@@ -1,4 +1,3 @@
-import "./App.css";
 import JoinRoomCard from "@/components/join-room";
 import { useRoomContext } from "@/components/room-provider";
 import Canvas from "@/components/canvas";
