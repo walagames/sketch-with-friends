@@ -5,13 +5,10 @@ FROM golang:1.19-alpine AS build
 WORKDIR /app
 
 # Step 3: Copy go mod and sum files
-COPY go.mod go.sum ./
+COPY ./ ./
 
 # Step 4: Download all dependencies. Dependencies will be cached if the go.mod and go.sum files are not changed
 RUN go mod download
-
-# Step 5: Copy the source from the current directory to the Working Directory inside the container
-COPY . .
 
 # Step 6: Build the Go app
 RUN go build -o main cmd/main.go
