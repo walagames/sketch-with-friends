@@ -4,7 +4,8 @@ import Canvas from "@/components/canvas";
 function App() {
 	const { state } = useRoomContext();
 	return (
-		<main className="flex flex-1 flex-col items-center">
+    <main className="flex flex-1 flex-col items-center">
+      test
 			{state.code ? <Canvas /> : <JoinRoomCard />}
 		</main>
 	);
