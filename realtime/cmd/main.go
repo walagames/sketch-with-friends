@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 
@@ -13,10 +14,14 @@ import (
 )
 
 func run(ctx context.Context) error {
-	err := godotenv.Load()
-	if err != nil {
-		return err
+	env := os.Getenv("ENV")
+
+	if env == "development" || env == "" {
+		if err := godotenv.Load(); err != nil {
+			log.Printf("Error loading .env file: %v", err)
+		}
 	}
+
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
