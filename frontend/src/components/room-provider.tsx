@@ -58,7 +58,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 		console.log("called");
 		setState({
 			...state,
-			socketUrl: `wss://${import.meta.env.VITE_SOCKET_HOST}/connect`,
+			socketUrl: `ws://${import.meta.env.VITE_SOCKET_HOST}/connect`,
 		});
 	};
 
@@ -67,25 +67,24 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 			case RoomEvent.MESSAGE:
 				toast(JSON.stringify(payload, null, 2));
 				break;
-			case RoomEvent.ROOM_STATE:
-				() => {
-					const roomState = payload as RoomState;
+			case RoomEvent.ROOM_STATE: {
+				const roomState = payload as RoomState;
+				console.log(roomState);
 					updateRoom({
 						code: roomState.code,
-					});
-				};
+				});
 				break;
+			}
 			case RoomEvent.NEW_ROUND:
 				toast(JSON.stringify(payload, null, 2));
 				break;
 			case RoomEvent.GAME_START:
 				break;
-			case RoomEvent.STROKE:
-				() => {
-					const stroke = payload as number[];
-					handleStroke(stroke);
-				};
+			case RoomEvent.STROKE: {
+				const stroke = payload as number[];
+				handleStroke(stroke);
 				break;
+			}
 			default:
 				console.log(`Unhandled event type: ${type}`);
 				break;

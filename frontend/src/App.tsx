@@ -5,7 +5,6 @@ function App() {
 	const { state } = useRoomContext();
 	return (
     <main className="flex flex-1 flex-col items-center">
-      test4
 			{state.code ? <Canvas /> : <JoinRoomCard />}
 		</main>
 	);
