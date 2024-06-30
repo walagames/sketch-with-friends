@@ -3,7 +3,6 @@ import {
 	Card,
 	CardContent,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
@@ -17,13 +16,11 @@ import { z } from "zod";
 import {
 	Form,
 	FormControl,
-	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
-import { toast } from "sonner";
 import { useRoomContext } from "./room-provider";
 
 export default function JoinRoomCard() {

@@ -1,9 +1,10 @@
 import { useRoom } from "@/hooks/room";
-import { createContext, useContext, useEffect, useState } from "react";
-import { Player, PlayerAction, RoomState } from "../lib/types";
+import { createContext, useCallback, useContext, useState } from "react";
+import { Player, PlayerAction, RoomEvent, RoomState } from "../lib/types";
+import { toast } from "sonner";
 
 interface RoomContextType {
-	sendEvent: (type: PlayerAction, payload: any) => void;
+	sendEvent: (type: PlayerAction, payload: unknown) => void;
 	createRoom: (username: string) => void;
 	updateRoom: (changes: Partial<RoomState>) => void;
 	joinRoom: (code: string) => void;
@@ -21,7 +22,6 @@ const defaultContextValue: RoomContextType = {
 	handleStroke: () => {},
 	state: {
 		socketUrl: "",
-		name: "",
 		role: "",
 		code: "",
 		players: [] as Player[],
@@ -33,9 +33,8 @@ const RoomContext = createContext<RoomContextType>(defaultContextValue);
 export const useRoomContext = () => useContext(RoomContext);
 
 export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
-	const [state, setState] = useState({
+	const [state, setState] = useState<RoomState>({
 		socketUrl: "",
-		name: "",
 		role: "",
 		code: "",
 		players: [] as Player[],
@@ -54,28 +53,60 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 			points: [...prev.points, point],
 		}));
 	};
-	
-	const createRoom = (username: string) => {
+
+	const createRoom = () => {
 		console.log("called");
 		setState({
 			...state,
-			name: username,
 			socketUrl: `ws://${import.meta.env.VITE_SOCKET_HOST}/connect`,
 		});
 	};
-	
+
+	const handleEvent = useCallback((type: RoomEvent, payload: unknown) => {
+		switch (type) {
+			case RoomEvent.MESSAGE:
+				toast(JSON.stringify(payload, null, 2));
+				break;
+			case RoomEvent.ROOM_STATE:
+				() => {
+					const roomState = payload as RoomState;
+					updateRoom({
+						code: roomState.code,
+					});
+				};
+				break;
+			case RoomEvent.NEW_ROUND:
+				toast(JSON.stringify(payload, null, 2));
+				break;
+			case RoomEvent.GAME_START:
+				break;
+			case RoomEvent.STROKE:
+				() => {
+					const stroke = payload as number[];
+					handleStroke(stroke);
+				};
+				break;
+			default:
+				console.log(`Unhandled event type: ${type}`);
+				break;
+		}
+	}, []);
+
 	const updateRoom = (changes: Partial<RoomState>) => {
-		setState((prev) => ({
-			...prev,
-			code: changes.code,
-		}));
-	};
-	const [sendEvent] = useRoom(state.socketUrl, handleStroke, updateRoom);
+		if (changes.code) {
+			const copy = { ...state };
+			copy.code = changes.code;
+			setState(copy);
+		}
+	}
+	const [sendEvent] = useRoom(state.socketUrl, handleEvent);
 
 	const joinRoom = (code: string) => {
 		setState({
 			...state,
-			socketUrl: `ws://${import.meta.env.VITE_SOCKET_HOST}/connect?room=${code}`,
+			socketUrl: `ws://${
+				import.meta.env.VITE_SOCKET_HOST
+			}/connect?room=${code}`,
 		});
 	};
 
