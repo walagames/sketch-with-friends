@@ -102,7 +102,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 	const joinRoom = (code: string) => {
 		setState({
 			...state,
-			socketUrl: `ws://${
+			socketUrl: `${process.env.NODE_ENV === "development" ? "ws" : "wss"}://${
 				import.meta.env.VITE_SOCKET_HOST
 			}/connect?room=${code}`,
 		});
