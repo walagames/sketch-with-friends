@@ -14,7 +14,7 @@ import (
 )
 
 func run(ctx context.Context) error {
-	
+
 	if env := os.Getenv("ENVIRONMENT"); env == "development" {
 		if err := godotenv.Load(); err != nil {
 			log.Printf("Error loading .env file: %v", err)
@@ -25,11 +25,8 @@ func run(ctx context.Context) error {
 	defer cancel()
 
 	cfg := &realtime.HTTPConfig{
-		Host:        os.Getenv("HOST"),
-		Port:        os.Getenv("PORT"),
-		APIEndpoint: os.Getenv("API_ENDPOINT"),
-		APIKey:      os.Getenv("API_KEY"),
-		// AllowedOrigin: os.Getenv("CORS_ALLOWED_ORIGINS"),
+		Host: os.Getenv("HOST"),
+		Port: os.Getenv("PORT"),
 	}
 	rm := room.NewManager()
 
