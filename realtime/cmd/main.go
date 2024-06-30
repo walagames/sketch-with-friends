@@ -15,6 +15,9 @@ import (
 
 func run(ctx context.Context) error {
 	env := os.Getenv("ENV")
+	port := os.Getenv("PORT")
+
+	fmt.Println(port, env)
 
 	if env == "development" || env == "" {
 		if err := godotenv.Load(); err != nil {
