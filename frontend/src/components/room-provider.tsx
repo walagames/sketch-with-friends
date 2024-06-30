@@ -93,12 +93,11 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 	}, []);
 
 	const updateRoom = (changes: Partial<RoomState>) => {
-		if (changes.code) {
-			const copy = { ...state };
-			copy.code = changes.code;
-			setState(copy);
-		}
-	}
+		setState((prev) => ({
+			...prev,
+			...changes,
+		}));
+	};
 	const [sendEvent] = useRoom(state.socketUrl, handleEvent);
 
 	const joinRoom = (code: string) => {
