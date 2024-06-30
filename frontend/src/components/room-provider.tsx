@@ -58,7 +58,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 		console.log("called");
 		setState({
 			...state,
-			socketUrl: `ws://${import.meta.env.VITE_SOCKET_HOST}/connect`,
+			socketUrl: `${process.env.NODE_ENV === "development" ? "ws" : "wss"}://${import.meta.env.VITE_SOCKET_HOST}/connect`,
 		});
 	};
 
