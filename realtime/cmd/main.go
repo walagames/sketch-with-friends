@@ -14,7 +14,7 @@ import (
 )
 
 func run(ctx context.Context) error {
-	env := os.Getenv("ENV")
+	env := os.Getenv("ENVIRONMENT")
 	port := os.Getenv("PORT")
 
 	fmt.Println(port, env)
