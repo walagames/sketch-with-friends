@@ -60,7 +60,7 @@ export const RoomProvider = ({ children, endpoint }: { children: React.ReactNode
 		setState({
 			...state,
 			socketUrl: `${process.env.NODE_ENV === "development" ? "ws" : "wss"}://${
-				process.env.NEXT_PUBLIC_SOCKET_HOST || "realtime" + window.location.host
+				process.env.NEXT_PUBLIC_SOCKET_HOST || "realtime-" + window.location.host
 			}/connect`,
 		});
 	};
