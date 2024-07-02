@@ -56,9 +56,12 @@ export const RoomProvider = ({ children, endpoint }: { children: React.ReactNode
 	};
 
 	const createRoom = () => {
+		console.log("called");
 		setState({
 			...state,
-			socketUrl: endpoint,
+			socketUrl: `${process.env.NODE_ENV === "development" ? "ws" : "wss"}://${
+				process.env.NEXT_PUBLIC_SOCKET_HOST || "realtime" + window.location.host
+			}/connect`,
 		});
 	};
 
@@ -102,7 +105,9 @@ export const RoomProvider = ({ children, endpoint }: { children: React.ReactNode
 	const joinRoom = (code: string) => {
 		setState({
 			...state,
-			socketUrl: `${endpoint}?room=${code}`,
+			socketUrl: `${process.env.NODE_ENV === "development" ? "ws" : "wss"}://${
+				process.env.NEXT_PUBLIC_SOCKET_HOST || "realtime" + window.location.host
+			}/connect?room=${code}`,
 		});
 	};
 
