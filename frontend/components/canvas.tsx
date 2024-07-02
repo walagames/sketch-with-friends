@@ -1,3 +1,4 @@
+"use client"
 import * as React from "react";
 import { getStroke } from "perfect-freehand";
 import { useRoomContext } from "./room-provider";

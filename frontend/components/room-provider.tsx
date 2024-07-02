@@ -1,3 +1,4 @@
+"use client"
 import { useRoom } from "@/hooks/room";
 import { createContext, useCallback, useContext, useState } from "react";
 import { Player, PlayerAction, RoomEvent, RoomState } from "../lib/types";
@@ -58,7 +59,9 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 		console.log("called");
 		setState({
 			...state,
-			socketUrl: `${process.env.NODE_ENV === "development" ? "ws" : "wss"}://${import.meta.env.VITE_SOCKET_HOST}/connect`,
+			socketUrl: `${process.env.NODE_ENV === "development" ? "ws" : "wss"}://${
+				process.env.NEXT_PUBLIC_SOCKET_HOST
+			}/connect`,
 		});
 	};
 
@@ -70,8 +73,8 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 			case RoomEvent.ROOM_STATE: {
 				const roomState = payload as RoomState;
 				console.log(roomState);
-					updateRoom({
-						code: roomState.code,
+				updateRoom({
+					code: roomState.code,
 				});
 				break;
 			}
@@ -103,7 +106,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 		setState({
 			...state,
 			socketUrl: `${process.env.NODE_ENV === "development" ? "ws" : "wss"}://${
-				import.meta.env.VITE_SOCKET_HOST
+				process.env.NEXT_PUBLIC_SOCKET_HOST
 			}/connect?room=${code}`,
 		});
 	};
