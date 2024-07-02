@@ -32,7 +32,7 @@
       --input: 240 5.9% 90%;
       --ring: 240 10% 3.9%;
 
-      --radius: 0.5rem;
+      --radius: 0.6rem;
     }
 
     .dark {
@@ -74,3 +74,5 @@
       @apply bg-background text-foreground;
     }
   }
+
+

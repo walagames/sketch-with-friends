@@ -1,7 +1,7 @@
-"use client"
+"use client";
 import Image from "next/image";
 import { useRoomContext } from "@/components/room-provider";
-import Canvas from "@/components/canvas";
+import Canvas from "@/components/canvas/canvas";
 import JoinRoomCard from "@/components/join-room";
 
 export default function Home() {
