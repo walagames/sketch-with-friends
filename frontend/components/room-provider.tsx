@@ -33,7 +33,7 @@ const RoomContext = createContext<RoomContextType>(defaultContextValue);
 
 export const useRoomContext = () => useContext(RoomContext);
 
-export const RoomProvider = ({ children, endpoint }: { children: React.ReactNode, endpoint: string }) => {
+export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 	const [state, setState] = useState<RoomState>({
 		socketUrl: "",
 		role: "",
@@ -56,7 +56,10 @@ export const RoomProvider = ({ children, endpoint }: { children: React.ReactNode
 	};
 
 	const createRoom = () => {
-		console.log("called");
+		const protocol = process.env.NODE_ENV === "development" ? "ws" : "wss";
+		const host =
+			process.env.NEXT_PUBLIC_SOCKET_HOST || "realtime-" + window.location.host;
+		const endpoint = `${protocol}://${host}/connect`;
 		setState({
 			...state,
 			socketUrl: endpoint,
@@ -101,6 +104,10 @@ export const RoomProvider = ({ children, endpoint }: { children: React.ReactNode
 	const [sendEvent] = useRoom(state.socketUrl, handleEvent);
 
 	const joinRoom = (code: string) => {
+		const protocol = process.env.NODE_ENV === "development" ? "ws" : "wss";
+		const host =
+			process.env.NEXT_PUBLIC_SOCKET_HOST || "realtime-" + window.location.host;
+		const endpoint = `${protocol}://${host}/connect`;
 		setState({
 			...state,
 			socketUrl: endpoint + "?room=" + code,
