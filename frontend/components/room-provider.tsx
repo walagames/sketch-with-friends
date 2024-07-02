@@ -104,9 +104,10 @@ export const RoomProvider = ({ children, endpoint }: { children: React.ReactNode
 
 	const joinRoom = (code: string) => {
 		setState({
+			// TODO: need to check if its preview and only then set using realtime
 			...state,
 			socketUrl: `${process.env.NODE_ENV === "development" ? "ws" : "wss"}://${
-				process.env.NEXT_PUBLIC_SOCKET_HOST || "realtime" + window.location.host
+				process.env.NEXT_PUBLIC_SOCKET_HOST || "realtime-" + window.location.host
 			}/connect?room=${code}`,
 		});
 	};
