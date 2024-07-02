@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useRoom } from "@/hooks/room";
 import { createContext, useCallback, useContext, useState } from "react";
 import { Player, PlayerAction, RoomEvent, RoomState } from "../lib/types";
@@ -33,7 +33,7 @@ const RoomContext = createContext<RoomContextType>(defaultContextValue);
 
 export const useRoomContext = () => useContext(RoomContext);
 
-export const RoomProvider = ({ children, endpoint }: { children: React.ReactNode, endpoint: string }) => {
+export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 	const [state, setState] = useState<RoomState>({
 		socketUrl: "",
 		role: "",
@@ -56,11 +56,17 @@ export const RoomProvider = ({ children, endpoint }: { children: React.ReactNode
 	};
 
 	const createRoom = () => {
-		console.log("called");
 		setState({
 			...state,
-			socketUrl: endpoint,
+			socketUrl: getEndpoint(),
 		});
+	};
+
+	const getEndpoint = () => {
+		const protocol = process.env.NODE_ENV === "development" ? "ws" : "wss";
+		const host =
+			process.env.NEXT_PUBLIC_SOCKET_HOST || "realtime-" + window.location.host;
+		return `${protocol}://${host}/connect`;
 	};
 
 	const handleEvent = useCallback((type: RoomEvent, payload: unknown) => {
@@ -103,7 +109,7 @@ export const RoomProvider = ({ children, endpoint }: { children: React.ReactNode
 	const joinRoom = (code: string) => {
 		setState({
 			...state,
-			socketUrl: endpoint + "?room=" + code,
+			socketUrl: getEndpoint() + "?room=" + code,
 		});
 	};
 
