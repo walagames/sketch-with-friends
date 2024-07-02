@@ -15,11 +15,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const endpoint = `${
+		process.env.NODE_ENV === "development" ? "ws" : "wss"
+	}://${process.env.NEXT_PUBLIC_SOCKET_HOST}/connect`;
   return (
     <html lang="en">
       
       <body className={inter.className}>
-        <RoomProvider>
+        <RoomProvider endpoint={endpoint}>
           {children}
         </RoomProvider>
       </body>
