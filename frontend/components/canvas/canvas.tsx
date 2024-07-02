@@ -31,7 +31,7 @@ const options = {
 		cap: true,
 	},
 };
-import { ToolButton } from "./canvas-tools";
+import { CopyRoomLink, ToolButton } from "./canvas-tools";
 import { CanvasTools } from "./canvas-tools";
 
 type Stroke = {
@@ -111,9 +111,7 @@ function Canvas() {
 			className="w-screen h-screen relative overflow-hidden"
 		>
 			<div className="absolute top-3 right-3">
-				<ToolButton>
-					<Link className="h-5" />
-				</ToolButton>
+				<CopyRoomLink />
 			</div>
 
 			<canvas

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Brush, PaintBucket, Undo2, Trash } from "lucide-react";
+import { Brush, PaintBucket, Undo2, Trash, Link } from "lucide-react";
 import { Button } from "../ui/button";
 
 export function CanvasTools() {
@@ -22,9 +22,14 @@ export function CanvasTools() {
 	);
 }
 
-export function ToolButton({ children }: { children: React.ReactNode }) {
+export function ToolButton({
+	children,
+	...props
+}: {
+	children: React.ReactNode;
+} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
 	return (
-		<Button size="icon" variant="outline">
+		<Button size="icon" variant="outline" {...props}>
 			{children}
 		</Button>
 	);
@@ -36,6 +41,8 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { HexColorPicker } from "react-colorful";
+import { useRoomContext } from "../room-provider";
+import { toast } from "sonner";
 
 export function StrokeTool() {
 	const [color, setColor] = useState("#aabbcc");
@@ -92,5 +99,21 @@ export function StrokeTool() {
 				</div>
 			</PopoverContent>
 		</Popover>
+	);
+}
+
+export function CopyRoomLink() {
+	const { state } = useRoomContext();
+
+	const handleCopy = () => {
+		const url = window.location.href + "?room=" + state.code;
+		navigator.clipboard.writeText(url);
+		toast.info("Copied room link");
+	};
+
+	return (
+		<ToolButton onClick={handleCopy}>
+			<Link className="h-5" />
+		</ToolButton>
 	);
 }

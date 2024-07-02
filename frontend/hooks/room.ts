@@ -15,7 +15,7 @@ export const useRoom = (
 			const socket = socketRef.current;
 
 			socket.onopen = () => {
-				toast("Connection started");
+				toast.success(`Connected to room`);
 			};
 
 			socket.onmessage = (event: MessageEvent) => {
@@ -28,7 +28,7 @@ export const useRoom = (
 			};
 
 			socket.onclose = () => {
-				toast.error("Disconnected from room");
+				toast.info("Disconnected from room");
 			};
 
 			socket.onerror = () => {

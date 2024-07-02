@@ -54,19 +54,18 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 			points: [...prev.points, point],
 		}));
 	};
-
-	const createRoom = () => {
-		setState({
-			...state,
-			socketUrl: getEndpoint(),
-		});
-	};
-
 	const getEndpoint = () => {
 		const protocol = process.env.NODE_ENV === "development" ? "ws" : "wss";
 		const host =
 			process.env.NEXT_PUBLIC_SOCKET_HOST || "realtime-" + window.location.host;
 		return `${protocol}://${host}/connect`;
+	};
+	
+	const createRoom = () => {
+		setState({
+			...state,
+			socketUrl: getEndpoint(),
+		});
 	};
 
 	const handleEvent = useCallback((type: RoomEvent, payload: unknown) => {
@@ -107,10 +106,6 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 	const [sendEvent] = useRoom(state.socketUrl, handleEvent);
 
 	const joinRoom = (code: string) => {
-		const protocol = process.env.NODE_ENV === "development" ? "ws" : "wss";
-		const host =
-			process.env.NEXT_PUBLIC_SOCKET_HOST || "realtime-" + window.location.host;
-		const endpoint = `${protocol}://${host}/connect`;
 		setState({
 			...state,
 			socketUrl: getEndpoint() + "?room=" + code,
