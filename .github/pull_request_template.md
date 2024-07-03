@@ -1,16 +1,7 @@
 ## Describe your changes
-[Provide a succinct and descriptive title for the pull request, e.g., "Improve caching mechanism for API calls"]
+[Provide a succinct and descriptive title for the pull request, e.g., "Improve caching mechanism for API calls" Additionally, you can create a checklist of tasks or changes you intend to make including features, bug fixes, documentation updates, etc.]
 
 **Relevant issues or PRs:**
-
-## Types of Changes
-- [ ] New feature
-- [ ] Bug fix
-- [ ] Documentation update
-- [ ] Refactoring
-- [ ] Hotfix
-- [ ] Security patch
-- [ ] UI/UX improvement
 
 ## Impact
 [Discuss the impact of your changes on the project. This might include effects on performance, new dependencies, or changes in behaviour.]
