@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -146,7 +146,7 @@ export function CreateRoomForm() {
 	});
 
 	function onSubmit(data: z.infer<typeof CreateRoomFormSchema>) {
-		createRoom(data.username);
+		createRoom();
 	}
 
 	return (

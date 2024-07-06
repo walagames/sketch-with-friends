@@ -41,7 +41,7 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { HexColorPicker } from "react-colorful";
-import { useRoomContext } from "../room-provider";
+import { useRoomContext } from "../room/room-provider";
 import { toast } from "sonner";
 
 export function StrokeTool() {
@@ -103,12 +103,12 @@ export function StrokeTool() {
 }
 
 export function CopyRoomLink() {
-	const { state } = useRoomContext();
+	const { room } = useRoomContext();
 
 	const handleCopy = () => {
-		const url = window.location.href + "?room=" + state.code;
+		const url = window.location.href + "?room=" + room.code;
 		navigator.clipboard.writeText(url);
-		toast.info("Copied room link");
+		toast.info("Copied to clipboard");
 	};
 
 	return (

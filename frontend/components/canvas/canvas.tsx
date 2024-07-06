@@ -1,18 +1,8 @@
 "use client";
 import * as React from "react";
 import { getStroke } from "perfect-freehand";
-import { useRoomContext } from "../room-provider";
-import { PlayerAction } from "@/lib/types";
-import { Button } from "../ui/button";
-import {
-	Brush,
-	Link,
-	PaintBucket,
-	Trash,
-	Undo,
-	Undo2,
-	UserIcon,
-} from "lucide-react";
+import { useRoomContext } from "../room/room-provider";
+import { RoomEventType } from "@/types/room";
 
 const options = {
 	size: 18,
@@ -33,22 +23,16 @@ const options = {
 };
 import { CopyRoomLink, ToolButton } from "./canvas-tools";
 import { CanvasTools } from "./canvas-tools";
-
-type Stroke = {
-	points: number[][];
-	color: string;
-	width: number;
-};
-
+import { useResize } from "@/hooks/use-resize";
 
 function Canvas() {
-	const { sendEvent, state, handleStrokeStart, handleStroke } =
-		useRoomContext();
+	const { dispatchEvent, room } = useRoomContext();
 	const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 	const containerRef = React.useRef<HTMLDivElement | null>(null);
 	const [context, setContext] = React.useState<CanvasRenderingContext2D | null>(
 		null
 	);
+	useResize(canvasRef, containerRef, draw);
 	React.useEffect(() => {
 		const canvas = canvasRef.current;
 		if (canvas) {
@@ -61,7 +45,10 @@ function Canvas() {
 
 	function draw() {
 		if (context) {
-			const stroke = getStroke(state.points, options);
+			const stroke = getStroke(
+				room.strokes[room.strokes.length - 1].points,
+				options
+			);
 			const pathData = getSvgPathFromStroke(stroke);
 			const myPath = new Path2D(pathData);
 			context.fill(myPath);
@@ -72,37 +59,27 @@ function Canvas() {
 		if (context) {
 			draw();
 		}
-	}, [state.points]);
+	}, [room.strokes]);
 
-	React.useEffect(() => {
-		// Handler to call on window resize
-		function handleResize() {
-			// Set window width/height to state
-			if (canvasRef.current && containerRef.current) {
-				canvasRef.current.width = containerRef.current.clientWidth * 2;
-				canvasRef.current.height = containerRef.current.clientHeight * 2;
-				canvasRef.current.style.width = `${containerRef.current.clientWidth}px`;
-				canvasRef.current.style.height = `${containerRef.current.clientHeight}px`;
-				draw();
-			}
-		}
-		// Add event listener
-		window.addEventListener("resize", handleResize);
-		// Call handler right away so state gets updated with initial window size
-		handleResize();
-		// Remove event listener on cleanup
-		return () => window.removeEventListener("resize", handleResize);
-	}, []);
 
 	function handlePointerDown(e: React.MouseEvent<HTMLCanvasElement>) {
-		handleStrokeStart([e.pageX * 2, e.pageY * 2]);
-		sendEvent(PlayerAction.STROKE, [e.pageX * 2, e.pageY * 2]);
+		dispatchEvent({
+			type: RoomEventType.NEW_STROKE,
+			payload: {
+				color: "#FFFFFF",
+				width: 8,
+				points: [[e.pageX * 2, e.pageY * 2]],
+			},
+		});
 	}
 
 	function handlePointerMove(e: React.MouseEvent<HTMLCanvasElement>) {
 		if (e.buttons !== 1) return;
-		handleStroke([e.pageX * 2, e.pageY * 2]);
-		sendEvent(PlayerAction.STROKE, [e.pageX * 2, e.pageY * 2]);
+
+		dispatchEvent({
+			type: RoomEventType.STROKE_POINT,
+			payload: [e.pageX * 2, e.pageY * 2],
+		});
 	}
 
 	return (
@@ -167,4 +144,3 @@ function getSvgPathFromStroke(points: number[][], closed = true) {
 }
 
 export default Canvas;
-

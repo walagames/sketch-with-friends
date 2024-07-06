@@ -1,14 +1,23 @@
 "use client";
-import Image from "next/image";
-import { useRoomContext } from "@/components/room-provider";
+import { useRoomContext } from "@/components/room/room-provider";
 import Canvas from "@/components/canvas/canvas";
-import JoinRoomCard from "@/components/join-room";
+import JoinRoomCard from "@/components/room/join-room";
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 export default function Home() {
-	const { state } = useRoomContext();
+	const { room, joinRoom } = useRoomContext();
+	const params = useSearchParams();
+	useEffect(() => {
+		const code = params.get("room");
+		if (code) {
+			joinRoom(code as string);
+		}
+	}, [params, joinRoom]);
+
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-between">
-			{state.code ? (
+			{room.code ? (
 				<Canvas />
 			) : (
 				<div className="p-24">
