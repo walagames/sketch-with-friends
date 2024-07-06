@@ -1,19 +1,24 @@
-package room
+package main
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
+	"log/slog"
 
 	// "os"
 
 	"github.com/gorilla/websocket"
-	realtime "github.com/jacobschwantes/sketch-with-friends/realtime/internal"
 	// "golang.org/x/time/rate"
+	"net/http"
 
-	"log"
 	"time"
 )
+
+type Client interface {
+	Send(msg []byte) error
+	Run(ctx context.Context)
+	Close()
+}
 
 const (
 	// Time allowed to write a message to the peer.
@@ -35,17 +40,17 @@ var (
 )
 
 type client struct {
-	Player realtime.Player
-	room  *room
+	Player Player
+	room   *room
 	conn   *websocket.Conn
 	send   chan []byte
 	cancel context.CancelFunc
 }
 
-func newClient(conn *websocket.Conn, room *room, player realtime.Player) *client {
+func newClient(conn *websocket.Conn, room *room, player Player) *client {
 	return &client{
 		Player: player,
-		room:  room,
+		room:   room,
 		conn:   conn,
 		send:   make(chan []byte, 256),
 	}
@@ -63,7 +68,8 @@ func (c *client) Run(roomCtx context.Context) {
 	// block return until both go routines start
 	<-ready
 	<-ready
-	c.Player.ChangeStatus(realtime.StatusConnected)
+	c.Player.ChangeStatus(StatusConnected)
+	slog.Info("client connected", "player", c.Player.Info().ID)
 }
 
 func (c *client) Send(msg []byte) error {
@@ -73,6 +79,8 @@ func (c *client) Send(msg []byte) error {
 
 func (c *client) Close() {
 	c.cancel()
+	c.room.Disconnect(c.Player)
+	slog.Info("client disconnected", "player", c.Player.Info().ID)
 }
 
 // readPump pumps messages from the websocket connection to the room.
@@ -81,19 +89,18 @@ func (c *client) Close() {
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine
 func (c *client) read(ctx context.Context, ready chan<- bool) {
-	fmt.Println("Read routine started: ", c.Player.ID())
+	slog.Info("Read routine started", "player", c.Player.Info().ID)
 	ready <- true
 	defer func() {
-		c.Player.ChangeStatus(realtime.StatusDisconnected)
 		c.conn.Close()
 		c.Close()
-		fmt.Println("Read routine exited: ", c.Player.ID())
+		slog.Info("Read routine exited: ", "player", c.Player.Info().ID)
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 
-	// limiter := rate.NewLimiter(0.5, 5) 
+	// limiter := rate.NewLimiter(0.5, 5)
 
 	for {
 		select {
@@ -103,16 +110,16 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 			_, msgBytes, err := c.conn.ReadMessage()
 			if err != nil {
 				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					// fmt.Println("error: ", err)
+					slog.Warn("unexpected close error", "player", c.Player.Info().ID, "error", err)
 					return
 				}
 				return
 			}
 			// if limiter.Allow() {
 			if true {
-				var event realtime.Event
+				var event RoomEvent
 				if err := json.Unmarshal(msgBytes, &event); err != nil {
-					log.Printf("Error un-marshalling message: %v", err)
+					slog.Error("Error un-marshalling message", "player", c.Player.Info().ID, "error", err)
 					return
 				}
 
@@ -120,10 +127,10 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 
 				c.room.event <- &event
 
-				fmt.Println("sent event from client")
+				slog.Debug("sent event from client", "player", c.Player.Info().ID)
 
 			} else {
-				fmt.Println("dropped event")
+				slog.Warn("dropped event", "player", c.Player.Info().ID)
 			}
 
 		}
@@ -136,16 +143,18 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 // application ensures that there is at most one writer to a connection by
 // executing all writes from this goroutine.
 func (c *client) write(ctx context.Context, ready chan<- bool) {
-	fmt.Println("Write routine started: ", c.Player.ID())
+	slog.Info("Write routine started", "player", c.Player.Info().ID)
 	ready <- true
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
 		c.conn.Close()
-		fmt.Println("Write routine exited: ", c.Player.ID())
+		slog.Info("Write routine exited", "player", c.Player.Info().ID)
 	}()
 	for {
 		select {
+		case <-ctx.Done():
+			return
 		case message, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
@@ -173,8 +182,6 @@ func (c *client) write(ctx context.Context, ready chan<- bool) {
 			if err := w.Close(); err != nil {
 				return
 			}
-		case <-ctx.Done():
-			return
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
@@ -182,4 +189,19 @@ func (c *client) write(ctx context.Context, ready chan<- bool) {
 			}
 		}
 	}
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		// allowedOrigin := os.Getenv("CORS_ORIGIN") // Adjust this to match your Next.js app's origin
+		// return r.Header.Get("Origin") == allowedOrigin
+		// ! This is a security risk, but it's fine for local development
+		return true
+	},
+}
+
+func UpgradeConnection(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
+	return upgrader.Upgrade(w, r, nil)
 }
