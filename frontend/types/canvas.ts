@@ -3,3 +3,8 @@ export type Stroke = {
 	color: string;
 	width: number;
 };
+
+export enum Tool {
+	BRUSH = "brush",
+	BUCKET = "eraser",
+}

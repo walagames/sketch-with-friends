@@ -9,21 +9,20 @@ import {
 	useReducer,
 	useState,
 } from "react";
+import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 import { RoomEvent, RoomEventType, RoomState, RoomStatus } from "@/types/room";
 import { Stroke } from "@/types/canvas";
 import { Player } from "@/types/player";
-import { toast } from "sonner";
 
 interface RoomContextType {
 	handleEvent: (event: RoomEvent) => void;
-	createRoom: () => void;
-	joinRoom: (code: string) => void;
+	handleRoomFormSubmit: (username: string) => void;
 	room: RoomState;
 }
 const defaultContext: RoomContextType = {
 	handleEvent: () => {},
-	createRoom: () => {},
-	joinRoom: () => {},
+	handleRoomFormSubmit: () => {},
 	room: {
 		role: "",
 		code: "",
@@ -70,14 +69,18 @@ const getRealtimeHref = () => {
 	return `${protocol}://${host}`;
 };
 
+// TODO: store canvas tool state and stroke settings here and pass down to children via context
 export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 	const [socketUrl, setSocketUrl] = useState<string | null>(null);
+
 	const [room, dispatch] = useReducer(reducer, defaultContext.room);
+
+	const searchParams = useSearchParams();
 
 	const roomOptions = useMemo(
 		() => ({
 			onClose: () => {
-				toast.info("Disconnected from room");
+				if (!room.code) return;
 				const url = new URL(window.location.href);
 				url.searchParams.delete("room");
 				history.pushState({}, "", url.toString());
@@ -85,11 +88,15 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 				dispatch({ type: RoomEventType.CLEAR_STATE });
 			},
 			onMessage: (event: MessageEvent) => {
+				console.log("onMessage", event);
 				const { type, payload } = JSON.parse(event.data);
 				dispatch({ type, payload });
 			},
 			onConnect: () => toast.success("Connected to room"),
-			onError: () => toast.error("Room connection failed"),
+			onError: () => {
+				toast.error("Failed to connect to room");
+				setSocketUrl(null);
+			},
 		}),
 		[]
 	);
@@ -104,23 +111,25 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 		[sendEvent]
 	);
 
-	const createRoom = useCallback(
-		() => setSocketUrl(getRealtimeHref() + "/host"),
-		[]
-	);
-	const joinRoom = useCallback(
-		(code: string) => setSocketUrl(getRealtimeHref() + "/join/" + code),
-		[]
+	const handleRoomFormSubmit = useCallback(
+		(username: string) => {
+			const roomCode = searchParams.get("room");
+			if (roomCode) {
+				setSocketUrl(getRealtimeHref() + "/join/" + roomCode);
+			} else {
+				setSocketUrl(getRealtimeHref() + "/host");
+			}
+		},
+		[searchParams]
 	);
 
 	const contextValue = useMemo(
 		() => ({
 			room,
 			handleEvent,
-			createRoom,
-			joinRoom,
+			handleRoomFormSubmit,
 		}),
-		[room, handleEvent, createRoom, joinRoom]
+		[room, handleEvent, handleRoomFormSubmit]
 	);
 
 	return (

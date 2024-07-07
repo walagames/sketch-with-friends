@@ -5,12 +5,11 @@ import { getStroke } from "perfect-freehand";
 import { useRoomContext } from "@/components/room/room-provider";
 import { RoomEventType } from "@/types/room";
 import { CanvasTools, CopyRoomLink } from "@/components/canvas/canvas-tools";
-import { useWindowDimensions } from "@/hooks/use-window-dimensions";
+import { useWindowSize } from "@/hooks/use-window-size";
 import { Button } from "@/components/ui/button";
 import { Stroke } from "@/types/canvas";
 
-
-// scale factor of 2 to make canvas less pixelated
+// make canvas less pixelated
 const CANVAS_SCALE = 2;
 
 // perfect-freehand options
@@ -49,8 +48,6 @@ function getSvgPathFromStroke(stroke: number[][]) {
 	return d.join(" ");
 }
 
-
-
 function Canvas() {
 	const [strokeColor, setStrokeColor] = React.useState("#aabbcc");
 	const [strokeWidth, setStrokeWidth] = React.useState(8);
@@ -58,7 +55,7 @@ function Canvas() {
 	const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 
 	const { handleEvent, room } = useRoomContext();
-	const [windowWidth, windowHeight] = useWindowDimensions();
+	const [windowWidth, windowHeight] = useWindowSize();
 
 	const fillCanvasWithStroke = React.useCallback(
 		(ctx: CanvasRenderingContext2D, stroke: Stroke) => {
@@ -84,16 +81,6 @@ function Canvas() {
 		}
 	}, [fillCanvasWithStroke, room.game.strokes]);
 
-	// Draw all strokes on first load or when window size changes
-	React.useEffect(() => {
-		const isWindowInitialized = windowWidth !== 0 && windowHeight !== 0;
-
-		if (isWindowInitialized) {
-			drawAllStrokes();
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [windowWidth, windowHeight]);
-
 	const drawMostRecentStroke = React.useCallback(() => {
 		const canvasContext = canvasRef.current?.getContext("2d");
 		const strokeCount = room.game.strokes.length;
@@ -104,7 +91,17 @@ function Canvas() {
 		}
 	}, [fillCanvasWithStroke, room.game.strokes]);
 
-	// Draw the most recent stroke only to avoid unnecessary work
+	// Avoid unnecessary work by only drawing all strokes on first load or when window size changes
+	React.useEffect(() => {
+		const isWindowInitialized = windowWidth !== 0 && windowHeight !== 0;
+
+		if (isWindowInitialized) {
+			drawAllStrokes();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [windowWidth, windowHeight]);
+
+	// Avoid unnecessary work by only drawing the most recent stroke
 	React.useEffect(() => {
 		const isWindowInitialized = windowWidth !== 0 && windowHeight !== 0;
 

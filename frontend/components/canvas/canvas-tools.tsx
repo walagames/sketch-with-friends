@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Brush, PaintBucket, Undo2, Trash, Link } from "lucide-react";
 import { Button } from "../ui/button";
 

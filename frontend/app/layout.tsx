@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
 	title: "Sketch with Friends",
-	description: "An interactive drawing game",
+	description: "An interactive multiplayer drawing game",
 };
 
 export default function RootLayout({

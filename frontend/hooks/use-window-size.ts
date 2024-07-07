@@ -1,12 +1,12 @@
 import React from "react";
 
-interface UseWindowDimensionsOptions {
+interface UseWindowSizeOptions {
 	maxWidth?: number;
 	maxHeight?: number;
 }
 
 /**
- * Custom hook to get and update window dimensions
+ * Custom hook to get current window dimensions
  *
  * @note Useful for redrawing canvas when the window is resized
  *
@@ -17,10 +17,10 @@ interface UseWindowDimensionsOptions {
  * @returns A tuple containing the current width and height
  * 
  * @example
- * const [width, height] = useWindowDimensions({ maxWidth: 1200, maxHeight: 800 });
+ * const [width, height] = useWindowSize({ maxWidth: 1200, maxHeight: 800 });
  */
-export const useWindowDimensions = (
-	options?: UseWindowDimensionsOptions,
+export const useWindowSize = (
+	options?: UseWindowSizeOptions,
 ): [number, number] => {
 	const [width, setWidth] = React.useState(0);
 	const [height, setHeight] = React.useState(0);
