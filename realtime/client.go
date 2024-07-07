@@ -69,7 +69,7 @@ func (c *client) Run(roomCtx context.Context) {
 	<-ready
 	<-ready
 	c.Player.ChangeStatus(StatusConnected)
-	slog.Info("client connected", "player", c.Player.Info().ID)
+	slog.Info("client is ready", "player_id", c.Player.Info().ID)
 }
 
 func (c *client) Send(msg []byte) error {
@@ -89,12 +89,12 @@ func (c *client) Close() {
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine
 func (c *client) read(ctx context.Context, ready chan<- bool) {
-	slog.Info("Read routine started", "player", c.Player.Info().ID)
+	slog.Debug("Read routine started", "player", c.Player.Info().ID)
 	ready <- true
 	defer func() {
 		c.conn.Close()
 		c.Close()
-		slog.Info("Read routine exited: ", "player", c.Player.Info().ID)
+		slog.Debug("Read routine exited: ", "player", c.Player.Info().ID)
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -143,7 +143,7 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 // application ensures that there is at most one writer to a connection by
 // executing all writes from this goroutine.
 func (c *client) write(ctx context.Context, ready chan<- bool) {
-	slog.Info("Write routine started", "player", c.Player.Info().ID)
+	slog.Debug("Write routine started", "player", c.Player.Info().ID)
 	ready <- true
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {

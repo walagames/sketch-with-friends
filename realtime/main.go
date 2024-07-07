@@ -5,9 +5,25 @@ import (
 	"os"
 	"os/signal"
 	"log/slog"
+	"time"
+
+	"github.com/lmittmann/tint"
 )
 
+func init() {
+	w := os.Stderr
+
+	// set global logger with custom options
+	slog.SetDefault(slog.New(
+		tint.NewHandler(w, &tint.Options{
+			Level:      slog.LevelInfo,
+			TimeFormat: time.Kitchen,
+		}),
+	))
+}
+
 func run(ctx context.Context) error {
+	slog.Info("starting up realtime server")
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 

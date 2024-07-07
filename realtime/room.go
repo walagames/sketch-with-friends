@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"log/slog"
-	"time"
 
 	"github.com/gorilla/websocket"
 )
@@ -16,18 +15,28 @@ type Room interface {
 	Connect(conn *websocket.Conn, role PlayerRole, name string) error
 	Run(rm RoomManager)
 	Broadcast(msg []byte)
+	BroadcastExcept(msg []byte, excludePlayer Player)
 }
+
+type RoomStatus string
+
+const (
+	WAITING  RoomStatus = "WAITING"
+	PLAYING  RoomStatus = "PLAYING"
+	FINISHED RoomStatus = "FINISHED"
+)
 
 type RoomState struct {
-	Code    string   `json:"code,omitempty"`
-	Players []Player `json:"players,omitempty"`
-	Strokes []Stroke `json:"strokes,omitempty"`
+	Status  RoomStatus `json:"status,omitempty"`
+	Code    string     `json:"code,omitempty"`
+	Players []Player   `json:"players,omitempty"`
+	Strokes []Stroke   `json:"strokes,omitempty"`
 }
-
 
 type RoomEventType string
 
 const (
+	START_GAME    RoomEventType = "START_GAME"
 	INITIAL_STATE RoomEventType = "INITIAL_STATE"
 	NEW_STROKE    RoomEventType = "NEW_STROKE"
 	STROKE_POINT  RoomEventType = "STROKE_POINT"
@@ -40,24 +49,42 @@ type RoomEvent struct {
 }
 
 type room struct {
-	code      string
-	players   map[Player]*client
-	broadcast chan []byte
-	connect   chan *client
+	code       string
+	players    map[Player]*client
+	broadcast  chan []byte
+	connect    chan *client
 	disconnect chan *client
-	event     chan *RoomEvent
-	game      Game
-	cancel    context.CancelFunc
+	event      chan *RoomEvent
+	game       Game
+	status     RoomStatus
+	cancel     context.CancelFunc
+}
+
+type RoomInfo struct {
+	Status  RoomStatus    `json:"status"`
+	Code    string        `json:"code"`
+	Players []*PlayerInfo `json:"players"`
+	Strokes []*Stroke     `json:"strokes"`
+}
+
+func (r *room) Info() *RoomInfo {
+	return &RoomInfo{
+		Status:  r.status,
+		Code:    r.code,
+		Players: r.Players(),
+		// Strokes: r.game.Strokes(),
+	}
 }
 
 func NewRoom(code string) Room {
 	return &room{
-		code:      code,
-		players:   make(map[Player]*client),
-		broadcast: make(chan []byte),
-		connect:   make(chan *client),
+		code:       code,
+		status:     WAITING,
+		players:    make(map[Player]*client),
+		broadcast:  make(chan []byte),
+		connect:    make(chan *client),
 		disconnect: make(chan *client),
-		event:     make(chan *RoomEvent),
+		event:      make(chan *RoomEvent),
 	}
 }
 
@@ -94,7 +121,6 @@ func (r *room) Broadcast(msg []byte) {
 	r.broadcast <- msg
 }
 
-
 func (r *room) Close() {
 	r.cancel()
 }
@@ -104,7 +130,6 @@ func (r *room) Run(rm RoomManager) {
 	ctx, cancel := context.WithCancel(context.Background())
 	r.cancel = cancel
 	defer cancel()
-	ticker := time.NewTicker(time.Second * 30)
 
 	defer func() {
 		slog.Info("Room routine exited", "code", r.code)
@@ -135,42 +160,33 @@ func (r *room) Run(rm RoomManager) {
 				client.Send(msg)
 			}
 		case e := <-r.event:
-			slog.Info("recv event", "type", e.Type, "player", e.Player.Info().ID)
 			switch e.Type {
-			// case realtime.START_GAME:
-			// 	if e.Player.Role() == realtime.RoleHost {
-			// 		go r.game.Run(ctx, r)
-			// 	}
-			// case realtime.CLOSE_LOBBY:
-			// 	if e.Player.Role() == realtime.RoleHost {
-			// 		cancel()
-			// 	}
-			case NEW_STROKE:
-				evt := &RoomEvent{
-					Type:    NEW_STROKE,
-					Payload: e.Payload,
-				}
-
-				msgBytes, err := json.Marshal(evt)
-				if err != nil {
-					slog.Error("error marshalling event", "error", err)
-				}
-
-				for player, client := range r.players {
-					if player.Info().ID != e.Player.Info().ID {
-						slog.Info("sending event to", "player", player.Info().ID)
-						client.Send(msgBytes)
-					}
+			case START_GAME:
+				if e.Player.Role() == RoleHost {
+					r.game = NewGame()
+					go r.game.Run(ctx, r)
 				}
 			default:
-				// r.game.PushEvent(e)
+				r.game.PushEvent(e)
 			}
-		case <-ticker.C:
-			// for p := range r.players {
-			// 	slog.Info("player", "player", p.Info().ID)
-			// }
 		}
 
+	}
+}
+
+func encodeEvent(e *RoomEvent) []byte {
+	jsonBytes, err := json.Marshal(e)
+	if err != nil {
+		slog.Error("error marshalling event", "error", err)
+	}
+	return jsonBytes
+}
+
+func (r *room) BroadcastExcept(msg []byte, excludePlayer Player) {
+	for player, client := range r.players {
+		if player.Info().ID != excludePlayer.Info().ID {
+			client.Send(msg)
+		}
 	}
 }
 
@@ -178,17 +194,26 @@ func (r *room) Run(rm RoomManager) {
 func (r *room) state(p Player) []byte {
 	type stateUpdate struct {
 		Players []*PlayerInfo `json:"players"`
-		Code    string                 `json:"code"`
-		Strokes []*Stroke    `json:"strokes"`
+		Code    string        `json:"code"`
+		Game    *GameState    `json:"game"`
+	}
+
+	msg := &stateUpdate{
+		Players: r.Players(),
+		Code:    r.code,
+	}
+
+	if r.game != nil {
+		msg.Game = r.game.State()
+	} else {
+		msg.Game = &GameState{
+			Strokes: []Stroke{},
+		}
 	}
 
 	msgBytes, _ := json.Marshal(&RoomEvent{
 		Type: INITIAL_STATE,
-		Payload: &stateUpdate{
-			Players: r.Players(),
-			Code:    r.code,
-			Strokes: []*Stroke{},
-		},
+		Payload: msg,
 	})
 
 	return msgBytes
