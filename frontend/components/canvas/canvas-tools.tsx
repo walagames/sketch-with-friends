@@ -2,10 +2,25 @@ import { useState } from "react";
 import { Brush, PaintBucket, Undo2, Trash, Link } from "lucide-react";
 import { Button } from "../ui/button";
 
-export function CanvasTools() {
+export function CanvasTools({
+	color,
+	setColor,
+	width,
+	setWidth,
+}: {
+	color: string;
+	setColor: (color: string) => void;
+	width: number;
+	setWidth: (width: number) => void;
+}) {
 	return (
 		<div className="absolute bottom-5 left-1/2 p-1 bg-white rounded-lg shadow-lg border border-border -translate-x-1/2 flex items-center gap-1">
-			<StrokeTool />
+			<StrokeTool
+				color={color}
+				setColor={setColor}
+				width={width}
+				setWidth={setWidth}
+			/>
 			<ToolButton>
 				<Brush className="h-5" />
 			</ToolButton>
@@ -44,8 +59,17 @@ import { HexColorPicker } from "react-colorful";
 import { useRoomContext } from "../room/room-provider";
 import { toast } from "sonner";
 
-export function StrokeTool() {
-	const [color, setColor] = useState("#aabbcc");
+export function StrokeTool({
+	color,
+	setColor,
+	width,
+	setWidth,
+}: {
+	color: string;
+	setColor: (color: string) => void;
+	width: number;
+	setWidth: (width: number) => void;
+}) {
 	const colorPresets = [
 		"#000000",
 		"#ffffff",
@@ -56,15 +80,14 @@ export function StrokeTool() {
 		"#00ffff",
 		"#ff00ff",
 	];
-	const [strokeWidth, setStrokeWidth] = useState(10);
-	const strokeWidthPresets = [4, 6, 8, 10, 12, 14, 16];
+	const strokeWidthPresets = [8, 16, 24, 32, 40];
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
 				<Button size="icon" variant="outline">
 					<div
 						className="rounded-full border border-border aspect-square"
-						style={{ backgroundColor: color, height: `${strokeWidth * 2}px` }}
+						style={{ backgroundColor: color, height: `${width / 2}px` }}
 					></div>
 				</Button>
 			</PopoverTrigger>
@@ -87,7 +110,7 @@ export function StrokeTool() {
 				<div className="flex gap-2 items-center justify-between px-4">
 					{strokeWidthPresets.map((width) => (
 						<button
-							onClick={() => setStrokeWidth(width)}
+							onClick={() => setWidth(width)}
 							key={width}
 							className="rounded-full cursor-pointer border border-border aspect-square"
 							style={{
