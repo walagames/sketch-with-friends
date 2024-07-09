@@ -49,11 +49,10 @@ function getSvgPathFromStroke(stroke: number[][]) {
 }
 
 function Canvas() {
-	const [strokeCount, setStrokeCount] = React.useState(0);
-
 	const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+	const strokeCountRef = React.useRef(0);
 
-	const { handleEvent, room, toolSettings } = useRoomContext();
+	const { handleEvent, room, settings } = useRoomContext();
 	const [windowWidth, windowHeight] = useWindowSize();
 
 	const fillCanvasWithStroke = React.useCallback(
@@ -70,18 +69,25 @@ function Canvas() {
 		[]
 	);
 
-	const drawAllStrokes = React.useCallback(() => {
-		const canvasContext = canvasRef.current?.getContext("2d");
-
-		if (canvasContext) {
-			canvasContext.clearRect(
+	const clearCanvas = React.useCallback(
+		(ctx: CanvasRenderingContext2D) => {
+			ctx.clearRect(
 				0,
 				0,
 				windowWidth * CANVAS_SCALE,
 				windowHeight * CANVAS_SCALE
 			);
+		},
+		[windowWidth, windowHeight]
+	);
+
+	const drawAllStrokes = React.useCallback(() => {
+		const ctx = canvasRef.current?.getContext("2d");
+
+		if (ctx) {
+			clearCanvas(ctx);
 			for (const stroke of room.game.strokes) {
-				fillCanvasWithStroke(canvasContext, stroke);
+				fillCanvasWithStroke(ctx, stroke);
 			}
 		}
 	}, [fillCanvasWithStroke, room.game.strokes]);
@@ -111,14 +117,17 @@ function Canvas() {
 		const isWindowInitialized = windowWidth !== 0 && windowHeight !== 0;
 		const newStrokeCount = room.game.strokes.length;
 
-		if (strokeCount > newStrokeCount || room.game.strokes.length === 0) {
+		if (
+			strokeCountRef.current > newStrokeCount ||
+			room.game.strokes.length === 0
+		) {
 			// Undo stroke or clear canvas
 			drawAllStrokes();
 		} else if (room.game.strokes.length > 0 && isWindowInitialized) {
 			drawMostRecentStroke();
 		}
 
-		setStrokeCount(newStrokeCount);
+		strokeCountRef.current = newStrokeCount;
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [room.game.strokes]);
 
@@ -127,13 +136,13 @@ function Canvas() {
 			handleEvent({
 				type: RoomEventType.NEW_STROKE,
 				payload: {
-					color: toolSettings.color,
-					width: toolSettings.strokeWidth,
+					color: settings.color,
+					width: settings.strokeWidth,
 					points: [[e.pageX * CANVAS_SCALE, e.pageY * CANVAS_SCALE]],
 				},
 			});
 		},
-		[handleEvent, toolSettings.color, toolSettings.strokeWidth]
+		[handleEvent, settings.color, settings.strokeWidth]
 	);
 
 	const handleStrokePoint = React.useCallback(
