@@ -57,6 +57,10 @@ const reducer = (state: RoomState, event: RoomEvent) => {
 			return { ...state, ...event.payload };
 		case RoomEventType.CLEAR_STATE:
 			return defaultContext.room;
+		case RoomEventType.CLEAR_STROKES:
+			return { ...state, game: { ...state.game, strokes: [] } };
+		case RoomEventType.UNDO_STROKE:
+			return { ...state, game: { ...state.game, strokes: state.game.strokes.slice(0, -1) } };
 		default:
 			return state;
 	}

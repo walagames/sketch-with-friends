@@ -12,6 +12,7 @@ export function CanvasTools({
 	width: number;
 	setWidth: (width: number) => void;
 }) {
+	const { handleEvent } = useRoomContext();
 	return (
 		<div className="absolute bottom-5 left-1/2 p-1 bg-white rounded-lg shadow-lg border border-border -translate-x-1/2 flex items-center gap-1">
 			<StrokeTool
@@ -26,10 +27,14 @@ export function CanvasTools({
 			<ToolButton>
 				<PaintBucket className="h-5" />
 			</ToolButton>
-			<ToolButton>
+			<ToolButton
+				onClick={() => handleEvent({ type: RoomEventType.UNDO_STROKE })}
+			>
 				<Undo2 className="h-5" />
 			</ToolButton>
-			<ToolButton>
+			<ToolButton
+				onClick={() => handleEvent({ type: RoomEventType.CLEAR_STROKES })}
+			>
 				<Trash className="h-5" />
 			</ToolButton>
 		</div>
@@ -57,6 +62,8 @@ import {
 import { HexColorPicker } from "react-colorful";
 import { useRoomContext } from "../room/room-provider";
 import { toast } from "sonner";
+import { useRoom } from "@/hooks/use-room";
+import { RoomEventType } from "@/types/room";
 
 export function StrokeTool({
 	color,

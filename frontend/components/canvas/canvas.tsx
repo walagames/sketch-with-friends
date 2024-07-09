@@ -51,6 +51,7 @@ function getSvgPathFromStroke(stroke: number[][]) {
 function Canvas() {
 	const [strokeColor, setStrokeColor] = React.useState("#aabbcc");
 	const [strokeWidth, setStrokeWidth] = React.useState(8);
+	const [strokeCount, setStrokeCount] = React.useState(0);
 
 	const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 
@@ -75,6 +76,12 @@ function Canvas() {
 		const canvasContext = canvasRef.current?.getContext("2d");
 
 		if (canvasContext) {
+			canvasContext.clearRect(
+				0,
+				0,
+				windowWidth * CANVAS_SCALE,
+				windowHeight * CANVAS_SCALE
+			);
 			for (const stroke of room.game.strokes) {
 				fillCanvasWithStroke(canvasContext, stroke);
 			}
@@ -91,7 +98,7 @@ function Canvas() {
 		}
 	}, [fillCanvasWithStroke, room.game.strokes]);
 
-	// Avoid unnecessary work by only drawing all strokes on first load or when window size changes
+	// Draws all strokes on first load and when window size changes
 	React.useEffect(() => {
 		const isWindowInitialized = windowWidth !== 0 && windowHeight !== 0;
 
@@ -101,13 +108,19 @@ function Canvas() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [windowWidth, windowHeight]);
 
-	// Avoid unnecessary work by only drawing the most recent stroke
+	// Only draws most recent stroke unless canvas is cleared or a stroke is undone
 	React.useEffect(() => {
 		const isWindowInitialized = windowWidth !== 0 && windowHeight !== 0;
+		const newStrokeCount = room.game.strokes.length;
 
-		if (room.game.strokes.length > 0 && isWindowInitialized) {
+		if (strokeCount > newStrokeCount || room.game.strokes.length === 0) {
+			// Undo stroke or clear canvas
+			drawAllStrokes();
+		} else if (room.game.strokes.length > 0 && isWindowInitialized) {
 			drawMostRecentStroke();
 		}
+
+		setStrokeCount(newStrokeCount);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [room.game.strokes]);
 

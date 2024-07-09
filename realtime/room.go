@@ -40,6 +40,8 @@ const (
 	INITIAL_STATE RoomEventType = "INITIAL_STATE"
 	NEW_STROKE    RoomEventType = "NEW_STROKE"
 	STROKE_POINT  RoomEventType = "STROKE_POINT"
+	CLEAR_STROKES RoomEventType = "CLEAR_STROKES"
+	UNDO_STROKE   RoomEventType = "UNDO_STROKE"
 )
 
 type RoomEvent struct {
@@ -212,7 +214,7 @@ func (r *room) state(p Player) []byte {
 	}
 
 	msgBytes, _ := json.Marshal(&RoomEvent{
-		Type: INITIAL_STATE,
+		Type:    INITIAL_STATE,
 		Payload: msg,
 	})
 

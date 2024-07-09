@@ -7,6 +7,8 @@ export enum RoomEventType {
 	NEW_STROKE = "NEW_STROKE",
 	STROKE_POINT = "STROKE_POINT",
 	CLEAR_STATE = "CLEAR_STATE",
+	CLEAR_STROKES = "CLEAR_STROKES",
+	UNDO_STROKE = "UNDO_STROKE",
 }
 export type RoomState = {
 	status: RoomStatus;
@@ -30,7 +32,7 @@ export type InitialState = {
 	payload: RoomState;
 };
 
-export type RoomEvent = InitialState | NewStroke | StrokePoint | StartGame | ClearState;
+export type RoomEvent = InitialState | NewStroke | StrokePoint | StartGame | ClearState | ClearStrokes | UndoStroke;
 
 export type NewStroke = {
 	type: RoomEventType.NEW_STROKE;
@@ -52,5 +54,12 @@ export type StartGame = {
 
 export type ClearState = {
 	type: RoomEventType.CLEAR_STATE;
+};
+
+export type ClearStrokes = {
+	type: RoomEventType.CLEAR_STROKES;
+};
+export type UndoStroke = {
+	type: RoomEventType.UNDO_STROKE;
 };
 

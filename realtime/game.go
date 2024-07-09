@@ -119,6 +119,12 @@ func (g *game) handleEvent(e *RoomEvent) {
 			return
 		}
 		g.strokes[len(g.strokes)-1].Points = append(g.strokes[len(g.strokes)-1].Points, point)
+	case CLEAR_STROKES:
+		g.strokes = make([]Stroke, 0)
+	case UNDO_STROKE:
+		if len(g.strokes) > 0 {
+			g.strokes = g.strokes[:len(g.strokes)-1]
+		}
 	default:
 		slog.Warn("unhandled event in game", "event", e)
 	}

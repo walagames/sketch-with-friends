@@ -5,6 +5,6 @@ export type Stroke = {
 };
 
 export enum Tool {
-	BRUSH = "brush",
-	BUCKET = "eraser",
+	BRUSH = "BRUSH",
+	BUCKET = "BUCKET",
 }
