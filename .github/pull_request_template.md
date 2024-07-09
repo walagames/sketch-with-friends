@@ -18,6 +18,5 @@
 - [ ] I have performed a self-review of my own code.
 - [ ] I have tested my changes locally and in the preview environment.
 - [ ] I have commented my code, particularly in hard-to-understand areas.
-- [ ] I have made corresponding changes to the documentation.
-- [ ] I have incremented the major, minor, or patch version number as appropriate.
+- [ ] I have made corresponding changes to the documentation if needed.
 - [ ] My changes generate no new warnings, errors, or vulnerabilities.
