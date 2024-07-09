@@ -9,6 +9,13 @@ export enum Tool {
 	BUCKET = "BUCKET",
 }
 
+export enum SettingActionType {
+	CHANGE_COLOR = "CHANGE_COLOR",
+	CHANGE_STROKE_WIDTH = "CHANGE_STROKE_WIDTH",
+	CHANGE_TOOL = "CHANGE_TOOL",
+}
+
+// not sure I like this naming convention, feels too verbose
 export type CanvasToolSettings = {
 	color: string;
 	strokeWidth: number;
@@ -16,17 +23,17 @@ export type CanvasToolSettings = {
 };
 
 export type ChangeColor = {
-	type: "CHANGE_COLOR";
+	type: SettingActionType.CHANGE_COLOR;
 	payload: string;
 };
 
 export type ChangeStrokeWidth = {
-	type: "CHANGE_STROKE_WIDTH";
+	type: SettingActionType.CHANGE_STROKE_WIDTH;
 	payload: number;
 };
 
 export type ChangeTool = {
-	type: "CHANGE_TOOL";
+	type: SettingActionType.CHANGE_TOOL;
 	payload: Tool;
 };
 

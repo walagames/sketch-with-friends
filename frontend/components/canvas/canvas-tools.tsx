@@ -2,22 +2,28 @@ import { Brush, PaintBucket, Undo2, Trash, Link } from "lucide-react";
 import { Button } from "../ui/button";
 
 export function CanvasTools() {
-	const { handleEvent, dispatchToolSettings, toolSettings } = useRoomContext();
+	const { handleEvent, updateSettings, settings } = useRoomContext();
 	return (
 		<div className="absolute bottom-5 left-1/2 p-1 bg-white rounded-lg shadow-lg border border-border -translate-x-1/2 flex items-center gap-1">
 			<StrokeTool />
 			<ToolButton
-				selected={toolSettings.tool === Tool.BRUSH}
+				selected={settings.tool === Tool.BRUSH}
 				onClick={() =>
-					dispatchToolSettings({ type: "CHANGE_TOOL", payload: Tool.BRUSH })
+					updateSettings({
+						type: SettingActionType.CHANGE_TOOL,
+						payload: Tool.BRUSH,
+					})
 				}
 			>
 				<Brush className="h-5" />
 			</ToolButton>
 			<ToolButton
-				selected={toolSettings.tool === Tool.BUCKET}
+				selected={settings.tool === Tool.BUCKET}
 				onClick={() =>
-					dispatchToolSettings({ type: "CHANGE_TOOL", payload: Tool.BUCKET })
+					updateSettings({
+						type: SettingActionType.CHANGE_TOOL,
+						payload: Tool.BUCKET,
+					})
 				}
 			>
 				<PaintBucket className="h-5" />
@@ -61,10 +67,10 @@ import { useRoomContext } from "../room/room-provider";
 import { toast } from "sonner";
 import { useRoom } from "@/hooks/use-room";
 import { RoomEventType } from "@/types/room";
-import { Tool } from "@/types/canvas";
+import { SettingActionType, Tool } from "@/types/canvas";
 
 export function StrokeTool() {
-	const { toolSettings, dispatchToolSettings } = useRoomContext();
+	const { settings, updateSettings } = useRoomContext();
 	const colorPresets = [
 		"#000000",
 		"#ffffff",
@@ -83,8 +89,8 @@ export function StrokeTool() {
 					<div
 						className="rounded-full border border-border aspect-square"
 						style={{
-							backgroundColor: toolSettings.color,
-							height: `${toolSettings.strokeWidth / 2}px`,
+							backgroundColor: settings.color,
+							height: `${settings.strokeWidth / 2}px`,
 						}}
 					></div>
 				</Button>
@@ -92,16 +98,22 @@ export function StrokeTool() {
 			<PopoverContent sideOffset={12} className=" w-56 p-2 gap-2 flex flex-col">
 				<HexColorPicker
 					className="max-w-full min-w-full"
-					color={toolSettings.color}
+					color={settings.color}
 					onChange={(color) =>
-						dispatchToolSettings({ type: "CHANGE_COLOR", payload: color })
+						updateSettings({
+							type: SettingActionType.CHANGE_COLOR,
+							payload: color,
+						})
 					}
 				/>
 				<div className="flex flex-wrap justify-between">
 					{colorPresets.map((color) => (
 						<button
 							onClick={() =>
-								dispatchToolSettings({ type: "CHANGE_COLOR", payload: color })
+								updateSettings({
+									type: SettingActionType.CHANGE_COLOR,
+									payload: color,
+								})
 							}
 							key={color}
 							className=" basis-[12%] aspect-square rounded-full cursor-pointer border border-border"
@@ -113,8 +125,8 @@ export function StrokeTool() {
 					{strokeWidthPresets.map((width) => (
 						<button
 							onClick={() =>
-								dispatchToolSettings({
-									type: "CHANGE_STROKE_WIDTH",
+								updateSettings({
+									type: SettingActionType.CHANGE_STROKE_WIDTH,
 									payload: width,
 								})
 							}
@@ -122,7 +134,7 @@ export function StrokeTool() {
 							className="rounded-full cursor-pointer border border-border aspect-square"
 							style={{
 								width: `${width * 2}px`,
-								backgroundColor: toolSettings.color,
+								backgroundColor: settings.color,
 							}}
 						/>
 					))}
