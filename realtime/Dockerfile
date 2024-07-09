@@ -11,7 +11,7 @@ COPY ./ ./
 RUN go mod download
 
 # Step 5: Build the Go app
-RUN go build -o main cmd/main.go
+RUN go build -o main .
 
 # Step 6: Use a smaller base image to run the application
 FROM alpine:latest
