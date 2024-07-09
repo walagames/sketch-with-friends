@@ -2,19 +2,17 @@
 
 > Real-time, multiplayer drawing games
 
-## Developing locally
+## Setup
 
 - [Frontend instructions](frontend/README.md)
 - [Real-time instructions](realtime/README.md)
 
 ## Contributing
-> To learn more about how you can contribute, reach out via [email](mailto:hello@walagames.com).
 
 ### Issues
 We use [GitHub Issues](https://github.com/walagames/sketch-with-friends/issues) as our main source of truth for tracking bugs and new features.
 
 ### Pull Requests
-All code changes should be made via pull requests.
 
 1. Checkout a new branch `git checkout -b my-branch`
 2. Commit your changes `git commit -m 'feat: add some feature'`
