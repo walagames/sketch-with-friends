@@ -126,6 +126,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 				updateRoom({ type: RoomEventType.CLEAR_STATE });
 			},
 			onMessage: (event: MessageEvent) => {
+				console.log(event);
 				const { type, payload } = JSON.parse(event.data);
 				updateRoom({ type, payload });
 			},
@@ -135,7 +136,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 				setSocketUrl(null);
 			},
 		}),
-		[room.code]
+		[]
 	);
 
 	const [sendEvent] = useRoom(socketUrl, roomOptions);
