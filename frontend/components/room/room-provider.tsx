@@ -12,17 +12,25 @@ import {
 import { toast } from "sonner";
 import { useSearchParams } from "next/navigation";
 import { RoomEvent, RoomEventType, RoomState, RoomStatus } from "@/types/room";
-import { Stroke } from "@/types/canvas";
+import { CanvasAction, CanvasToolSettings, Stroke, Tool } from "@/types/canvas";
 import { Player } from "@/types/player";
 
 interface RoomContextType {
 	handleEvent: (event: RoomEvent) => void;
 	handleRoomFormSubmit: (username: string) => void;
 	room: RoomState;
+	toolSettings: CanvasToolSettings;
+	dispatchToolSettings: (action: CanvasAction) => void;
 }
 const defaultContext: RoomContextType = {
+	dispatchToolSettings: () => {},
 	handleEvent: () => {},
 	handleRoomFormSubmit: () => {},
+	toolSettings: {
+		color: "#000000",
+		strokeWidth: 18,
+		tool: Tool.BRUSH,
+	},
 	room: {
 		role: "",
 		code: "",
@@ -36,7 +44,7 @@ const defaultContext: RoomContextType = {
 const RoomContext = createContext<RoomContextType>(defaultContext);
 export const useRoomContext = () => useContext(RoomContext);
 
-const reducer = (state: RoomState, event: RoomEvent) => {
+const roomReducer = (state: RoomState, event: RoomEvent) => {
 	switch (event.type) {
 		case RoomEventType.NEW_STROKE:
 			return {
@@ -60,7 +68,23 @@ const reducer = (state: RoomState, event: RoomEvent) => {
 		case RoomEventType.CLEAR_STROKES:
 			return { ...state, game: { ...state.game, strokes: [] } };
 		case RoomEventType.UNDO_STROKE:
-			return { ...state, game: { ...state.game, strokes: state.game.strokes.slice(0, -1) } };
+			return {
+				...state,
+				game: { ...state.game, strokes: state.game.strokes.slice(0, -1) },
+			};
+		default:
+			return state;
+	}
+};
+
+const toolSettingsReducer = (state: CanvasToolSettings, action: CanvasAction) => {
+	switch (action.type) {
+		case "CHANGE_COLOR":
+			return { ...state, color: action.payload };
+		case "CHANGE_STROKE_WIDTH":
+			return { ...state, strokeWidth: action.payload };
+		case "CHANGE_TOOL":
+			return { ...state, tool: action.payload };
 		default:
 			return state;
 	}
@@ -73,11 +97,15 @@ const getRealtimeHref = () => {
 	return `${protocol}://${host}`;
 };
 
-// TODO: store canvas tool state and stroke settings here and pass down to children via context
 export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 	const [socketUrl, setSocketUrl] = useState<string | null>(null);
 
-	const [room, dispatch] = useReducer(reducer, defaultContext.room);
+	const [room, dispatch] = useReducer(roomReducer, defaultContext.room);
+
+	const [toolSettings, dispatchToolSettings] = useReducer(
+		toolSettingsReducer,
+		defaultContext.toolSettings
+	);
 
 	const searchParams = useSearchParams();
 
@@ -132,8 +160,10 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 			room,
 			handleEvent,
 			handleRoomFormSubmit,
+			toolSettings,
+			dispatchToolSettings,
 		}),
-		[room, handleEvent, handleRoomFormSubmit]
+		[room, handleEvent, handleRoomFormSubmit, toolSettings]
 	);
 
 	return (

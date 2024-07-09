@@ -49,13 +49,11 @@ function getSvgPathFromStroke(stroke: number[][]) {
 }
 
 function Canvas() {
-	const [strokeColor, setStrokeColor] = React.useState("#aabbcc");
-	const [strokeWidth, setStrokeWidth] = React.useState(8);
 	const [strokeCount, setStrokeCount] = React.useState(0);
 
 	const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 
-	const { handleEvent, room } = useRoomContext();
+	const { handleEvent, room, toolSettings } = useRoomContext();
 	const [windowWidth, windowHeight] = useWindowSize();
 
 	const fillCanvasWithStroke = React.useCallback(
@@ -129,13 +127,13 @@ function Canvas() {
 			handleEvent({
 				type: RoomEventType.NEW_STROKE,
 				payload: {
-					color: strokeColor,
-					width: strokeWidth,
+					color: toolSettings.color,
+					width: toolSettings.strokeWidth,
 					points: [[e.pageX * CANVAS_SCALE, e.pageY * CANVAS_SCALE]],
 				},
 			});
 		},
-		[handleEvent, strokeColor, strokeWidth]
+		[handleEvent, toolSettings.color, toolSettings.strokeWidth]
 	);
 
 	const handleStrokePoint = React.useCallback(
@@ -184,12 +182,7 @@ function Canvas() {
 				onMouseMove={handleStrokePoint}
 				ref={canvasRef}
 			/>
-			<CanvasTools
-				color={strokeColor}
-				setColor={setStrokeColor}
-				width={strokeWidth}
-				setWidth={setStrokeWidth}
-			/>
+			<CanvasTools />
 		</div>
 	);
 }
