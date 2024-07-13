@@ -150,7 +150,7 @@ func (r *room) Run(rm RoomManager) {
 
 			slog.Info("player connected", "player", client.Player.Info().ID)
 
-			msg := r.state(client.Player)
+			msg := r.state()
 			client.Send(msg)
 		case client := <-r.disconnect:
 			delete(r.players, client.Player)
@@ -164,12 +164,18 @@ func (r *room) Run(rm RoomManager) {
 		case e := <-r.event:
 			switch e.Type {
 			case START_GAME:
-				if e.Player.Role() == RoleHost {
+				if e.Player.Role() == RoleHost && r.status == WAITING {
 					r.game = NewGame()
 					go r.game.Run(ctx, r)
+					r.status = PLAYING
+					for _, client := range r.players {
+						client.Send(r.state())
+					}
 				}
 			default:
-				r.game.PushEvent(e)
+				if r.status == PLAYING {
+					r.game.PushEvent(e)
+				}
 			}
 		}
 
@@ -193,8 +199,9 @@ func (r *room) BroadcastExcept(msg []byte, excludePlayer Player) {
 }
 
 // * opportunity for generic ? or veratic
-func (r *room) state(p Player) []byte {
+func (r *room) state() []byte {
 	type stateUpdate struct {
+		Status  RoomStatus    `json:"status"`
 		Players []*PlayerInfo `json:"players"`
 		Code    string        `json:"code"`
 		Game    *GameState    `json:"game"`
@@ -203,6 +210,7 @@ func (r *room) state(p Player) []byte {
 	msg := &stateUpdate{
 		Players: r.Players(),
 		Code:    r.code,
+		Status:  r.status,
 	}
 
 	if r.game != nil {

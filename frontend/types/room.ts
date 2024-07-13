@@ -24,6 +24,7 @@ export type GameState = {
 export enum RoomStatus {
 	WAITING = "WAITING",
 	PLAYING = "PLAYING",
+	UNINITIALIZED = "UNINITIALIZED",
 	FINISHED = "FINISHED",
 }
 

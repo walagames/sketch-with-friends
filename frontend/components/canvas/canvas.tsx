@@ -164,22 +164,6 @@ function Canvas() {
 				<CopyRoomLink />
 			</div>
 
-			<div className="absolute top-3 left-3">
-				<Button
-					onClick={() =>
-						handleEvent({
-							type: RoomEventType.START_GAME,
-							payload: {
-								rounds: 5,
-								timeLimit: 60,
-							},
-						})
-					}
-				>
-					Start Game
-				</Button>
-			</div>
-
 			<canvas
 				style={{
 					width: windowWidth,

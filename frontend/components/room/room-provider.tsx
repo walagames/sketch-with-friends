@@ -41,7 +41,7 @@ const defaultContext: RoomContextType = {
 		role: "",
 		code: "",
 		players: [] as Player[],
-		status: RoomStatus.WAITING,
+		status: RoomStatus.UNINITIALIZED,
 		game: {
 			strokes: [] as Stroke[],
 		},
