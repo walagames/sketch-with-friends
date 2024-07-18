@@ -134,7 +134,7 @@ function Canvas() {
 	const handleNewStroke = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
 			handleEvent({
-				type: RoomEventType.NEW_STROKE,
+				type: RoomEventType.STROKE,
 				payload: {
 					color: settings.color,
 					width: settings.strokeWidth,

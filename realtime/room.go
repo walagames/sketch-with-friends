@@ -37,8 +37,8 @@ type RoomEventType string
 
 const (
 	START_GAME    RoomEventType = "START_GAME"
-	INITIAL_STATE RoomEventType = "INITIAL_STATE"
-	NEW_STROKE    RoomEventType = "NEW_STROKE"
+	STATE         RoomEventType = "STATE"
+	STROKE        RoomEventType = "STROKE"
 	STROKE_POINT  RoomEventType = "STROKE_POINT"
 	CLEAR_STROKES RoomEventType = "CLEAR_STROKES"
 	UNDO_STROKE   RoomEventType = "UNDO_STROKE"
@@ -150,7 +150,7 @@ func (r *room) Run(rm RoomManager) {
 
 			slog.Info("player connected", "player", client.Player.Info().ID)
 
-			msg := r.state()
+			msg := r.state(client.Player.Role())
 			client.Send(msg)
 		case client := <-r.disconnect:
 			delete(r.players, client.Player)
@@ -168,13 +168,13 @@ func (r *room) Run(rm RoomManager) {
 					r.game = NewGame()
 					go r.game.Run(ctx, r)
 					r.status = PLAYING
-					for _, client := range r.players {
-						client.Send(r.state())
+					for player, client := range r.players {
+						client.Send(r.state(player.Role()))
 					}
 				}
 			default:
 				if r.status == PLAYING {
-					r.game.PushEvent(e)
+					r.game.EnqueueEvent(e)
 				}
 			}
 		}
@@ -199,8 +199,9 @@ func (r *room) BroadcastExcept(msg []byte, excludePlayer Player) {
 }
 
 // * opportunity for generic ? or veratic
-func (r *room) state() []byte {
+func (r *room) state(role PlayerRole) []byte {
 	type stateUpdate struct {
+		Role    PlayerRole    `json:"role"`
 		Status  RoomStatus    `json:"status"`
 		Players []*PlayerInfo `json:"players"`
 		Code    string        `json:"code"`
@@ -211,6 +212,7 @@ func (r *room) state() []byte {
 		Players: r.Players(),
 		Code:    r.code,
 		Status:  r.status,
+		Role:    role,
 	}
 
 	if r.game != nil {
@@ -222,7 +224,7 @@ func (r *room) state() []byte {
 	}
 
 	msgBytes, _ := json.Marshal(&RoomEvent{
-		Type:    INITIAL_STATE,
+		Type:    STATE,
 		Payload: msg,
 	})
 
