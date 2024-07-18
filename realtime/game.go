@@ -5,18 +5,19 @@ import (
 	"encoding/json"
 	"log/slog"
 
-	"github.com/mitchellh/mapstructure"
-	// "time"
-)
+	"time"
 
-type GameState struct {
-	Strokes []Stroke `json:"strokes"`
-}
+	"github.com/mitchellh/mapstructure"
+)
 
 type Game interface {
 	Run(ctx context.Context, r Room)
-	PushEvent(e *RoomEvent)
+	EnqueueEvent(e *RoomEvent)
 	State() *GameState
+}
+
+type GameState struct {
+	Strokes []Stroke `json:"strokes"`
 }
 
 type Stroke struct {
@@ -26,14 +27,20 @@ type Stroke struct {
 }
 
 type game struct {
-	strokes        []Stroke
-	event          chan *RoomEvent
+	strokes       []Stroke
+	event         chan *RoomEvent
+	roundDuration int
+	totalRounds   int
+	currentRound  int
 }
 
 func NewGame() Game {
 	return &game{
 		strokes:       make([]Stroke, 0),
 		event:         make(chan *RoomEvent, 5), // event buffer size of 5
+		roundDuration: 10,
+		totalRounds:   3,
+		currentRound:  1,
 	}
 }
 
@@ -45,14 +52,13 @@ func (g *game) State() *GameState {
 
 func (g *game) Run(ctx context.Context, r Room) {
 	slog.Info("Game routine started: ")
-	// roundTimer := time.NewTimer(time.Duration(g.roundDuration+7) * time.Second)
-	// judgeTimer := time.NewTimer(time.Duration(g.roundDuration+2) * time.Second)
-
+	roundTimer := time.NewTimer(time.Duration(g.roundDuration+7) * time.Second)
+	judgeTimer := time.NewTimer(time.Duration(g.roundDuration+2) * time.Second)
 
 	defer func() {
 		slog.Info("Game routine exited")
-		// roundTimer.Stop()
-		// judgeTimer.Stop()
+		roundTimer.Stop()
+		judgeTimer.Stop()
 	}()
 
 	for {
@@ -60,83 +66,89 @@ func (g *game) Run(ctx context.Context, r Room) {
 		case <-ctx.Done():
 			return
 		case e := <-g.event:
-			g.handleEvent(e)
+			g.processEvent(e)
 			json, err := json.Marshal(e)
 			if err != nil {
 				slog.Error("error marshalling event", "error", err)
 			}
 			r.BroadcastExcept(json, e.Player)
-		// case <-judgeTimer.C:
-		// 	slog.Info("judge timer")
-		// case <-roundTimer.C:
-		// 	slog.Info("round timer")
+		case <-judgeTimer.C:
+			slog.Info("judge timer")
+		case <-roundTimer.C:
+			slog.Info("round timer")
 
-		// 	if g.currentRound == g.totalRounds {
-		// 		g.end(l)
-		// 		return
-		// 	}
+			if g.currentRound == g.totalRounds {
+				g.end(r)
+				return
+			}
 
-		// 	roundTimer.Reset(time.Duration(g.roundDuration+7) * time.Second)
-		// 	judgeTimer.Reset(time.Duration(g.roundDuration+2) * time.Second)
+			roundTimer.Reset(time.Duration(g.roundDuration+7) * time.Second)
+			judgeTimer.Reset(time.Duration(g.roundDuration+2) * time.Second)
 		}
 	}
-
 }
 
+func (g *game) EnqueueEvent(e *RoomEvent) {
+	select {
+	case g.event <- e:
+	default:
+		slog.Warn("game event channel full, dropping event", "event", e)
+	}
+}
 
+func (g *game) processEvent(e *RoomEvent) {
+	switch e.Type {
+	case STROKE:
+		g.startStroke(e)
+	case STROKE_POINT:
+		g.appendStrokePoint(e)
+	case CLEAR_STROKES:
+		g.clearStrokes()
+	case UNDO_STROKE:
+		g.undoStroke()
+	default:
+		slog.Warn("unhandled event", "event", e)
+	}
+}
+
+func (g *game) startStroke(e *RoomEvent) {
+	stroke, err := decodePayload[Stroke](e.Payload)
+	if err != nil {
+		slog.Warn("failed to process stroke", "error", err)
+		return
+	}
+	g.strokes = append(g.strokes, stroke)
+}
+
+func (g *game) appendStrokePoint(e *RoomEvent) {
+	point, err := decodePayload[[]int](e.Payload)
+	if err != nil {
+		slog.Warn("failed to process stroke point", "error", err)
+		return
+	}
+	g.strokes[len(g.strokes)-1].Points = append(g.strokes[len(g.strokes)-1].Points, point)
+}
+
+func (g *game) clearStrokes() {
+	g.strokes = make([]Stroke, 0)
+}
+
+func (g *game) undoStroke() {
+	if len(g.strokes) > 0 {
+		g.strokes = g.strokes[:len(g.strokes)-1]
+	}
+}
+
+func decodePayload[T any](payload interface{}) (T, error) {
+	var target T
+	err := mapstructure.Decode(payload, &target)
+	if err != nil {
+		slog.Warn("failed to decode payload", "error", err)
+		return target, err
+	}
+	return target, nil
+}
 
 func (g *game) end(r Room) {
 	slog.Info("Game ended")
 }
-
-// func (game *game) calculateScore(a playerAnswer) int {
-// 	timeTaken := (float32(game.roundDuration) - a.timeTaken) / float32(game.roundDuration)
-
-// 	if timeTaken < 0.0 {
-// 		timeTaken = 0
-// 	}
-
-// 	return int(timeTaken * 100.0)
-// }
-
-func (g *game) handleEvent(e *RoomEvent) {
-
-	// slog.Info("recv event in game routine of type %s from player %s\n", "type", e.Type, "player", e.Player.Info().ID)
-	switch e.Type {
-	case NEW_STROKE:
-		var stroke Stroke
-		err := mapstructure.Decode(e.Payload, &stroke)
-		if err != nil {
-			slog.Warn("unhandled event in game", "event", e)
-			return
-		}
-		g.strokes = append(g.strokes, stroke)
-	case STROKE_POINT:
-		var point []int
-		err := mapstructure.Decode(e.Payload, &point)
-		if err != nil {
-			slog.Warn("unhandled event in game", "event", e)
-			return
-		}
-		g.strokes[len(g.strokes)-1].Points = append(g.strokes[len(g.strokes)-1].Points, point)
-	case CLEAR_STROKES:
-		g.strokes = make([]Stroke, 0)
-	case UNDO_STROKE:
-		if len(g.strokes) > 0 {
-			g.strokes = g.strokes[:len(g.strokes)-1]
-		}
-	default:
-		slog.Warn("unhandled event in game", "event", e)
-	}
-}
-
-func (g *game) PushEvent(e *RoomEvent) {
-	select {
-	case g.event <- e:
-	default:
-		slog.Warn("dropped event in game chan")
-	}
-
-}
-
-
