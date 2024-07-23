@@ -205,7 +205,7 @@ func (r *room) state(role PlayerRole) []byte {
 		Status  RoomStatus    `json:"status"`
 		Players []*PlayerInfo `json:"players"`
 		Code    string        `json:"code"`
-		Game    *GameState    `json:"game"`
+		Game    *game         `json:"game"`
 	}
 
 	msg := &stateUpdate{
@@ -217,11 +217,7 @@ func (r *room) state(role PlayerRole) []byte {
 
 	if r.game != nil {
 		msg.Game = r.game.State()
-	} else {
-		msg.Game = &GameState{
-			Strokes: []Stroke{},
-		}
-	}
+	} 
 
 	msgBytes, _ := json.Marshal(&RoomEvent{
 		Type:    STATE,
