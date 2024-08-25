@@ -101,14 +101,13 @@ func (rm *roomManager) Room(code string) (Room, error) {
 }
 
 func (rm *roomManager) uniqueRoomCode() (string, error) {
-	rm.mu.Lock()
-	defer rm.mu.Unlock()
 	code, err := generateRandomCode(6)
 	if err != nil {
 		return "", err
 	}
 
 	if _, ok := rm.rooms[code]; ok {
+		slog.Warn("Room code already exists", "code", code)
 		return rm.uniqueRoomCode()
 	}
 
