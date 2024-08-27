@@ -2,14 +2,12 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"log/slog"
 
 	// "os"
 
 	"github.com/gorilla/websocket"
 	// "golang.org/x/time/rate"
-	"net/http"
 
 	"time"
 )
@@ -47,7 +45,7 @@ type client struct {
 	cancel context.CancelFunc
 }
 
-func newClient(conn *websocket.Conn, room *room, player Player) *client {
+func NewClient(conn *websocket.Conn, room *room, player Player) *client {
 	return &client{
 		Player: player,
 		room:   room,
@@ -117,15 +115,15 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 			}
 			// if limiter.Allow() {
 			if true {
-				var event RoomEvent
-				if err := json.Unmarshal(msgBytes, &event); err != nil {
+				event, err := unmarshalEvent(msgBytes)
+				if err != nil {
 					slog.Error("Error un-marshalling message", "player", c.Player.Info().ID, "error", err)
 					return
 				}
 
 				event.Player = c.Player
 
-				c.room.event <- &event
+				c.room.event <- event
 
 				slog.Debug("sent event from client", "player", c.Player.Info().ID)
 
@@ -191,17 +189,3 @@ func (c *client) write(ctx context.Context, ready chan<- bool) {
 	}
 }
 
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-	CheckOrigin: func(r *http.Request) bool {
-		// allowedOrigin := os.Getenv("CORS_ORIGIN") // Adjust this to match your Next.js app's origin
-		// return r.Header.Get("Origin") == allowedOrigin
-		// ! This is a security risk, but it's fine for local development
-		return true
-	},
-}
-
-func UpgradeConnection(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
-	return upgrader.Upgrade(w, r, nil)
-}

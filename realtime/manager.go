@@ -19,7 +19,7 @@ type RoomManager interface {
 	Run(ctx context.Context)
 	Room(code string) (Room, error)
 	CreateRoom() (Room, error)
-	ShutdownRoom(code string, message string) error
+	DeleteRoom(code string) error
 }
 
 type roomManager struct {
@@ -77,16 +77,16 @@ func (rm *roomManager) CreateRoom() (Room, error) {
 	return room, nil
 }
 
-func (rm *roomManager) ShutdownRoom(code string, message string) error {
+func (rm *roomManager) DeleteRoom(code string) error {
 	if _, err := rm.Room(code); err == nil {
 		rm.mu.Lock()
 		delete(rm.rooms, code)
 		rm.mu.Unlock()
-		slog.Info("Room deleted", "code", code, "message", message)
+		slog.Info("Room deleted", "code", code)
 		return nil
 	}
 
-	slog.Warn("tried to shutdown a room that does not exist", "code", code)
+	slog.Warn("tried to delete a room that does not exist", "code", code)
 	return fmt.Errorf("room with code:%s not found", code)
 }
 
