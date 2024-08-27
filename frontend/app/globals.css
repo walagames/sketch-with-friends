@@ -64,6 +64,8 @@
 		--input: 240 3.7% 15.9%;
 		--ring: 240 4.9% 83.9%;
 	}
+
+
 }
 
 @layer base {
@@ -80,6 +82,7 @@
 	width: 100%;
 	display: flex;
 	align-items: center;
+	text-align: center;
 	padding: 0 20px;
 
 	&[data-x-position="center"] {
@@ -93,4 +96,9 @@
 	&[data-x-position="right"] {
 		justify-content: flex-end;
 	}
+}
+
+
+.radial-gradient {
+  background: radial-gradient(circle, hsla(240, 4.8%, 95.9%, 0.7) 0%, transparent 100%);
 }

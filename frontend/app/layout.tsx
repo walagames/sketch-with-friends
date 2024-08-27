@@ -19,13 +19,14 @@ export default function RootLayout({
 			<body className={cn(dmsans.className, "bg-secondary")}>
 				<RoomProvider>{children}</RoomProvider>
 				<Toaster
+					offset={16}
 					className="Toaster"
 					toastOptions={{
 						classNames: {
-							toast: "px-4 py-2 rounded-full",
+							toast: "px-4 py-2 ",
 						},
 					}}
-					richColors
+					// richColors
 					position="top-center"
 				/>
 			</body>
