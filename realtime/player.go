@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 )
+
 type PlayerRole string
 
 const (
@@ -20,10 +21,14 @@ const (
 )
 
 type PlayerInfo struct {
-	ID     string                 `json:"id"`
-	Name   string                 `json:"name"`
-	Role   PlayerRole             `json:"role"`
-	Status PlayerConnectionStatus `json:"status"`
+	ID          string                 `json:"id"`
+	Name        string                 `json:"name"`
+	Role        PlayerRole             `json:"role"`
+	GameRole    GameRole               `json:"gameRole"`
+	Status      PlayerConnectionStatus `json:"status"`
+	AvatarSeed  string                 `json:"avatarSeed"`
+	AvatarColor string                 `json:"avatarColor"`
+	Score       int                    `json:"score"`
 }
 
 type Player interface {
@@ -31,24 +36,35 @@ type Player interface {
 	ChangeStatus(status PlayerConnectionStatus)
 	Role() PlayerRole
 	ChangeRole(role PlayerRole)
+	GameRole() GameRole
+	ChangeGameRole(role GameRole)
 	Info() *PlayerInfo
+	Score() int
+	ChangeScore(score int)
 }
-
 
 type player struct {
-	id      uuid.UUID
-	name    string
-	role    PlayerRole
-	status  PlayerConnectionStatus
-	mu      sync.RWMutex
+	id          uuid.UUID
+	name        string
+	avatarSeed  string
+	avatarColor string
+	role        PlayerRole
+	status      PlayerConnectionStatus
+	score       int
+	mu          sync.RWMutex
+	gameRole    GameRole
 }
 
-func NewPlayer(role PlayerRole, name string) Player {
+func NewPlayer(role PlayerRole, name string, avatarSeed string, avatarColor string) Player {
 	return &player{
-		id:      uuid.New(),
-		name:    name,
-		role:    role,
-		status:  StatusJoining,
+		id:          uuid.New(),
+		name:        name,
+		avatarSeed:  avatarSeed,
+		avatarColor: avatarColor,
+		role:        role,
+		status:      StatusJoining,
+		score:       0,
+		gameRole:    Guessing,
 	}
 }
 
@@ -64,6 +80,18 @@ func (p *player) ChangeStatus(newStatus PlayerConnectionStatus) {
 	p.status = newStatus
 }
 
+func (p *player) GameRole() GameRole {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.gameRole
+}
+
+func (p *player) ChangeGameRole(role GameRole) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.gameRole = role
+}
+
 func (p *player) Role() PlayerRole {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
@@ -76,14 +104,28 @@ func (p *player) ChangeRole(r PlayerRole) {
 	p.role = r
 }
 
-
 func (p *player) Info() *PlayerInfo {
 	p.mu.RLock()
 	defer p.mu.RUnlock()
 	return &PlayerInfo{
-		ID:      p.id.String(),
-		Name:    p.name,
-		Role:    p.role,
-		Status:  p.status,
+		ID:          p.id.String(),
+		Name:        p.name,
+		Role:        p.role,
+		Status:      p.status,
+		AvatarSeed:  p.avatarSeed,
+		AvatarColor: p.avatarColor,
+		GameRole:    p.gameRole,
 	}
+}
+
+func (p *player) Score() int {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.score
+}
+
+func (p *player) ChangeScore(score int) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.score = score
 }
