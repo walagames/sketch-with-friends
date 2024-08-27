@@ -3,9 +3,9 @@ import React from "react";
 import { RoomEvent } from "@/types/room";
 
 interface UseRoomOptions {
-	onConnect?: () => void;
-	onClose?: () => void;
-	onError?: () => void;
+	onConnect?: (event: Event) => void;
+	onClose?: (event: CloseEvent) => void;
+	onError?: (event: Event) => void;
 	onMessage?: (event: MessageEvent) => void;
 }
 
@@ -49,9 +49,9 @@ export const useRoom = (
 			const socket = (socketRef.current = new WebSocket(url));
 
 			socket.onmessage = (event: MessageEvent) => options?.onMessage?.(event);
-			socket.onopen = () => options?.onConnect?.();
-			socket.onclose = () => options?.onClose?.();
-			socket.onerror = () => options?.onError?.();
+			socket.onopen = (event: Event) => options?.onConnect?.(event);
+			socket.onclose = (event: CloseEvent) => options?.onClose?.(event);
+			socket.onerror = (event: Event) => options?.onError?.(event);
 
 			// Cleanup the connection when the component unmounts
 			return () => socket.close();

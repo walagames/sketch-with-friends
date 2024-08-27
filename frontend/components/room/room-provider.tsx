@@ -8,9 +8,10 @@ import {
 	useMemo,
 	useReducer,
 	useState,
+	useEffect, // Added this line
 } from "react";
 import { toast } from "sonner";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { RoomEvent, RoomEventType, RoomState, RoomStatus } from "@/types/room";
 import {
 	CanvasAction,
@@ -23,10 +24,15 @@ import { Player, PlayerRole } from "@/types/player";
 
 interface RoomContextType {
 	handleEvent: (event: RoomEvent) => void;
-	handleRoomFormSubmit: (username: string) => void;
+	handleRoomFormSubmit: (
+		username: string,
+		avatarSeed: string,
+		avatarColor: string
+	) => void;
 	room: RoomState;
 	settings: CanvasToolSettings;
 	updateSettings: (action: CanvasAction) => void;
+	playerId: string;
 }
 const defaultContext: RoomContextType = {
 	updateSettings: () => {},
@@ -34,18 +40,19 @@ const defaultContext: RoomContextType = {
 	handleRoomFormSubmit: () => {},
 	settings: {
 		color: "#000000",
-		strokeWidth: 18,
+		strokeWidth: 8,
 		tool: Tool.BRUSH,
 	},
 	room: {
-		role: PlayerRole.PLAYER,
 		code: "",
 		players: [] as Player[],
 		status: RoomStatus.UNINITIALIZED,
 		game: {
 			strokes: [] as Stroke[],
+			startsAt: "",
 		},
 	} as RoomState,
+	playerId: "",
 };
 const RoomContext = createContext<RoomContextType>(defaultContext);
 export const useRoomContext = () => useContext(RoomContext);
@@ -78,6 +85,34 @@ const roomReducer = (state: RoomState, event: RoomEvent) => {
 				...state,
 				game: { ...state.game, strokes: state.game.strokes.slice(0, -1) },
 			};
+		case RoomEventType.PLAYER_JOINED:
+			return { ...state, players: [...state.players, event.payload] };
+		case RoomEventType.PLAYER_LEFT:
+			return {
+				...state,
+				players: state.players.filter(
+					(player) => player.id !== event.payload.id
+				),
+			};
+		case RoomEventType.HOST_CHANGED:
+			return {
+				...state,
+				players: state.players.map((player) =>
+					player.id === event.payload.id
+						? { ...player, role: PlayerRole.HOST }
+						: player
+				),
+			};
+		case RoomEventType.GAME_STARTED:
+			return {
+				...state,
+				game: { ...state.game, startsAt: event.payload },
+			};
+		case RoomEventType.CHANGE_SETTINGS:
+			return {
+				...state,
+				settings: { ...state.settings, ...event.payload },
+			};
 		default:
 			return state;
 	}
@@ -99,7 +134,7 @@ const settingsReducer = (state: CanvasToolSettings, action: CanvasAction) => {
 const getRealtimeHref = () => {
 	const protocol = process.env.NODE_ENV === "development" ? "ws" : "wss";
 	const host =
-		process.env.NEXT_PUBLIC_SOCKET_HOST || "realtime-" + window.location.host;
+		process.env.NEXT_PUBLIC_SOCKET_HOST ?? "realtime-" + window.location.host;
 	return `${protocol}://${host}`;
 };
 
@@ -108,6 +143,8 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 
 	const [room, updateRoom] = useReducer(roomReducer, defaultContext.room);
 
+	const [playerId, setPlayerId] = useState<string>("");
+
 	const [settings, updateSettings] = useReducer(
 		settingsReducer,
 		defaultContext.settings
@@ -115,25 +152,33 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 
 	const searchParams = useSearchParams();
 
+	const router = useRouter();
+
 	const roomOptions = useMemo(
 		() => ({
-			onClose: () => {
-				if (!room.code) return;
+			onClose: (event: CloseEvent) => {
+				console.log("on close", event);
+				// if (!room.code) return;
 				const url = new URL(window.location.href);
 				url.searchParams.delete("room");
 				history.pushState({}, "", url.toString());
 				setSocketUrl(null);
 				updateRoom({ type: RoomEventType.CLEAR_STATE });
+				router.push("/");
+				toast.error(event.reason ?? "Connection closed");
 			},
 			onMessage: (event: MessageEvent) => {
-				console.log(event);
 				const { type, payload } = JSON.parse(event.data);
+				if (type === "INITIALIZE_PLAYER_ID") {
+					setPlayerId(payload);
+					return;
+				}
+				console.log(event);
 				updateRoom({ type, payload });
 			},
-			onConnect: () => toast.success("Connected to room"),
-			onError: () => {
-				toast.error("Failed to connect to room");
-				setSocketUrl(null);
+			onConnect: (event: Event) => {
+				console.log("on connect", event);
+				// toast.success("Connected to room");
 			},
 		}),
 		[]
@@ -149,13 +194,37 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 		[sendEvent]
 	);
 
+	useEffect(() => {
+		if (!searchParams.get("room") && room.code) {
+			router.push("?room=" + room.code);
+		}
+	}, [room.code]);
+
 	const handleRoomFormSubmit = useCallback(
-		(username: string) => {
+		(username: string, avatarSeed: string, avatarColor: string) => {
 			const roomCode = searchParams.get("room");
 			if (roomCode) {
-				setSocketUrl(getRealtimeHref() + "/join/" + roomCode);
+				setSocketUrl(
+					getRealtimeHref() +
+						"/join/" +
+						roomCode +
+						"?username=" +
+						username +
+						"&avatarSeed=" +
+						avatarSeed +
+						"&avatarColor=" +
+						avatarColor
+				);
 			} else {
-				setSocketUrl(getRealtimeHref() + "/host");
+				setSocketUrl(
+					getRealtimeHref() +
+						"/host?username=" +
+						username +
+						"&avatarSeed=" +
+						avatarSeed +
+						"&avatarColor=" +
+						avatarColor
+				);
 			}
 		},
 		[searchParams]
@@ -164,12 +233,13 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 	const contextValue = useMemo(
 		() => ({
 			room,
+			playerId,
 			handleEvent,
 			handleRoomFormSubmit,
 			settings,
 			updateSettings,
 		}),
-		[room, handleEvent, handleRoomFormSubmit, settings]
+		[room, handleEvent, handleRoomFormSubmit, settings, playerId]
 	);
 
 	return (
