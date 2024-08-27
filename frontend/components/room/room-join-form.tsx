@@ -8,8 +8,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { createAvatar } from "@dicebear/core";
-import { funEmoji, notionists } from "@dicebear/collection";
+import { generateAvatar } from "@/lib/avatar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -62,7 +61,7 @@ const colors = [
 	"f2f3f4",
 ];
 
-export function RoomForm() {
+export function RoomJoinForm() {
 	const { handleRoomFormSubmit } = useRoomContext();
 
 	const [avatarSeed, setAvatarSeed] = useState(generateRandomHash());
@@ -80,15 +79,7 @@ export function RoomForm() {
 		setAvatarSvg(generateAvatar(avatarSeed, color));
 	}, [avatarSeed, color]);
 
-	function generateAvatar(seed: string, bgcolor: string) {
-		const avatar = createAvatar(notionists, {
-			seed,
-			backgroundColor: [bgcolor],
-		});
-		return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(
-			avatar.toString()
-		)}`;
-	}
+
 
 	function randomColor() {
 		return colors[Math.floor(Math.random() * colors.length)];
@@ -104,7 +95,7 @@ export function RoomForm() {
 	}
 
 	function onSubmit(data: z.infer<typeof RoomFormSchema>) {
-		handleRoomFormSubmit(data.username);
+		handleRoomFormSubmit(data.username, avatarSeed, color);
 	}
 
 	return (
@@ -114,7 +105,7 @@ export function RoomForm() {
 					<Tooltip>
 						<TooltipTrigger asChild>
 							<Button variant="outline" size="icon" onClick={generateNewColor}>
-								<RefreshCw />
+								<RefreshCw className="w-4 h-4" />
 							</Button>
 						</TooltipTrigger>
 						<TooltipContent>
@@ -124,7 +115,10 @@ export function RoomForm() {
 				</TooltipProvider>
 				<div className="avatar">
 					<div className="w-24 h-24">
-						<img className="rounded-[var(--radius)] border border-input" src={avatarSvg} />
+						<img
+							className="rounded-[var(--radius)] border border-input"
+							src={avatarSvg}
+						/>
 					</div>
 				</div>
 				<TooltipProvider>
@@ -135,7 +129,7 @@ export function RoomForm() {
 								size="icon"
 								onClick={generateNewAvatarSeed}
 							>
-								<RefreshCw />
+								<RefreshCw className="w-4 h-4" />
 							</Button>
 						</TooltipTrigger>
 						<TooltipContent>
@@ -155,7 +149,6 @@ export function RoomForm() {
 									<FormControl>
 										<Input
 											autoComplete="off"
-											// className="shadow-2xl"
 											placeholder="Enter your name"
 											{...field}
 										/>
