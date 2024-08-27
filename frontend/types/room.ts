@@ -1,6 +1,6 @@
 import { Stroke } from "./canvas";
 import { Player, PlayerRole } from "./player";
-
+import { GameState } from "./game";
 export enum RoomEventType {
 	START_GAME = "START_GAME",
 	STATE = "STATE",
@@ -9,17 +9,29 @@ export enum RoomEventType {
 	CLEAR_STATE = "CLEAR_STATE",
 	CLEAR_STROKES = "CLEAR_STROKES",
 	UNDO_STROKE = "UNDO_STROKE",
+	PLAYER_JOINED = "PLAYER_JOINED",
+	PLAYER_LEFT = "PLAYER_LEFT",
+	HOST_CHANGED = "HOST_CHANGED",
+	CHANGE_SETTINGS = "CHANGE_SETTINGS",
+	GAME_STATE = "GAME_STATE",
+	INITIALIZE_CLIENT = "INITIALIZE_CLIENT",
+	GAME_STARTED = "GAME_STARTED",
 }
 export type RoomState = {
-	role: PlayerRole;
 	status: RoomStatus;
 	code: string;
 	players: Player[];
 	game: GameState;
+	settings: RoomSettings;
 };
 
-export type GameState = {
-	strokes: Stroke[];
+export type RoomSettings = {
+	drawingTime: number;
+	rounds: number;
+	wordOptions: number;
+	letterHints: number;
+	playerLimit: number;
+	isRoomOpen: boolean;
 };
 
 export enum RoomStatus {
@@ -36,7 +48,13 @@ export type RoomEvent =
 	| StartGameEvent
 	| ClearStateEvent
 	| ClearStrokesEvent
-	| UndoStrokeEvent;
+	| UndoStrokeEvent
+	| PlayerJoinedEvent
+	| PlayerLeftEvent
+	| HostChangedEvent
+	| GameStartedEvent
+	| ChangeSettingsEvent
+	| GameStateEvent;
 
 export type StateEvent = {
 	type: RoomEventType.STATE;
@@ -55,9 +73,17 @@ export type StrokePointEvent = {
 
 export type StartGameEvent = {
 	type: RoomEventType.START_GAME;
+};
+
+export type ChangeSettingsEvent = {
+	type: RoomEventType.CHANGE_SETTINGS;
 	payload: {
+		drawingTime: number;
 		rounds: number;
-		timeLimit: number;
+		wordOptions: number;
+		letterHints: number;
+		playerLimit: number;
+		isRoomOpen: boolean;
 	};
 };
 
@@ -70,4 +96,29 @@ export type ClearStrokesEvent = {
 };
 export type UndoStrokeEvent = {
 	type: RoomEventType.UNDO_STROKE;
+};
+
+export type PlayerJoinedEvent = {
+	type: RoomEventType.PLAYER_JOINED;
+	payload: Player;
+};
+
+export type PlayerLeftEvent = {
+	type: RoomEventType.PLAYER_LEFT;
+	payload: Player;
+};
+
+export type HostChangedEvent = {
+	type: RoomEventType.HOST_CHANGED;
+	payload: Player;
+};
+
+export type GameStateEvent = {
+	type: RoomEventType.GAME_STATE;
+	payload: GameState;
+};
+
+export type GameStartedEvent = {
+	type: RoomEventType.GAME_STARTED;
+	payload: string;
 };
