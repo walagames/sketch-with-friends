@@ -1,50 +1,7 @@
 "use client";
-import { useRoomContext } from "./room-provider";
-import { Player, PlayerRole } from "@/types/player";
-import { CopyRoomLink } from "../canvas/canvas-tools";
-import { generateAvatar } from "@/lib/avatar";
 import { motion, AnimatePresence } from "framer-motion";
-import { RoomStatus } from "@/types/room";
-
-export function RoomLayout({ children }: { children: React.ReactNode }) {
-	const { room } = useRoomContext();
-	return (
-		<div className="h-screen w-screen flex flex-col relative p-3">
-			{room.status !== RoomStatus.UNINITIALIZED && (
-				<div className="w-full flex justify-between relative z-50">
-					<AnimatedPlayerCards players={room.players} />
-					<CopyRoomLink />
-				</div>
-			)}
-			{children}
-		</div>
-	);
-}
-
-function PlayerCard({ player }: { player: Player }) {
-	const { role, avatarSeed, avatarColor, score } = player;
-	const avatarSvg = generateAvatar(avatarSeed, avatarColor);
-	return (
-		<div className="flex items-center rounded-lg border border-input p-0.5 bg-background w-52 relative">
-			{role === PlayerRole.HOST && (
-				<div className="absolute -top-2 -right-1.5 z-10">
-					<CrownIcon className="w-5 h-5 text-yellow-400 rotate-12" />
-				</div>
-			)}
-			<img
-				className="rounded-lg border border-input h-10 w-10 relative"
-				src={avatarSvg}
-			/>
-			<div className="flex flex-col justify-center px-4">
-				<p className="font-medium text-sm leading-0">{player.name}</p>
-				<p className="text-xs text-muted-foreground">{role.toLowerCase()}</p>
-			</div>
-			<div className="ml-auto px-4">
-				<p className="text-xs font-medium">{score}</p>
-			</div>
-		</div>
-	);
-}
+import { Player, PlayerRole } from "@/types/player";
+import { generateAvatar } from "@/lib/avatar";
 
 const CrownIcon = (props: React.SVGProps<SVGSVGElement>) => (
 	<svg
@@ -71,35 +28,58 @@ const CrownIcon = (props: React.SVGProps<SVGSVGElement>) => (
 	</svg>
 );
 
-const playerVariants = {
+const variants = {
 	initial: { opacity: 0, y: -25 },
 	animate: { opacity: 1, y: 0 },
 	exit: { opacity: 0, y: -25 },
 };
 
-function AnimatedPlayerCards({ players }: { players: Player[] }) {
+function PlayerCard({ player }: { player: Player }) {
+	const { role, avatarSeed, avatarColor, score } = player;
+	const avatarSvg = generateAvatar(avatarSeed, avatarColor);
+	return (
+		<motion.div
+			layout
+			variants={variants}
+			initial="initial"
+			animate="animate"
+			exit="exit"
+			transition={{
+				type: "spring",
+				stiffness: 500,
+				damping: 50,
+				mass: 1,
+			}}
+			className="flex items-center rounded-lg border border-input p-0.5 bg-background w-52 relative"
+		>
+			{role === PlayerRole.HOST && (
+				<div className="absolute -top-2 -right-1.5 z-10">
+					<CrownIcon className="w-5 h-5 text-yellow-400 rotate-12" />
+				</div>
+			)}
+			<img
+				className="rounded-lg border border-input h-10 w-10 relative"
+				src={avatarSvg}
+			/>
+			<div className="flex flex-col justify-center px-4">
+				<p className="font-medium text-sm leading-0">{player.name}</p>
+				<p className="text-xs text-muted-foreground">{role.toLowerCase()}</p>
+			</div>
+			<div className="ml-auto px-4">
+				<p className="text-xs font-medium">{score}</p>
+			</div>
+		</motion.div>
+	);
+}
+
+export function PlayerCards({ players }: { players: Player[] }) {
 	return (
 		<ul className="flex gap-2">
 			<AnimatePresence initial={false} mode="popLayout">
 				{players
 					.sort((a, b) => b.score - a.score)
 					.map((player) => (
-						<motion.li
-							key={player.id}
-							layout
-							variants={playerVariants}
-							initial="initial"
-							animate="animate"
-							exit="exit"
-							transition={{
-								type: "spring",
-								stiffness: 500,
-								damping: 50,
-								mass: 1,
-							}}
-						>
-							<PlayerCard player={player} />
-						</motion.li>
+						<PlayerCard key={player.id} player={player} />
 					))}
 			</AnimatePresence>
 		</ul>

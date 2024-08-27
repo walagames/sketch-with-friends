@@ -1,6 +1,7 @@
 import { Stroke } from "./canvas";
 import { Player, PlayerRole } from "./player";
 import { GameState } from "./game";
+
 export enum RoomEventType {
 	START_GAME = "START_GAME",
 	STATE = "STATE",
@@ -17,6 +18,7 @@ export enum RoomEventType {
 	INITIALIZE_CLIENT = "INITIALIZE_CLIENT",
 	GAME_STARTED = "GAME_STARTED",
 }
+
 export type RoomState = {
 	status: RoomStatus;
 	code: string;
@@ -78,12 +80,10 @@ export type StartGameEvent = {
 export type ChangeSettingsEvent = {
 	type: RoomEventType.CHANGE_SETTINGS;
 	payload: {
-		drawingTime: number;
-		rounds: number;
-		wordOptions: number;
-		letterHints: number;
 		playerLimit: number;
 		isRoomOpen: boolean;
+		drawingTime: number;
+		rounds: number;
 	};
 };
 

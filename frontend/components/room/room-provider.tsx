@@ -8,7 +8,7 @@ import {
 	useMemo,
 	useReducer,
 	useState,
-	useEffect, // Added this line
+	useEffect,
 } from "react";
 import { toast } from "sonner";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -157,14 +157,9 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 	const roomOptions = useMemo(
 		() => ({
 			onClose: (event: CloseEvent) => {
-				console.log("on close", event);
-				// if (!room.code) return;
-				const url = new URL(window.location.href);
-				url.searchParams.delete("room");
-				history.pushState({}, "", url.toString());
-				setSocketUrl(null);
 				updateRoom({ type: RoomEventType.CLEAR_STATE });
-				router.push("/");
+				setSocketUrl(null);
+				router.replace("/");
 				toast.error(event.reason ?? "Connection closed");
 			},
 			onMessage: (event: MessageEvent) => {
@@ -177,11 +172,10 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 				updateRoom({ type, payload });
 			},
 			onConnect: (event: Event) => {
-				console.log("on connect", event);
 				// toast.success("Connected to room");
 			},
 		}),
-		[]
+		[router]
 	);
 
 	const [sendEvent] = useRoom(socketUrl, roomOptions);
@@ -198,7 +192,7 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 		if (!searchParams.get("room") && room.code) {
 			router.push("?room=" + room.code);
 		}
-	}, [room.code]);
+	}, [room.code, searchParams, router]);
 
 	const handleRoomFormSubmit = useCallback(
 		(username: string, avatarSeed: string, avatarColor: string) => {

@@ -1,18 +1,11 @@
 "use client";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { generateAvatar } from "@/lib/avatar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
 import {
 	Form,
 	FormControl,
@@ -21,7 +14,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
-import { useRoomContext } from "./room-provider";
+import { useRoomContext } from "../room-provider";
 import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import {
@@ -30,11 +23,40 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-const RoomFormSchema = z.object({
-	username: z.string().min(2, {
-		message: "Username must be at least 2 characters.",
-	}),
-});
+import { motion } from "framer-motion";
+export function JoinRoomView() {
+	return (
+		<motion.div
+			initial={{ opacity: 0, scale: 0.98 }}
+			animate={{ opacity: 1, scale: 1 }}
+			transition={{
+				type: "spring",
+				stiffness: 500,
+				damping: 50,
+				mass: 1,
+			}}
+			className="w-full h-full absolute inset-0 flex flex-col items-center justify-center gap-8"
+		>
+			<div className="flex items-center gap-3">
+				<Image
+					className="rotate-12"
+					src="/logo.png"
+					alt="logo"
+					width={44}
+					height={44}
+				/>
+				<h1
+					style={{ wordSpacing: "0.01em" }}
+					className="text-4xl font-medium tracking-tight"
+				>
+					Sketch with Friends
+				</h1>
+			</div>
+			<JoinRoomForm />
+		</motion.div>
+	);
+}
+
 const colors = [
 	"b6e3f4",
 	"c0aede",
@@ -61,15 +83,31 @@ const colors = [
 	"f2f3f4",
 ];
 
-export function RoomJoinForm() {
+function randomAvatarSeed() {
+	return Array.from(crypto.getRandomValues(new Uint8Array(8)))
+		.map((b) => b.toString(16).padStart(2, "0"))
+		.join("");
+}
+
+function randomColor() {
+	return colors[Math.floor(Math.random() * colors.length)];
+}
+
+const JoinRoomFormSchema = z.object({
+	username: z.string().min(2, {
+		message: "Username must be at least 2 characters.",
+	}),
+});
+
+export function JoinRoomForm() {
 	const { handleRoomFormSubmit } = useRoomContext();
 
-	const [avatarSeed, setAvatarSeed] = useState(generateRandomHash());
-	const [avatarSvg, setAvatarSvg] = useState("");
+	const [avatarSeed, setAvatarSeed] = useState(randomAvatarSeed());
 	const [color, setColor] = useState(randomColor());
+	const [avatarSvg, setAvatarSvg] = useState(generateAvatar(avatarSeed, color));
 
-	const form = useForm<z.infer<typeof RoomFormSchema>>({
-		resolver: zodResolver(RoomFormSchema),
+	const form = useForm<z.infer<typeof JoinRoomFormSchema>>({
+		resolver: zodResolver(JoinRoomFormSchema),
 		defaultValues: {
 			username: "",
 		},
@@ -79,22 +117,7 @@ export function RoomJoinForm() {
 		setAvatarSvg(generateAvatar(avatarSeed, color));
 	}, [avatarSeed, color]);
 
-
-
-	function randomColor() {
-		return colors[Math.floor(Math.random() * colors.length)];
-	}
-
-	function generateNewAvatarSeed() {
-		const newSeed = generateRandomHash();
-		setAvatarSeed(newSeed);
-	}
-
-	function generateNewColor() {
-		setColor(randomColor());
-	}
-
-	function onSubmit(data: z.infer<typeof RoomFormSchema>) {
+	function onSubmit(data: z.infer<typeof JoinRoomFormSchema>) {
 		handleRoomFormSubmit(data.username, avatarSeed, color);
 	}
 
@@ -104,7 +127,11 @@ export function RoomJoinForm() {
 				<TooltipProvider>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Button variant="outline" size="icon" onClick={generateNewColor}>
+							<Button
+								variant="outline"
+								size="icon"
+								onClick={() => setColor(randomColor())}
+							>
 								<RefreshCw className="w-4 h-4" />
 							</Button>
 						</TooltipTrigger>
@@ -127,7 +154,7 @@ export function RoomJoinForm() {
 							<Button
 								variant="outline"
 								size="icon"
-								onClick={generateNewAvatarSeed}
+								onClick={() => setAvatarSeed(randomAvatarSeed())}
 							>
 								<RefreshCw className="w-4 h-4" />
 							</Button>
@@ -170,10 +197,4 @@ export function RoomJoinForm() {
 			</Form>
 		</div>
 	);
-}
-
-function generateRandomHash(length = 8) {
-	return Array.from(crypto.getRandomValues(new Uint8Array(length)))
-		.map((b) => b.toString(16).padStart(2, "0"))
-		.join("");
 }

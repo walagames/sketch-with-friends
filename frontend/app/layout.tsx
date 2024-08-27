@@ -26,7 +26,6 @@ export default function RootLayout({
 							toast: "px-4 py-2 ",
 						},
 					}}
-					// richColors
 					position="top-center"
 				/>
 			</body>
