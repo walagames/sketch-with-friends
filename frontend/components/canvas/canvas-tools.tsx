@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 export function CanvasTools() {
 	const { handleEvent, updateSettings, settings } = useRoomContext();
 	return (
-		<div className="absolute bottom-5 left-1/2 p-1 bg-white rounded-lg shadow-lg border border-border -translate-x-1/2 flex items-center gap-1">
+		<div className="p-1 bg-white rounded-lg border border-border flex items-center gap-1">
 			<StrokeTool />
 			<ToolButton
 				selected={settings.tool === Tool.BRUSH}
@@ -81,7 +81,7 @@ export function StrokeTool() {
 		"#00ffff",
 		"#ff00ff",
 	];
-	const strokeWidthPresets = [8, 16, 24, 32, 40];
+	const strokeWidthPresets = [2, 4, 8, 12, 16];
 	return (
 		<Popover>
 			<PopoverTrigger asChild>
@@ -133,7 +133,7 @@ export function StrokeTool() {
 							key={width}
 							className="rounded-full cursor-pointer border border-border aspect-square"
 							style={{
-								width: `${width * 2}px`,
+								width: `${width}px`,
 								backgroundColor: settings.color,
 							}}
 						/>
@@ -148,14 +148,14 @@ export function CopyRoomLink() {
 	const { room } = useRoomContext();
 
 	const handleCopy = () => {
-		const url = window.location.href + "?room=" + room.code;
+		const url = window.location.href
 		navigator.clipboard.writeText(url);
 		toast.info("Copied to clipboard");
 	};
 
 	return (
-		<ToolButton onClick={handleCopy}>
-			<Link className="h-5" />
-		</ToolButton>
+		<Button variant="outline" onClick={handleCopy}>
+			Copy invite link
+		</Button>
 	);
 }

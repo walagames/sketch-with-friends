@@ -8,29 +8,27 @@ import { CanvasTools, CopyRoomLink } from "@/components/canvas/canvas-tools";
 import { useWindowSize } from "@/hooks/use-window-size";
 import { Button } from "@/components/ui/button";
 import { Stroke } from "@/types/canvas";
+import { useEffect } from "react"; // Added this line to import useEffect
 
 // make canvas less pixelated
 const CANVAS_SCALE = 2;
 
 // perfect-freehand options
 const strokeOptions = {
-	size: 18,
-	thinning: 0.5,
-	smoothing: 0.5,
-	streamline: 0.5,
+	size: 3,
+	smoothing: 0.32,
+	thinning: 0.32,
+	streamline: 0.99,
 	easing: (t: number) => t,
 	start: {
 		taper: 0,
-		easing: (t: number) => t,
 		cap: true,
 	},
 	end: {
-		taper: 100,
-		easing: (t: number) => t,
+		taper: 0,
 		cap: true,
 	},
 };
-
 // Constructs svg path from stroke
 function getSvgPathFromStroke(stroke: number[][]) {
 	if (!stroke.length) return "";
@@ -48,12 +46,12 @@ function getSvgPathFromStroke(stroke: number[][]) {
 	return d.join(" ");
 }
 
-function Canvas() {
+function Canvas({ width, height }: { width: number; height: number }) {
 	const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 	const strokeCountRef = React.useRef(0);
 
 	const { handleEvent, room, settings } = useRoomContext();
-	const [windowWidth, windowHeight] = useWindowSize();
+	// const [windowWidth, windowHeight] = useWindowSize();
 
 	const fillCanvasWithStroke = React.useCallback(
 		(ctx: CanvasRenderingContext2D, stroke: Stroke) => {
@@ -71,14 +69,9 @@ function Canvas() {
 
 	const clearCanvas = React.useCallback(
 		(ctx: CanvasRenderingContext2D) => {
-			ctx.clearRect(
-				0,
-				0,
-				windowWidth * CANVAS_SCALE,
-				windowHeight * CANVAS_SCALE
-			);
+			ctx.clearRect(0, 0, width * CANVAS_SCALE, height * CANVAS_SCALE);
 		},
-		[windowWidth, windowHeight]
+		[width, height]
 	);
 
 	const drawAllStrokes = React.useCallback(() => {
@@ -104,17 +97,17 @@ function Canvas() {
 
 	// Draws all strokes on first load and when window size changes
 	React.useEffect(() => {
-		const isWindowInitialized = windowWidth !== 0 && windowHeight !== 0;
+		const isWindowInitialized = width !== 0 && height !== 0;
 
 		if (isWindowInitialized) {
 			drawAllStrokes();
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [windowWidth, windowHeight]);
+	}, [width, height]);
 
 	// Only draws most recent stroke unless canvas is cleared or a stroke is undone
 	React.useEffect(() => {
-		const isWindowInitialized = windowWidth !== 0 && windowHeight !== 0;
+		const isWindowInitialized = width !== 0 && height !== 0;
 		const newStrokeCount = room.game.strokes.length;
 
 		if (
@@ -133,12 +126,15 @@ function Canvas() {
 
 	const handleNewStroke = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
+			const rect = e.currentTarget.getBoundingClientRect();
+			const x = (e.clientX - rect.left) * CANVAS_SCALE;
+			const y = (e.clientY - rect.top) * CANVAS_SCALE;
 			handleEvent({
 				type: RoomEventType.STROKE,
 				payload: {
 					color: settings.color,
 					width: settings.strokeWidth,
-					points: [[e.pageX * CANVAS_SCALE, e.pageY * CANVAS_SCALE]],
+					points: [[x, y]],
 				},
 			});
 		},
@@ -150,33 +146,30 @@ function Canvas() {
 			// Only draw when left click is held down
 			if (e.buttons !== 1) return;
 
+			const rect = e.currentTarget.getBoundingClientRect();
+			const x = (e.clientX - rect.left) * CANVAS_SCALE;
+			const y = (e.clientY - rect.top) * CANVAS_SCALE;
 			handleEvent({
 				type: RoomEventType.STROKE_POINT,
-				payload: [e.pageX * CANVAS_SCALE, e.pageY * CANVAS_SCALE],
+				payload: [x, y],
 			});
 		},
 		[handleEvent]
 	);
 
 	return (
-		<div className="w-screen h-screen relative overflow-hidden">
-			<div className="absolute top-3 right-3">
-				<CopyRoomLink />
-			</div>
-
-			<canvas
-				style={{
-					width: windowWidth,
-					height: windowHeight,
-				}}
-				width={windowWidth * CANVAS_SCALE}
-				height={windowHeight * CANVAS_SCALE}
-				onMouseDown={handleNewStroke}
-				onMouseMove={handleStrokePoint}
-				ref={canvasRef}
-			/>
-			<CanvasTools />
-		</div>
+		<canvas
+			className="border border-border rounded-lg bg-background"
+			style={{
+				width,
+				height,
+			}}
+			width={width * CANVAS_SCALE}
+			height={height * CANVAS_SCALE}
+			onMouseDown={handleNewStroke}
+			onMouseMove={handleStrokePoint}
+			ref={canvasRef}
+		/>
 	);
 }
 
