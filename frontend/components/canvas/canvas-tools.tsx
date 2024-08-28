@@ -57,6 +57,7 @@ function Strokes() {
 		<div className="grid grid-cols-3 grid-rows-2 gap-1">
 			{strokeWidthPresets.map((width) => (
 				<Button
+					key={width}
 					size="icon"
 					variant={settings.strokeWidth === width ? "default" : "outline"}
 					onClick={() =>
