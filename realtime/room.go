@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"time"
 
@@ -20,6 +19,8 @@ type Room interface {
 	Broadcast(msg []byte)
 	BroadcastExcept(msg []byte, excludePlayer Player)
 	ChangeSettings(settings RoomSettings)
+	Status() RoomStatus
+	ChangeStatus(status RoomStatus)
 }
 
 // Connection failure codes
@@ -60,8 +61,11 @@ const (
 	CHANGE_SETTINGS      RoomEventType = "CHANGE_SETTINGS"
 	GAME_STATE           RoomEventType = "GAME_STATE"
 	GAME_STARTED         RoomEventType = "GAME_STARTED"
-	WORD_PICKED          RoomEventType = "WORD_PICKED"
+	PICK_WORD            RoomEventType = "PICK_WORD"
 	INITIALIZE_PLAYER_ID RoomEventType = "INITIALIZE_PLAYER_ID"
+	WORD_OPTIONS         RoomEventType = "WORD_OPTIONS"
+	GUESS                RoomEventType = "GUESS"
+	GUESS_RESPONSE       RoomEventType = "GUESS_RESPONSE"
 )
 
 type RoomEvent struct {
@@ -83,26 +87,29 @@ type room struct {
 }
 
 type RoomSettings struct {
-	IsRoomOpen bool `json:"isRoomOpen"`
-	MaxPlayers int  `json:"maxPlayers"`
+	IsRoomOpen  bool `json:"isRoomOpen"`
+	PlayerLimit int  `json:"playerLimit"`
+	DrawingTime int  `json:"drawingTime"`
+	Rounds      int  `json:"rounds"`
 }
 
 type RoomInfo struct {
-	Status  RoomStatus    `json:"status"`
-	Code    string        `json:"code"`
-	Players []*PlayerInfo `json:"players"`
+	Status   RoomStatus    `json:"status"`
+	Code     string        `json:"code"`
+	Players  []*PlayerInfo `json:"players"`
+	Settings RoomSettings  `json:"settings"`
 }
 
 func (r *room) Info() *RoomInfo {
-	playerInfos := []*PlayerInfo{}
+	players := []*PlayerInfo{}
 	for _, player := range r.Players() {
-		playerInfos = append(playerInfos, player.Info())
+		players = append(players, player.Info())
 	}
 	return &RoomInfo{
-		Status:  r.status,
-		Code:    r.code,
-		Players: playerInfos,
-		// Strokes: r.game.Strokes(),
+		Status:   r.status,
+		Code:     r.code,
+		Players:  players,
+		Settings: r.settings,
 	}
 }
 
@@ -115,13 +122,22 @@ func NewRoom(code string) Room {
 		disconnect: make(chan *client),
 		event:      make(chan *RoomEvent),
 		settings: RoomSettings{
-			IsRoomOpen: true,
-			MaxPlayers: 10,
+			IsRoomOpen:  true,
+			PlayerLimit: 6,
+			DrawingTime: 60,
+			Rounds:      3,
 		},
 	}
 }
 
-// ? tbh this really should just be a struct instead of interface
+func (r *room) Status() RoomStatus {
+	return r.status
+}
+
+func (r *room) ChangeStatus(status RoomStatus) {
+	r.status = status
+}
+
 func (r *room) Player(id string) Player {
 	for p := range r.players {
 		if p.Info().ID == id {
@@ -151,6 +167,7 @@ type connectionAttempt struct {
 func (r *room) Connect(conn *websocket.Conn, role PlayerRole, name string, avatarSeed string, avatarColor string) error {
 	player := NewPlayer(role, name, avatarSeed, avatarColor)
 	client := NewClient(conn, r, player)
+	player.SetClient(client)
 
 	attempt := &connectionAttempt{
 		client: client,
@@ -205,7 +222,7 @@ func (r *room) Run(rm RoomManager) {
 				req.result <- RoomClosed
 				continue
 			}
-			if len(r.players) >= r.settings.MaxPlayers {
+			if len(r.players) >= r.settings.PlayerLimit {
 				req.result <- RoomFull
 				continue
 			}
@@ -233,20 +250,17 @@ func (r *room) Run(rm RoomManager) {
 					player.ChangeRole(RoleHost)
 					slog.Info("host changed", "player", player.Info().Name)
 					r.Broadcast(r.StateMsg())
-					break // Only change the first player to host
+					break
 				}
 			}
 		case e := <-r.event:
 			switch e.Type {
 			case START_GAME:
 				if e.Player.Role() == RoleHost && r.status == WAITING {
-					r.game = NewGame()
+					r.game = NewGame(r.settings.Rounds, r.settings.DrawingTime)
 					go r.game.Run(ctx, r)
 					r.status = PLAYING
 					r.Broadcast(marshalEvent(GAME_STARTED, time.Now().Add(time.Duration(CountdownTime)).UTC()))
-					// for _, client := range r.players {
-					// 	client.Send(r.StateMsg())
-					// }
 				}
 			case CHANGE_SETTINGS:
 				settings, err := decodePayload[RoomSettings](e.Payload)
@@ -254,6 +268,7 @@ func (r *room) Run(rm RoomManager) {
 					slog.Warn("failed to decode settings", "error", err)
 					return
 				}
+				slog.Info("settings changed", "settings", settings)
 				r.ChangeSettings(settings)
 				r.Broadcast(marshalEvent(CHANGE_SETTINGS, r.settings))
 			default:
@@ -274,29 +289,27 @@ func (r *room) BroadcastExcept(msg []byte, excludePlayer Player) {
 	}
 }
 
-// * opportunity for generic ? or veratic
 func (r *room) StateMsg() []byte {
-	type stateUpdate struct {
+	type state struct {
 		Status  RoomStatus    `json:"status"`
 		Players []*PlayerInfo `json:"players"`
 		Code    string        `json:"code"`
 		Game    *game         `json:"game"`
 	}
 
-	playerInfo := []*PlayerInfo{}
+	players := []*PlayerInfo{}
 	for _, player := range r.Players() {
-		playerInfo = append(playerInfo, player.Info())
+		players = append(players, player.Info())
 	}
 
-	msg := &stateUpdate{
-		Players: playerInfo,
+	msg := &state{
+		Players: players,
 		Code:    r.code,
 		Status:  r.status,
 	}
 
 	if r.game != nil {
 		msg.Game = r.game.State()
-		fmt.Println("game", msg.Game)
 	}
 
 	return marshalEvent(STATE, msg)

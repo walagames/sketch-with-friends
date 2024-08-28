@@ -38,6 +38,8 @@ type Player interface {
 	ChangeRole(role PlayerRole)
 	GameRole() GameRole
 	ChangeGameRole(role GameRole)
+	SetClient(client *client)
+	Client() *client
 	Info() *PlayerInfo
 	Score() int
 	ChangeScore(score int)
@@ -53,6 +55,7 @@ type player struct {
 	score       int
 	mu          sync.RWMutex
 	gameRole    GameRole
+	client      *client
 }
 
 func NewPlayer(role PlayerRole, name string, avatarSeed string, avatarColor string) Player {
@@ -66,6 +69,18 @@ func NewPlayer(role PlayerRole, name string, avatarSeed string, avatarColor stri
 		score:       0,
 		gameRole:    Guessing,
 	}
+}
+
+func (p *player) SetClient(client *client) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.client = client
+}
+
+func (p *player) Client() *client {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.client
 }
 
 func (p *player) Status() PlayerConnectionStatus {

@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"log/slog"
+	"math"
 	"math/rand"
 	"strings"
-
 	"time"
 )
 
@@ -18,23 +18,35 @@ type Game interface {
 type game struct {
 	event                chan *RoomEvent
 	Strokes              []Stroke `json:"strokes"`
-	rounds               int
 	word                 string
-	hintedWord           string
-	roundEndsAt          time.Time
-	currentRound         int
-	currentRoundEndsAt   time.Time
-	drawingOrder         []string
+	HintedWord           string `json:"word"`
+	CurrentRound         int    `json:"currentRound"`
+	TotalRounds          int    `json:"totalRounds"`
+	drawingTime          int
+	CurrentPhaseDeadline time.Time `json:"currentPhaseDeadline"`
+	wordOptions          []string
+	totalHints           int
+	lettersRevealed      int
+	hintInterval         time.Duration
 	currentDrawingIndex  int
-	currentDrawingPlayer string
+	timers               GameTimers
+}
+type GameTimers struct {
+	Countdown   *time.Timer
+	WordPicking *time.Timer
+	Drawing     *time.Timer
+	Hint        *time.Timer
+	PostDrawing *time.Timer
 }
 
-func NewGame() Game {
+func NewGame(numberOfRounds int, drawingTime int) Game {
 	return &game{
-		Strokes:      make([]Stroke, 0),
-		event:        make(chan *RoomEvent, 5), // event buffer size of 5
-		rounds:       3,
-		currentRound: 1,
+		Strokes:             make([]Stroke, 0),
+		event:               make(chan *RoomEvent, 5), // event buffer size of 5
+		TotalRounds:         numberOfRounds,
+		CurrentRound:        1,
+		drawingTime:         drawingTime,
+		currentDrawingIndex: 0,
 	}
 }
 
@@ -47,9 +59,6 @@ const (
 )
 
 const (
-	// Time the drawing player has to draw the word
-	DrawingTime = 60 * time.Second
-
 	// Time after the drawing timer ends and before the next player picks a word
 	// We reveal the word and show the updated leaderboard during this period
 	PostDrawingTime = 10 * time.Second
@@ -59,17 +68,11 @@ const (
 
 	// Time players have to pick a word they will draw
 	WordPickingTime = 15 * time.Second
-
-	// Interval between when new letters are revealed
-	HintTime = 10 * time.Second
 )
 
 const (
 	// Number of options the player drawing has to pick from
 	WordOptions = 3
-
-	// Number of letters revealed of a word
-	LetterHints = 2
 )
 
 var wordBank = []string{
@@ -85,82 +88,78 @@ var wordBank = []string{
 	"computer",
 }
 
+func (g *game) stopAllTimers() {
+	g.timers.Countdown.Stop()
+	g.timers.Drawing.Stop()
+	g.timers.WordPicking.Stop()
+	g.timers.Hint.Stop()
+	g.timers.PostDrawing.Stop()
+}
+
 func (g *game) Run(ctx context.Context, r Room) {
 	slog.Info("Game routine started: ")
 
-	startTimer := time.NewTimer(CountdownTime)
-	var drawingTimer *time.Timer
-	var wordPickingTimer *time.Timer
-	var hintTimer *time.Timer
-	var postDrawingTimer *time.Timer
+	g.timers = GameTimers{
+		Countdown:   time.NewTimer(CountdownTime),
+		WordPicking: time.NewTimer(math.MaxInt64),
+		Drawing:     time.NewTimer(math.MaxInt64),
+		Hint:        time.NewTimer(math.MaxInt64),
+		PostDrawing: time.NewTimer(math.MaxInt64),
+	}
 
 	defer func() {
 		slog.Info("Game routine exited")
-		if startTimer != nil {
-			startTimer.Stop()
-		}
-		if drawingTimer != nil {
-			drawingTimer.Stop()
-		}
-		if wordPickingTimer != nil {
-			wordPickingTimer.Stop()
-		}
-		if hintTimer != nil {
-			hintTimer.Stop()
-		}
-		if postDrawingTimer != nil {
-			postDrawingTimer.Stop()
-		}
+		g.stopAllTimers()
+		r.ChangeStatus(WAITING)
+		r.Broadcast(r.StateMsg())
 	}()
-
-	/*
-		- 3, 2, 1 Countdown at game start, picking word timer begins
-		- First drawing player picks word or timer runs out, word is set, drawing timer begins, hinting timer begins
-		- Players guess until all have guessed right or drawing timer runs out, drawing timer ends, post round timer starts
-		- Post round timer ends, next players turn, picking time begins
-
-
-
-		- picking phase
-		- drawing phase
-		- end phase
-	*/
 
 	for {
 		select {
 		case <-ctx.Done():
 			return
-		case <-startTimer.C:
-			slog.Info("startTimer expired")
-			players := r.Players()
-			players[0].ChangeGameRole(Drawing)
-			r.Broadcast(r.StateMsg())
-			// TODO: pick drawing player and broadcast state (including the word options for the drawing player)
-			// r.BroadcastExcept(g.stateMsg(Picking), nil)
-			// wordPickingTimer.Reset(WordPickingTime)
-		// case <-wordPickingTimer.C:
-			// g.word = g.newWord()
-			// drawingTimer.Reset(DrawingTime)
-			// TODO: broadcast state
-		// case <-drawingTimer.C:
-			// TODO: broadcast state
-			// postDrawingTimer.Reset(PostDrawingTime)
-		// case <-hintTimer.C:
-			// g.hintWord()
-			// hintTimer.Reset(HintTime)
-		// case <-postDrawingTimer.C:
-			// TODO: broadcast state
-			// wordPickingTimer.Reset(WordPickingTime)
-
+		case <-g.timers.Countdown.C:
+			g.startPickingPhase(r)
+		case <-g.timers.WordPicking.C:
+			// Player didn't pick a word in time, so we pick a random word for them
+			randomWordChoice := g.wordOptions[rand.Intn(len(g.wordOptions))]
+			g.startDrawingPhase(r, randomWordChoice)
+		case <-g.timers.Drawing.C:
+			g.startPostDrawingPhase(r)
+		case <-g.timers.Hint.C:
+			slog.Info("hint timer expired")
+			if g.lettersRevealed < g.totalHints {
+				slog.Info("hinting word", "word", g.word, "hintedWord", g.HintedWord)
+				g.hintWord()
+				g.lettersRevealed++
+				r.BroadcastExcept(r.StateMsg(), r.Players()[g.currentDrawingIndex])
+				g.timers.Hint.Reset(g.hintInterval)
+				continue
+			}
+			slog.Info("hint limit reached")
+			g.timers.Hint.Stop()
+		case <-g.timers.PostDrawing.C:
+			r.Players()[g.currentDrawingIndex].ChangeGameRole(Guessing)
+			g.currentDrawingIndex = (g.currentDrawingIndex + 1) % len(r.Players())
+			if g.currentDrawingIndex == 0 {
+				g.CurrentRound++
+				if g.CurrentRound > g.TotalRounds {
+					slog.Info("Game ended")
+					return
+				}
+			}
+			g.startPickingPhase(r)
 		case e := <-g.event:
 			switch e.Type {
 			case STROKE, STROKE_POINT, CLEAR_STROKES, UNDO_STROKE:
 				g.handleDrawingEvent(e)
-			case WORD_PICKED:
-				g.word = e.Payload.(string)
-				g.hintWord()
-				hintTimer.Stop()
-				drawingTimer.Reset(DrawingTime)
+			case PICK_WORD:
+				g.timers.WordPicking.Stop()
+				word := e.Payload.(string)
+				g.startDrawingPhase(r, word)
+			case GUESS:
+				isGuessCorrect := g.word == e.Payload.(string)
+				e.Player.Client().Send(marshalEvent(GUESS_RESPONSE, isGuessCorrect))
 			default:
 				slog.Warn("unhandled event", "event", e)
 			}
@@ -170,22 +169,158 @@ func (g *game) Run(ctx context.Context, r Room) {
 	}
 }
 
+func (g *game) startPickingPhase(r Room) {
+	slog.Info("Picking phase started")
+	// Pick the next drawing player
+	players := r.Players()
+	drawingPlayer := players[g.currentDrawingIndex]
+	drawingPlayer.ChangeGameRole(Picking)
+
+	// Send the word options to the drawing player
+	g.wordOptions = g.randomWordOptions()
+	drawingPlayer.Client().Send(marshalEvent(WORD_OPTIONS, g.wordOptions))
+
+	// Set the word picking timer
+	g.timers.WordPicking.Reset(WordPickingTime)
+	g.CurrentPhaseDeadline = time.Now().Add(WordPickingTime).UTC()
+
+	// Broadcast the state to all players
+	r.Broadcast(r.StateMsg())
+}
+
+func (g *game) startDrawingPhase(r Room, word string) {
+	slog.Info("Drawing phase started")
+	// Initialize the word choice
+	g.Strokes = make([]Stroke, 0)
+	g.word = word
+	g.HintedWord = ""
+	g.calculateHints(g.word)
+	g.hintWord()
+
+	// Update the drawing player's game role
+	drawingPlayer := r.Players()[g.currentDrawingIndex]
+	drawingPlayer.ChangeGameRole(Drawing)
+
+	// Reset the timers
+	g.timers.Drawing.Reset(time.Duration(g.drawingTime) * time.Second)
+	g.timers.Hint.Reset(g.hintInterval)
+	g.CurrentPhaseDeadline = time.Now().Add(time.Duration(g.drawingTime) * time.Second).UTC()
+
+	// Broadcast the state to all players
+	r.Broadcast(r.StateMsg())
+}
+
+func (g *game) startPostDrawingPhase(r Room) {
+	slog.Info("Post drawing phase started")
+	// Reveal the word
+	g.timers.Hint.Stop()
+	g.HintedWord = g.word
+
+	// Reset the timers
+	g.CurrentPhaseDeadline = time.Now().Add(PostDrawingTime).UTC()
+	g.timers.PostDrawing.Reset(PostDrawingTime)
+
+	// Broadcast the state to all players
+	r.Broadcast(r.StateMsg())
+}
+
+func (g *game) calculateHints(word string) {
+	const hintPercentage = 0.6 // 60% of the word will be revealed
+
+	wordLength := len(word)
+	g.totalHints = int(math.Ceil(float64(wordLength) * hintPercentage))
+	g.lettersRevealed = 0
+
+	if g.totalHints >= wordLength {
+		g.totalHints = wordLength - 1 // Always keep at least one letter hidden
+	}
+
+	g.hintInterval = time.Duration(g.drawingTime) * time.Second / time.Duration(g.totalHints)
+
+	slog.Info("Hint calculation",
+		"wordLength", wordLength,
+		"totalHints", g.totalHints,
+		"hintInterval", g.hintInterval)
+}
+
 func (g *game) State() *game {
 	return g
 }
 
-func (g *game) initializeGame(players []*PlayerInfo) {
-	// Create drawing order
-	g.drawingOrder = make([]string, len(players))
-	for i, player := range players {
-		g.drawingOrder[i] = player.ID
+func (g *game) EnqueueEvent(e *RoomEvent) {
+	select {
+	case g.event <- e:
+	default:
+		// If the channel is full, instead of blocking, the event just gets dropped
+		// Not sure if this is the best way to handle this, in practice it shouldn't happen
+		slog.Warn("game event channel full, dropping event", "event", e)
 	}
-	// Shuffle the drawing order
-	rand.Shuffle(len(g.drawingOrder), func(i, j int) {
-		g.drawingOrder[i], g.drawingOrder[j] = g.drawingOrder[j], g.drawingOrder[i]
-	})
-	g.currentDrawingIndex = 0
-	g.currentDrawingPlayer = g.drawingOrder[0]
+}
+
+func randomWord() string {
+	return wordBank[rand.Intn(len(wordBank))]
+}
+
+func (g *game) randomWordOptions() []string {
+	// Create a set to ensure uniqueness
+	wordSet := make(map[string]struct{})
+
+	// Keep adding words until we have the required number
+	for len(wordSet) < WordOptions {
+		word := randomWord()
+		wordSet[word] = struct{}{}
+	}
+
+	// Convert set to slice
+	words := make([]string, 0, WordOptions)
+	for word := range wordSet {
+		words = append(words, word)
+	}
+
+	return words
+}
+
+func (g *game) hintWord() {
+	if g.HintedWord == "" {
+		// Initialize hinted word with stars
+		g.HintedWord = strings.Repeat("*", len(g.word))
+	}
+
+	wordRunes := []rune(g.word)
+	hintedRunes := []rune(g.HintedWord)
+	hiddenIndices := []int{}
+
+	// Find all hidden letter positions
+	for i, r := range hintedRunes {
+		if r == '*' {
+			hiddenIndices = append(hiddenIndices, i)
+		}
+	}
+
+	if len(hiddenIndices) <= 1 {
+		return // Keep at least one letter hidden
+	}
+
+	// Choose a random hidden position
+	randomIndex := hiddenIndices[rand.Intn(len(hiddenIndices)-1)]
+
+	// Replace the star with the actual letter
+	hintedRunes[randomIndex] = wordRunes[randomIndex]
+
+	g.HintedWord = string(hintedRunes)
+}
+
+func (g *game) handleDrawingEvent(e *RoomEvent) {
+	switch e.Type {
+	case STROKE:
+		g.addStroke(e.Payload)
+	case STROKE_POINT:
+		g.addStrokePoint(e.Payload)
+	case CLEAR_STROKES:
+		g.clearStrokes()
+	case UNDO_STROKE:
+		g.undoStroke()
+	}
 }
 
 type Stroke struct {
@@ -224,86 +359,4 @@ func (g *game) undoStroke() {
 	if len(g.Strokes) > 0 {
 		g.Strokes = g.Strokes[:len(g.Strokes)-1]
 	}
-}
-
-func (g *game) handleDrawingEvent(e *RoomEvent) {
-	switch e.Type {
-	case STROKE:
-		g.addStroke(e.Payload)
-	case STROKE_POINT:
-		g.addStrokePoint(e.Payload)
-	case CLEAR_STROKES:
-		g.clearStrokes()
-	case UNDO_STROKE:
-		g.undoStroke()
-	}
-}
-
-// This method is used by the room to pass events to the game
-func (g *game) EnqueueEvent(e *RoomEvent) {
-	select {
-	case g.event <- e:
-	default:
-		// If the channel is full, instead of blocking, the event just gets dropped
-		// Not sure if this is the best way to handle this, in practice it shouldn't happen
-		slog.Warn("game event channel full, dropping event", "event", e)
-	}
-}
-
-func (g *game) stateMsg(role GameRole) []byte {
-	type gameState struct {
-		Strokes     []Stroke  `json:"strokes"`
-		Word        string    `json:"word"`
-		Role        GameRole  `json:"role"`
-		Round       int       `json:"round"`
-		RoundEndsAt time.Time `json:"roundEndsAt"`
-	}
-
-	state := &gameState{
-		Strokes:     g.Strokes,
-		Role:        role,
-		Round:       g.currentRound,
-		RoundEndsAt: g.roundEndsAt.UTC(),
-		Word:        g.hintedWord,
-	}
-
-	if role == Drawing {
-		state.Word = g.word
-	}
-
-	return marshalEvent(GAME_STATE, state)
-}
-
-func (g *game) newWord() string {
-	return wordBank[rand.Intn(len(wordBank))]
-}
-
-func (g *game) hintWord() {
-	if g.hintedWord == "" {
-		// Initialize hinted word with stars
-		g.hintedWord = strings.Repeat("*", len(g.word))
-	}
-
-	wordRunes := []rune(g.word)
-	hintedRunes := []rune(g.hintedWord)
-	hiddenIndices := []int{}
-
-	// Find all hidden letter positions
-	for i, r := range hintedRunes {
-		if r == '*' {
-			hiddenIndices = append(hiddenIndices, i)
-		}
-	}
-
-	if len(hiddenIndices) <= 1 {
-		return // Keep at least one letter hidden
-	}
-
-	// Choose a random hidden position
-	randomIndex := hiddenIndices[rand.Intn(len(hiddenIndices)-1)]
-
-	// Replace the star with the actual letter
-	hintedRunes[randomIndex] = wordRunes[randomIndex]
-
-	g.hintedWord = string(hintedRunes)
 }
