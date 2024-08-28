@@ -27,14 +27,6 @@ import { motion } from "framer-motion";
 export function JoinRoomView() {
 	return (
 		<motion.div
-			initial={{ opacity: 0, scale: 0.98 }}
-			animate={{ opacity: 1, scale: 1 }}
-			transition={{
-				type: "spring",
-				stiffness: 500,
-				damping: 50,
-				mass: 1,
-			}}
 			className="w-full h-full absolute inset-0 flex flex-col items-center justify-center gap-8"
 		>
 			<div className="flex items-center gap-3">
@@ -104,7 +96,7 @@ export function JoinRoomForm() {
 
 	const [avatarSeed, setAvatarSeed] = useState(randomAvatarSeed());
 	const [color, setColor] = useState(randomColor());
-	const [avatarSvg, setAvatarSvg] = useState(generateAvatar(avatarSeed, color));
+	const [avatarSvg, setAvatarSvg] = useState("");
 
 	const form = useForm<z.infer<typeof JoinRoomFormSchema>>({
 		resolver: zodResolver(JoinRoomFormSchema),
