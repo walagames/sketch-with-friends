@@ -17,6 +17,11 @@ export enum RoomEventType {
 	GAME_STATE = "GAME_STATE",
 	INITIALIZE_CLIENT = "INITIALIZE_CLIENT",
 	GAME_STARTED = "GAME_STARTED",
+	WORD_OPTIONS = "WORD_OPTIONS",
+	PICK_WORD = "PICK_WORD",
+	INITIALIZE_PLAYER_ID = "INITIALIZE_PLAYER_ID",
+	GUESS = "GUESS",
+	GUESS_RESPONSE = "GUESS_RESPONSE",
 }
 
 export type RoomState = {
@@ -56,7 +61,10 @@ export type RoomEvent =
 	| HostChangedEvent
 	| GameStartedEvent
 	| ChangeSettingsEvent
-	| GameStateEvent;
+	| GameStateEvent
+	| PickWordEvent
+	| GuessEvent
+	| GuessResponseEvent;
 
 export type StateEvent = {
 	type: RoomEventType.STATE;
@@ -121,4 +129,24 @@ export type GameStateEvent = {
 export type GameStartedEvent = {
 	type: RoomEventType.GAME_STARTED;
 	payload: string;
+};
+
+export type WordOptionsEvent = {
+	type: RoomEventType.WORD_OPTIONS;
+	payload: string[];
+};
+
+export type PickWordEvent = {
+	type: RoomEventType.PICK_WORD;
+	payload: string;
+};
+
+export type GuessEvent = {
+	type: RoomEventType.GUESS;
+	payload: string;
+};
+
+export type GuessResponseEvent = {
+	type: RoomEventType.GUESS_RESPONSE;
+	payload: boolean;
 };

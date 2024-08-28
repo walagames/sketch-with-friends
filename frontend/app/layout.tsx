@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { RoomProvider } from "@/components/room/room-provider";
+import { RoomProvider } from "@/contexts/room-context";
 import { Toaster } from "@/components/ui/sonner";
 import { DM_Sans } from "next/font/google";
 import { cn } from "@/lib/utils";

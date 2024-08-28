@@ -8,9 +8,9 @@ export enum GameRole {
 
 export type GameState = {
 	startsAt: string;
+	totalRounds: number;
+	currentRound: number;
 	strokes: Stroke[];
 	word: string;
-	role: GameRole;
-	round: number;
-	roundEndsAt: string;
+	currentPhaseDeadline: string;
 };

@@ -28,19 +28,33 @@ const CrownIcon = (props: React.SVGProps<SVGSVGElement>) => (
 	</svg>
 );
 
-const variants = {
+const verticalVariants = {
+	initial: { opacity: 0, x: -25 },
+	animate: { opacity: 1, x: 0 },
+	exit: { opacity: 0, x: -25 },
+};
+
+const horizontalVariants = {
 	initial: { opacity: 0, y: -25 },
 	animate: { opacity: 1, y: 0 },
 	exit: { opacity: 0, y: -25 },
 };
 
-function PlayerCard({ player }: { player: Player }) {
+function PlayerCard({
+	player,
+	orientation = "horizontal",
+}: {
+	player: Player;
+	orientation?: "horizontal" | "vertical";
+}) {
 	const { role, avatarSeed, avatarColor, score } = player;
 	const avatarSvg = generateAvatar(avatarSeed, avatarColor);
 	return (
 		<motion.div
 			layout
-			variants={variants}
+			variants={
+				orientation === "horizontal" ? horizontalVariants : verticalVariants
+			}
 			initial="initial"
 			animate="animate"
 			exit="exit"
@@ -72,14 +86,28 @@ function PlayerCard({ player }: { player: Player }) {
 	);
 }
 
-export function PlayerCards({ players }: { players: Player[] }) {
+export function PlayerCards({
+	players,
+	orientation = "horizontal",
+}: {
+	players: Player[];
+	orientation?: "horizontal" | "vertical";
+}) {
 	return (
-		<ul className="flex gap-2">
+		<ul
+			className={`flex gap-1 ${
+				orientation === "horizontal" ? "flex-row" : "flex-col"
+			}`}
+		>
 			<AnimatePresence initial={false} mode="popLayout">
 				{players
 					.sort((a, b) => b.score - a.score)
 					.map((player) => (
-						<PlayerCard key={player.id} player={player} />
+						<PlayerCard
+							key={player.id}
+							player={player}
+							orientation={orientation}
+						/>
 					))}
 			</AnimatePresence>
 		</ul>

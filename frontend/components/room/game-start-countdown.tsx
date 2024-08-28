@@ -1,7 +1,7 @@
 "use client";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useRoomContext } from "./room-provider";
+import { useRoomContext } from "../../contexts/room-context";
 
 const textVariants = {
 	hidden: { pathLength: 0, y: 2, x: 3, fillOpacity: 0, opacity: 0 },

@@ -14,7 +14,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from "@/components/ui/form";
-import { useRoomContext } from "../room-provider";
+import { useRoomContext } from "../../../contexts/room-context";
 import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import {
@@ -26,9 +26,7 @@ import {
 import { motion } from "framer-motion";
 export function JoinRoomView() {
 	return (
-		<motion.div
-			className="w-full h-full absolute inset-0 flex flex-col items-center justify-center gap-8"
-		>
+		<motion.div className="w-full h-full absolute inset-0 flex flex-col items-center justify-center gap-8">
 			<div className="flex items-center gap-3">
 				<Image
 					className="rotate-12"

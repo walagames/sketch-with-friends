@@ -20,10 +20,12 @@ import {
 	FormMessage,
 	FormDescription,
 } from "@/components/ui/form";
-import { useRoomContext } from "../room-provider";
+import { useRoomContext } from "../../../contexts/room-context";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { useDebouncedCallback } from "use-debounce";
+import { PlayerCards } from "../player-card";
+import { CopyRoomLink } from "@/components/canvas/canvas-tools";
 
 const waitingViews = {
 	[PlayerRole.HOST]: {
@@ -75,6 +77,7 @@ export function WaitingView() {
 			}}
 			className="h-full w-full flex flex-col z-10 p-3 absolute inset-0"
 		>
+			
 			{room.status === RoomStatus.WAITING && <WaitingView.Component />}
 
 			{(room.game?.startsAt || room.status === RoomStatus.PLAYING) && (
@@ -84,8 +87,6 @@ export function WaitingView() {
 	);
 }
 
-
-
 const RoomFormSchema = z.object({
 	drawingTime: z.number().min(15).max(180),
 	rounds: z.number().min(2).max(10),
@@ -94,15 +95,15 @@ const RoomFormSchema = z.object({
 });
 
 export function RoomSettingsForm() {
-	const { handleEvent } = useRoomContext();
+	const { handleEvent, room } = useRoomContext();
 
 	const form = useForm<z.infer<typeof RoomFormSchema>>({
 		resolver: zodResolver(RoomFormSchema),
 		defaultValues: {
-			drawingTime: 60,
-			rounds: 3,
-			isRoomOpen: true,
-			playerLimit: 6,
+			drawingTime: room.settings.drawingTime,
+			rounds: room.settings.rounds,
+			isRoomOpen: room.settings.isRoomOpen,
+			playerLimit: room.settings.playerLimit,
 		},
 	});
 

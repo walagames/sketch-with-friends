@@ -2,13 +2,15 @@
 import * as React from "react";
 import { getStroke } from "perfect-freehand";
 
-import { useRoomContext } from "@/components/room/room-provider";
+import { useRoomContext } from "@/contexts/room-context";
 import { RoomEventType } from "@/types/room";
 import { CanvasTools, CopyRoomLink } from "@/components/canvas/canvas-tools";
 import { useWindowSize } from "@/hooks/use-window-size";
 import { Button } from "@/components/ui/button";
 import { Stroke } from "@/types/canvas";
 import { useEffect } from "react"; // Added this line to import useEffect
+import { getGameRole } from "@/lib/player";
+import { GameRole } from "@/types/game";
 
 // make canvas less pixelated
 const CANVAS_SCALE = 2;
@@ -50,8 +52,10 @@ function Canvas({ width, height }: { width: number; height: number }) {
 	const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 	const strokeCountRef = React.useRef(0);
 
-	const { handleEvent, room, settings } = useRoomContext();
+	const { handleEvent, room, settings, playerId } = useRoomContext();
 	// const [windowWidth, windowHeight] = useWindowSize();
+
+	const role = getGameRole(playerId, room.players);
 
 	const fillCanvasWithStroke = React.useCallback(
 		(ctx: CanvasRenderingContext2D, stroke: Stroke) => {
@@ -166,8 +170,8 @@ function Canvas({ width, height }: { width: number; height: number }) {
 			}}
 			width={width * CANVAS_SCALE}
 			height={height * CANVAS_SCALE}
-			onMouseDown={handleNewStroke}
-			onMouseMove={handleStrokePoint}
+			onMouseDown={role === GameRole.DRAWING ? handleNewStroke : () => {}}
+			onMouseMove={role === GameRole.DRAWING ? handleStrokePoint : () => {}}
 			ref={canvasRef}
 		/>
 	);

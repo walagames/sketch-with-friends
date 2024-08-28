@@ -1,7 +1,7 @@
 "use client";
-import { useRoomContext } from "@/components/room/room-provider";
+import { useRoomContext } from "@/contexts/room-context";
 import { RoomStatus } from "@/types/room";
-import { DrawingGuessingView } from "@/components/room/views/drawing-guessing-view";
+import { PlayingView } from "@/components/room/views/playing-view";
 import { PlayerCards } from "@/components/room/player-card";
 import { CopyRoomLink } from "@/components/canvas/canvas-tools";
 import { AnimatePresence } from "framer-motion";
@@ -10,8 +10,8 @@ import { JoinRoomView } from "@/components/room/views/join-room-view";
 
 const views = {
 	[RoomStatus.PLAYING]: {
-		Component: DrawingGuessingView,
-		key: "drawing-guessing",
+		Component: PlayingView,
+		key: "playing",
 	},
 	[RoomStatus.WAITING]: {
 		Component: WaitingView,
@@ -31,13 +31,13 @@ export default function Home() {
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-between relative">
 			<div className="h-screen w-screen flex flex-col relative p-3">
-				{room.status !== RoomStatus.UNINITIALIZED && (
-					<div className="w-full flex justify-between relative z-50">
-						<PlayerCards players={room.players} />
-						<CopyRoomLink />
-					</div>
-				)}
 				<AnimatePresence mode="popLayout">
+					{room.status !== RoomStatus.UNINITIALIZED && (
+						<div className="w-full flex justify-between relative z-50">
+							<PlayerCards orientation="horizontal" players={room.players} />
+							<CopyRoomLink />
+						</div>
+					)}
 					<View.Component key={View.key} />
 				</AnimatePresence>
 			</div>

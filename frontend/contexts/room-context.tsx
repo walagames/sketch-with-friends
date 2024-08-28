@@ -33,6 +33,11 @@ interface RoomContextType {
 	settings: CanvasToolSettings;
 	updateSettings: (action: CanvasAction) => void;
 	playerId: string;
+	wordOptions: string[];
+	selectedWord: string;
+	setSelectedWord: (word: string) => void;
+	guessResponse: boolean | null;
+	setGuessResponse: (response: boolean | null) => void;
 }
 const defaultContext: RoomContextType = {
 	updateSettings: () => {},
@@ -51,8 +56,19 @@ const defaultContext: RoomContextType = {
 			strokes: [] as Stroke[],
 			startsAt: "",
 		},
+		settings: {
+			drawingTime: 60,
+			rounds: 3,
+			isRoomOpen: true,
+			playerLimit: 6,
+		},
 	} as RoomState,
 	playerId: "",
+	wordOptions: [],
+	selectedWord: "",
+	setSelectedWord: () => {},
+	guessResponse: null,
+	setGuessResponse: () => {},
 };
 const RoomContext = createContext<RoomContextType>(defaultContext);
 export const useRoomContext = () => useContext(RoomContext);
@@ -144,6 +160,9 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 	const [room, updateRoom] = useReducer(roomReducer, defaultContext.room);
 
 	const [playerId, setPlayerId] = useState<string>("");
+	const [wordOptions, setWordOptions] = useState<string[]>([]);
+	const [selectedWord, setSelectedWord] = useState<string>("");
+	const [guessResponse, setGuessResponse] = useState<boolean | null>(null);
 
 	const [settings, updateSettings] = useReducer(
 		settingsReducer,
@@ -164,12 +183,20 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 			},
 			onMessage: (event: MessageEvent) => {
 				const { type, payload } = JSON.parse(event.data);
-				if (type === "INITIALIZE_PLAYER_ID") {
-					setPlayerId(payload);
-					return;
+				switch (type) {
+					case RoomEventType.WORD_OPTIONS:
+						setWordOptions(payload);
+						return;
+					case RoomEventType.INITIALIZE_PLAYER_ID:
+						setPlayerId(payload);
+						return;
+					case RoomEventType.GUESS_RESPONSE:
+						setGuessResponse(payload);
+						return;
+					default:
+						console.log(event);
+						updateRoom({ type, payload });
 				}
-				console.log(event);
-				updateRoom({ type, payload });
 			},
 			onConnect: (event: Event) => {
 				// toast.success("Connected to room");
@@ -232,8 +259,13 @@ export const RoomProvider = ({ children }: { children: React.ReactNode }) => {
 			handleRoomFormSubmit,
 			settings,
 			updateSettings,
+			wordOptions,
+			selectedWord,
+			setSelectedWord,
+			guessResponse,
+			setGuessResponse,
 		}),
-		[room, handleEvent, handleRoomFormSubmit, settings, playerId]
+		[room, handleEvent, handleRoomFormSubmit, settings, playerId, wordOptions]
 	);
 
 	return (
