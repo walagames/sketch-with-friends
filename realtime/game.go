@@ -13,6 +13,7 @@ type Game interface {
 	Run(ctx context.Context, r Room)
 	EnqueueEvent(e *RoomEvent)
 	State() *game
+	End()
 }
 
 type game struct {
@@ -30,6 +31,7 @@ type game struct {
 	hintInterval         time.Duration
 	currentDrawingIndex  int
 	timers               GameTimers
+	cancel 				 context.CancelFunc
 }
 type GameTimers struct {
 	Countdown   *time.Timer
@@ -96,8 +98,11 @@ func (g *game) stopAllTimers() {
 	g.timers.PostDrawing.Stop()
 }
 
-func (g *game) Run(ctx context.Context, r Room) {
+func (g *game) Run(roomCtx context.Context, r Room) {
 	slog.Info("Game routine started: ")
+
+	ctx, cancel := context.WithCancel(roomCtx)
+	g.cancel = cancel
 
 	g.timers = GameTimers{
 		Countdown:   time.NewTimer(CountdownTime),
@@ -109,6 +114,12 @@ func (g *game) Run(ctx context.Context, r Room) {
 
 	defer func() {
 		slog.Info("Game routine exited")
+
+		players := r.Players()
+		for _, p := range players {
+			p.ChangeGameRole(Guessing)
+		}
+
 		g.stopAllTimers()
 		r.ChangeStatus(WAITING)
 		r.Broadcast(r.StateMsg())
@@ -167,6 +178,10 @@ func (g *game) Run(ctx context.Context, r Room) {
 			r.BroadcastExcept(marshalEvent(e.Type, e.Payload), e.Player)
 		}
 	}
+}
+
+func (g *game) End() {
+	g.cancel()
 }
 
 func (g *game) startPickingPhase(r Room) {

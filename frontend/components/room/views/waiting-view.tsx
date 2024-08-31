@@ -21,6 +21,7 @@ import {
 	FormDescription,
 } from "@/components/ui/form";
 import { useRoomContext } from "../../../contexts/room-context";
+import { toast } from "sonner";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { useDebouncedCallback } from "use-debounce";
@@ -118,9 +119,13 @@ export function RoomSettingsForm() {
 	}, 300);
 
 	function handleSubmit(data: z.infer<typeof RoomFormSchema>) {
-		handleEvent({
-			type: RoomEventType.START_GAME,
-		});
+		if (room.players.length >= 2) {
+			handleEvent({
+				type: RoomEventType.START_GAME,
+			});
+		} else {
+			toast.info("At least 2 players required");
+		}
 	}
 
 	return (

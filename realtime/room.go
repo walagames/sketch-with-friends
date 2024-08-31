@@ -244,6 +244,7 @@ func (r *room) Run(rm RoomManager) {
 			delete(r.players, client.Player)
 			if len(r.players) == 0 {
 				r.cancel()
+				// continue
 			} else if role == RoleHost {
 				// Migrate host role to the next player
 				for player := range r.players {
@@ -252,6 +253,13 @@ func (r *room) Run(rm RoomManager) {
 					r.Broadcast(r.StateMsg())
 					break
 				}
+			}
+
+			// minimum 2 players required to continue the game
+			if r.status == PLAYING && len(r.players) < 2 {
+				slog.Info("less than 2 players remain, ending game")
+				r.game.End()
+				r.status = FINISHED
 			}
 		case e := <-r.event:
 			switch e.Type {
