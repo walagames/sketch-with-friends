@@ -1,5 +1,3 @@
-// Package main provides the entry point and core functionality for the realtime server.
-// It includes HTTP server setup, routing, and WebSocket handling for real-time communication.
 package main
 
 import (
@@ -7,9 +5,9 @@ import (
 	"log/slog"
 	"net/http"
 
+	"errors"
 	"sync"
 	"time"
-
 )
 
 type HTTPConfig struct {
@@ -71,12 +69,12 @@ func NewServer(
 // host handles the HTTP request for creating and joining a new room
 func host(rm RoomManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// name := r.Header.Get("X-Player-Name")
-		// if name == "" {
-		// 	http.Error(w, "Name is required", http.StatusBadRequest)
-		// 	return
-		// }
-		slog.Info("host request", "remote", r.RemoteAddr)
+		// Get username, avatarSeed, and avatarColor from query params
+		username, avatarSeed, avatarColor, err := extractUserParams(r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
 
 		// Upgrade the HTTP connection to a WebSocket connection
 		conn, err := UpgradeConnection(w, r)
@@ -97,40 +95,70 @@ func host(rm RoomManager) http.HandlerFunc {
 		go room.Run(rm)
 
 		// Connect the client to the room
-		room.Connect(conn, RoleHost, "hostUser")
+		room.Connect(conn, RoleHost, username, avatarSeed, avatarColor)
 	}
 }
 
 // join handles the HTTP request for joining an existing room
 func join(rm RoomManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// name := r.Header.Get("X-Player-Name")
-		// if name == "" {
-		// 	http.Error(w, "Name is required", http.StatusBadRequest)
-		// 	return
-		// }
-		// Get the room code from the URL path
-		code := r.PathValue("code")
-		if code == "" {
-			http.Error(w, "Room code is required", http.StatusBadRequest)
+		// Get username, avatarSeed, and avatarColor from query params
+		username, avatarSeed, avatarColor, err := extractUserParams(r)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		// Lookup the room using the provided code
-		room, err := rm.Room(code)
-		if err != nil {
-			http.Error(w, "Room lookup failed", http.StatusInternalServerError)
+		// Get the room code from the URL path
+		code := r.PathValue("code")
+		if code == "" {
+			slog.Error("room code is required", "remote", r.RemoteAddr)
+			http.Error(w, "Room code is required", http.StatusBadRequest)
 			return
 		}
 
 		// Upgrade the HTTP connection to a WebSocket connection
 		conn, err := UpgradeConnection(w, r)
 		if err != nil {
+			slog.Error("failed to upgrade to websocket connection", "error", err)
 			http.Error(w, "Failed to upgrade to websocket connection", http.StatusInternalServerError)
 			return
 		}
 
+		// Lookup the room using the provided code
+		room, err := rm.Room(code)
+		if err != nil {
+			slog.Error("failed to lookup room", "error", err)
+			CloseConnectionWithReason(conn, RoomNotFound.Error())
+			return
+		}
+
 		// Connect the client to the room
-		room.Connect(conn, RolePlayer, "playerUser")
+		err = room.Connect(conn, RolePlayer, username, avatarSeed, avatarColor)
+		if err != nil {
+			slog.Error("failed to connect to room", "error", err)
+			CloseConnectionWithReason(conn, err.Error())
+			return
+		}
 	}
+}
+
+func extractUserParams(r *http.Request) (string, string, string, error) {
+	username := r.URL.Query().Get("username")
+	avatarSeed := r.URL.Query().Get("avatarSeed")
+	avatarColor := r.URL.Query().Get("avatarColor")
+
+	slog.Info("join request",
+		"remote", r.RemoteAddr,
+		"username", username,
+		"avatarSeed", avatarSeed,
+		"avatarColor", avatarColor,
+	)
+
+	if username == "" || avatarSeed == "" || avatarColor == "" {
+		slog.Error("missing required query parameters", "username", username, "avatarSeed", avatarSeed, "avatarColor", avatarColor)
+		return "", "", "", errors.New("missing required query parameters")
+	}
+
+	return username, avatarSeed, avatarColor, nil
 }

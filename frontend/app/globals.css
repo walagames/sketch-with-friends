@@ -20,7 +20,7 @@
 		--secondary-foreground: 240 5.9% 10%;
 
 		--muted: 240 4.8% 95.9%;
-		--muted-foreground: 240 3.8% 46.1%;
+		--muted-foreground: 240 5% 57%;
 
 		--accent: 240 4.8% 95.9%;
 		--accent-foreground: 240 5.9% 10%;
@@ -64,6 +64,8 @@
 		--input: 240 3.7% 15.9%;
 		--ring: 240 4.9% 83.9%;
 	}
+
+
 }
 
 @layer base {
@@ -80,6 +82,7 @@
 	width: 100%;
 	display: flex;
 	align-items: center;
+	text-align: center;
 	padding: 0 20px;
 
 	&[data-x-position="center"] {
@@ -93,4 +96,38 @@
 	&[data-x-position="right"] {
 		justify-content: flex-end;
 	}
+}
+
+
+.radial-gradient {
+  background: radial-gradient(circle, hsla(240, 4.8%, 95.9%, 0.7) 0%, transparent 100%);
+}
+
+.shake {
+  animation: shake .5s ease-in-out;
+}
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-3px);
+  }
+
+  40% {
+    transform: translateX(3px);
+  }
+
+  60% {
+    transform: translateX(-3px);
+  }
+
+  80% {
+    transform: translateX(3px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
 }

@@ -5,20 +5,6 @@ interface UseWindowSizeOptions {
 	maxHeight?: number;
 }
 
-/**
- * Custom hook to get current window dimensions
- *
- * @note Useful for redrawing canvas when the window is resized
- *
- * @param options - Optional configuration object
- * @param options.maxWidth - Maximum width to consider (defaults to window.innerWidth)
- * @param options.maxHeight - Maximum height to consider (defaults to window.innerHeight)
- * 
- * @returns A tuple containing the current width and height
- * 
- * @example
- * const [width, height] = useWindowSize({ maxWidth: 1200, maxHeight: 800 });
- */
 export const useWindowSize = (
 	options?: UseWindowSizeOptions,
 ): [number, number] => {

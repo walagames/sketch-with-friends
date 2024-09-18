@@ -15,7 +15,6 @@ export enum SettingActionType {
 	CHANGE_TOOL = "CHANGE_TOOL",
 }
 
-// not sure I like this naming convention, feels too verbose
 export type CanvasToolSettings = {
 	color: string;
 	strokeWidth: number;

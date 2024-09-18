@@ -1,16 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
-import { RoomProvider } from "@/components/room/room-provider";
+import { RoomProvider } from "@/contexts/room-context";
 import { Toaster } from "@/components/ui/sonner";
-
-const inter = Inter({ subsets: ["latin"] });
-
+import { DM_Sans } from "next/font/google";
+import { cn } from "@/lib/utils";
+const dmsans = DM_Sans({ subsets: ["latin"] });
 export const metadata: Metadata = {
 	title: "Sketch with Friends",
 	description: "An interactive multiplayer drawing game",
 };
-
 export default function RootLayout({
 	children,
 }: Readonly<{
@@ -18,16 +16,16 @@ export default function RootLayout({
 }>) {
 	return (
 		<html lang="en">
-			<body className={inter.className}>
+			<body className={cn(dmsans.className, "bg-secondary")}>
 				<RoomProvider>{children}</RoomProvider>
 				<Toaster
+					offset={16}
 					className="Toaster"
 					toastOptions={{
 						classNames: {
-							toast: "px-4 py-2 rounded-full",
+							toast: "px-4 py-2 ",
 						},
 					}}
-					richColors
 					position="top-center"
 				/>
 			</body>
