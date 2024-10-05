@@ -146,8 +146,8 @@ const settingsReducer = (state: CanvasToolSettings, action: CanvasAction) => {
 
 const getRealtimeHref = () => {
 	const protocol = import.meta.env.DEV ? "ws" : "wss";
-	const host = import.meta.env.DEV ? "localhost:8080" : import.meta.env.SOCKET_HOST;
-	console.log(import.meta.env.SOCKET_HOST);
+	const host = import.meta.env.DEV ? "localhost:8080" : import.meta.env.VITE_SOCKET_HOST;
+	console.log(import.meta.env.VITE_SOCKET_HOST);
 	return `${protocol}://${host}`;
 };
 
