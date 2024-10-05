@@ -10,4 +10,7 @@ export default defineConfig({
 	server: {
 		port: 3000,
 	},
+	define: {
+		"import.meta.env.SOCKET_HOST": JSON.stringify(process.env.CF_PAGES_BRANCH),
+	},
 });
