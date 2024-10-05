@@ -11,10 +11,12 @@
     "clean": "rm -rf dist tsconfig.app.tsbuildinfo tsconfig.node.tsbuildinfo"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.2.7",
     "@vitejs/plugin-react": "^4.3.2",
     "next-themes": "^0.3.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-redux": "^9.1.2"
   },
   "devDependencies": {
     "@dicebear/collection": "^9.2.1",
