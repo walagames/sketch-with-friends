@@ -11,6 +11,6 @@ export default defineConfig({
 		port: 3000,
 	},
 	define: {
-		"import.meta.env.SOCKET_HOST": JSON.stringify(process.env.CF_PAGES_BRANCH),
+		"import.meta.env.SOCKET_HOST": `${process.env.CF_PAGES_BRANCH}-realtime.sketchwithfriends.com`,
 	},
 });
