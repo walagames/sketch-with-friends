@@ -66,7 +66,7 @@ export function DrawingGuesserView() {
 			</div>
 			<div className="flex w-full h-full items-start justify-center gap-2">
 				<div className="flex flex-col items-center justify-center gap-2 w-[800px]">
-					<Canvas width={800} height={600} role={GameRole.Drawing} />
+					<Canvas width={800} height={600} role={GameRole.Guessing} />
 					<GuessForm />
 				</div>
 			</div>
