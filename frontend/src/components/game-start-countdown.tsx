@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { useRoomContext } from "../../contexts/room-context";
 
 const textVariants = {
 	hidden: { pathLength: 0, y: 2, x: 3, fillOpacity: 0, opacity: 0 },
@@ -151,28 +150,17 @@ function Number({ number }: { number: number }) {
 	);
 }
 
-function getTimeLeft(startsAt: string) {
-	return new Date(startsAt).getTime() - Date.now();
-}
-
 export function GameStartCountdown() {
-	const { room } = useRoomContext();
-	const [countdown, setCountdown] = useState(
-		Math.ceil((getTimeLeft(room.game.startsAt) - 2000) / 1000)
-	);
+	const [countdown, setCountdown] = useState(3);
 
 	useEffect(() => {
 		const interval = setInterval(() => {
-			const timeLeft = Math.ceil(
-				(getTimeLeft(room.game.startsAt) - 2000) / 1000
-			);
-
-			if (timeLeft >= 0) {
-				setCountdown(timeLeft);
+			if (countdown > 0) {
+				setCountdown((prev) => prev - 1);
 			}
 		}, 1000);
 		return () => clearInterval(interval);
-	}, [room.game.startsAt]);
+	}, [countdown]);
 
 	return (
 		<motion.div

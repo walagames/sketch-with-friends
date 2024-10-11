@@ -1,17 +1,17 @@
 import * as React from "react";
 import { getStroke } from "perfect-freehand";
 
-import { useRoomContext } from "@/contexts/room-context";
-import { RoomEventType } from "@/types/room";
-import { SettingActionType, Stroke } from "@/types/canvas";
-import { getGameRole } from "@/lib/player";
-import { GameRole } from "@/types/game";
 import {
 	ContextMenu,
 	ContextMenuTrigger,
 	ContextMenuContent,
-} from "../ui/context-menu";
+} from "./ui/context-menu";
 import { HexColorPicker } from "react-colorful";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/state/store";
+import { GameRole } from "@/state/features/game";
+import { addStroke, addStrokePoint, Stroke } from "@/state/features/canvas";
+import { changeStrokeColor } from "@/state/features/client";
 
 // make canvas less pixelated
 const CANVAS_SCALE = 2;
@@ -49,15 +49,28 @@ function getSvgPathFromStroke(stroke: number[][]) {
 	return d.join(" ");
 }
 
-function Canvas({ width, height }: { width: number; height: number }) {
+function Canvas({
+	width,
+	height,
+	role,
+}: {
+	width: number;
+	height: number;
+	role: GameRole;
+}) {
 	const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 	const strokeCountRef = React.useRef(0);
 
-	const { handleEvent, room, settings, playerId, updateSettings } =
-		useRoomContext();
-	// const [windowWidth, windowHeight] = useWindowSize();
+	const dispatch = useDispatch();
 
-	const role = getGameRole(playerId, room.players);
+	const strokes = useSelector((state: RootState) => state.canvas.strokes);
+	const strokeColor = useSelector(
+		(state: RootState) => state.client.canvas.strokeColor
+	);
+	const strokeWidth = useSelector(
+		(state: RootState) => state.client.canvas.strokeWidth
+	);
+	// const [windowWidth, windowHeight] = useWindowSize();
 
 	const fillCanvasWithStroke = React.useCallback(
 		(ctx: CanvasRenderingContext2D, stroke: Stroke) => {
@@ -85,21 +98,21 @@ function Canvas({ width, height }: { width: number; height: number }) {
 
 		if (ctx) {
 			clearCanvas(ctx);
-			for (const stroke of room.game.strokes) {
+			for (const stroke of strokes) {
 				fillCanvasWithStroke(ctx, stroke);
 			}
 		}
-	}, [fillCanvasWithStroke, room.game.strokes]);
+	}, [fillCanvasWithStroke, strokes]);
 
 	const drawMostRecentStroke = React.useCallback(() => {
 		const canvasContext = canvasRef.current?.getContext("2d");
-		const strokeCount = room.game.strokes.length;
+		const strokeCount = strokes.length;
 
 		if (canvasContext && strokeCount) {
-			const stroke = room.game.strokes[strokeCount - 1];
+			const stroke = strokes[strokeCount - 1];
 			fillCanvasWithStroke(canvasContext, stroke);
 		}
-	}, [fillCanvasWithStroke, room.game.strokes]);
+	}, [fillCanvasWithStroke, strokes]);
 
 	// Draws all strokes on first load and when window size changes
 	React.useEffect(() => {
@@ -114,37 +127,33 @@ function Canvas({ width, height }: { width: number; height: number }) {
 	// Only draws most recent stroke unless canvas is cleared or a stroke is undone
 	React.useEffect(() => {
 		const isWindowInitialized = width !== 0 && height !== 0;
-		const newStrokeCount = room.game.strokes.length;
+		const newStrokeCount = strokes.length;
 
-		if (
-			strokeCountRef.current > newStrokeCount ||
-			room.game.strokes.length === 0
-		) {
+		if (strokeCountRef.current > newStrokeCount || strokes.length === 0) {
 			// Undo stroke or clear canvas
 			drawAllStrokes();
-		} else if (room.game.strokes.length > 0 && isWindowInitialized) {
+		} else if (strokes.length > 0 && isWindowInitialized) {
 			drawMostRecentStroke();
 		}
 
 		strokeCountRef.current = newStrokeCount;
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [room.game.strokes]);
+	}, [strokes]);
 
 	const handleNewStroke = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
 			const rect = e.currentTarget.getBoundingClientRect();
 			const x = (e.clientX - rect.left) * CANVAS_SCALE;
 			const y = (e.clientY - rect.top) * CANVAS_SCALE;
-			handleEvent({
-				type: RoomEventType.STROKE,
-				payload: {
-					color: settings.color,
-					width: settings.strokeWidth,
+			dispatch(
+				addStroke({
+					color: strokeColor,
+					width: strokeWidth,
 					points: [[x, y]],
-				},
-			});
+				})
+			);
 		},
-		[handleEvent, settings.color, settings.strokeWidth]
+		[strokeColor, strokeWidth]
 	);
 
 	const handleStrokePoint = React.useCallback(
@@ -155,12 +164,9 @@ function Canvas({ width, height }: { width: number; height: number }) {
 			const rect = e.currentTarget.getBoundingClientRect();
 			const x = (e.clientX - rect.left) * CANVAS_SCALE;
 			const y = (e.clientY - rect.top) * CANVAS_SCALE;
-			handleEvent({
-				type: RoomEventType.STROKE_POINT,
-				payload: [x, y],
-			});
+			dispatch(addStrokePoint([x, y]));
 		},
-		[handleEvent]
+		[dispatch]
 	);
 
 	return (
@@ -175,12 +181,12 @@ function Canvas({ width, height }: { width: number; height: number }) {
 					width={width * CANVAS_SCALE}
 					height={height * CANVAS_SCALE}
 					onMouseDown={(e) => {
-						if (e.button === 0 && role === GameRole.DRAWING) {
+						if (e.button === 0 && role === GameRole.Drawing) {
 							handleNewStroke(e);
 						}
 					}}
 					onMouseMove={(e) => {
-						if (e.buttons === 1 && role === GameRole.DRAWING) {
+						if (e.buttons === 1 && role === GameRole.Drawing) {
 							handleStrokePoint(e);
 						}
 					}}
@@ -190,13 +196,8 @@ function Canvas({ width, height }: { width: number; height: number }) {
 			<ContextMenuContent className="overflow-visible p-0 bg-transparent rounded-[2px] border-[6px] border-[#423e2e]/90">
 				<HexColorPicker
 					className="custom-pointers"
-					color={settings.color}
-					onChange={(color) => {
-						updateSettings({
-							type: SettingActionType.CHANGE_COLOR,
-							payload: color,
-						});
-					}}
+					color={strokeColor}
+					onChange={(color) => dispatch(changeStrokeColor(color))}
 				/>
 			</ContextMenuContent>
 		</ContextMenu>

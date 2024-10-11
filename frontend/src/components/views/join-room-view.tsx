@@ -11,7 +11,6 @@ import {
 	FormItem,
 	FormMessage,
 } from "@/components/ui/form";
-import { useRoomContext } from "../../../contexts/room-context";
 import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import {
@@ -21,6 +20,8 @@ import {
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
+import { getRealtimeHref } from "@/lib/realtime";
+import { useDispatch } from "react-redux";
 export function JoinRoomView() {
 	return (
 		<motion.div className="w-full h-full absolute inset-0 flex flex-col items-center justify-center gap-8">
@@ -87,11 +88,11 @@ const JoinRoomFormSchema = z.object({
 });
 
 export function JoinRoomForm() {
-	const { handleRoomFormSubmit } = useRoomContext();
-
 	const [avatarSeed, setAvatarSeed] = useState(randomAvatarSeed());
 	const [color, setColor] = useState(randomColor());
 	const [avatarSvg, setAvatarSvg] = useState("");
+
+	const dispatch = useDispatch();
 
 	const form = useForm<z.infer<typeof JoinRoomFormSchema>>({
 		resolver: zodResolver(JoinRoomFormSchema),
@@ -105,7 +106,35 @@ export function JoinRoomForm() {
 	}, [avatarSeed, color]);
 
 	function onSubmit(data: z.infer<typeof JoinRoomFormSchema>) {
-		handleRoomFormSubmit(data.username, avatarSeed, color);
+		const { username } = data;
+		const roomCode = window.location.search.split("room=")[1];
+		if (roomCode) {
+			dispatch({
+				type: "socket/connect",
+				payload:
+					getRealtimeHref() +
+					"/join/" +
+					roomCode +
+					"?username=" +
+					username +
+					"&avatarSeed=" +
+					avatarSeed +
+					"&avatarColor=" +
+					color,
+			});
+		} else {
+			dispatch({
+				type: "socket/connect",
+				payload:
+					getRealtimeHref() +
+					"/host?username=" +
+					username +
+					"&avatarSeed=" +
+					avatarSeed +
+					"&avatarColor=" +
+					color,
+			});
+		}
 	}
 
 	return (

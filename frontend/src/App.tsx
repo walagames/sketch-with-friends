@@ -1,45 +1,129 @@
 import "./App.css";
-import { useRoomContext } from "@/contexts/room-context";
-import { RoomStatus } from "@/types/room";
-import { PlayingView } from "@/components/room/views/playing-view";
-import { PlayerCards } from "@/components/room/player-card";
-import { CopyRoomLink } from "@/components/canvas/canvas-tools";
-import { AnimatePresence } from "framer-motion";
-import { WaitingView } from "@/components/room/views/waiting-view";
-import { JoinRoomView } from "@/components/room/views/join-room-view";
+import { RoomRole, RoomStage } from "@/state/features/room";
+import { AnimatePresence, motion } from "framer-motion";
 import { Toaster } from "@/components/ui/sonner";
+import { useSelector } from "react-redux";
+import { RootState } from "./state/store";
+import { GamePhase, GameRole } from "./state/features/game";
+import {
+	JoinRoomView,
+	PreGameHostView,
+	PreGamePlayerView,
+	PickingDrawerView,
+	PickingGuesserView,
+	DrawingDrawerView,
+	DrawingGuesserView,
+	PostDrawingView,
+	PostGameHostView,
+	PostGamePlayerView,
+} from "@/components/views";
+import { GameStartCountdown } from "./components/game-start-countdown";
+import { PlayerCards } from "./components/player-card";
+import { Button } from "./components/ui/button";
+import { LinkIcon } from "lucide-react";
+import { copyRoomLink } from "./lib/realtime";
 
 const views = {
-	[RoomStatus.PLAYING]: {
-		Component: PlayingView,
-		key: "playing",
+	[RoomStage.PreGame]: {
+		[RoomRole.Host]: {
+			Component: PreGameHostView,
+			key: "pre-game-host",
+		},
+		[RoomRole.Player]: {
+			Component: PreGamePlayerView,
+			key: "pre-game-player",
+		},
 	},
-	[RoomStatus.WAITING]: {
-		Component: WaitingView,
-		key: "waiting",
+	[RoomStage.Playing]: {
+		[GamePhase.Picking]: {
+			[GameRole.Drawing]: {
+				Component: PickingDrawerView,
+				key: "playing-picking-drawer",
+			},
+			[GameRole.Guessing]: {
+				Component: PickingGuesserView,
+				key: "playing-picking-guesser",
+			},
+		},
+		[GamePhase.Drawing]: {
+			[GameRole.Drawing]: {
+				Component: DrawingDrawerView,
+				key: "playing-drawing-drawer",
+			},
+			[GameRole.Guessing]: {
+				Component: DrawingGuesserView,
+				key: "playing-drawing-guesser",
+			},
+		},
+		[GamePhase.PostDrawing]: {
+			Component: PostDrawingView,
+			key: "playing-post-drawing",
+		},
 	},
-	[RoomStatus.UNINITIALIZED]: {
-		Component: JoinRoomView,
-		key: "join-room",
+	[RoomStage.PostGame]: {
+		[RoomRole.Host]: {
+			Component: PostGameHostView,
+			key: "post-game-host",
+		},
+		[RoomRole.Player]: {
+			Component: PostGamePlayerView,
+			key: "post-game-player",
+		},
 	},
 };
 
 function App() {
-	const { room } = useRoomContext();
+	const roomStage = useSelector((state: RootState) => state.room.stage);
+	const gamePhase = useSelector((state: RootState) => state.game.phase);
+	const players = useSelector((state: RootState) => state.room.players);
+	const playerId = useSelector((state: RootState) => state.client.id);
+	const roomRole = players[playerId]?.roomRole;
+	const gameRole = players[playerId]?.gameRole;
 
-	const View = views[room.status as keyof typeof views];
+	const roomId = useSelector((state: RootState) => state.room.id);
+
+	const View = getView(views, { roomStage, roomRole, gamePhase, gameRole });
+
+	const isCountdownActive = useSelector(
+		(state: RootState) => state.game.isCountdownActive
+	);
 
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-between relative">
-			<div className="h-screen w-screen flex flex-col relative p-3">
+			<div className="h-screen w-screen flex flex-col items-center justify-center relative p-3">
 				<AnimatePresence mode="popLayout">
-					{room.status !== RoomStatus.UNINITIALIZED && (
-						<div className="w-full flex justify-between relative z-50">
-							<PlayerCards orientation="horizontal" players={room.players} />
-							<CopyRoomLink />
-						</div>
+					{isCountdownActive && <GameStartCountdown />}
+					{roomId ? (
+						<motion.div
+							key={View.key}
+							initial={{ opacity: 0, scale: 0.98 }}
+							animate={{ opacity: 1, scale: 1 }}
+							exit={{ opacity: 0, scale: 0.98 }}
+							transition={{
+								type: "spring",
+								stiffness: 500,
+								damping: 50,
+								mass: 1,
+							}}
+							className="h-full w-full flex flex-col items-center justify-between relative"
+						>
+							<div className="flex justify-between w-full">
+								<PlayerCards players={Object.values(players)} />
+								<Button
+									onClick={() => copyRoomLink(roomId)}
+									variant="outline"
+									size="icon"
+								>
+									<LinkIcon className="w-5 h-5" />
+								</Button>
+							</div>
+							<div className="my-auto">
+								<View.Component />
+							</div>
+						</motion.div>
+					) : (
+						<JoinRoomView />
 					)}
-					<View.Component key={View.key} />
 				</AnimatePresence>
 			</div>
 			<Toaster
@@ -54,6 +138,56 @@ function App() {
 			/>
 		</main>
 	);
+}
+
+function getView(
+	viewsObj: any,
+	{
+		roomStage,
+		roomRole,
+		gamePhase,
+		gameRole,
+	}: {
+		roomStage: RoomStage;
+		roomRole: RoomRole;
+		gamePhase: GamePhase;
+		gameRole: GameRole;
+	}
+): {
+	Component: React.ComponentType;
+	key: string;
+} {
+	const stageView = viewsObj[roomStage];
+	if (!stageView) {
+		console.error(`Invalid room stage: ${roomStage}`);
+		return { Component: () => null, key: "error" };
+	}
+
+	if (roomStage === RoomStage.Playing) {
+		const phaseView = stageView[gamePhase];
+		if (!phaseView) {
+			console.error(`Invalid game phase: ${gamePhase}`);
+			return { Component: () => null, key: "error" };
+		}
+
+		if (gamePhase === GamePhase.PostDrawing) {
+			return phaseView;
+		} else {
+			const roleView = phaseView[gameRole];
+			if (!roleView) {
+				console.error(`Invalid game role: ${gameRole}`);
+				return { Component: () => null, key: "error" };
+			}
+			return roleView;
+		}
+	} else {
+		const roleView = stageView[roomRole];
+		if (!roleView) {
+			console.error(`Invalid room role: ${roomRole}`);
+			return { Component: () => null, key: "error" };
+		}
+		return roleView;
+	}
 }
 
 export default App;

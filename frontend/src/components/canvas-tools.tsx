@@ -1,8 +1,26 @@
 import { Brush, PaintBucket, Undo2, Trash } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/state/store";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import { HexColorPicker } from "react-colorful";
+import { toast } from "sonner";
+import {
+	changeStrokeColor,
+	changeStrokeWidth,
+	changeTool,
+	CanvasTool,
+} from "@/state/features/client";
+
+import { undoStroke, clearStrokes } from "@/state/features/canvas";
 
 export function CanvasTools() {
-	const { handleEvent, updateSettings, settings } = useRoomContext();
+	const dispatch = useDispatch();
+	const tool = useSelector((state: RootState) => state.client.canvas.tool);
 	return (
 		<div className="flex justify-between w-full ">
 			<Colors />
@@ -11,38 +29,24 @@ export function CanvasTools() {
 				<Strokes />
 				<div className="flex flex-col gap-1">
 					<ToolButton
-						selected={settings.tool === Tool.BRUSH}
-						onClick={() =>
-							updateSettings({
-								type: SettingActionType.CHANGE_TOOL,
-								payload: Tool.BRUSH,
-							})
-						}
+						selected={tool === CanvasTool.Brush}
+						onClick={() => dispatch(changeTool(CanvasTool.Brush))}
 					>
 						<Brush className="h-5" />
 					</ToolButton>
 					<ToolButton
-						selected={settings.tool === Tool.BUCKET}
-						onClick={() =>
-							updateSettings({
-								type: SettingActionType.CHANGE_TOOL,
-								payload: Tool.BUCKET,
-							})
-						}
+						selected={tool === CanvasTool.Bucket}
+						onClick={() => dispatch(changeTool(CanvasTool.Bucket))}
 					>
 						<PaintBucket className="h-5" />
 					</ToolButton>
 				</div>
 			</div>
 			<div className="flex flex-col gap-1">
-				<ToolButton
-					onClick={() => handleEvent({ type: RoomEventType.UNDO_STROKE })}
-				>
+				<ToolButton onClick={() => dispatch(undoStroke())}>
 					<Undo2 className="h-5" />
 				</ToolButton>
-				<ToolButton
-					onClick={() => handleEvent({ type: RoomEventType.CLEAR_STROKES })}
-				>
+				<ToolButton onClick={() => dispatch(clearStrokes())}>
 					<Trash className="h-5" />
 				</ToolButton>
 			</div>
@@ -52,24 +56,25 @@ export function CanvasTools() {
 
 const strokeWidthPresets = [8, 12, 16, 18, 22, 28];
 function Strokes() {
-	const { settings, updateSettings } = useRoomContext();
+	const dispatch = useDispatch();
+	const strokeWidth = useSelector(
+		(state: RootState) => state.client.canvas.strokeWidth
+	);
+	const strokeColor = useSelector(
+		(state: RootState) => state.client.canvas.strokeColor
+	);
 	return (
 		<div className="grid grid-cols-3 grid-rows-2 gap-1">
 			{strokeWidthPresets.map((width) => (
 				<Button
 					key={width}
 					size="icon"
-					variant={settings.strokeWidth === width ? "default" : "outline"}
-					onClick={() =>
-						updateSettings({
-							type: SettingActionType.CHANGE_STROKE_WIDTH,
-							payload: width,
-						})
-					}
+					variant={strokeWidth === width ? "default" : "outline"}
+					onClick={() => dispatch(changeStrokeWidth(width))}
 				>
 					<span
 						className="rounded-full cursor-pointer border border-border aspect-square"
-						style={{ width: `${width}px`, backgroundColor: settings.color }}
+						style={{ width: `${width}px`, backgroundColor: strokeColor }}
 					/>
 				</Button>
 			))}
@@ -111,17 +116,12 @@ const colorPresets = [
 	"#8A2BE2", // Blue Violet
 ];
 function Colors() {
-	const { updateSettings } = useRoomContext();
+	const dispatch = useDispatch();
 	return (
 		<div className="grid grid-cols-12 gap-1">
 			{colorPresets.map((color) => (
 				<button
-					onClick={() =>
-						updateSettings({
-							type: SettingActionType.CHANGE_COLOR,
-							payload: color,
-						})
-					}
+					onClick={() => dispatch(changeStrokeColor(color))}
 					key={color}
 					className=" w-10 aspect-square rounded-md cursor-pointer border border-border"
 					style={{ backgroundColor: color }}
@@ -146,19 +146,15 @@ export function ToolButton({
 	);
 }
 
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import { HexColorPicker } from "react-colorful";
-import { useRoomContext } from "../../contexts/room-context";
-import { toast } from "sonner";
-import { RoomEventType } from "@/types/room";
-import { SettingActionType, Tool } from "@/types/canvas";
-
 export function StrokeTool() {
-	const { settings, updateSettings } = useRoomContext();
+	const dispatch = useDispatch();
+
+	const strokeColor = useSelector(
+		(state: RootState) => state.client.canvas.strokeColor
+	);
+	const strokeWidth = useSelector(
+		(state: RootState) => state.client.canvas.strokeWidth
+	);
 
 	const strokeWidthPresets = [2, 4, 8, 12, 16];
 	return (
@@ -168,8 +164,8 @@ export function StrokeTool() {
 					<div
 						className="rounded-full border border-border aspect-square"
 						style={{
-							backgroundColor: settings.color,
-							height: `${settings.strokeWidth / 2}px`,
+							backgroundColor: strokeColor,
+							height: `${strokeWidth / 2}px`,
 						}}
 					></div>
 				</Button>
@@ -177,23 +173,13 @@ export function StrokeTool() {
 			<PopoverContent sideOffset={12} className=" w-56 p-2 gap-2 flex flex-col">
 				<HexColorPicker
 					className="max-w-full min-w-full"
-					color={settings.color}
-					onChange={(color) =>
-						updateSettings({
-							type: SettingActionType.CHANGE_COLOR,
-							payload: color,
-						})
-					}
+					color={strokeColor}
+					onChange={(color) => dispatch(changeStrokeColor(color))}
 				/>
 				<div className="flex flex-wrap justify-between">
 					{colorPresets.map((color) => (
 						<button
-							onClick={() =>
-								updateSettings({
-									type: SettingActionType.CHANGE_COLOR,
-									payload: color,
-								})
-							}
+							onClick={() => dispatch(changeStrokeColor(color))}
 							key={color}
 							className=" basis-[12%] aspect-square rounded-full cursor-pointer border border-border"
 							style={{ backgroundColor: color }}
@@ -203,17 +189,12 @@ export function StrokeTool() {
 				<div className="flex gap-2 items-center justify-between px-4">
 					{strokeWidthPresets.map((width) => (
 						<button
-							onClick={() =>
-								updateSettings({
-									type: SettingActionType.CHANGE_STROKE_WIDTH,
-									payload: width,
-								})
-							}
+							onClick={() => dispatch(changeStrokeWidth(width))}
 							key={width}
 							className="rounded-full cursor-pointer border border-border aspect-square"
 							style={{
 								width: `${width}px`,
-								backgroundColor: settings.color,
+								backgroundColor: strokeColor,
 							}}
 						/>
 					))}
@@ -224,7 +205,6 @@ export function StrokeTool() {
 }
 
 export function CopyRoomLink() {
-
 	const handleCopy = () => {
 		const url = window.location.href;
 		navigator.clipboard.writeText(url);
