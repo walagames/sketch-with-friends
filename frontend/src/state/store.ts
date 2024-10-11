@@ -33,7 +33,7 @@ const socketMiddleware: Middleware = (store) => {
 				socket.onmessage = (event) => {
 					const actions = JSON.parse(event.data);
 					batch(() => {
-						actions.forEach((action) => {
+						actions.forEach((action: any) => {
 							if (action.type === "error") {
 								toast.error(action.payload);
 							} else {
