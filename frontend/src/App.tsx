@@ -84,21 +84,16 @@ function App() {
 
 	const View = getView(views, { roomStage, roomRole, gamePhase, gameRole });
 
-	const isCountdownActive = useSelector(
-		(state: RootState) => state.game.isCountdownActive
-	);
-
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-between relative">
 			<div className="h-screen w-screen flex flex-col items-center justify-center relative p-3">
 				<AnimatePresence mode="popLayout">
-					{isCountdownActive && <GameStartCountdown />}
 					{roomId ? (
 						<motion.div
 							key={View.key}
-							initial={{ opacity: 0, scale: 0.98 }}
-							animate={{ opacity: 1, scale: 1 }}
-							exit={{ opacity: 0, scale: 0.98 }}
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							exit={{ opacity: 0 }}
 							transition={{
 								type: "spring",
 								stiffness: 500,

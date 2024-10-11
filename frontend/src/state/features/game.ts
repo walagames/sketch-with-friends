@@ -15,20 +15,18 @@ export interface GameState {
 	round: number;
 	phase: GamePhase;
 	currentPhaseDeadline: number;
-	currentDrawer: string;
+	currentRound: number;
 	wordOptions: string[];
 	selectedWord: string;
-	isCountdownActive: boolean;
 }
 
 const initialState: GameState = {
 	round: 0,
 	phase: GamePhase.Picking,
 	currentPhaseDeadline: 0,
-	currentDrawer: "",
+	currentRound: 0,
 	wordOptions: [],
 	selectedWord: "",
-	isCountdownActive: false,
 };
 
 export const gameSlice = createSlice({
@@ -51,8 +49,8 @@ export const gameSlice = createSlice({
 		selectWord: (state, action: PayloadAction<string>) => {
 			state.selectedWord = action.payload;
 		},
-		toggleCountdown: (state, action: PayloadAction<boolean>) => {
-			state.isCountdownActive = action.payload;
+		setRound: (state, action: PayloadAction<number>) => {
+			state.currentRound = action.payload;
 		},
 	},
 });

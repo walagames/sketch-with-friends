@@ -29,7 +29,7 @@ func NewGameState(initialPhase Phase, r *room) *gameState {
 	return &gameState{
 		room:              r,
 		currentPhase:      initialPhase,
-		currentRound:      0,
+		currentRound:      1,
 		drawingQueue:      make([]uuid.UUID, 0),
 		wordOptions:       make([]string, 0),
 		strokes:           make([]Stroke, 0),
@@ -131,6 +131,7 @@ func (phase PickingPhase) Begin(g *gameState) {
 				Phase:    g.currentPhase.Name(),
 				Deadline: g.currentPhaseDeadline,
 			}),
+		message(SetRound, g.currentRound),
 		message(ClearStrokes, nil),
 	)
 
@@ -157,7 +158,7 @@ func (phase DrawingPhase) Name() string {
 
 // Start of drawing phase
 func (phase DrawingPhase) Begin(g *gameState) {
-	phaseDuration := time.Second * 30
+	phaseDuration := time.Second * time.Duration(g.room.Settings.DrawingTimeAllowed)
 	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
 	fmt.Println("Drawing phase started", "duration", phaseDuration)
 
