@@ -6,7 +6,7 @@ export const getRealtimeHref = () => {
 	const isBranch = import.meta.env.BRANCH_SOCKET_HOST;
 
 	const host = isDev
-		? "localhost:3000"
+		? "localhost:8080"
 		: isBranch
 		? import.meta.env.BRANCH_SOCKET_HOST
 		: "realtime.sketchwithfriends.com";
