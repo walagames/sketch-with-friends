@@ -1,11 +1,15 @@
 import { toast } from "sonner";
 
 export const getRealtimeHref = () => {
-	const protocol = import.meta.env.DEV ? "ws" : "wss";
-	const host = import.meta.env.DEV
-		? "localhost:8080"
-		: import.meta.env.SOCKET_HOST;
-	console.log(import.meta.env.SOCKET_HOST);
+	const isDev = import.meta.env.DEV;
+	const protocol = isDev ? "ws" : "wss";
+	const isBranch = import.meta.env.BRANCH_SOCKET_HOST;
+
+	const host = isDev
+		? "localhost:3000"
+		: isBranch
+		? import.meta.env.BRANCH_SOCKET_HOST
+		: "realtime.sketchwithfriends.com";
 	return `${protocol}://${host}`;
 };
 
