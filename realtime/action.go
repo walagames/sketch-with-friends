@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"log/slog"
-	"time"
 
 	"fmt"
 	"reflect"
@@ -26,25 +25,25 @@ const (
 	ClearStrokes   ActionType = "canvas/clearStrokes"
 	UndoStroke     ActionType = "canvas/undoStroke"
 	SetStrokes     ActionType = "canvas/setStrokes"
-	
+
 	// Game actions
-	SetWord         ActionType = "game/setWord"         // picker sends real word, guessers get hinted word
-	SubmitGuess     ActionType = "game/submitGuess"     // only sent from client
-	WordOptions     ActionType = "game/wordOptions"     // only sent from server to picker
-	StartGame       ActionType = "game/startGame"       // only sent to server from host
-	GuessResult     ActionType = "game/guessResult"     // added to guess chat when a player guess is processed
-	ChangePhase     ActionType = "game/changePhase"     // changes the game phase
-	SelectWord      ActionType = "game/selectWord"      // picker selects a word from options
-	ToggleCountdown ActionType = "game/toggleCountdown" // displays countdown animation
+	SetWord     ActionType = "game/setWord"     // picker sends real word, guessers get hinted word
+	SubmitGuess ActionType = "game/submitGuess" // only sent from client
+	WordOptions ActionType = "game/wordOptions" // only sent from server to picker
+	StartGame   ActionType = "game/startGame"   // only sent to server from host
+	GuessResult ActionType = "game/guessResult" // added to guess chat when a player guess is processed
+	ChangePhase ActionType = "game/changePhase" // changes the game phase
+	SelectWord  ActionType = "game/selectWord"  // picker selects a word from options
+	SetRound    ActionType = "game/setRound"    // sets the current round number
 
 	// Room actions
-	InitializeRoom ActionType = "room/initializeRoom" // send initial state to client including playerId and existing game state
-	ChangeSettings ActionType = "room/changeSettings"
-	SetPlayers     ActionType = "room/setPlayers"
-	PlayerJoined   ActionType = "room/playerJoined"
-	PlayerLeft     ActionType = "room/playerLeft"
-	HostChanged    ActionType = "room/hostChanged"
-	ChangeStage    ActionType = "room/changeStage"
+	InitializeRoom     ActionType = "room/initializeRoom" // send initial state to client including playerId and existing game state
+	ChangeRoomSettings ActionType = "room/changeRoomSettings"
+	SetPlayers         ActionType = "room/setPlayers"
+	PlayerJoined       ActionType = "room/playerJoined"
+	PlayerLeft         ActionType = "room/playerLeft"
+	HostChanged        ActionType = "room/hostChanged"
+	ChangeStage        ActionType = "room/changeStage"
 )
 
 // ActionDefinition struct to encapsulate action metadata
@@ -75,19 +74,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		Execute: func(r *room, a *Action) error {
 			slog.Info("starting game")
 			r.Stage = Playing
-
 			r.game = NewGameState(PickingPhase{}, r)
-			r.game.isCountdownActive = true
-			r.broadcast(GameRoleAny,
-				message(ToggleCountdown, true),
-			)
-
-			time.Sleep(time.Second * 5)
-			r.game.isCountdownActive = false
-			r.broadcast(GameRoleAny,
-				message(ToggleCountdown, false),
-			)
-
 			r.game.initDrawQueue()
 			r.game.currentPhase.Begin(r.game)
 			return nil
@@ -227,6 +214,26 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 				return fmt.Errorf("guess does not match current word")
 			}
 			slog.Info("player guessed the word correctly", "playerId", a.Player.ID, "guess", a.Payload)
+			return nil
+		},
+		After: func(r *room, a *Action) error {
+			// TODO
+			return nil
+		},
+	},
+	ChangeRoomSettings: {
+		Permission:  RoomRoleHost,
+		Role:        GameRoleAny,
+		PayloadType: map[string]interface{}{},
+		validator: func(r *room) error {
+			// TODO
+			return nil
+		},
+		Execute: func(r *room, a *Action) error {
+			// ! i hate this
+			r.Settings.DrawingTimeAllowed = int(a.Payload.(map[string]interface{})["drawingTimeAllowed"].(float64))
+			r.Settings.PlayerLimit = int(a.Payload.(map[string]interface{})["playerLimit"].(float64))
+			r.Settings.TotalRounds = int(a.Payload.(map[string]interface{})["totalRounds"].(float64))
 			return nil
 		},
 		After: func(r *room, a *Action) error {
