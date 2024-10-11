@@ -51,12 +51,19 @@ export function DrawingGuesserView() {
 	const selectedWord = useSelector(
 		(state: RootState) => state.game.selectedWord
 	);
+
+	const currentRound = useSelector(
+		(state: RootState) => state.game.currentRound
+	);
+	const totalRounds = useSelector(
+		(state: RootState) => state.room.settings.totalRounds
+	);
 	return (
 		<div className="flex flex-col  items-start justify-center gap-2">
 			<div className="flex justify-between w-full items-center">
 				<div className="flex items-center justify-center text-2xl gap-1.5">
-					Round <span className="font-medium">TODO</span> of{" "}
-					<span className="font-medium">TODO</span>
+					Round <span className="font-medium">{currentRound}</span> of{" "}
+					<span className="font-medium">{totalRounds}</span>
 				</div>
 
 				<div className="text-2xl mx-auto">

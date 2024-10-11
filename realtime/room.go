@@ -140,6 +140,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 			}),
 			message(SetStrokes, r.game.strokes),
 			message(SelectWord, r.game.currentWord), // ! need to send the hinted word instead
+			message(SetRound, r.game.currentRound),
 		)
 	}
 
