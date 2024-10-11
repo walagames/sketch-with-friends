@@ -84,18 +84,25 @@ func host(rm RoomManager) http.HandlerFunc {
 			return
 		}
 
-		// Create a new room
-		room, err := rm.CreateRoom()
+		// Register a new room
+		room, err := rm.Register()
 		if err != nil {
 			slog.Error("failed to create room", "error", err)
 			http.Error(w, "Failed to create room", http.StatusInternalServerError)
 			return
 		}
 
+		// Start the room routine
 		go room.Run(rm)
 
-		// Connect the client to the room
-		room.Connect(conn, RoleHost, username, avatarSeed, avatarColor)
+		// Connect the player to the room
+		player := NewPlayer(&playerOptions{
+			roomRole:    RoomRoleHost,
+			name:        username,
+			avatarSeed:  avatarSeed,
+			avatarColor: avatarColor,
+		})
+		room.Connect(conn, player)
 	}
 }
 
@@ -129,12 +136,20 @@ func join(rm RoomManager) http.HandlerFunc {
 		room, err := rm.Room(code)
 		if err != nil {
 			slog.Error("failed to lookup room", "error", err)
-			CloseConnectionWithReason(conn, RoomNotFound.Error())
+			CloseConnectionWithReason(conn, ErrRoomNotFound.Error())
 			return
 		}
 
-		// Connect the client to the room
-		err = room.Connect(conn, RolePlayer, username, avatarSeed, avatarColor)
+		// Create a new player
+		player := NewPlayer(&playerOptions{
+			roomRole:    RoomRolePlayer,
+			name:        username,
+			avatarSeed:  avatarSeed,
+			avatarColor: avatarColor,
+		})
+
+		// Connect the player to the room
+		err = room.Connect(conn, player)
 		if err != nil {
 			slog.Error("failed to connect to room", "error", err)
 			CloseConnectionWithReason(conn, err.Error())

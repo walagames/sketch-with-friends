@@ -1,377 +1,222 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"log/slog"
-	"math"
-	"math/rand"
-	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
-type Game interface {
-	Run(ctx context.Context, r Room)
-	EnqueueEvent(e *RoomEvent)
-	State() *game
-	End()
+type GamePhase string
+
+type gameState struct {
+	room         *room
+	currentPhase Phase
+
+	currentRound int
+	drawingQueue []uuid.UUID
+	wordOptions  []string
+
+	strokes              []Stroke
+	currentDrawer        *player
+	currentWord          string
+	currentPhaseDeadline time.Time
+	isCountdownActive    bool
 }
 
-type game struct {
-	event                chan *RoomEvent
-	Strokes              []Stroke `json:"strokes"`
-	word                 string
-	HintedWord           string `json:"word"`
-	CurrentRound         int    `json:"currentRound"`
-	TotalRounds          int    `json:"totalRounds"`
-	drawingTime          int
-	CurrentPhaseDeadline time.Time `json:"currentPhaseDeadline"`
-	wordOptions          []string
-	totalHints           int
-	lettersRevealed      int
-	hintInterval         time.Duration
-	currentDrawingIndex  int
-	timers               GameTimers
-	cancel 				 context.CancelFunc
-}
-type GameTimers struct {
-	Countdown   *time.Timer
-	WordPicking *time.Timer
-	Drawing     *time.Timer
-	Hint        *time.Timer
-	PostDrawing *time.Timer
-}
-
-func NewGame(numberOfRounds int, drawingTime int) Game {
-	return &game{
-		Strokes:             make([]Stroke, 0),
-		event:               make(chan *RoomEvent, 5), // event buffer size of 5
-		TotalRounds:         numberOfRounds,
-		CurrentRound:        1,
-		drawingTime:         drawingTime,
-		currentDrawingIndex: 0,
+func NewGameState(initialPhase Phase, r *room) *gameState {
+	return &gameState{
+		room:              r,
+		currentPhase:      initialPhase,
+		currentRound:      0,
+		drawingQueue:      make([]uuid.UUID, 0),
+		wordOptions:       make([]string, 0),
+		strokes:           make([]Stroke, 0),
+		currentDrawer:     nil,
+		currentWord:       "",
+		isCountdownActive: false,
 	}
 }
 
-type GameRole string
-
-const (
-	Picking  GameRole = "PICKING"
-	Drawing  GameRole = "DRAWING"
-	Guessing GameRole = "GUESSING"
-)
-
-const (
-	// Time after the drawing timer ends and before the next player picks a word
-	// We reveal the word and show the updated leaderboard during this period
-	PostDrawingTime = 10 * time.Second
-
-	// Time before the game starts and the first player picks a word
-	CountdownTime = 5 * time.Second
-
-	// Time players have to pick a word they will draw
-	WordPickingTime = 15 * time.Second
-)
-
-const (
-	// Number of options the player drawing has to pick from
-	WordOptions = 3
-)
-
-var wordBank = []string{
-	"cat",
-	"dog",
-	"house",
-	"tree",
-	"book",
-	"chair",
-	"sun",
-	"moon",
-	"flower",
-	"computer",
-}
-
-func (g *game) stopAllTimers() {
-	g.timers.Countdown.Stop()
-	g.timers.Drawing.Stop()
-	g.timers.WordPicking.Stop()
-	g.timers.Hint.Stop()
-	g.timers.PostDrawing.Stop()
-}
-
-func (g *game) Run(roomCtx context.Context, r Room) {
-	slog.Info("Game routine started: ")
-
-	ctx, cancel := context.WithCancel(roomCtx)
-	g.cancel = cancel
-
-	g.timers = GameTimers{
-		Countdown:   time.NewTimer(CountdownTime),
-		WordPicking: time.NewTimer(math.MaxInt64),
-		Drawing:     time.NewTimer(math.MaxInt64),
-		Hint:        time.NewTimer(math.MaxInt64),
-		PostDrawing: time.NewTimer(math.MaxInt64),
+func (g *gameState) initDrawQueue() {
+	for _, p := range g.room.Players {
+		g.drawingQueue = append(g.drawingQueue, p.ID)
 	}
+}
 
-	defer func() {
-		slog.Info("Game routine exited")
+func (g *gameState) nextDrawer() *player {
+	if len(g.drawingQueue) == 0 {
+		return nil
+	}
+	next := g.drawingQueue[0]
+	g.drawingQueue = g.drawingQueue[1:]
+	return g.room.Players[next]
+}
 
-		players := r.Players()
-		for _, p := range players {
-			p.ChangeGameRole(Guessing)
-		}
+type Phase interface {
+	Name() string
+	Begin(gs *gameState)   // called when the phase is starting
+	End(gs *gameState)     // called when the phase is ending
+	Advance(gs *gameState) // transition to the next phase
+}
 
-		g.stopAllTimers()
-		r.ChangeStatus(WAITING)
-		r.Broadcast(r.StateMsg())
-	}()
+func (g *gameState) setPhase(phase Phase) {
+	g.currentPhase.End(g)
+	g.currentPhase = phase
+	g.currentPhase.Begin(g)
+}
 
-	for {
-		select {
-		case <-ctx.Done():
+type PhaseChangeMessage struct {
+	Phase    string    `json:"phase"`
+	Deadline time.Time `json:"deadline"`
+}
+
+func (g *gameState) Transition() bool {
+	// if g.currentRound >= g.room.Settings.TotalRounds {
+	// 	fmt.Println("Game over")
+	// 	g.room.Stage = PostGame
+	// 	g.room.broadcast(GameRoleAny, message(ChangeStage, g.room.Stage))
+	// 	return false
+	// }
+	g.currentPhase.Advance(g)
+	return true
+}
+
+type PickingPhase struct{}
+
+func (phase PickingPhase) Name() string {
+	return "picking"
+}
+
+// Start of picking phase
+func (phase PickingPhase) Begin(g *gameState) {
+	phaseDuration := time.Second * 30
+	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
+	slog.Info("picking phase started", "duration", phaseDuration)
+
+	nextDrawer := g.nextDrawer()
+	// if drawing queue is empty, attempt to refill
+	if nextDrawer == nil {
+		// we've reached the last round, end the game
+		if g.currentRound >= g.room.Settings.TotalRounds {
+			fmt.Println("Game over")
+			g.room.Stage = PostGame
+			g.room.broadcast(GameRoleAny, message(ChangeStage, g.room.Stage))
 			return
-		case <-g.timers.Countdown.C:
-			g.startPickingPhase(r)
-		case <-g.timers.WordPicking.C:
-			// Player didn't pick a word in time, so we pick a random word for them
-			randomWordChoice := g.wordOptions[rand.Intn(len(g.wordOptions))]
-			g.startDrawingPhase(r, randomWordChoice)
-		case <-g.timers.Drawing.C:
-			g.startPostDrawingPhase(r)
-		case <-g.timers.Hint.C:
-			slog.Info("hint timer expired")
-			if g.lettersRevealed < g.totalHints {
-				slog.Info("hinting word", "word", g.word, "hintedWord", g.HintedWord)
-				g.hintWord()
-				g.lettersRevealed++
-				r.BroadcastExcept(r.StateMsg(), r.Players()[g.currentDrawingIndex])
-				g.timers.Hint.Reset(g.hintInterval)
-				continue
-			}
-			slog.Info("hint limit reached")
-			g.timers.Hint.Stop()
-		case <-g.timers.PostDrawing.C:
-			r.Players()[g.currentDrawingIndex].ChangeGameRole(Guessing)
-			g.currentDrawingIndex = (g.currentDrawingIndex + 1) % len(r.Players())
-			if g.currentDrawingIndex == 0 {
-				g.CurrentRound++
-				if g.CurrentRound > g.TotalRounds {
-					slog.Info("Game ended")
-					return
-				}
-			}
-			g.startPickingPhase(r)
-		case e := <-g.event:
-			switch e.Type {
-			case STROKE, STROKE_POINT, CLEAR_STROKES, UNDO_STROKE:
-				g.handleDrawingEvent(e)
-			case PICK_WORD:
-				g.timers.WordPicking.Stop()
-				word := e.Payload.(string)
-				g.startDrawingPhase(r, word)
-			case GUESS:
-				isGuessCorrect := g.word == e.Payload.(string)
-				e.Player.Client().Send(marshalEvent(GUESS_RESPONSE, isGuessCorrect))
-			default:
-				slog.Warn("unhandled event", "event", e)
-			}
-
-			r.BroadcastExcept(marshalEvent(e.Type, e.Payload), e.Player)
 		}
-	}
-}
-
-func (g *game) End() {
-	g.cancel()
-}
-
-func (g *game) startPickingPhase(r Room) {
-	slog.Info("Picking phase started")
-	// Pick the next drawing player
-	players := r.Players()
-	drawingPlayer := players[g.currentDrawingIndex]
-	drawingPlayer.ChangeGameRole(Picking)
-
-	// Send the word options to the drawing player
-	g.wordOptions = g.randomWordOptions()
-	drawingPlayer.Client().Send(marshalEvent(WORD_OPTIONS, g.wordOptions))
-
-	// Set the word picking timer
-	g.timers.WordPicking.Reset(WordPickingTime)
-	g.CurrentPhaseDeadline = time.Now().Add(WordPickingTime).UTC()
-
-	// Broadcast the state to all players
-	r.Broadcast(r.StateMsg())
-}
-
-func (g *game) startDrawingPhase(r Room, word string) {
-	slog.Info("Drawing phase started")
-	// Initialize the word choice
-	g.Strokes = make([]Stroke, 0)
-	g.word = word
-	g.HintedWord = ""
-	g.calculateHints(g.word)
-	g.hintWord()
-
-	// Update the drawing player's game role
-	drawingPlayer := r.Players()[g.currentDrawingIndex]
-	drawingPlayer.ChangeGameRole(Drawing)
-
-	// Reset the timers
-	g.timers.Drawing.Reset(time.Duration(g.drawingTime) * time.Second)
-	g.timers.Hint.Reset(g.hintInterval)
-	g.CurrentPhaseDeadline = time.Now().Add(time.Duration(g.drawingTime) * time.Second).UTC()
-
-	// Broadcast the state to all players
-	r.Broadcast(r.StateMsg())
-}
-
-func (g *game) startPostDrawingPhase(r Room) {
-	slog.Info("Post drawing phase started")
-	// Reveal the word
-	g.timers.Hint.Stop()
-	g.HintedWord = g.word
-
-	// Reset the timers
-	g.CurrentPhaseDeadline = time.Now().Add(PostDrawingTime).UTC()
-	g.timers.PostDrawing.Reset(PostDrawingTime)
-
-	// Broadcast the state to all players
-	r.Broadcast(r.StateMsg())
-}
-
-func (g *game) calculateHints(word string) {
-	const hintPercentage = 0.6 // 60% of the word will be revealed
-
-	wordLength := len(word)
-	g.totalHints = int(math.Ceil(float64(wordLength) * hintPercentage))
-	g.lettersRevealed = 0
-
-	if g.totalHints >= wordLength {
-		g.totalHints = wordLength - 1 // Always keep at least one letter hidden
+		// otherwise, refill and advance to next round
+		g.currentRound++
+		g.initDrawQueue()
+		nextDrawer = g.nextDrawer()
 	}
 
-	g.hintInterval = time.Duration(g.drawingTime) * time.Second / time.Duration(g.totalHints)
+	// update next drawer's role
+	nextDrawer.GameRole = GameRoleDrawing
+	g.currentDrawer = nextDrawer
 
-	slog.Info("Hint calculation",
-		"wordLength", wordLength,
-		"totalHints", g.totalHints,
-		"hintInterval", g.hintInterval)
+	// send next drawer their word options
+	g.wordOptions = wordOptions(3)
+	nextDrawer.Send(message(WordOptions, g.wordOptions))
+
+	// send updated player info
+	g.room.broadcast(GameRoleAny, message(SetPlayers, g.room.Players))
+
+	g.strokes = emptyStrokeSlice()
+
+	// notify players of the change
+	g.room.broadcast(GameRoleAny,
+		message(ChangePhase,
+			PhaseChangeMessage{
+				Phase:    g.currentPhase.Name(),
+				Deadline: g.currentPhaseDeadline,
+			}),
+		message(ClearStrokes, nil),
+	)
+
+	// set the timer
+	g.room.timer.Reset(phaseDuration)
 }
 
-func (g *game) State() *game {
-	return g
+// End of picking phase
+func (phase PickingPhase) End(g *gameState) {
+	fmt.Println("Picking phase ended")
 }
 
-func (g *game) EnqueueEvent(e *RoomEvent) {
-	select {
-	case g.event <- e:
-	default:
-		// If the channel is full, instead of blocking, the event just gets dropped
-		// Not sure if this is the best way to handle this, in practice it shouldn't happen
-		slog.Warn("game event channel full, dropping event", "event", e)
-	}
+// Advance to drawing phase
+func (phase PickingPhase) Advance(g *gameState) {
+	slog.Info("advancing to drawing phase")
+	g.setPhase(&DrawingPhase{})
 }
 
-func randomWord() string {
-	return wordBank[rand.Intn(len(wordBank))]
+type DrawingPhase struct{}
+
+func (phase DrawingPhase) Name() string {
+	return "drawing"
 }
 
-func (g *game) randomWordOptions() []string {
-	// Create a set to ensure uniqueness
-	wordSet := make(map[string]struct{})
+// Start of drawing phase
+func (phase DrawingPhase) Begin(g *gameState) {
+	phaseDuration := time.Second * 30
+	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
+	fmt.Println("Drawing phase started", "duration", phaseDuration)
 
-	// Keep adding words until we have the required number
-	for len(wordSet) < WordOptions {
-		word := randomWord()
-		wordSet[word] = struct{}{}
-	}
+	// notify players of the change
+	g.room.broadcast(GameRoleAny,
+		message(ChangePhase,
+			PhaseChangeMessage{
+				Phase:    g.currentPhase.Name(),
+				Deadline: g.currentPhaseDeadline,
+			}))
 
-	// Convert set to slice
-	words := make([]string, 0, WordOptions)
-	for word := range wordSet {
-		words = append(words, word)
-	}
-
-	return words
+	// set the timer
+	g.room.timer.Reset(phaseDuration)
 }
 
-func (g *game) hintWord() {
-	if g.HintedWord == "" {
-		// Initialize hinted word with stars
-		g.HintedWord = strings.Repeat("*", len(g.word))
-	}
-
-	wordRunes := []rune(g.word)
-	hintedRunes := []rune(g.HintedWord)
-	hiddenIndices := []int{}
-
-	// Find all hidden letter positions
-	for i, r := range hintedRunes {
-		if r == '*' {
-			hiddenIndices = append(hiddenIndices, i)
-		}
-	}
-
-	if len(hiddenIndices) <= 1 {
-		return // Keep at least one letter hidden
-	}
-
-	// Choose a random hidden position
-	randomIndex := hiddenIndices[rand.Intn(len(hiddenIndices)-1)]
-
-	// Replace the star with the actual letter
-	hintedRunes[randomIndex] = wordRunes[randomIndex]
-
-	g.HintedWord = string(hintedRunes)
+// End of drawing phase
+func (phase DrawingPhase) End(g *gameState) {
+	fmt.Println("Drawing phase ended")
 }
 
-func (g *game) handleDrawingEvent(e *RoomEvent) {
-	switch e.Type {
-	case STROKE:
-		g.addStroke(e.Payload)
-	case STROKE_POINT:
-		g.addStrokePoint(e.Payload)
-	case CLEAR_STROKES:
-		g.clearStrokes()
-	case UNDO_STROKE:
-		g.undoStroke()
-	}
+// Advance to post drawing phase
+func (phase DrawingPhase) Advance(g *gameState) {
+	slog.Info("advancing to post drawing phase")
+
+	g.setPhase(&PostDrawingPhase{})
 }
 
-type Stroke struct {
-	Points [][]int `json:"points"`
-	Color  string  `json:"color"` // hex color
-	Width  int     `json:"width"`
+type PostDrawingPhase struct{}
+
+func (phase PostDrawingPhase) Name() string {
+	return "postDrawing"
 }
 
-// Decodes a stroke payload and adds it to the strokes slice
-func (g *game) addStroke(payload interface{}) {
-	stroke, err := decodePayload[Stroke](payload)
-	if err != nil {
-		slog.Warn("failed to decode stroke", "error", err)
-		return
-	}
-	g.Strokes = append(g.Strokes, stroke)
+// Start of post drawing phase
+func (phase PostDrawingPhase) Begin(g *gameState) {
+	phaseDuration := time.Second * 10
+	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
+	fmt.Println("Post drawing phase started", "duration", phaseDuration)
+	// notify players of the change
+	g.room.broadcast(GameRoleAny,
+		message(ChangePhase,
+			PhaseChangeMessage{
+				Phase:    g.currentPhase.Name(),
+				Deadline: g.currentPhaseDeadline,
+			}))
+	// set the timer
+	g.room.timer.Reset(phaseDuration)
 }
 
-// Decodes a stroke point payload and appends it to the most recent stroke
-func (g *game) addStrokePoint(payload interface{}) {
-	point, err := decodePayload[[]int](payload)
-	if err != nil {
-		slog.Warn("failed to decode stroke point", "error", err)
-		return
-	}
-	g.Strokes[len(g.Strokes)-1].Points = append(g.Strokes[len(g.Strokes)-1].Points, point)
+// End of post drawing phase
+func (phase PostDrawingPhase) End(g *gameState) {
+	fmt.Println("Post drawing phase ended")
 }
 
-// Removes all strokes from the strokes slice by creating a new empty slice
-func (g *game) clearStrokes() {
-	g.Strokes = make([]Stroke, 0)
-}
+// Advance to picking phase
+func (phase PostDrawingPhase) Advance(g *gameState) {
+	slog.Info("advancing to picking phase")
 
-// Removes the most recent stroke from the strokes slice
-func (g *game) undoStroke() {
-	if len(g.Strokes) > 0 {
-		g.Strokes = g.Strokes[:len(g.Strokes)-1]
-	}
+	// update the drawer's role
+	g.currentDrawer.GameRole = GameRoleGuessing
+	g.setPhase(&PickingPhase{})
 }
