@@ -73,7 +73,10 @@ export function DrawingGuesserView() {
 						{drawingPlayer?.name} is drawing:{" "}
 						<WordWithLetterBlanks word={selectedWord} />
 					</div>
-					<CountdownTimer endTime={deadline} />
+					<CountdownTimer
+						key={deadline}
+						endTime={new Date(deadline).getTime()}
+					/>
 				</div>
 				<div className="flex w-full h-full items-start justify-center gap-2">
 					<div className="flex flex-col items-center justify-center gap-2 w-[800px]">

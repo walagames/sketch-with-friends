@@ -235,6 +235,10 @@ function App() {
 		? Direction.RIGHT
 		: Direction.LEFT;
 
+	const deadline = useSelector(
+		(state: RootState) => state.game.currentPhaseDeadline
+	);
+
 	const JoinView =
 		joinViews[
 			enteredRoomCode ? JoinStage.ChoosePlayerInfo : JoinStage.EnterCode
@@ -258,7 +262,7 @@ function App() {
 						direction={direction}
 					>
 						{roomId ? (
-							<RoomView.Component key={RoomView.key} />
+							<RoomView.Component key={RoomView.key + deadline} />
 						) : (
 							<JoinView.Component key={JoinView.key} />
 						)}

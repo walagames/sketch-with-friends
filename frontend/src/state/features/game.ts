@@ -14,7 +14,7 @@ export enum GameRole {
 export interface GameState {
 	round: number;
 	phase: GamePhase;
-	currentPhaseDeadline: number;
+	currentPhaseDeadline: string;
 	currentRound: number;
 	wordOptions: string[];
 	selectedWord: string;
@@ -23,7 +23,7 @@ export interface GameState {
 const initialState: GameState = {
 	round: 0,
 	phase: GamePhase.Picking,
-	currentPhaseDeadline: 0,
+	currentPhaseDeadline: new Date().toISOString(),
 	currentRound: 0,
 	wordOptions: [],
 	selectedWord: "",
@@ -41,7 +41,7 @@ export const gameSlice = createSlice({
 			action: PayloadAction<{ phase: GamePhase; deadline: string }>
 		) => {
 			state.phase = action.payload.phase;
-			state.currentPhaseDeadline = new Date(action.payload.deadline).getTime();
+			state.currentPhaseDeadline = action.payload.deadline;
 		},
 		wordOptions: (state, action: PayloadAction<string[]>) => {
 			state.wordOptions = action.payload;

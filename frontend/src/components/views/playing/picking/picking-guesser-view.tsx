@@ -26,7 +26,7 @@ export function PickingGuesserView() {
 			className="flex h-full flex-col items-center justify-center w-full absolute inset-0 gap-12"
 		>
 			<div className="absolute top-10 right-10">
-				<CountdownTimer endTime={deadline} />
+				<CountdownTimer key={deadline} endTime={new Date(deadline).getTime()} />
 			</div>
 			<img src={avatarSvg} className="w-20 h-20 rounded-lg shadow-accent" />
 			<h1 className="text-2xl font-bold">

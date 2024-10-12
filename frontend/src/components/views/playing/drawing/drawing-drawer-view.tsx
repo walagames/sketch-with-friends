@@ -33,7 +33,10 @@ export function DrawingDrawerView() {
 								You're drawing:{" "}
 								<span className="text-3xl font-bold">{selectedWord}</span>
 							</div>
-							<CountdownTimer endTime={deadline} />
+							<CountdownTimer
+								key={deadline}
+								endTime={new Date(deadline).getTime()}
+							/>
 						</div>
 						<Canvas width={800} height={600} role={GameRole.Drawing} />
 						<CanvasTools />
