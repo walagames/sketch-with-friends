@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { copyRoomLink } from "@/lib/realtime";
 import { RaisedButton } from "@/components/raised-button";
 import { useState } from "react";
-import { SettingsIcon, UsersIcon } from "lucide-react";
+import { ClockIcon, SettingsIcon, Tally5Icon, UsersIcon } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -22,15 +22,13 @@ import { useSelector } from "react-redux";
 import { changeRoomSettings } from "@/state/features/room";
 import { RootState } from "@/state/store";
 
-export function PlayerPane({ isHost }: { isHost: boolean }) {
+export function RoomPane({ isHost }: { isHost: boolean }) {
 	const players = useSelector((state: RootState) => state.room.players);
 	const roomId = useSelector((state: RootState) => state.room.id);
 
 	const [showSettings, setShowSettings] = useState(false);
 
-	const maxPlayers = useSelector(
-		(state: RootState) => state.room.settings.playerLimit
-	);
+	const settings = useSelector((state: RootState) => state.room.settings);
 
 	const dispatch = useDispatch();
 	return (
@@ -39,9 +37,18 @@ export function PlayerPane({ isHost }: { isHost: boolean }) {
 				<RaisedButton size="lg" onClick={() => copyRoomLink(roomId)}>
 					{roomId}
 				</RaisedButton>
-				<p className="font-bold text-xl">
-					{Object.keys(players).length}/{maxPlayers}
-				</p>
+				<span className="font-bold text-xl flex items-center gap-2">
+					<UsersIcon className="w-5 h-5 mb-1" />
+					{Object.keys(players).length}/{settings.playerLimit}
+				</span>
+				<span className="font-bold text-xl flex items-center gap-2">
+					<Tally5Icon className="w-5 h-5 mb-1" />
+					{settings.totalRounds}
+				</span>
+				<span className="font-bold text-xl flex items-center gap-1.5">
+					<ClockIcon className="w-5 h-5 mb-1" />
+					{settings.drawingTimeAllowed}s
+				</span>
 				{isHost && (
 					<div className="ml-auto">
 						<RaisedButton

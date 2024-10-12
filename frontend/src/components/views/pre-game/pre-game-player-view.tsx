@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useDirectionAnimation } from "@/App";
-import { PlayerPane } from "./player-pane";
+import { RoomPane } from "./room-pane";
 
 export function PreGamePlayerView() {
 	const directionProps = useDirectionAnimation();
@@ -10,7 +10,7 @@ export function PreGamePlayerView() {
 			{...directionProps}
 			className="flex h-full flex-col items-center justify-center w-full absolute inset-0"
 		>
-			<PlayerPane isHost={false} />
+			<RoomPane isHost={false} />
 		</motion.div>
 	);
 }
