@@ -38,7 +38,7 @@ const initialState: ClientState = {
 	canvas: {
 		hue: 0,
 		lightness: 50,
-		strokeWidth: 2,
+		strokeWidth: 25,
 		tool: CanvasTool.Brush,
 	},
 	enteredRoomCode: "",
