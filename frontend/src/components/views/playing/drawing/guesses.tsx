@@ -127,7 +127,7 @@ function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
 }
 
 const FormSchema = z.object({
-	guess: z.string(),
+	guess: z.string().min(1),
 });
 export function GuessForm() {
 	const dispatch = useDispatch();
