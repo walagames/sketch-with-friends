@@ -222,10 +222,6 @@ function App() {
 		? Direction.RIGHT
 		: Direction.LEFT;
 
-	const deadline = useSelector(
-		(state: RootState) => state.game.currentPhaseDeadline
-	);
-
 	const JoinView =
 		joinViews[
 			enteredRoomCode ? JoinStage.ChoosePlayerInfo : JoinStage.EnterCode
