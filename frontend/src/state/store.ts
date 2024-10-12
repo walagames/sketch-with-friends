@@ -54,7 +54,7 @@ const socketMiddleware: Middleware = (store) => {
 			default:
 				// Check if the action should be sent to the server
 				if (!action.type.startsWith("client") && !action.fromServer) {
-					console.log("sending action to server", action);
+					// console.log("sending action to server", action);
 					if (!action.payload) {
 						action.payload = null;
 					}
