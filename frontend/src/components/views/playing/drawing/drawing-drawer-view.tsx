@@ -7,6 +7,7 @@ import { GameRole } from "@/state/features/game";
 import { motion } from "framer-motion";
 import { useDirectionAnimation } from "@/App";
 import { Hills } from "@/components/hills";
+import { Guesses } from "./guesses";
 
 export function DrawingDrawerView() {
 	const deadline = useSelector(
@@ -41,6 +42,7 @@ export function DrawingDrawerView() {
 						<Canvas width={800} height={600} role={GameRole.Drawing} />
 						<CanvasTools />
 					</div>
+					<Guesses />
 				</div>
 			</div>
 			<Hills />

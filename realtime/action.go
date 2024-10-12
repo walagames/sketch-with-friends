@@ -27,14 +27,16 @@ const (
 	SetStrokes     ActionType = "canvas/setStrokes"
 
 	// Game actions
-	SetWord     ActionType = "game/setWord"     // picker sends real word, guessers get hinted word
-	SubmitGuess ActionType = "game/submitGuess" // only sent from client
-	WordOptions ActionType = "game/wordOptions" // only sent from server to picker
-	StartGame   ActionType = "game/startGame"   // only sent to server from host
-	GuessResult ActionType = "game/guessResult" // added to guess chat when a player guess is processed
-	ChangePhase ActionType = "game/changePhase" // changes the game phase
-	SelectWord  ActionType = "game/selectWord"  // picker selects a word from options
-	SetRound    ActionType = "game/setRound"    // sets the current round number
+	SetWord      ActionType = "game/setWord"      // picker sends real word, guessers get hinted word
+	SubmitGuess  ActionType = "game/submitGuess"  // only sent from client
+	WordOptions  ActionType = "game/wordOptions"  // only sent from server to picker
+	StartGame    ActionType = "game/startGame"    // only sent to server from host
+	GuessResult  ActionType = "game/guessResult"  // added to guess chat when a player guess is processed
+	ClearGuesses ActionType = "game/clearGuesses" // clears the guess chat
+	SetGuesses   ActionType = "game/setGuesses"   // sets the guess chat
+	ChangePhase  ActionType = "game/changePhase"  // changes the game phase
+	SelectWord   ActionType = "game/selectWord"   // picker selects a word from options
+	SetRound     ActionType = "game/setRound"     // sets the current round number
 
 	// Room actions
 	InitializeRoom     ActionType = "room/initializeRoom" // send initial state to client including playerId and existing game state
@@ -210,10 +212,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		},
 		Execute: func(r *room, a *Action) error {
 			// TODO
-			if r.game.currentWord != a.Payload.(string) {
-				return fmt.Errorf("guess does not match current word")
-			}
-			slog.Info("player guessed the word correctly", "playerId", a.Player.ID, "guess", a.Payload)
+			r.game.judgeGuess(a.Player.ID, a.Payload.(string))
 			return nil
 		},
 		After: func(r *room, a *Action) error {

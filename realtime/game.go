@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"log/slog"
+	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -23,6 +25,15 @@ type gameState struct {
 	currentWord          string
 	currentPhaseDeadline time.Time
 	isCountdownActive    bool
+	guesses              []guess
+}
+
+type guess struct {
+	PlayerID      uuid.UUID `json:"playerId"`
+	Guess         string    `json:"guess"`
+	IsCorrect     bool      `json:"isCorrect"`
+	PointsAwarded int       `json:"pointsAwarded"`
+	IsClose       bool      `json:"isClose"`
 }
 
 func NewGameState(initialPhase Phase, r *room) *gameState {
@@ -36,7 +47,61 @@ func NewGameState(initialPhase Phase, r *room) *gameState {
 		currentDrawer:     nil,
 		currentWord:       "",
 		isCountdownActive: false,
+		guesses:           make([]guess, 0),
 	}
+}
+
+func (g *gameState) resetGuesses() {
+	g.guesses = make([]guess, 0)
+	g.room.broadcast(GameRoleAny, message(SetGuesses, g.guesses))
+}
+
+func (g *gameState) judgeGuess(playerID uuid.UUID, guessText string) {
+	result := guess{
+		PlayerID:  playerID,
+		Guess:     guessText,
+		IsCorrect: false,
+		IsClose:   false,
+	}
+
+	// Convert both guess and current word to lowercase for case-insensitive comparison
+	lowerGuess := strings.ToLower(guessText)
+	lowerWord := strings.ToLower(g.currentWord)
+
+	if lowerGuess == lowerWord {
+		result.IsCorrect = true
+		result.PointsAwarded = g.calculatePoints()
+		result.Guess = "Guessed it!" // Replace correct guess with "Guessed it!"
+	} else {
+		// Check for close guesses (e.g., typos, minor differences)
+		result.IsClose = isCloseGuess(lowerGuess, lowerWord)
+	}
+
+	g.guesses = append(g.guesses, result)
+	g.room.broadcast(GameRoleAny, message(GuessResult, result))
+}
+
+func (g *gameState) calculatePoints() int {
+	remainingTime := time.Until(g.currentPhaseDeadline)
+	totalTime := time.Duration(g.room.Settings.DrawingTimeAllowed) * time.Second
+
+	if remainingTime <= 0 {
+		return 0
+	}
+
+	// Calculate points based on remaining time, max 500 points
+	points := int((float64(remainingTime) / float64(totalTime)) * 500)
+
+	return points
+}
+
+// Helper function to determine if a guess is close to the correct word
+func isCloseGuess(guess, word string) bool {
+	// Use Levenshtein distance to determine if the guess is close
+	distance := levenshteinDistance(guess, word)
+	maxDistance := len(word) / 3 // Allow up to 1/3 of the word length to be different
+
+	return distance <= maxDistance
 }
 
 func (g *gameState) initDrawQueue() {
@@ -140,6 +205,15 @@ func (phase PickingPhase) Begin(g *gameState) {
 
 // End of picking phase
 func (phase PickingPhase) End(g *gameState) {
+	if g.currentWord == "" {
+		// Pick a random word if none was chosen
+		randomIndex := rand.Intn(len(g.wordOptions))
+		g.currentWord = g.wordOptions[randomIndex]
+		slog.Info("No word chosen, randomly selected", "word", g.currentWord)
+
+		// Notify all players of the chosen word
+		g.room.broadcast(GameRoleAny, message(SetWord, g.currentWord))
+	}
 	fmt.Println("Picking phase ended")
 }
 
@@ -222,5 +296,36 @@ func (phase PostDrawingPhase) Advance(g *gameState) {
 
 	// update the drawer's role
 	g.currentDrawer.GameRole = GameRoleGuessing
+	g.resetGuesses()
 	g.setPhase(&PickingPhase{})
+}
+
+// levenshteinDistance calculates the Levenshtein distance between two strings
+func levenshteinDistance(s1, s2 string) int {
+	m, n := len(s1), len(s2)
+	d := make([][]int, m+1)
+	for i := range d {
+		d[i] = make([]int, n+1)
+		d[i][0] = i
+	}
+	for j := 1; j <= n; j++ {
+		d[0][j] = j
+	}
+	for j := 1; j <= n; j++ {
+		for i := 1; i <= m; i++ {
+			if s1[i-1] == s2[j-1] {
+				d[i][j] = d[i-1][j-1]
+			} else {
+				d[i][j] = min(d[i-1][j]+1, min(d[i][j-1]+1, d[i-1][j-1]+1))
+			}
+		}
+	}
+	return d[m][n]
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

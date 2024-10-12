@@ -1,7 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 import animate from "tailwindcss-animate";
 export default {
- 	darkMode: ["class"],
+	darkMode: ["class"],
 	content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
 	prefix: "",
 	theme: {
@@ -53,6 +53,15 @@ export default {
 				md: "calc(var(--radius) - 2px)",
 				sm: "calc(var(--radius) - 4px)",
 			},
+			utilities: {
+				".scrollbar-hide": {
+					"-ms-overflow-style": "none",
+					"scrollbar-width": "none",
+					"&::-webkit-scrollbar": {
+						display: "none",
+					},
+				},
+			},
 			keyframes: {
 				"accordion-down": {
 					from: { height: "0" },
@@ -80,4 +89,4 @@ export default {
 		},
 	},
 	plugins: [animate],
-}
+};
