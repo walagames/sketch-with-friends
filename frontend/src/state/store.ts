@@ -5,12 +5,12 @@ import gameReducer from "./features/game";
 import clientReducer from "./features/client";
 import { toast } from "sonner";
 
-const logger: Middleware = (store) => (next) => (action) => {
-	console.log("dispatching", action);
-	const result = next(action);
-	console.log("next state", store.getState());
-	return result;
-};
+// const logger: Middleware = (store) => (next) => (action) => {
+// 	console.log("dispatching", action);
+// 	const result = next(action);
+// 	console.log("next state", store.getState());
+// 	return result;
+// };
 
 const socketMiddleware: Middleware = (store) => {
 	let socket: WebSocket | null = null;
