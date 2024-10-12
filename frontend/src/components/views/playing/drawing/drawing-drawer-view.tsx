@@ -5,7 +5,6 @@ import Canvas from "@/components/canvas";
 import {
 	CanvasTools,
 	ColorSliders,
-	HueSlider,
 } from "@/components/canvas-tools";
 import { GameRole } from "@/state/features/game";
 import { motion } from "framer-motion";
