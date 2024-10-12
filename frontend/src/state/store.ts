@@ -66,7 +66,7 @@ const socketMiddleware: Middleware = (store) => {
 };
 
 export const store = configureStore({
-	devTools: true,
+	devTools: false,
 	reducer: {
 		canvas: canvasReducer,
 		room: roomReducer,
