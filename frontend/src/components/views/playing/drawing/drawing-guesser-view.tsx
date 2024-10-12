@@ -54,7 +54,7 @@ export function DrawingGuesserView() {
 function WordWithLetterBlanks({ word }: { word: string }) {
 	const wordLetters = word.replaceAll("*", "_").split("");
 	return (
-		<span className="text-3xl font-bold">
+		<span className="text-3xl font-bold inline-flex gap-2 px-2">
 			{wordLetters.map((letter, index) => (
 				<span key={index}>{letter}</span>
 			))}

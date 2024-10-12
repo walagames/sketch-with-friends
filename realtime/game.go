@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"math/rand"
@@ -23,10 +24,12 @@ type gameState struct {
 	strokes              []Stroke
 	currentDrawer        *player
 	currentWord          string
+	hintedWord           string
 	currentPhaseDeadline time.Time
 	isCountdownActive    bool
 	guesses              []guess
 	correctGuessCount    int
+	cancelHintRoutine    context.CancelFunc
 }
 
 type guess struct {
@@ -47,9 +50,11 @@ func NewGameState(initialPhase Phase, r *room) *gameState {
 		strokes:           make([]Stroke, 0),
 		currentDrawer:     nil,
 		currentWord:       "",
+		hintedWord:        "",
 		isCountdownActive: false,
 		guesses:           make([]guess, 0),
 		correctGuessCount: 0,
+		cancelHintRoutine: nil,
 	}
 }
 
@@ -85,6 +90,9 @@ func (g *gameState) judgeGuess(playerID uuid.UUID, guessText string) {
 	g.room.broadcast(GameRoleAny, message(GuessResult, result))
 	if g.correctGuessCount >= len(g.room.Players)-1 {
 		g.room.timer.Stop()
+		g.cancelHintRoutine()
+		g.hintedWord = g.currentWord
+		g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
 		time.Sleep(time.Duration(1 * time.Second))
 		g.Transition()
 	}
@@ -221,8 +229,9 @@ func (phase PickingPhase) End(g *gameState) {
 		slog.Info("No word chosen, randomly selected", "word", g.currentWord)
 
 		// Notify all players of the chosen word
-		g.room.broadcast(GameRoleAny, message(SetWord, g.currentWord))
+		g.room.broadcast(GameRoleAny, message(SelectWord, g.currentWord))
 	}
+
 	fmt.Println("Picking phase ended")
 }
 
@@ -244,13 +253,48 @@ func (phase DrawingPhase) Begin(g *gameState) {
 	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
 	fmt.Println("Drawing phase started", "duration", phaseDuration)
 
+	// Initialize hinted word with one hint applied
+	g.hintedWord = applyHint(g.currentWord, g.currentWord)
+
+	// Calculate number of hints and interval
+	totalHints := int(float64(len(g.currentWord)) * 0.6)
+	hintInterval := phaseDuration / time.Duration(totalHints+1)
+
+	// Create a context that can be canceled
+	ctx, cancel := context.WithCancel(context.Background())
+	g.cancelHintRoutine = cancel
+
+	// Start the hint goroutine
+	go func() {
+		ticker := time.NewTicker(hintInterval)
+		defer ticker.Stop()
+
+		hintCount := 1 // We've already applied one hint
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case <-ticker.C:
+				if hintCount >= totalHints {
+					cancel() // All hints applied, cancel the context
+					return
+				}
+				g.hintedWord = applyHint(g.hintedWord, g.currentWord)
+				g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
+				hintCount++
+			}
+		}
+	}()
+
 	// notify players of the change
+	g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
 	g.room.broadcast(GameRoleAny,
 		message(ChangePhase,
 			PhaseChangeMessage{
 				Phase:    g.currentPhase.Name(),
 				Deadline: g.currentPhaseDeadline,
-			}))
+			}),
+	)
 
 	// set the timer
 	g.room.timer.Reset(phaseDuration)

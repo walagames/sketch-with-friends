@@ -139,7 +139,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 				Deadline: r.game.currentPhaseDeadline,
 			}),
 			message(SetStrokes, r.game.strokes),
-			message(SelectWord, r.game.currentWord), // ! need to send the hinted word instead
+			message(SelectWord, r.game.hintedWord),
 			message(SetRound, r.game.currentRound),
 			message(SetGuesses, r.game.guesses),
 		)

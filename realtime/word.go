@@ -37,29 +37,32 @@ func wordOptions(n int) []string {
 	return words
 }
 
-func hintWord(word string) string {
-	hintedWord := strings.Repeat("*", len(word))
+func applyHint(prevWord string, fullWord string) string {
+	if prevWord == fullWord {
+		// First iteration: create initial hinted word
+		prevWord = strings.Repeat("*", len(fullWord))
+	}
 
-	wordRunes := []rune(word)
-	hintedRunes := []rune(hintedWord)
+	prevRunes := []rune(prevWord)
+	fullRunes := []rune(fullWord)
 	hiddenIndices := []int{}
 
 	// Find all hidden letter positions
-	for i, r := range hintedRunes {
+	for i, r := range prevRunes {
 		if r == '*' {
 			hiddenIndices = append(hiddenIndices, i)
 		}
 	}
 
-	if len(hiddenIndices) <= 1 {
-		return hintedWord // Keep at least one letter hidden
+	if len(hiddenIndices) == 0 {
+		return prevWord // All letters are already revealed
 	}
 
 	// Choose a random hidden position
-	randomIndex := hiddenIndices[rand.Intn(len(hiddenIndices)-1)]
+	randomIndex := hiddenIndices[rand.Intn(len(hiddenIndices))]
 
 	// Replace the star with the actual letter
-	hintedRunes[randomIndex] = wordRunes[randomIndex]
+	prevRunes[randomIndex] = fullRunes[randomIndex]
 
-	return string(hintedRunes)
+	return string(prevRunes)
 }
