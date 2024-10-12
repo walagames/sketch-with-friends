@@ -158,7 +158,7 @@ export function ColorSliders() {
 				<Slider
 					trackStyles={{
 						background:
-							"linear-gradient(to bottom, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)",
+							"linear-gradient(to top, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)",
 					}}
 					thumbStyles={{
 						backgroundColor: hslToRgb(hue, 100, 50),
