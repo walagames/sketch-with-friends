@@ -32,7 +32,7 @@ export function EnterPlayerInfoView() {
 			{...animationProps}
 			className="w-full h-full absolute inset-0 flex flex-col items-center justify-center gap-8"
 		>
-			<JoinRoomForm />
+			<PlayerInfoForm />
 			<Hills />
 		</motion.div>
 	);
@@ -80,7 +80,7 @@ const JoinRoomFormSchema = z.object({
 	}),
 });
 
-export function JoinRoomForm() {
+export function PlayerInfoForm() {
 	const [avatarSeed, setAvatarSeed] = useState(randomAvatarSeed());
 	const [color, setColor] = useState(randomColor());
 	const [avatarSvg, setAvatarSvg] = useState("");

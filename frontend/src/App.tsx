@@ -6,10 +6,9 @@ import {
 	MotionConfig,
 } from "framer-motion";
 import { Toaster } from "@/components/ui/sonner";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "./state/store";
 import { GamePhase, GameRole } from "./state/features/game";
-import { useLocation } from "react-router-dom";
 import {
 	EnterCodeView,
 	EnterPlayerInfoView,
@@ -24,7 +23,6 @@ import {
 	PostGamePlayerView,
 } from "@/components/views";
 import { createContext, useContext, useEffect, useState } from "react";
-import { enterRoomCode } from "./state/features/client";
 
 enum JoinStage {
 	EnterCode = "EnterCode",
@@ -177,9 +175,6 @@ const joinViews = {
 };
 
 function App() {
-	const dispatch = useDispatch();
-	const location = useLocation();
-
 	const roomStage = useSelector((state: RootState) => state.room.stage);
 	const gamePhase = useSelector((state: RootState) => state.game.phase);
 	const players = useSelector((state: RootState) => state.room.players);
@@ -199,6 +194,8 @@ function App() {
 		isFirstPickingPhase,
 	});
 
+	// Hack to get the picking phase to slide right
+	// On game start, we slide down from the room view, afterwards it slides right
 	useEffect(() => {
 		if (
 			isFirstPickingPhase &&
@@ -213,16 +210,6 @@ function App() {
 			setIsFirstPickingPhase(true);
 		}
 	}, [roomStage, gamePhase, isFirstPickingPhase]);
-
-	useEffect(() => {
-		const searchParams = new URLSearchParams(location.search);
-		const roomCode = searchParams.get("room");
-		if (roomCode) {
-			dispatch(enterRoomCode(roomCode));
-		} else {
-			dispatch(enterRoomCode(""));
-		}
-	}, [location.search]);
 
 	const enteredRoomCode = useSelector(
 		(state: RootState) => state.client.enteredRoomCode
@@ -262,7 +249,13 @@ function App() {
 						direction={direction}
 					>
 						{roomId ? (
-							<RoomView.Component key={RoomView.key + deadline} />
+							<RoomView.Component
+								key={
+									roomStage === RoomStage.PostGame
+										? RoomView.key
+										: RoomView.key + deadline
+								}
+							/>
 						) : (
 							<JoinView.Component key={JoinView.key} />
 						)}
