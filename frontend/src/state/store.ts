@@ -4,7 +4,6 @@ import roomReducer from "./features/room";
 import gameReducer from "./features/game";
 import clientReducer from "./features/client";
 import { toast } from "sonner";
-import { batch } from "react-redux";
 
 const logger: Middleware = (store) => (next) => (action) => {
 	console.log("dispatching", action);
@@ -32,17 +31,15 @@ const socketMiddleware: Middleware = (store) => {
 				};
 				socket.onmessage = (event) => {
 					const actions = JSON.parse(event.data);
-					batch(() => {
-						actions.forEach((action: any) => {
-							if (action.type === "error") {
-								toast.error(action.payload);
-							} else {
-								store.dispatch({
-									...action,
-									fromServer: true,
-								});
-							}
-						});
+					actions.forEach((action: any) => {
+						if (action.type === "error") {
+							toast.error(action.payload);
+						} else {
+							store.dispatch({
+								...action,
+								fromServer: true,
+							});
+						}
 					});
 				};
 

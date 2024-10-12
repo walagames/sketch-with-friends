@@ -1,8 +1,8 @@
 import { createAvatar } from "@dicebear/core";
-import { notionists } from "@dicebear/collection";
+import { dylan } from "@dicebear/collection";
 
 export function generateAvatar(seed: string, bgcolor: string) {
-	const avatar = createAvatar(notionists, {
+	const avatar = createAvatar(dylan, {
 		seed,
 		backgroundColor: [bgcolor],
 	});
