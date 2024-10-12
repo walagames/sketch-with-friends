@@ -42,15 +42,17 @@ export function PlayerPane({ isHost }: { isHost: boolean }) {
 				<p className="font-bold text-xl">
 					{Object.keys(players).length}/{maxPlayers}
 				</p>
-				<div className="ml-auto">
-					<RaisedButton
-						variant="action"
-						size="icon"
-						onClick={() => setShowSettings(!showSettings)}
-					>
-						{showSettings ? <UsersIcon /> : <SettingsIcon />}
-					</RaisedButton>
-				</div>
+				{isHost && (
+					<div className="ml-auto">
+						<RaisedButton
+							variant="action"
+							size="icon"
+							onClick={() => setShowSettings(!showSettings)}
+						>
+							{showSettings ? <UsersIcon /> : <SettingsIcon />}
+						</RaisedButton>
+					</div>
+				)}
 			</div>
 			<div className="w-full aspect-[4/3] bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex items-start justify-center py-8 px-6">
 				{showSettings ? (
