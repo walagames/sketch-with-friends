@@ -17,7 +17,8 @@ export interface ClientState {
 		guessResponse: boolean | null;
 	};
 	canvas: {
-		strokeColor: string;
+		hue: number;
+		lightness: number;
 		strokeWidth: number;
 		tool: string;
 	};
@@ -35,9 +36,10 @@ const initialState: ClientState = {
 		guessResponse: null,
 	},
 	canvas: {
-		strokeColor: "#000000",
+		hue: 0,
+		lightness: 50,
 		strokeWidth: 2,
-		tool: "pen",
+		tool: CanvasTool.Brush,
 	},
 	enteredRoomCode: "",
 };
@@ -50,8 +52,11 @@ export const clientSlice = createSlice({
 		initializeClient: (state, action: PayloadAction<string>) => {
 			state.id = action.payload;
 		},
-		changeStrokeColor: (state, action: PayloadAction<string>) => {
-			state.canvas.strokeColor = action.payload;
+		changeHue: (state, action: PayloadAction<number>) => {
+			state.canvas.hue = action.payload;
+		},
+		changeLightness: (state, action: PayloadAction<number>) => {
+			state.canvas.lightness = action.payload;
 		},
 		changeStrokeWidth: (state, action: PayloadAction<number>) => {
 			state.canvas.strokeWidth = action.payload;
@@ -72,7 +77,8 @@ export const clientSlice = createSlice({
 });
 
 export const {
-	changeStrokeColor,
+	changeHue,
+	changeLightness,
 	changeStrokeWidth,
 	changeTool,
 	enterRoomCode,

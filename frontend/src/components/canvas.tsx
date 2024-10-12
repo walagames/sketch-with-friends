@@ -11,7 +11,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { GameRole } from "@/state/features/game";
 import { addStroke, addStrokePoint, Stroke } from "@/state/features/canvas";
-import { changeStrokeColor } from "@/state/features/client";
 
 // make canvas less pixelated
 const CANVAS_SCALE = 2;
@@ -64,9 +63,25 @@ function Canvas({
 	const dispatch = useDispatch();
 
 	const strokes = useSelector((state: RootState) => state.canvas.strokes);
-	const strokeColor = useSelector(
-		(state: RootState) => state.client.canvas.strokeColor
+	const hue = useSelector((state: RootState) => state.client.canvas.hue);
+	const lightness = useSelector(
+		(state: RootState) => state.client.canvas.lightness
 	);
+
+	const hslToHex = (h: number, s: number, l: number): string => {
+		l /= 100;
+		const a = (s * Math.min(l, 1 - l)) / 100;
+		const f = (n: number) => {
+			const k = (n + h / 30) % 12;
+			const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+			return Math.round(255 * color)
+				.toString(16)
+				.padStart(2, "0");
+		};
+		return `#${f(0)}${f(8)}${f(4)}`;
+	};
+
+	const strokeColor = hslToHex(hue, 100, lightness);
 	const strokeWidth = useSelector(
 		(state: RootState) => state.client.canvas.strokeWidth
 	);
@@ -171,13 +186,9 @@ function Canvas({
 
 	return (
 		<ContextMenu>
-			<ContextMenuTrigger>
+			<ContextMenuTrigger style={{ width, height }} className="relative">
 				<canvas
-					className="border border-border rounded-lg bg-background"
-					style={{
-						width,
-						height,
-					}}
+					className="border-[3px] border-border rounded-lg bg-background w-full h-full relative z-10"
 					width={width * CANVAS_SCALE}
 					height={height * CANVAS_SCALE}
 					onMouseDown={(e) => {
@@ -192,12 +203,13 @@ function Canvas({
 					}}
 					ref={canvasRef}
 				/>
+				<div className=" w-[98%] h-full bg-border absolute left-1/2 rounded-xl -translate-x-1/2 -bottom-1.5" />
 			</ContextMenuTrigger>
 			<ContextMenuContent className="overflow-visible p-0 bg-transparent rounded-[2px] border-[6px] border-[#423e2e]/90">
 				<HexColorPicker
 					className="custom-pointers"
 					color={strokeColor}
-					onChange={(color) => dispatch(changeStrokeColor(color))}
+					// onChange={(color) => dispatch(changeStrokeColor(color))}
 				/>
 			</ContextMenuContent>
 		</ContextMenu>

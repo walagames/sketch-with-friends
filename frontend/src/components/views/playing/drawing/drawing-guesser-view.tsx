@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { useDirectionAnimation } from "@/App";
 import { Hills } from "@/components/hills";
+import { getPickingPlayer } from "@/lib/player";
 
 const FormSchema = z.object({
 	guess: z.string(),
@@ -50,6 +51,10 @@ export function GuessForm() {
 export function DrawingGuesserView() {
 	const directionProps = useDirectionAnimation();
 
+	const players = useSelector((state: RootState) => state.room.players);
+
+	const drawingPlayer = getPickingPlayer(players);
+
 	const deadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
 	);
@@ -57,26 +62,16 @@ export function DrawingGuesserView() {
 		(state: RootState) => state.game.selectedWord
 	);
 
-	const currentRound = useSelector(
-		(state: RootState) => state.game.currentRound
-	);
-	const totalRounds = useSelector(
-		(state: RootState) => state.room.settings.totalRounds
-	);
 	return (
 		<motion.div
 			{...directionProps}
 			className="flex h-full flex-col items-center justify-center w-full absolute inset-0"
 		>
 			<div className="flex flex-col  items-start justify-center gap-2">
-				<div className="flex justify-between w-full items-center">
-					<div className="flex items-center justify-center text-2xl gap-1.5">
-						Round <span className="font-medium">{currentRound}</span> of{" "}
-						<span className="font-medium">{totalRounds}</span>
-					</div>
-
-					<div className="text-2xl mx-auto">
-						<WordWithLetterBlanks word={selectedWord ?? "TODO"} />
+				<div className="flex justify-between w-full items-end">
+					<div className="text-2xl">
+						{drawingPlayer?.name} is drawing:{" "}
+						<WordWithLetterBlanks word={selectedWord} />
 					</div>
 					<CountdownTimer endTime={deadline} />
 				</div>
@@ -95,10 +90,10 @@ export function DrawingGuesserView() {
 function WordWithLetterBlanks({ word }: { word: string }) {
 	const wordLetters = word.replaceAll("*", "_").split("");
 	return (
-		<div className="text-2xl mx-auto">
+		<span className="text-3xl font-bold">
 			{wordLetters.map((letter, index) => (
 				<span key={index}>{letter}</span>
 			))}
-		</div>
+		</span>
 	);
 }

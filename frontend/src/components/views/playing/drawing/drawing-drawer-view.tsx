@@ -2,7 +2,11 @@ import CountdownTimer from "@/components/countdown-timer";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import Canvas from "@/components/canvas";
-import { CanvasTools } from "@/components/canvas-tools";
+import {
+	CanvasTools,
+	ColorSliders,
+	HueSlider,
+} from "@/components/canvas-tools";
 import { GameRole } from "@/state/features/game";
 import { motion } from "framer-motion";
 import { useDirectionAnimation } from "@/App";
@@ -15,12 +19,6 @@ export function DrawingDrawerView() {
 	const selectedWord = useSelector(
 		(state: RootState) => state.game.selectedWord
 	);
-	const currentRound = useSelector(
-		(state: RootState) => state.game.currentRound
-	);
-	const totalRounds = useSelector(
-		(state: RootState) => state.room.settings.totalRounds
-	);
 	const directionProps = useDirectionAnimation();
 
 	return (
@@ -28,18 +26,19 @@ export function DrawingDrawerView() {
 			{...directionProps}
 			className="flex h-full flex-col items-center justify-center w-full absolute inset-0"
 		>
-			<div className="mx-auto my-auto">
-				<div className="flex justify-between w-full items-center">
-					<div className="flex items-center justify-center text-2xl gap-1.5">
-						Round <span className="font-medium">{currentRound}</span> of{" "}
-						<span className="font-medium">{totalRounds}</span>
+			<div className="mx-auto my-auto flex flex-col gap-2 items-center">
+				<div className="flex w-full h-full items-end justify-center gap-6">
+					<div className="py-16">
+						<ColorSliders />
 					</div>
-
-					<div className="text-2xl mx-auto">{selectedWord}</div>
-					<CountdownTimer endTime={deadline} />
-				</div>
-				<div className="flex w-full h-full items-start justify-center gap-2">
-					<div className="flex flex-col items-center justify-center gap-2 w-[800px]">
+					<div className="flex flex-col items-center justify-center gap-4 w-[800px]">
+						<div className="flex justify-between w-full items-end">
+							<div className="text-2xl">
+								You're drawing:{" "}
+								<span className="text-3xl font-bold">{selectedWord}</span>
+							</div>
+							<CountdownTimer endTime={deadline} />
+						</div>
 						<Canvas width={800} height={600} role={GameRole.Drawing} />
 						<CanvasTools />
 					</div>

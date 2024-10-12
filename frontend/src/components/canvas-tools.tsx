@@ -1,219 +1,177 @@
-import { Brush, PaintBucket, Undo2, Trash } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Brush, Undo2, Trash, EraserIcon } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
+import { Slider } from "./ui/slider";
 import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
-import { HexColorPicker } from "react-colorful";
-import { toast } from "sonner";
-import {
-	changeStrokeColor,
 	changeStrokeWidth,
 	changeTool,
 	CanvasTool,
+	changeHue,
+	changeLightness,
 } from "@/state/features/client";
 
 import { undoStroke, clearStrokes } from "@/state/features/canvas";
+import { RaisedButton } from "./raised-button";
 
 export function CanvasTools() {
 	const dispatch = useDispatch();
 	const tool = useSelector((state: RootState) => state.client.canvas.tool);
 	return (
-		<div className="flex justify-between w-full ">
-			<Colors />
-			{/* <StrokeTool /> */}
+		<div className="flex gap-8 w-full items-center ">
+			<StrokeWidthSlider />
 			<div className="flex gap-2">
-				<Strokes />
-				<div className="flex flex-col gap-1">
-					<ToolButton
-						selected={tool === CanvasTool.Brush}
-						onClick={() => dispatch(changeTool(CanvasTool.Brush))}
-					>
-						<Brush className="h-5" />
-					</ToolButton>
-					<ToolButton
-						selected={tool === CanvasTool.Bucket}
-						onClick={() => dispatch(changeTool(CanvasTool.Bucket))}
-					>
-						<PaintBucket className="h-5" />
-					</ToolButton>
-				</div>
-			</div>
-			<div className="flex flex-col gap-1">
-				<ToolButton onClick={() => dispatch(undoStroke())}>
-					<Undo2 className="h-5" />
-				</ToolButton>
-				<ToolButton onClick={() => dispatch(clearStrokes())}>
-					<Trash className="h-5" />
-				</ToolButton>
-			</div>
-		</div>
-	);
-}
-
-const strokeWidthPresets = [8, 12, 16, 18, 22, 28];
-function Strokes() {
-	const dispatch = useDispatch();
-	const strokeWidth = useSelector(
-		(state: RootState) => state.client.canvas.strokeWidth
-	);
-	const strokeColor = useSelector(
-		(state: RootState) => state.client.canvas.strokeColor
-	);
-	return (
-		<div className="grid grid-cols-3 grid-rows-2 gap-1">
-			{strokeWidthPresets.map((width) => (
-				<Button
-					key={width}
+				<RaisedButton
 					size="icon"
-					variant={strokeWidth === width ? "default" : "outline"}
-					onClick={() => dispatch(changeStrokeWidth(width))}
+					shift={false}
+					variant={tool === CanvasTool.Brush ? "action" : "default"}
+					onClick={() => dispatch(changeTool(CanvasTool.Brush))}
 				>
-					<span
-						className="rounded-full cursor-pointer border border-border aspect-square"
-						style={{ width: `${width}px`, backgroundColor: strokeColor }}
-					/>
-				</Button>
-			))}
-		</div>
-	);
-}
-const colorPresets = [
-	// "#000000",
-	// "#ffffff",
-	// "#ff0000",
-	// "#00ff00",
-	// "#0000ff",
-	// "#ffff00",
-	// "#00ffff",
-	// "#ff00ff",
-	"#000000", // Black
-	"#FFFFFF", // White
-	"#FF0000", // Red
-	"#00FF00", // Lime
-	"#0000FF", // Blue
-	"#FFFF00", // Yellow
-	"#00FFFF", // Cyan
-	"#FF00FF", // Magenta
-	"#808080", // Gray
-	"#800000", // Maroon
-	"#808000", // Olive
-	"#008000", // Green
-	"#800080", // Purple
-	"#008080", // Teal
-	"#000080", // Navy
-	"#FFA500", // Orange
-	"#A52A2A", // Brown
-	"#FFC0CB", // Pink
-	"#FFD700", // Gold
-	"#ADFF2F", // Green Yellow
-	"#FF69B4", // Hot Pink
-	"#1E90FF", // Dodger Blue
-	"#F0E68C", // Khaki
-	"#8A2BE2", // Blue Violet
-];
-function Colors() {
-	const dispatch = useDispatch();
-	return (
-		<div className="grid grid-cols-12 gap-1">
-			{colorPresets.map((color) => (
-				<button
-					onClick={() => dispatch(changeStrokeColor(color))}
-					key={color}
-					className=" w-10 aspect-square rounded-md cursor-pointer border border-border"
-					style={{ backgroundColor: color }}
-				/>
-			))}
+					<Brush />
+				</RaisedButton>
+				<RaisedButton
+					size="icon"
+					shift={false}
+					variant={tool === CanvasTool.Eraser ? "action" : "default"}
+					onClick={() => dispatch(changeTool(CanvasTool.Eraser))}
+				>
+					<EraserIcon />
+				</RaisedButton>
+			</div>
+			<div className="flex gap-2">
+				<RaisedButton
+					shift={false}
+					size="icon"
+					onClick={() => dispatch(undoStroke())}
+				>
+					<Undo2 />
+				</RaisedButton>
+				<RaisedButton
+					shift={false}
+					size="icon"
+					onClick={() => dispatch(clearStrokes())}
+				>
+					<Trash />
+				</RaisedButton>
+			</div>
 		</div>
 	);
 }
 
-export function ToolButton({
-	children,
-	selected,
-	...props
-}: {
-	children: React.ReactNode;
-	selected?: boolean;
-} & React.ButtonHTMLAttributes<HTMLButtonElement>) {
-	return (
-		<Button size="icon" variant={selected ? "default" : "outline"} {...props}>
-			{children}
-		</Button>
-	);
-}
-
-export function StrokeTool() {
+function StrokeWidthSlider() {
 	const dispatch = useDispatch();
-
-	const strokeColor = useSelector(
-		(state: RootState) => state.client.canvas.strokeColor
-	);
 	const strokeWidth = useSelector(
 		(state: RootState) => state.client.canvas.strokeWidth
 	);
 
-	const strokeWidthPresets = [2, 4, 8, 12, 16];
-	return (
-		<Popover>
-			<PopoverTrigger asChild>
-				<Button size="icon" variant="outline">
-					<div
-						className="rounded-full border border-border aspect-square"
-						style={{
-							backgroundColor: strokeColor,
-							height: `${strokeWidth / 2}px`,
-						}}
-					></div>
-				</Button>
-			</PopoverTrigger>
-			<PopoverContent sideOffset={12} className=" w-56 p-2 gap-2 flex flex-col">
-				<HexColorPicker
-					className="max-w-full min-w-full"
-					color={strokeColor}
-					onChange={(color) => dispatch(changeStrokeColor(color))}
-				/>
-				<div className="flex flex-wrap justify-between">
-					{colorPresets.map((color) => (
-						<button
-							onClick={() => dispatch(changeStrokeColor(color))}
-							key={color}
-							className=" basis-[12%] aspect-square rounded-full cursor-pointer border border-border"
-							style={{ backgroundColor: color }}
-						/>
-					))}
-				</div>
-				<div className="flex gap-2 items-center justify-between px-4">
-					{strokeWidthPresets.map((width) => (
-						<button
-							onClick={() => dispatch(changeStrokeWidth(width))}
-							key={width}
-							className="rounded-full cursor-pointer border border-border aspect-square"
-							style={{
-								width: `${width}px`,
-								backgroundColor: strokeColor,
-							}}
-						/>
-					))}
-				</div>
-			</PopoverContent>
-		</Popover>
-	);
-}
-
-export function CopyRoomLink() {
-	const handleCopy = () => {
-		const url = window.location.href;
-		navigator.clipboard.writeText(url);
-		toast.info("Copied to clipboard");
+	const handleStrokeWidthChange = (value: number[]) => {
+		dispatch(changeStrokeWidth(value[0]));
 	};
 
 	return (
-		<Button variant="outline" onClick={handleCopy}>
-			Copy invite link
-		</Button>
+		<div className="flex items-center w-full relative max-w-sm">
+			<div className="rounded-full border-[4px] border-border w-7 bg-background aspect-square -mr-1 relative z-10" />
+			<Slider
+				trackStyles={{
+					borderRadius: "0px",
+				}}
+				min={6}
+				max={60}
+				step={1}
+				value={[strokeWidth]}
+				onValueChange={handleStrokeWidthChange}
+				className="w-full"
+			/>
+			<div className="rounded-full border-[6px] border-border w-14 bg-background aspect-square -ml-1 relative z-10" />
+		</div>
+	);
+}
+
+export function ColorSliders() {
+	const dispatch = useDispatch();
+	const hue = useSelector((state: RootState) => state.client.canvas.hue);
+	const lightness = useSelector(
+		(state: RootState) => state.client.canvas.lightness
+	);
+
+	const handleHueChange = (value: number[]) => {
+		dispatch(changeHue(value[0]));
+	};
+
+	const handleLightnessChange = (value: number[]) => {
+		dispatch(changeLightness(value[0]));
+	};
+
+	const hslToRgb = (h: number, s: number, l: number) => {
+		h /= 360;
+		s /= 100;
+		l /= 100;
+		let r, g, b;
+
+		if (s === 0) {
+			r = g = b = l; // achromatic
+		} else {
+			const hue2rgb = (p: number, q: number, t: number) => {
+				if (t < 0) t += 1;
+				if (t > 1) t -= 1;
+				if (t < 1 / 6) return p + (q - p) * 6 * t;
+				if (t < 1 / 2) return q;
+				if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+				return p;
+			};
+
+			const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+			const p = 2 * l - q;
+			r = hue2rgb(p, q, h + 1 / 3);
+			g = hue2rgb(p, q, h);
+			b = hue2rgb(p, q, h - 1 / 3);
+		}
+
+		return `rgb(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(
+			b * 255
+		)})`;
+	};
+
+	return (
+		<div className="flex gap-6 w-full max-w-sm">
+			<div className="flex items-center  relative h-96">
+				<Slider
+					orientation="vertical"
+					min={0}
+					max={100}
+					step={1}
+					value={[lightness]}
+					onValueChange={handleLightnessChange}
+					className="h-full"
+					thumbStyles={{
+						backgroundColor: hslToRgb(hue, 100, lightness),
+					}}
+					trackStyles={{
+						background: `linear-gradient(to top, #000000, ${hslToRgb(
+							hue,
+							100,
+							50
+						)}, #ffffff)`,
+					}}
+				/>
+			</div>
+			<div className="flex items-center h-96 relative">
+				<Slider
+					trackStyles={{
+						background:
+							"linear-gradient(to bottom, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)",
+					}}
+					thumbStyles={{
+						backgroundColor: hslToRgb(hue, 100, 50),
+					}}
+					orientation="vertical"
+					min={0}
+					max={360}
+					step={1}
+					value={[hue]}
+					onValueChange={handleHueChange}
+					className="h-full"
+				/>
+			</div>
+		</div>
 	);
 }
