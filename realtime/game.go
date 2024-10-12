@@ -26,6 +26,7 @@ type gameState struct {
 	currentPhaseDeadline time.Time
 	isCountdownActive    bool
 	guesses              []guess
+	correctGuessCount    int
 }
 
 type guess struct {
@@ -48,6 +49,7 @@ func NewGameState(initialPhase Phase, r *room) *gameState {
 		currentWord:       "",
 		isCountdownActive: false,
 		guesses:           make([]guess, 0),
+		correctGuessCount: 0,
 	}
 }
 
@@ -71,7 +73,9 @@ func (g *gameState) judgeGuess(playerID uuid.UUID, guessText string) {
 	if lowerGuess == lowerWord {
 		result.IsCorrect = true
 		result.PointsAwarded = g.calculatePoints()
+		g.room.Players[playerID].Score += result.PointsAwarded
 		result.Guess = "Guessed it!" // Replace correct guess with "Guessed it!"
+		g.correctGuessCount++
 	} else {
 		// Check for close guesses (e.g., typos, minor differences)
 		result.IsClose = isCloseGuess(lowerGuess, lowerWord)
@@ -79,6 +83,11 @@ func (g *gameState) judgeGuess(playerID uuid.UUID, guessText string) {
 
 	g.guesses = append(g.guesses, result)
 	g.room.broadcast(GameRoleAny, message(GuessResult, result))
+	if g.correctGuessCount >= len(g.room.Players)-1 {
+		g.room.timer.Stop()
+		time.Sleep(time.Duration(1 * time.Second))
+		g.Transition()
+	}
 }
 
 func (g *gameState) calculatePoints() int {
@@ -249,6 +258,8 @@ func (phase DrawingPhase) Begin(g *gameState) {
 
 // End of drawing phase
 func (phase DrawingPhase) End(g *gameState) {
+	g.resetGuesses()
+	g.correctGuessCount = 0
 	fmt.Println("Drawing phase ended")
 }
 
@@ -267,7 +278,7 @@ func (phase PostDrawingPhase) Name() string {
 
 // Start of post drawing phase
 func (phase PostDrawingPhase) Begin(g *gameState) {
-	phaseDuration := time.Second * 10
+	phaseDuration := time.Second * 5
 	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
 	fmt.Println("Post drawing phase started", "duration", phaseDuration)
 	// notify players of the change
@@ -296,7 +307,6 @@ func (phase PostDrawingPhase) Advance(g *gameState) {
 
 	// update the drawer's role
 	g.currentDrawer.GameRole = GameRoleGuessing
-	g.resetGuesses()
 	g.setPhase(&PickingPhase{})
 }
 
