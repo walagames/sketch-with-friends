@@ -132,7 +132,6 @@ func (phase PickingPhase) Begin(g *gameState) {
 				Deadline: g.currentPhaseDeadline,
 			}),
 		message(SetRound, g.currentRound),
-		message(ClearStrokes, nil),
 	)
 
 	// set the timer
@@ -210,6 +209,10 @@ func (phase PostDrawingPhase) Begin(g *gameState) {
 
 // End of post drawing phase
 func (phase PostDrawingPhase) End(g *gameState) {
+	g.room.broadcast(GameRoleAny,
+		message(ClearStrokes, nil),
+		message(SelectWord, ""),
+	)
 	fmt.Println("Post drawing phase ended")
 }
 
