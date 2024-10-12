@@ -135,9 +135,9 @@ export function JoinRoomForm() {
 	}
 
 	return (
-		<div className="max-w-[16rem] w-full flex flex-col gap-8">
-			<div className="flex justify-center items-center gap-8">
-				<div className="flex flex-col gap-3">
+		<div className="max-w-[16rem] w-full flex flex-col gap-6">
+			<div className="flex justify-start pl-3 items-center gap-8">
+				<div className="flex flex-col gap-3 mt-3">
 					<TooltipProvider>
 						<Tooltip>
 							<TooltipTrigger asChild>
@@ -174,7 +174,7 @@ export function JoinRoomForm() {
 					</TooltipProvider>
 				</div>
 				<div className="avatar">
-					<div className="w-36 h-36 shadow-accent rounded-lg">
+					<div className="w-32 aspect-square shadow-accent rounded-lg">
 						<img className="rounded-lg" src={avatarSvg} />
 					</div>
 				</div>
@@ -189,15 +189,15 @@ export function JoinRoomForm() {
 								<FormItem>
 									<FormControl>
 										<div className="relative ">
-											<div className="flex items-center gap-3 bg-secondary-foreground rounded-lg">
+											<div className="flex items-center gap-3 bg-secondary-foreground rounded-lg w-56">
 												<Input
 													autoComplete="off"
 													placeholder="Name"
 													{...field}
-													className="font-bold text-xl text-zinc-400 placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-64 -translate-y-1.5 translate-x-1.5"
+													className="font-bold text-xl text-zinc-400 placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-full -translate-y-1.5 translate-x-1.5"
 												/>
 											</div>
-											<div className="absolute -right-14 top-2">
+											<div className="absolute -right-5 top-2">
 												<RaisedButton
 													shift={false}
 													variant="action"
