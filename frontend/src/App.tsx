@@ -249,13 +249,7 @@ function App() {
 						direction={direction}
 					>
 						{roomId ? (
-							<RoomView.Component
-								key={
-									roomStage === RoomStage.PostGame
-										? RoomView.key
-										: RoomView.key + deadline
-								}
-							/>
+							<RoomView.Component key={RoomView.key} />
 						) : (
 							<JoinView.Component key={JoinView.key} />
 						)}

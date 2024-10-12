@@ -1,16 +1,15 @@
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
 import { Hills } from "@/components/hills";
 import { useDirectionAnimation } from "@/App";
 import { RaisedButton } from "@/components/raised-button";
 import { enterRoomCode } from "@/state/features/client";
 import { useState } from "react";
 import { ArrowRightIcon } from "lucide-react";
+import { clearQueryParams } from "@/lib/params";
 export function EnterCodeView() {
 	const animationProps = useDirectionAnimation();
-	const location = useLocation();
 	const dispatch = useDispatch();
 
 	const searchParams = new URLSearchParams(location.search);
@@ -42,10 +41,7 @@ export function EnterCodeView() {
 					variant="action"
 					className="w-full"
 					onClick={() => {
-						// Clear the query params when creating a new room
-						const url = new URL(window.location.href);
-						url.search = "";
-						window.history.replaceState({}, "", url.toString());
+						clearQueryParams();
 						onSubmit("new");
 					}}
 				>

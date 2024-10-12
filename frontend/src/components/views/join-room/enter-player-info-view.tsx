@@ -11,7 +11,12 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { useEffect, useState } from "react";
-import { ArrowRightIcon, BlendIcon, UserIcon } from "lucide-react";
+import {
+	ArrowLeftIcon,
+	ArrowRightIcon,
+	BlendIcon,
+	UserIcon,
+} from "lucide-react";
 import {
 	Tooltip,
 	TooltipContent,
@@ -25,6 +30,7 @@ import { Hills } from "@/components/hills";
 import { useDirectionAnimation } from "@/App";
 import { RaisedButton } from "@/components/raised-button";
 import { Input } from "@/components/ui/input";
+import { enterRoomCode } from "@/state/features/client";
 export function EnterPlayerInfoView() {
 	const animationProps = useDirectionAnimation();
 	return (
@@ -135,8 +141,14 @@ export function PlayerInfoForm() {
 	}
 
 	return (
-		<div className="max-w-[16rem] w-full flex flex-col gap-6">
-			<div className="flex justify-start pl-3 items-center gap-8">
+		<div className="max-w-[16rem] w-full flex flex-col gap-8 items-start">
+			<RaisedButton onClick={() => dispatch(enterRoomCode(""))}>
+				<span className="flex items-center gap-1 flex-row">
+					<ArrowLeftIcon className="w-4 h-4 -translate-y-0.5" />
+					back
+				</span>
+			</RaisedButton>
+			<div className="flex justify-start pl-3 items-center gap-8 -mt-3">
 				<div className="flex flex-col gap-3 mt-3">
 					<TooltipProvider>
 						<Tooltip>
@@ -197,7 +209,7 @@ export function PlayerInfoForm() {
 													className="font-bold text-xl text-zinc-400 placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-full -translate-y-1.5 translate-x-1.5"
 												/>
 											</div>
-											<div className="absolute -right-5 top-2">
+											<div className="absolute -right-14 top-2">
 												<RaisedButton
 													shift={false}
 													variant="action"

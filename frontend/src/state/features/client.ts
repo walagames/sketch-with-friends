@@ -67,12 +67,6 @@ export const clientSlice = createSlice({
 		enterRoomCode: (state, action: PayloadAction<string>) => {
 			state.enteredRoomCode = action.payload;
 		},
-		// setWordOptions: (state, action: PayloadAction<string[]>) => {
-		// 	state.game.wordOptions = action.payload;
-		// },
-		// selectWord: (state, action: PayloadAction<string>) => {
-		// 	state.game.selectedWord = action.payload;
-		// },
 	},
 });
 
