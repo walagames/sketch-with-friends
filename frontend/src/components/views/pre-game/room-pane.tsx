@@ -3,7 +3,13 @@ import { useDispatch } from "react-redux";
 import { copyRoomLink } from "@/lib/realtime";
 import { RaisedButton } from "@/components/raised-button";
 import { useState } from "react";
-import { ClockIcon, SettingsIcon, Tally5Icon, UsersIcon } from "lucide-react";
+import {
+	ClockIcon,
+	LinkIcon,
+	SettingsIcon,
+	Tally5Icon,
+	UsersIcon,
+} from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -34,8 +40,16 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 	return (
 		<div className="max-w-3xl w-full flex flex-col items-end gap-4">
 			<div className="flex gap-6 items-center w-full">
-				<RaisedButton size="lg" onClick={() => copyRoomLink(roomId)}>
-					{roomId}
+				<RaisedButton
+					size="lg"
+					className="group w-40"
+					onClick={() => copyRoomLink(roomId)}
+				>
+					<span className="group-hover:block hidden">Copy room link</span>
+					<span className="flex items-center gap-2 group-hover:hidden text-lg">
+						<LinkIcon className="w-5 h-5 mb-1" />
+						{roomId}
+					</span>
 				</RaisedButton>
 				<span className="font-bold text-xl flex items-center gap-2">
 					<UsersIcon className="w-5 h-5 mb-1" />
