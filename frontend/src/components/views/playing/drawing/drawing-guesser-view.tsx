@@ -67,7 +67,7 @@ export function DrawingGuesserView() {
 			{...directionProps}
 			className="flex h-full flex-col items-center justify-center w-full absolute inset-0"
 		>
-			<div className="flex flex-col  items-start justify-center gap-2">
+			<div className="flex flex-col  items-start justify-center gap-2 relative z-50">
 				<div className="flex justify-between w-full items-end">
 					<div className="text-2xl">
 						{drawingPlayer?.name} is drawing:{" "}
