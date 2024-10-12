@@ -26,88 +26,56 @@ const CrownIcon = (props: React.SVGProps<SVGSVGElement>) => (
 	</svg>
 );
 
-const verticalVariants = {
-	initial: { opacity: 0, x: -25 },
-	animate: { opacity: 1, x: 0 },
-	exit: { opacity: 0, x: -25 },
+const variants = {
+	initial: { opacity: 0, scale: 0.95 },
+	animate: { opacity: 1, scale: 1 },
+	exit: { opacity: 0, scale: 0.95 },
 };
 
-const horizontalVariants = {
-	initial: { opacity: 0, y: -25 },
-	animate: { opacity: 1, y: 0 },
-	exit: { opacity: 0, y: -25 },
-};
-
-function PlayerCard({
-	player,
-	orientation = "horizontal",
-}: {
-	player: Player;
-	orientation?: "horizontal" | "vertical";
-}) {
-	const { roomRole, avatarSeed, avatarColor, score } = player;
+function PlayerCard({ player }: { player: Player }) {
+	const { roomRole, avatarSeed, avatarColor } = player;
 	const avatarSvg = generateAvatar(avatarSeed, avatarColor);
 	return (
-		<motion.div
-			layout
-			variants={
-				orientation === "horizontal" ? horizontalVariants : verticalVariants
-			}
-			initial="initial"
-			animate="animate"
-			exit="exit"
-			transition={{
-				type: "spring",
-				stiffness: 500,
-				damping: 50,
-				mass: 1,
-			}}
-			className="flex items-center rounded-lg border border-input p-0.5 bg-background w-52 relative"
-		>
+		<div className="flex items-center gap-2 ml-auto">
 			{roomRole === RoomRole.Host && (
-				<div className="absolute -top-2 -right-1.5 z-10">
-					<CrownIcon className="w-5 h-5 text-yellow-400 rotate-12" />
+				<div className="translate-y-2">
+					<CrownIcon className="w-8 h-8 text-yellow-400" />
 				</div>
 			)}
-			<img
-				className="rounded-lg border border-input h-10 w-10 relative"
-				src={avatarSvg}
-			/>
-			<div className="flex flex-col justify-center px-4">
-				<p className="font-medium text-sm leading-0">{player.name}</p>
-				<p className="text-xs text-muted-foreground">
-					{roomRole.toLowerCase()}
+			<motion.div
+				layout
+				variants={variants}
+				initial="initial"
+				animate="animate"
+				exit="exit"
+				transition={{
+					type: "spring",
+					stiffness: 500,
+					damping: 50,
+					mass: 1,
+				}}
+				className="flex items-center gap-3 bg-background shadow-accent rounded-lg mt-2 mr-auto w-64 min-h-0 h-14"
+			>
+				<img
+					className="rounded-l-lg h-full aspect-square relative"
+					src={avatarSvg}
+				/>
+				<p className="text-xl leading-0 font-bold truncate px-4 translate-y-0.5">
+					{player.name}
 				</p>
-			</div>
-			<div className="ml-auto px-4">
-				<p className="text-xs font-medium">{score}</p>
-			</div>
-		</motion.div>
+			</motion.div>
+		</div>
 	);
 }
 
-export function PlayerCards({
-	players,
-	orientation = "horizontal",
-}: {
-	players: Player[];
-	orientation?: "horizontal" | "vertical";
-}) {
+export function PlayerCards({ players }: { players: Player[] }) {
 	return (
-		<ul
-			className={`flex gap-1 ${
-				orientation === "horizontal" ? "flex-row" : "flex-col"
-			}`}
-		>
+		<ul className="gap-2 grid grid-cols-2">
 			<AnimatePresence initial={false} mode="popLayout">
 				{players
 					.sort((a, b) => b.score - a.score)
 					.map((player) => (
-						<PlayerCard
-							key={player.id}
-							player={player}
-							orientation={orientation}
-						/>
+						<PlayerCard key={player.id} player={player} />
 					))}
 			</AnimatePresence>
 		</ul>

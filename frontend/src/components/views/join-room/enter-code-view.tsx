@@ -12,7 +12,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { useEffect, useState } from "react";
-import { RefreshCw } from "lucide-react";
+import { ArrowRightIcon, RefreshCw } from "lucide-react";
 import {
 	Tooltip,
 	TooltipContent,
@@ -21,26 +21,78 @@ import {
 } from "@/components/ui/tooltip";
 import { motion } from "framer-motion";
 import { getRealtimeHref } from "@/lib/realtime";
-import { useDispatch } from "react-redux";
-export function JoinRoomView() {
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/state/store";
+import { useNavigate, createSearchParams } from "react-router-dom";
+import { Hills } from "@/components/hills";
+import { useDirectionAnimation } from "@/App";
+import { RaisedButton } from "@/components/raised-button";
+export function EnterCodeView() {
+	const animationProps = useDirectionAnimation();
+	const roomCode = useSelector(
+		(state: RootState) => state.client.enteredRoomCode
+	);
+
+	const navigate = useNavigate();
+
+	function onSubmit(code: string) {
+		navigate({
+			pathname: "/",
+			search: createSearchParams({
+				room: code,
+			}).toString(),
+		});
+	}
+
+	const codePlaceholder = roomCode ? roomCode : "Room code";
 	return (
-		<motion.div className="w-full h-full absolute inset-0 flex flex-col items-center justify-center gap-8">
+		<motion.div
+			{...animationProps}
+			className="w-full h-full absolute inset-0 flex flex-col items-center justify-center gap-8"
+		>
 			<div className="flex items-center gap-3">
 				<img
-					className="rotate-12"
-					src="/logo.png"
+					className=""
+					src="/logo-full.png"
 					alt="logo"
-					width={44}
-					height={44}
+					width={230}
+					height={102}
 				/>
-				<h1
-					style={{ wordSpacing: "0.01em" }}
-					className="text-4xl font-medium tracking-tight"
-				>
-					Sketch with Friends
-				</h1>
 			</div>
-			<JoinRoomForm />
+			<div className="flex flex-col items-center gap-4">
+				<RaisedButton
+					size="xl"
+					variant="action"
+					className="w-full"
+					onClick={() => onSubmit("new")}
+				>
+					Create room
+				</RaisedButton>
+				<form
+					onSubmit={(e) => {
+						e.preventDefault();
+						onSubmit(e.currentTarget.roomCode.value);
+					}}
+					className="flex items-center gap-3 relative"
+				>
+					<div className="relative ">
+						<div className="flex items-center gap-3 bg-secondary-foreground rounded-lg">
+							<Input
+								autoComplete="off"
+								placeholder={codePlaceholder}
+								className="font-bold text-xl text-zinc-400 placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-64 -translate-y-1.5 translate-x-1.5"
+							/>
+						</div>
+						<div className="absolute -right-14 top-2">
+							<RaisedButton shift={false} variant="action" size="icon">
+								<ArrowRightIcon className="w-6 h-6" />
+							</RaisedButton>
+						</div>
+					</div>
+				</form>
+			</div>
+			{/* <JoinRoomForm /> */}
+			<Hills />
 		</motion.div>
 	);
 }

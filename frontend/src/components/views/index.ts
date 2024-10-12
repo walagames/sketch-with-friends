@@ -7,10 +7,12 @@ import { PostGamePlayerView } from "./post-game/post-game-player-view";
 import { DrawingDrawerView } from "./playing/drawing/drawing-drawer-view";
 import { DrawingGuesserView } from "./playing/drawing/drawing-guesser-view";
 import { PostDrawingView } from "./playing/post-drawing-view";
-import { JoinRoomView } from "./join-room-view";
+import { EnterCodeView } from "./join-room/enter-code-view";
+import { EnterPlayerInfoView } from "./join-room/enter-player-info-view";
 
 export {
-	JoinRoomView,
+	EnterCodeView,
+	EnterPlayerInfoView,
 	PreGameHostView,
 	PreGamePlayerView,
 	PickingDrawerView,

@@ -21,6 +21,7 @@ export interface ClientState {
 		strokeWidth: number;
 		tool: string;
 	};
+	enteredRoomCode: string;
 }
 
 const initialState: ClientState = {
@@ -38,6 +39,7 @@ const initialState: ClientState = {
 		strokeWidth: 2,
 		tool: "pen",
 	},
+	enteredRoomCode: "",
 };
 
 export const clientSlice = createSlice({
@@ -57,6 +59,9 @@ export const clientSlice = createSlice({
 		changeTool: (state, action: PayloadAction<CanvasTool>) => {
 			state.canvas.tool = action.payload;
 		},
+		enterRoomCode: (state, action: PayloadAction<string>) => {
+			state.enteredRoomCode = action.payload;
+		},
 		// setWordOptions: (state, action: PayloadAction<string[]>) => {
 		// 	state.game.wordOptions = action.payload;
 		// },
@@ -66,7 +71,11 @@ export const clientSlice = createSlice({
 	},
 });
 
-export const { changeStrokeColor, changeStrokeWidth, changeTool } =
-	clientSlice.actions;
+export const {
+	changeStrokeColor,
+	changeStrokeWidth,
+	changeTool,
+	enterRoomCode,
+} = clientSlice.actions;
 
 export default clientSlice.reducer;

@@ -3,25 +3,36 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { selectWord } from "@/state/features/game";
 import { useDispatch } from "react-redux";
-import { Button } from "@/components/ui/button";
-
+import { useDirectionAnimation } from "@/App";
+import { motion } from "framer-motion";
+import { Hills } from "@/components/hills";
+import { RaisedButton } from "@/components/raised-button";
 export function PickingDrawerView() {
+	const directionProps = useDirectionAnimation();
 	const dispatch = useDispatch();
 	const deadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
 	);
 	const wordOptions = useSelector((state: RootState) => state.game.wordOptions);
 	return (
-		<div className="flex flex-col items-center justify-center gap-2">
-			<CountdownTimer endTime={deadline} />
-			<h1 className="text-2xl font-medium">Pick a word</h1>
-			<div className="flex items-center justify-center gap-2">
-				{wordOptions.map((word) => (
-					<Button key={word} onClick={() => dispatch(selectWord(word))}>
-						{word}
-					</Button>
-				))}
+		<motion.div
+			{...directionProps}
+			className="flex h-full flex-col items-center justify-center w-full absolute inset-0"
+		>
+			<div className="absolute top-10 right-10">
+				<CountdownTimer endTime={deadline} />
 			</div>
-		</div>
+			<div className="flex flex-col items-center justify-center my-auto gap-12">
+				<h1 className="text-3xl font-bold">Pick a word to sketch</h1>
+				<div className="flex items-center justify-center gap-8">
+					{wordOptions.map((word) => (
+						<RaisedButton size="lg" key={word} onClick={() => dispatch(selectWord(word))}>
+							{word}
+						</RaisedButton>
+					))}
+				</div>
+			</div>
+			<Hills />
+		</motion.div>
 	);
 }

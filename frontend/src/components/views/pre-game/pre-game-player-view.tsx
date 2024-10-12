@@ -1,12 +1,16 @@
+import { motion } from "framer-motion";
+import { useDirectionAnimation } from "@/App";
+import { PlayerPane } from "./player-pane";
+
 export function PreGamePlayerView() {
+	const directionProps = useDirectionAnimation();
+
 	return (
-		<div className="flex-1 flex flex-col items-center justify-center relative">
-			<p
-				style={{ wordSpacing: "0.01em" }}
-				className="text-4xl font-medium tracking-tight"
-			>
-				Waiting for the host to start the game
-			</p>
-		</div>
+		<motion.div
+			{...directionProps}
+			className="flex h-full flex-col items-center justify-center w-full absolute inset-0"
+		>
+			<PlayerPane isHost={false} />
+		</motion.div>
 	);
 }
