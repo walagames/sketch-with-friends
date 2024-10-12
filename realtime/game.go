@@ -81,6 +81,7 @@ func (g *gameState) judgeGuess(playerID uuid.UUID, guessText string) {
 		g.room.Players[playerID].Score += result.PointsAwarded
 		result.Guess = "Guessed it!" // Replace correct guess with "Guessed it!"
 		g.correctGuessCount++
+		g.room.Players[playerID].Send(message(SelectWord, g.currentWord))
 	} else {
 		// Check for close guesses (e.g., typos, minor differences)
 		result.IsClose = isCloseGuess(lowerGuess, lowerWord)
