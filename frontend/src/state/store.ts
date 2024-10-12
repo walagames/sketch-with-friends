@@ -2,7 +2,8 @@ import { configureStore, Middleware } from "@reduxjs/toolkit";
 import canvasReducer from "./features/canvas";
 import roomReducer from "./features/room";
 import gameReducer from "./features/game";
-import clientReducer from "./features/client";
+import clientReducer, { enterRoomCode } from "./features/client";
+import { clearQueryParams } from "@/lib/params";
 import { toast } from "sonner";
 
 // const logger: Middleware = (store) => (next) => (action) => {
@@ -11,6 +12,13 @@ import { toast } from "sonner";
 // 	console.log("next state", store.getState());
 // 	return result;
 // };
+
+enum ConnectionError {
+	RoomNotFound = "ErrRoomNotFound",
+	RoomFull = "ErrRoomFull",
+	RoomClosed = "ErrRoomClosed",
+	ConnectionTimeout = "ErrConnectionTimeout",
+}
 
 const socketMiddleware: Middleware = (store) => {
 	let socket: WebSocket | null = null;
@@ -24,10 +32,25 @@ const socketMiddleware: Middleware = (store) => {
 
 				socket = new WebSocket(action.payload);
 
-				socket.onopen = () => toast.success("Connected to server");
 				socket.onclose = (e) => {
-					toast.error(e.reason ?? "Connection closed");
-					// window.location.replace("/");
+					switch (e.reason) {
+						case ConnectionError.RoomNotFound:
+							toast.error("Room not found");
+							clearQueryParams();
+							store.dispatch(enterRoomCode(""));
+							break;
+						case ConnectionError.RoomFull:
+							toast.error("Room is full");
+							store.dispatch(enterRoomCode(""));
+							break;
+						case ConnectionError.ConnectionTimeout:
+							toast.error("Connection timed out");
+							store.dispatch(enterRoomCode(""));
+							break;
+						default:
+							toast.error(e.reason);
+							break;
+					}
 				};
 				socket.onmessage = (event) => {
 					const actions = JSON.parse(event.data);
@@ -66,7 +89,7 @@ const socketMiddleware: Middleware = (store) => {
 };
 
 export const store = configureStore({
-	devTools: false,
+	devTools: true,
 	reducer: {
 		canvas: canvasReducer,
 		room: roomReducer,
