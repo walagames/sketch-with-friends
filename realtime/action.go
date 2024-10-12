@@ -238,6 +238,9 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		},
 		After: func(r *room, a *Action) error {
 			// TODO
+			r.broadcast(GameRoleAny,
+				message(ChangeRoomSettings, r.Settings),
+			)
 			return nil
 		},
 	},
