@@ -18,6 +18,7 @@ const buttonVariants = cva(
 				lg: "h-11 px-6 rounded-md",
 				xl: "py-1 px-16",
 				icon: "h-10 w-10",
+				tall: "h-full w-12",
 			},
 		},
 		defaultVariants: {
@@ -40,7 +41,7 @@ interface RaisedButtonProps extends ButtonProps {
 const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 	({ className, variant, size, shift = true, ...props }, ref) => {
 		return (
-			<div className="flex items-center gap-3 bg-secondary-foreground rounded-lg">
+			<div className="flex items-center gap-3 bg-secondary-foreground rounded-lg h-full">
 				<motion.button
 					className={cn(buttonVariants({ variant, size, className }))}
 					ref={ref}

@@ -6,7 +6,7 @@ import { Hills } from "@/components/hills";
 import { RaisedButton } from "@/components/raised-button";
 import { enterRoomCode } from "@/state/features/client";
 import { useEffect } from "react";
-import { ArrowRightIcon } from "lucide-react";
+import { StepForwardIcon } from "lucide-react";
 import { clearQueryParams } from "@/lib/params";
 import {
 	Form,
@@ -73,7 +73,7 @@ function CodeForm() {
 											variant="action"
 											size="icon"
 										>
-											<ArrowRightIcon className="w-6 h-6" />
+											<StepForwardIcon className="w-6 h-6" />
 										</RaisedButton>
 									</div>
 								</div>
