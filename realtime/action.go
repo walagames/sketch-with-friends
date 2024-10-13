@@ -131,7 +131,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			return nil
 		},
 		After: func(r *room, a *Action) error {
-			r.broadcast(GameRoleAny,
+			r.broadcast(GameRoleGuessing,
 				message(AddStroke, a.Payload),
 			)
 			return nil
@@ -160,7 +160,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			return nil
 		},
 		After: func(r *room, a *Action) error {
-			r.broadcast(GameRoleAny,
+			r.broadcast(GameRoleGuessing,
 				message(AddStrokePoint, a.Payload),
 			)
 			return nil
@@ -208,7 +208,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		PayloadType: "string",
 		validator: func(r *room) error {
 			// TODO
-			if r.game.currentPhase.Name() != "drawing"{
+			if r.game.currentPhase.Name() != "drawing" {
 				return fmt.Errorf("not in guessing phase")
 			}
 			if r.Stage != Playing {
