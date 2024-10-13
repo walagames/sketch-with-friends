@@ -54,6 +54,7 @@ export const clientSlice = createSlice({
 		},
 		changeHue: (state, action: PayloadAction<number>) => {
 			state.canvas.hue = action.payload;
+			state.canvas.lightness = 50;
 		},
 		changeLightness: (state, action: PayloadAction<number>) => {
 			state.canvas.lightness = action.payload;
