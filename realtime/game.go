@@ -82,6 +82,7 @@ func (g *gameState) judgeGuess(playerID uuid.UUID, guessText string) {
 		result.Guess = "Guessed it!" // Replace correct guess with "Guessed it!"
 		g.correctGuessCount++
 		g.room.Players[playerID].Send(message(SelectWord, g.currentWord))
+		slog.Info("select word", "word", g.currentWord)
 	} else {
 		// Check for close guesses (e.g., typos, minor differences)
 		result.IsClose = isCloseGuess(lowerGuess, lowerWord)
@@ -94,6 +95,7 @@ func (g *gameState) judgeGuess(playerID uuid.UUID, guessText string) {
 		g.cancelHintRoutine()
 		g.hintedWord = g.currentWord
 		g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
+		slog.Info("select word", "hinted word", g.hintedWord)
 		time.Sleep(time.Duration(1 * time.Second))
 		g.Transition()
 	}
@@ -174,7 +176,7 @@ func (phase PickingPhase) Name() string {
 
 // Start of picking phase
 func (phase PickingPhase) Begin(g *gameState) {
-	phaseDuration := time.Second * 30
+	phaseDuration := time.Second * 15
 	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
 	slog.Info("picking phase started", "duration", phaseDuration)
 
@@ -225,12 +227,13 @@ func (phase PickingPhase) Begin(g *gameState) {
 func (phase PickingPhase) End(g *gameState) {
 	if g.currentWord == "" {
 		// Pick a random word if none was chosen
-		randomIndex := rand.Intn(len(g.wordOptions))
+		randomIndex := rand.Intn(len(g.wordOptions) - 1)
 		g.currentWord = g.wordOptions[randomIndex]
 		slog.Info("No word chosen, randomly selected", "word", g.currentWord)
 
 		// Notify all players of the chosen word
 		g.room.broadcast(GameRoleAny, message(SelectWord, g.currentWord))
+		slog.Info("select word", "word", g.currentWord)
 	}
 
 	fmt.Println("Picking phase ended")
@@ -282,6 +285,7 @@ func (phase DrawingPhase) Begin(g *gameState) {
 				}
 				g.hintedWord = applyHint(g.hintedWord, g.currentWord)
 				g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
+				slog.Info("select word", "hinted word", g.hintedWord)
 				hintCount++
 			}
 		}
@@ -289,6 +293,7 @@ func (phase DrawingPhase) Begin(g *gameState) {
 
 	// notify players of the change
 	g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
+	slog.Info("select word", "hinted word", g.hintedWord)
 	g.room.broadcast(GameRoleAny,
 		message(ChangePhase,
 			PhaseChangeMessage{
@@ -305,6 +310,8 @@ func (phase DrawingPhase) Begin(g *gameState) {
 func (phase DrawingPhase) End(g *gameState) {
 	g.resetGuesses()
 	g.correctGuessCount = 0
+	g.hintedWord = ""
+	g.currentWord = ""
 	fmt.Println("Drawing phase ended")
 }
 
@@ -343,6 +350,7 @@ func (phase PostDrawingPhase) End(g *gameState) {
 		message(ClearStrokes, nil),
 		message(SelectWord, ""),
 	)
+	slog.Info("selected word", "word", "")
 	fmt.Println("Post drawing phase ended")
 }
 
