@@ -2,9 +2,9 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { selectWord } from "@/state/features/game";
 import { useDispatch } from "react-redux";
-import { Hills } from "@/components/hills";
 import { RaisedButton } from "@/components/raised-button";
 import { Timer } from "@/components/timer";
+import { HillScene } from "@/components/scenes/hill-scene";
 export function PickingDrawerView() {
 	const dispatch = useDispatch();
 	const deadline = useSelector(
@@ -12,7 +12,7 @@ export function PickingDrawerView() {
 	);
 	const wordOptions = useSelector((state: RootState) => state.game.wordOptions);
 	return (
-		<div className="flex h-full flex-col items-center justify-center w-full">
+		<HillScene>
 			<div className="absolute top-10 right-10">
 				<Timer endTime={deadline} />
 			</div>
@@ -30,9 +30,6 @@ export function PickingDrawerView() {
 					))}
 				</div>
 			</div>
-			<Hills />
-			{/* so that hills still appear on the right when spring overshoots */}
-			<Hills className="absolute bottom-0 left-full w-full " />
-		</div>
+		</HillScene>
 	);
 }

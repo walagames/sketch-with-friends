@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { Timer } from "@/components/timer";
-import { Hills } from "@/components/hills";
+import { HillScene } from "@/components/scenes/hill-scene";
 
 export function PostDrawingView() {
 	const deadline = useSelector(
@@ -9,14 +9,11 @@ export function PostDrawingView() {
 	);
 
 	return (
-		<div className="flex h-full flex-col items-center justify-center w-full">
+		<HillScene>
 			<div className="absolute top-10 right-10">
 				<Timer endTime={deadline} />
 			</div>
 			<h1 className="text-3xl font-bold">Post-drawing</h1>
-			<Hills />
-			{/* so that hills still appear on the right when spring overshoots */}
-			<Hills className="absolute bottom-0 left-full w-full " />
-		</div>
+		</HillScene>
 	);
 }

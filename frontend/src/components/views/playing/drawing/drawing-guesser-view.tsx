@@ -2,10 +2,10 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import Canvas from "@/components/canvas";
 import { GameRole } from "@/state/features/game";
-import { Hills } from "@/components/hills";
 import { getPickingPlayer } from "@/lib/player";
 import { Guesses } from "./guesses";
 import { Timer } from "@/components/timer";
+import { HillScene } from "@/components/scenes/hill-scene";
 
 export function DrawingGuesserView() {
 	const players = useSelector((state: RootState) => state.room.players);
@@ -20,7 +20,7 @@ export function DrawingGuesserView() {
 	);
 
 	return (
-		<div className="flex h-full flex-col items-center justify-center w-full">
+		<HillScene>
 			<div className="mx-auto my-auto flex flex-col gap-2 items-center relative z-50">
 				<div className="flex w-full h-full items-center justify-center gap-6">
 					<div className="flex flex-col items-center justify-centerw-[800px]">
@@ -36,10 +36,7 @@ export function DrawingGuesserView() {
 					<Guesses isGuessing />
 				</div>
 			</div>
-			<Hills />
-			{/* so that hills still appear on the right when spring overshoots */}
-			<Hills className="absolute bottom-0 left-full w-full " />
-		</div>
+		</HillScene>
 	);
 }
 

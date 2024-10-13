@@ -2,12 +2,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useDispatch } from "react-redux";
-import { Hills } from "@/components/hills";
 import { RaisedButton } from "@/components/raised-button";
 import { enterRoomCode } from "@/state/features/client";
 import { useEffect } from "react";
 import { StepForwardIcon } from "lucide-react";
 import { clearQueryParams } from "@/lib/params";
+import { HillScene } from "@/components/scenes/hill-scene";
 import {
 	Form,
 	FormControl,
@@ -91,7 +91,7 @@ export function EnterCodeView() {
 	const dispatch = useDispatch();
 
 	return (
-		<div className="w-full h-full flex flex-col items-center justify-center gap-8 relative">
+		<HillScene>
 			<div className="flex items-center gap-3">
 				<img
 					className=""
@@ -115,9 +115,6 @@ export function EnterCodeView() {
 				</RaisedButton>
 				<CodeForm />
 			</div>
-			{/* so that hills still appear on the left when spring overshoots */}
-			<Hills className="absolute bottom-0 right-full w-full" />
-			<Hills />
-		</div>
+		</HillScene>
 	);
 }

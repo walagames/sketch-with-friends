@@ -3,10 +3,9 @@ import { RootState } from "@/state/store";
 import Canvas from "@/components/canvas";
 import { CanvasTools, ColorSliders } from "@/components/canvas-tools";
 import { GameRole } from "@/state/features/game";
-import { Hills } from "@/components/hills";
 import { Guesses } from "./guesses";
 import { Timer } from "@/components/timer";
-
+import { HillScene } from "@/components/scenes/hill-scene";
 export function DrawingDrawerView() {
 	const deadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
@@ -16,7 +15,7 @@ export function DrawingDrawerView() {
 	);
 
 	return (
-		<div className="flex h-full flex-col items-center justify-center w-full">
+		<HillScene>
 			<div className="mx-auto my-auto flex flex-col gap-2 items-center relative z-50">
 				<div className="flex w-full h-full items-end justify-center gap-6">
 					<div className="py-16">
@@ -36,9 +35,6 @@ export function DrawingDrawerView() {
 					<Guesses />
 				</div>
 			</div>
-			<Hills />
-			{/* so that hills still appear on the left when spring overshoots */}
-			<Hills className="absolute bottom-0 left-full w-full" />
-		</div>
+		</HillScene>
 	);
 }

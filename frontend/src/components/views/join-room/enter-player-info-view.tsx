@@ -14,18 +14,15 @@ import { useEffect, useState } from "react";
 import { DicesIcon, StepBackIcon, StepForwardIcon } from "lucide-react";
 import { getRealtimeHref } from "@/lib/realtime";
 import { useDispatch, useSelector } from "react-redux";
-import { Hills } from "@/components/hills";
 import { RaisedButton } from "@/components/raised-button";
 import { Input } from "@/components/ui/input";
 import { enterRoomCode } from "@/state/features/client";
+import { HillScene } from "@/components/scenes/hill-scene";
 export function EnterPlayerInfoView() {
 	return (
-		<div className="w-full h-full flex flex-col items-center justify-center gap-8">
+		<HillScene>
 			<PlayerInfoForm />
-			{/* so that hills still appear on the right when spring overshoots */}
-			<Hills className="absolute bottom-0 left-full w-full " />
-			<Hills />
-		</div>
+		</HillScene>
 	);
 }
 
@@ -35,7 +32,6 @@ const colors = [
 	"e0da29",
 	"5de029",
 	"29e0d4",
-	// "297ee0",
 	"9129e0",
 	"e029ce",
 ];
@@ -78,7 +74,7 @@ export function PlayerInfoForm() {
 	});
 
 	useEffect(() => {
-		setAvatarSvg(generateAvatar(avatarSeed, colors[0]));
+		setAvatarSvg(generateAvatar(avatarSeed));
 	}, [avatarSeed]);
 
 	function onSubmit(data: z.infer<typeof JoinRoomFormSchema>) {
