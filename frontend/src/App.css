@@ -22,6 +22,9 @@
 .shadow-accent {
 	box-shadow: -0.4rem 0.4rem 0px #333333;
 }
+.shadow-accent-sm {
+	box-shadow: -0.2rem 0.2rem 0px #333333;
+}
 
 .radial-gradient {
 	background: radial-gradient(

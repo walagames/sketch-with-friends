@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { getPickingPlayer } from "@/lib/player";
 import { Hills } from "@/components/hills";
-import CountdownTimer from "@/components/countdown-timer";
+import { Timer } from "@/components/timer";
 
 export function PickingGuesserView() {
 	const players = useSelector((state: RootState) => state.room.players);
@@ -20,7 +20,7 @@ export function PickingGuesserView() {
 	return (
 		<div className="flex h-full flex-col items-center justify-center w-full gap-8">
 			<div className="absolute top-10 right-10">
-				<CountdownTimer key={deadline} endTime={new Date(deadline).getTime()} />
+				<Timer endTime={deadline} />
 			</div>
 			<img src={avatarSvg} className="w-20 h-20 rounded-lg shadow-accent" />
 			<h1 className="text-3xl font-bold">

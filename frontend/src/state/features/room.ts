@@ -44,9 +44,9 @@ export interface RoomState {
 const initialState: RoomState = {
 	id: "",
 	settings: {
-		playerLimit: 10,
-		drawingTimeAllowed: 30,
-		totalRounds: 10,
+		playerLimit: 6,
+		drawingTimeAllowed: 60,
+		totalRounds: 4,
 	},
 	players: {},
 	stage: RoomStage.PreGame,
@@ -70,8 +70,8 @@ export const roomSlice = createSlice({
 		) => {
 			// Update the URL with the room ID as a query parameter
 			const url = new URL(window.location.href);
-			url.searchParams.set('room', action.payload.id);
-			window.history.replaceState({}, '', url.toString());
+			url.searchParams.set("room", action.payload.id);
+			window.history.replaceState({}, "", url.toString());
 			state.id = action.payload.id;
 			state.settings = action.payload.settings;
 			state.players = action.payload.players;

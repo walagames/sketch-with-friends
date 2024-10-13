@@ -17,7 +17,7 @@ export function CanvasTools() {
 	const dispatch = useDispatch();
 	const tool = useSelector((state: RootState) => state.client.canvas.tool);
 	return (
-		<div className="flex gap-8 w-full items-center ">
+		<div className="flex gap-8 w-full items-center py-4 ">
 			<StrokeWidthSlider />
 			<div className="flex gap-2">
 				<RaisedButton

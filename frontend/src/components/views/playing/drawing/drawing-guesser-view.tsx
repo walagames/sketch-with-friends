@@ -1,11 +1,11 @@
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
-import CountdownTimer from "@/components/countdown-timer";
 import Canvas from "@/components/canvas";
 import { GameRole } from "@/state/features/game";
 import { Hills } from "@/components/hills";
 import { getPickingPlayer } from "@/lib/player";
 import { Guesses } from "./guesses";
+import { Timer } from "@/components/timer";
 
 export function DrawingGuesserView() {
 	const players = useSelector((state: RootState) => state.room.players);
@@ -23,16 +23,13 @@ export function DrawingGuesserView() {
 		<div className="flex h-full flex-col items-center justify-center w-full">
 			<div className="mx-auto my-auto flex flex-col gap-2 items-center relative z-50">
 				<div className="flex w-full h-full items-center justify-center gap-6">
-					<div className="flex flex-col items-center justify-center gap-4 w-[800px]">
-						<div className="flex justify-between w-full items-end">
+					<div className="flex flex-col items-center justify-centerw-[800px]">
+						<div className="flex justify-between w-full items-center py-2">
 							<div className="text-2xl">
 								{drawingPlayer?.name} is drawing:{" "}
 								<WordWithLetterBlanks word={selectedWord} />
 							</div>
-							<CountdownTimer
-								key={deadline}
-								endTime={new Date(deadline).getTime()}
-							/>
+							<Timer endTime={deadline} />
 						</div>
 						<Canvas width={800} height={600} role={GameRole.Guessing} />
 					</div>

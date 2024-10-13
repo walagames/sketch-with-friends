@@ -1,6 +1,6 @@
-import CountdownTimer from "@/components/countdown-timer";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
+import { Timer } from "@/components/timer";
 import { Hills } from "@/components/hills";
 
 export function PostDrawingView() {
@@ -11,7 +11,7 @@ export function PostDrawingView() {
 	return (
 		<div className="flex h-full flex-col items-center justify-center w-full">
 			<div className="absolute top-10 right-10">
-				<CountdownTimer key={deadline} endTime={new Date(deadline).getTime()} />
+				<Timer endTime={deadline} />
 			</div>
 			<h1 className="text-3xl font-bold">Post-drawing</h1>
 			<Hills />

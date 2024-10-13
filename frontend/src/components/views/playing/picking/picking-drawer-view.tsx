@@ -1,10 +1,10 @@
-import CountdownTimer from "@/components/countdown-timer";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { selectWord } from "@/state/features/game";
 import { useDispatch } from "react-redux";
 import { Hills } from "@/components/hills";
 import { RaisedButton } from "@/components/raised-button";
+import { Timer } from "@/components/timer";
 export function PickingDrawerView() {
 	const dispatch = useDispatch();
 	const deadline = useSelector(
@@ -14,7 +14,7 @@ export function PickingDrawerView() {
 	return (
 		<div className="flex h-full flex-col items-center justify-center w-full">
 			<div className="absolute top-10 right-10">
-				<CountdownTimer key={deadline} endTime={new Date(deadline).getTime()} />
+				<Timer endTime={deadline} />
 			</div>
 			<div className="flex flex-col items-center justify-center my-auto gap-12">
 				<h1 className="text-3xl font-bold">Pick a word</h1>

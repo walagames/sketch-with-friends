@@ -177,7 +177,7 @@ export function RoomSettingsForm() {
 								<FormControl>
 									<Slider
 										min={15}
-										max={180}
+										max={90}
 										step={5}
 										defaultValue={[field.value]}
 										onValueChange={(vals) => {
@@ -198,7 +198,7 @@ export function RoomSettingsForm() {
 								<FormLabel>Number of Rounds</FormLabel>
 								<FormControl>
 									<Slider
-										min={2}
+										min={1}
 										max={10}
 										step={1}
 										defaultValue={[field.value]}
