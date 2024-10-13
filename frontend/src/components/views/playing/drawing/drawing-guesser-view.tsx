@@ -3,15 +3,11 @@ import { RootState } from "@/state/store";
 import CountdownTimer from "@/components/countdown-timer";
 import Canvas from "@/components/canvas";
 import { GameRole } from "@/state/features/game";
-import { motion } from "framer-motion";
-import { useDirectionAnimation } from "@/App";
 import { Hills } from "@/components/hills";
 import { getPickingPlayer } from "@/lib/player";
 import { Guesses } from "./guesses";
 
 export function DrawingGuesserView() {
-	const directionProps = useDirectionAnimation();
-
 	const players = useSelector((state: RootState) => state.room.players);
 
 	const drawingPlayer = getPickingPlayer(players);
@@ -24,10 +20,7 @@ export function DrawingGuesserView() {
 	);
 
 	return (
-		<motion.div
-			{...directionProps}
-			className="flex h-full flex-col items-center justify-center w-full absolute inset-0"
-		>
+		<div className="flex h-full flex-col items-center justify-center w-full">
 			<div className="mx-auto my-auto flex flex-col gap-2 items-center relative z-50">
 				<div className="flex w-full h-full items-center justify-center gap-6">
 					<div className="flex flex-col items-center justify-center gap-4 w-[800px]">
@@ -47,7 +40,9 @@ export function DrawingGuesserView() {
 				</div>
 			</div>
 			<Hills />
-		</motion.div>
+			{/* so that hills still appear on the right when spring overshoots */}
+			<Hills className="absolute bottom-0 left-full w-full " />
+		</div>
 	);
 }
 

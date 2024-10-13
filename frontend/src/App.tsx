@@ -23,7 +23,7 @@ import {
 	PostGamePlayerView,
 } from "@/components/views";
 import { createContext, useContext, useEffect, useState } from "react";
-
+import { motion } from "framer-motion";
 enum JoinStage {
 	EnterCode = "EnterCode",
 	ChoosePlayerInfo = "ChoosePlayerInfo",
@@ -174,6 +174,15 @@ const joinViews = {
 	},
 };
 
+function TransitionChild({ children }: { children: React.ReactNode }) {
+	const animationProps = useDirectionAnimation();
+	return (
+		<motion.div className="absolute inset-0" {...animationProps}>
+			{children}
+		</motion.div>
+	);
+}
+
 function App() {
 	const roomStage = useSelector((state: RootState) => state.room.stage);
 	const gamePhase = useSelector((state: RootState) => state.game.phase);
@@ -215,6 +224,10 @@ function App() {
 		(state: RootState) => state.client.enteredRoomCode
 	);
 
+	const deadline = useSelector(
+		(state: RootState) => state.game.currentPhaseDeadline
+	);
+
 	const clientId = useSelector((state: RootState) => state.client.id);
 	const direction = clientId
 		? RoomView.direction
@@ -233,8 +246,8 @@ function App() {
 				<MotionConfig
 					transition={{
 						type: "spring",
-						stiffness: 500,
-						damping: 50,
+						stiffness: 350,
+						damping: 30,
 						mass: 1,
 						restDelta: 0.01,
 					}}
@@ -245,9 +258,15 @@ function App() {
 						direction={direction}
 					>
 						{roomId ? (
-							<RoomView.Component key={RoomView.key} />
+							<TransitionChild
+								key={RoomView.key + new Date(deadline).getTime()}
+							>
+								<RoomView.Component />
+							</TransitionChild>
 						) : (
-							<JoinView.Component key={JoinView.key} />
+							<TransitionChild key={JoinView.key}>
+								<JoinView.Component />
+							</TransitionChild>
 						)}
 					</AnimatePresenceWithDirection>
 				</MotionConfig>

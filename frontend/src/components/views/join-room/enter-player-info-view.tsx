@@ -23,24 +23,20 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { motion } from "framer-motion";
 import { getRealtimeHref } from "@/lib/realtime";
 import { useDispatch, useSelector } from "react-redux";
 import { Hills } from "@/components/hills";
-import { useDirectionAnimation } from "@/App";
 import { RaisedButton } from "@/components/raised-button";
 import { Input } from "@/components/ui/input";
 import { enterRoomCode } from "@/state/features/client";
 export function EnterPlayerInfoView() {
-	const animationProps = useDirectionAnimation();
 	return (
-		<motion.div
-			{...animationProps}
-			className="w-full h-full absolute inset-0 flex flex-col items-center justify-center gap-8"
-		>
+		<div className="w-full h-full flex flex-col items-center justify-center gap-8">
 			<PlayerInfoForm />
+			{/* so that hills still appear on the right when spring overshoots */}
+			<Hills className="absolute bottom-0 left-full w-full " />
 			<Hills />
-		</motion.div>
+		</div>
 	);
 }
 
