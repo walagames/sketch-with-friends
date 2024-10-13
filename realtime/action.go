@@ -208,6 +208,12 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		PayloadType: "string",
 		validator: func(r *room) error {
 			// TODO
+			if r.game.currentPhase.Name() != "drawing"{
+				return fmt.Errorf("not in guessing phase")
+			}
+			if r.Stage != Playing {
+				return fmt.Errorf("game is not active")
+			}
 			return nil
 		},
 		Execute: func(r *room, a *Action) error {
