@@ -77,7 +77,7 @@ func (g *gameState) judgeGuess(playerID uuid.UUID, guessText string) {
 
 	if lowerGuess == lowerWord {
 		result.IsCorrect = true
-		result.PointsAwarded = g.calculatePoints()
+		result.PointsAwarded = g.calculatePoints(400)
 		g.room.Players[playerID].Score += result.PointsAwarded
 		result.Guess = ""
 		g.correctGuessCount++
@@ -85,8 +85,7 @@ func (g *gameState) judgeGuess(playerID uuid.UUID, guessText string) {
 		slog.Info("select word", "word", g.currentWord)
 
 		// Award points to the drawer
-		pointsPerGuess := 500 / (len(g.room.Players) - 1)
-		g.currentDrawer.Score += pointsPerGuess
+		g.currentDrawer.Score += g.calculatePoints(100)
 	} else {
 		// Check for close guesses (e.g., typos, minor differences)
 		result.IsClose = isCloseGuess(lowerGuess, lowerWord)
@@ -105,7 +104,7 @@ func (g *gameState) judgeGuess(playerID uuid.UUID, guessText string) {
 	}
 }
 
-func (g *gameState) calculatePoints() int {
+func (g *gameState) calculatePoints(pointsPerGuess int) int {
 	remainingTime := time.Until(g.currentPhaseDeadline)
 	totalTime := time.Duration(g.room.Settings.DrawingTimeAllowed) * time.Second
 
@@ -114,7 +113,7 @@ func (g *gameState) calculatePoints() int {
 	}
 
 	// Calculate points based on remaining time, max 500 points
-	points := int((float64(remainingTime) / float64(totalTime)) * 500)
+	points := int((float64(remainingTime) / float64(totalTime)) * pointsPerGuess)
 
 	return points
 }
