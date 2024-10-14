@@ -348,7 +348,7 @@ func (phase PostDrawingPhase) Begin(g *gameState) {
 	isLastPhase := g.currentRound >= g.room.Settings.TotalRounds && len(g.drawingQueue) == 0
 	phaseDuration := time.Second * 5
 	if isLastPhase {
-		phaseDuration = time.Second * 20
+		phaseDuration = time.Second * 10
 	}
 	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
 	fmt.Println("Post drawing phase started", "duration", phaseDuration)
