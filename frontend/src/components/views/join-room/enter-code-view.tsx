@@ -16,6 +16,7 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Logo } from "@/components/logo";
 
 const CodeFormSchema = z.object({
 	roomCode: z
@@ -92,15 +93,7 @@ export function EnterCodeView() {
 
 	return (
 		<HillScene>
-			<div className="flex items-center gap-3">
-				<img
-					className=""
-					src="/logo-full.png"
-					alt="logo"
-					width={230}
-					height={102}
-				/>
-			</div>
+			<Logo />
 			<div className="flex flex-col items-center gap-4">
 				<RaisedButton
 					size="xl"
