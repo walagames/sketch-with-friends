@@ -158,6 +158,9 @@ func (r *room) unregister(player *player) {
 
 	delete(r.Players, player.ID)
 	if len(r.Players) == 0 {
+		if r.Stage == Playing && r.game != nil && r.game.currentPhase.Name() == "drawing" {
+			r.game.cancelHintRoutine()
+		}
 		r.cancel()
 		return
 	}
@@ -175,6 +178,16 @@ func (r *room) unregister(player *player) {
 		}
 	}
 
+	if len(r.Players) < 2 {
+		if r.Stage == Playing && r.game != nil && r.game.currentPhase.Name() == "drawing" {
+			r.game.cancelHintRoutine()
+		}
+		r.Stage = PreGame
+		r.timer.Stop()
+		r.game = nil
+		r.broadcast(GameRoleAny, message(ChangeStage, r.Stage), message(Error, "Not enough players to continue game"))
+	}
+
 }
 
 func (r *room) Run(rm RoomManager) {
@@ -188,6 +201,10 @@ func (r *room) Run(rm RoomManager) {
 	defer r.timer.Stop()
 
 	defer func() {
+		if r.Stage == Playing && r.game != nil && r.game.currentPhase.Name() == "drawing" {
+			r.game.cancelHintRoutine()
+		}
+
 		slog.Info("Room routine exited", "id", r.ID)
 		rm.Unregister(r.ID)
 	}()
