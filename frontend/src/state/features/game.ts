@@ -47,6 +47,7 @@ export const gameSlice = createSlice({
 	name: "game",
 	initialState,
 	reducers: {
+		reset: () => initialState,
 		changeRound: (state, action: PayloadAction<number>) => {
 			state.round = action.payload;
 		},
@@ -85,7 +86,7 @@ export const gameSlice = createSlice({
 	},
 });
 
-export const { changeRound, changePhase, selectWord, setPhaseDeadline } =
+export const { changeRound, changePhase, selectWord } =
 	gameSlice.actions;
 
 export default gameSlice.reducer;

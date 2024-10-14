@@ -5,6 +5,9 @@ import gameReducer from "./features/game";
 import clientReducer, { enterRoomCode } from "./features/client";
 import { clearQueryParams } from "@/lib/params";
 import { toast } from "sonner";
+import { resetRoom } from "./features/room";
+import { resetGame } from "./features/game";
+import { resetClient } from "./features/client";
 
 // const logger: Middleware = (store) => (next) => (action) => {
 // 	console.log("dispatching", action);
@@ -48,9 +51,12 @@ const socketMiddleware: Middleware = (store) => {
 							store.dispatch(enterRoomCode(""));
 							break;
 						default:
-							toast.error(e.reason);
+							toast.error(e.reason ?? "Unknown error occurred");
 							break;
 					}
+					store.dispatch({ type: "room/reset", fromServer: true });
+					store.dispatch({ type: "game/reset", fromServer: true });
+					store.dispatch({ type: "client/reset", fromServer: true });
 				};
 				socket.onmessage = (event) => {
 					const actions = JSON.parse(event.data);

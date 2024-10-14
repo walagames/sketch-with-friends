@@ -49,6 +49,7 @@ export const clientSlice = createSlice({
 	initialState,
 	reducers: {
 		// Only comes from the server
+		reset: () => initialState,
 		initializeClient: (state, action: PayloadAction<string>) => {
 			state.id = action.payload;
 		},

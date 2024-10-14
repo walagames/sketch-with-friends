@@ -56,6 +56,7 @@ export const roomSlice = createSlice({
 	name: "room",
 	initialState,
 	reducers: {
+		reset: () => initialState,
 		changeStage: (state, action: PayloadAction<RoomStage>) => {
 			state.stage = action.payload;
 		},
@@ -93,7 +94,11 @@ export const roomSlice = createSlice({
 	},
 });
 
-export const { changeStage, setPlayers, playerLeft, changeRoomSettings } =
-	roomSlice.actions;
+export const {
+	changeStage,
+	setPlayers,
+	playerLeft,
+	changeRoomSettings,
+} = roomSlice.actions;
 
 export default roomSlice.reducer;
