@@ -113,7 +113,7 @@ func (g *gameState) calculatePoints(pointsPerGuess int) int {
 	}
 
 	// Calculate points based on remaining time, max 500 points
-	points := int((float64(remainingTime) / float64(totalTime)) * pointsPerGuess)
+	points := int((float64(remainingTime) / float64(totalTime)) * float64(pointsPerGuess))
 
 	return points
 }
