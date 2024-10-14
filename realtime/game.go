@@ -79,10 +79,14 @@ func (g *gameState) judgeGuess(playerID uuid.UUID, guessText string) {
 		result.IsCorrect = true
 		result.PointsAwarded = g.calculatePoints()
 		g.room.Players[playerID].Score += result.PointsAwarded
-		result.Guess = "Guessed it!" // Replace correct guess with "Guessed it!"
+		result.Guess = ""
 		g.correctGuessCount++
 		g.room.Players[playerID].Send(message(SelectWord, g.currentWord))
 		slog.Info("select word", "word", g.currentWord)
+
+		// Award points to the drawer
+		pointsPerGuess := 500 / (len(g.room.Players) - 1)
+		g.currentDrawer.Score += pointsPerGuess
 	} else {
 		// Check for close guesses (e.g., typos, minor differences)
 		result.IsClose = isCloseGuess(lowerGuess, lowerWord)
@@ -313,6 +317,7 @@ func (phase DrawingPhase) End(g *gameState) {
 	g.hintedWord = ""
 	g.currentWord = ""
 	fmt.Println("Drawing phase ended")
+	g.room.broadcast(GameRoleAny, message(SetPlayers, g.room.Players))
 }
 
 // Advance to post drawing phase
