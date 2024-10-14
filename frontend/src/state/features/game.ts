@@ -19,6 +19,8 @@ export interface GameState {
 	wordOptions: string[];
 	guesses: Guess[];
 	selectedWord: string;
+	isLastPhase: boolean;
+	isFirstPhase: boolean;
 }
 
 const initialState: GameState = {
@@ -29,6 +31,8 @@ const initialState: GameState = {
 	wordOptions: [],
 	guesses: [],
 	selectedWord: "",
+	isLastPhase: false,
+	isFirstPhase: false,
 };
 
 export type Guess = {
@@ -48,10 +52,17 @@ export const gameSlice = createSlice({
 		},
 		changePhase: (
 			state,
-			action: PayloadAction<{ phase: GamePhase; deadline: string }>
+			action: PayloadAction<{
+				phase: GamePhase;
+				deadline: string;
+				isLastPhase: boolean;
+				isFirstPhase: boolean;
+			}>
 		) => {
 			state.phase = action.payload.phase;
 			state.currentPhaseDeadline = action.payload.deadline;
+			state.isLastPhase = action.payload.isLastPhase;
+			state.isFirstPhase = action.payload.isFirstPhase;
 		},
 		wordOptions: (state, action: PayloadAction<string[]>) => {
 			state.wordOptions = action.payload;
@@ -68,9 +79,13 @@ export const gameSlice = createSlice({
 		setGuesses: (state, action: PayloadAction<Guess[]>) => {
 			state.guesses = action.payload;
 		},
+		setPhaseDeadline: (state, action: PayloadAction<string>) => {
+			state.currentPhaseDeadline = action.payload;
+		},
 	},
 });
 
-export const { changeRound, changePhase, selectWord } = gameSlice.actions;
+export const { changeRound, changePhase, selectWord, setPhaseDeadline } =
+	gameSlice.actions;
 
 export default gameSlice.reducer;

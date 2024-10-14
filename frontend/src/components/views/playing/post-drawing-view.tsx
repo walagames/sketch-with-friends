@@ -1,13 +1,12 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { Timer } from "@/components/timer";
 import { HillScene } from "@/components/scenes/hill-scene";
-import { Player } from "@/state/features/room";
+import { Player, RoomStage } from "@/state/features/room";
 import { generateAvatar } from "@/lib/avatar";
 import { CrownIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-// import { RaisedButton } from "@/components/raised-button";
-
+import { RaisedButton } from "@/components/raised-button";
 export function PostDrawingView() {
 	const deadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
@@ -18,6 +17,10 @@ export function PostDrawingView() {
 		(a, b) => b.score - a.score
 	);
 
+	const isLastPhase = useSelector((state: RootState) => state.game.isLastPhase);
+
+	const dispatch = useDispatch();
+
 	return (
 		<HillScene>
 			<div className="absolute top-10 right-10">
@@ -27,11 +30,23 @@ export function PostDrawingView() {
 			{sortedPlayers.length > 3 && (
 				<Leaderboard players={sortedPlayers.slice(3)} />
 			)}
-			{/* <div className="absolute bottom-8 right-8 z-50">
-				<RaisedButton variant="action" size="xl">
-					Next Round
-				</RaisedButton>
-			</div> */}
+			{isLastPhase && (
+				<div className="absolute bottom-8 right-8 z-50">
+					<RaisedButton
+						onClick={() => {
+							dispatch({
+								type: "room/changeStage",
+								payload: RoomStage.PreGame,
+								fromServer: true,
+							});
+						}}
+						variant="action"
+						size="xl"
+					>
+						Return to room
+					</RaisedButton>
+				</div>
+			)}
 		</HillScene>
 	);
 }

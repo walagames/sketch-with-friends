@@ -89,7 +89,7 @@ const socketMiddleware: Middleware = (store) => {
 };
 
 export const store = configureStore({
-	devTools: false,
+	devTools: true,
 	reducer: {
 		canvas: canvasReducer,
 		room: roomReducer,

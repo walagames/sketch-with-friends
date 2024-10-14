@@ -156,8 +156,10 @@ func (g *gameState) setPhase(phase Phase) {
 }
 
 type PhaseChangeMessage struct {
-	Phase    string    `json:"phase"`
-	Deadline time.Time `json:"deadline"`
+	Phase        string    `json:"phase"`
+	Deadline     time.Time `json:"deadline"`
+	IsLastPhase  bool      `json:"isLastPhase"`
+	IsFirstPhase bool      `json:"isFirstPhase"`
 }
 
 func (g *gameState) Transition() bool {
@@ -189,7 +191,7 @@ func (phase PickingPhase) Begin(g *gameState) {
 		// we've reached the last round, end the game
 		if g.currentRound >= g.room.Settings.TotalRounds {
 			fmt.Println("Game over")
-			g.room.Stage = PostGame
+			g.room.Stage = PreGame
 			g.room.broadcast(GameRoleAny, message(ChangeStage, g.room.Stage))
 			return
 		}
@@ -197,6 +199,10 @@ func (phase PickingPhase) Begin(g *gameState) {
 		g.currentRound++
 		g.initDrawQueue()
 		nextDrawer = g.nextDrawer()
+	}
+
+	for _, p := range g.room.Players {
+		p.GameRole = GameRoleGuessing
 	}
 
 	// update next drawer's role
@@ -212,12 +218,15 @@ func (phase PickingPhase) Begin(g *gameState) {
 
 	g.strokes = emptyStrokeSlice()
 
+	isFirstPickingPhase := g.currentRound == 1 && len(g.drawingQueue) == len(g.room.Players)-1
 	// notify players of the change
 	g.room.broadcast(GameRoleAny,
 		message(ChangePhase,
 			PhaseChangeMessage{
-				Phase:    g.currentPhase.Name(),
-				Deadline: g.currentPhaseDeadline,
+				Phase:        g.currentPhase.Name(),
+				Deadline:     g.currentPhaseDeadline,
+				IsLastPhase:  false,
+				IsFirstPhase: isFirstPickingPhase,
 			}),
 		message(SetRound, g.currentRound),
 	)
@@ -300,8 +309,10 @@ func (phase DrawingPhase) Begin(g *gameState) {
 	g.room.broadcast(GameRoleAny,
 		message(ChangePhase,
 			PhaseChangeMessage{
-				Phase:    g.currentPhase.Name(),
-				Deadline: g.currentPhaseDeadline,
+				Phase:        g.currentPhase.Name(),
+				Deadline:     g.currentPhaseDeadline,
+				IsLastPhase:  false,
+				IsFirstPhase: false,
 			}),
 	)
 
@@ -334,15 +345,22 @@ func (phase PostDrawingPhase) Name() string {
 
 // Start of post drawing phase
 func (phase PostDrawingPhase) Begin(g *gameState) {
+	isLastPhase := g.currentRound >= g.room.Settings.TotalRounds && len(g.drawingQueue) == 0
 	phaseDuration := time.Second * 5
+	if isLastPhase {
+		phaseDuration = time.Second * 20
+	}
 	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
 	fmt.Println("Post drawing phase started", "duration", phaseDuration)
 	// notify players of the change
+
 	g.room.broadcast(GameRoleAny,
 		message(ChangePhase,
 			PhaseChangeMessage{
-				Phase:    g.currentPhase.Name(),
-				Deadline: g.currentPhaseDeadline,
+				Phase:        g.currentPhase.Name(),
+				Deadline:     g.currentPhaseDeadline,
+				IsLastPhase:  isLastPhase,
+				IsFirstPhase: false,
 			}))
 	// set the timer
 	g.room.timer.Reset(phaseDuration)

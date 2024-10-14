@@ -65,9 +65,9 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		Role:        GameRoleAny,
 		PayloadType: nil,
 		validator: func(r *room) error {
-			if !(r.Stage == PreGame || r.Stage == PostGame) {
-				return fmt.Errorf("game can only be started in pre or post game stage")
-			}
+			// if !(r.Stage == PreGame || r.Stage == PostGame) {
+			// 	return fmt.Errorf("game can only be started in pre or post game stage")
+			// }
 			if len(r.Players) < 2 {
 				return fmt.Errorf("game can only be started with at least 2 players")
 			}
@@ -75,6 +75,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		},
 		Execute: func(r *room, a *Action) error {
 			slog.Info("starting game")
+			r.timer.Stop()
 			r.Stage = Playing
 			r.game = NewGameState(PickingPhase{}, r)
 			r.game.initDrawQueue()
