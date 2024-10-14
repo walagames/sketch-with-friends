@@ -198,7 +198,6 @@ function App() {
 	const isFirstPhase = useSelector(
 		(state: RootState) => state.game.isFirstPhase
 	);
-	const isLastPhase = useSelector((state: RootState) => state.game.isLastPhase);
 
 	const roomId = useSelector((state: RootState) => state.room.id);
 
@@ -208,15 +207,10 @@ function App() {
 		gamePhase,
 		gameRole,
 		isFirstPhase,
-		isLastPhase,
 	});
 
 	const enteredRoomCode = useSelector(
 		(state: RootState) => state.client.enteredRoomCode
-	);
-
-	const deadline = useSelector(
-		(state: RootState) => state.game.currentPhaseDeadline
 	);
 
 	const JoinView =
@@ -244,9 +238,7 @@ function App() {
 						direction={direction}
 					>
 						{roomId ? (
-							<TransitionChild
-								key={RoomView.key + new Date(deadline).getTime()}
-							>
+							<TransitionChild key={RoomView.key}>
 								<RoomView.Component />
 							</TransitionChild>
 						) : (
@@ -284,14 +276,12 @@ function getView(
 		gamePhase,
 		gameRole,
 		isFirstPhase,
-		isLastPhase,
 	}: {
 		roomStage: RoomStage;
 		roomRole: RoomRole;
 		gamePhase: GamePhase;
 		gameRole: GameRole;
 		isFirstPhase: boolean;
-		isLastPhase: boolean;
 	}
 ): {
 	Component: React.ComponentType;
@@ -320,12 +310,6 @@ function getView(
 		}
 
 		if (gamePhase === GamePhase.PostDrawing) {
-			if (isLastPhase) {
-				return {
-					...phaseView,
-					direction: { enter: Direction.LEFT, exit: Direction.LEFT },
-				};
-			}
 			return phaseView;
 		} else {
 			const roleView = phaseView[gameRole];
@@ -337,16 +321,10 @@ function getView(
 					direction: { enter: Direction.LEFT, exit: Direction.LEFT },
 				};
 			}
-			if (!isFirstPhase && !isLastPhase) {
+			if (!isFirstPhase) {
 				return {
 					...roleView,
 					direction: { enter: Direction.LEFT, exit: Direction.LEFT },
-				};
-			}
-			if (isLastPhase) {
-				return {
-					...phaseView,
-					direction: { enter: Direction.LEFT, exit: Direction.UP },
 				};
 			}
 
@@ -362,12 +340,7 @@ function getView(
 				direction: { enter: Direction.LEFT, exit: Direction.LEFT },
 			};
 		}
-		if (isLastPhase) {
-			return {
-				...roleView,
-				direction: { enter: Direction.DOWN, exit: Direction.DOWN },
-			};
-		}
+
 		return roleView;
 	}
 }
