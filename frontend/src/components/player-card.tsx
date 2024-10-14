@@ -33,8 +33,8 @@ const variants = {
 };
 
 function PlayerCard({ player }: { player: Player }) {
-	const { roomRole, avatarSeed, avatarColor } = player;
-	const avatarSvg = generateAvatar(avatarSeed, avatarColor);
+	const { roomRole, avatarSeed } = player;
+	const avatarSvg = generateAvatar(avatarSeed);
 	return (
 		<div className="flex items-center gap-2 ml-auto">
 			{roomRole === RoomRole.Host && (

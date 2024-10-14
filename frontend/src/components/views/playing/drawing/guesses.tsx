@@ -77,9 +77,9 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 }
 
 function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
-	const { avatarSeed, avatarColor, name } = player;
+	const { avatarSeed, name } = player;
 
-	const avatarSvg = generateAvatar(avatarSeed, avatarColor);
+	const avatarSvg = generateAvatar(avatarSeed);
 	return (
 		<motion.li
 			initial={{ opacity: 0, y: 3 }}
