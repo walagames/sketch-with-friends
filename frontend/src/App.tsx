@@ -245,7 +245,7 @@ function App() {
 					>
 						{roomId ? (
 							<TransitionChild
-								key={isLastPhase ? RoomView.key : deadline + RoomView.key}
+								key={RoomView.key + new Date(deadline).getTime()}
 							>
 								<RoomView.Component />
 							</TransitionChild>
