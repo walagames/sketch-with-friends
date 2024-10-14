@@ -143,7 +143,7 @@ export function PlayerInfoForm() {
 										/>
 										<div className="absolute -right-[3.25rem] top-2">
 											<RaisedButton
-												data-m:click={
+												track={
 													enteredRoomCode === "new"
 														? "action=create_room_attempt"
 														: "action=join_room_attempt"
