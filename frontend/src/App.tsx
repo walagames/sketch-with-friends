@@ -231,6 +231,7 @@ function App() {
 						mass: 1,
 						restDelta: 0.01,
 					}}
+					reducedMotion="always"
 				>
 					<AnimatePresenceWithDirection
 						initial={false}
