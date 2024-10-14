@@ -5,9 +5,6 @@ import gameReducer from "./features/game";
 import clientReducer, { enterRoomCode } from "./features/client";
 import { clearQueryParams } from "@/lib/params";
 import { toast } from "sonner";
-import { resetRoom } from "./features/room";
-import { resetGame } from "./features/game";
-import { resetClient } from "./features/client";
 
 // const logger: Middleware = (store) => (next) => (action) => {
 // 	console.log("dispatching", action);
