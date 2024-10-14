@@ -20,7 +20,7 @@ import {
 	DrawingGuesserView,
 	PostDrawingView,
 } from "@/components/views";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 enum JoinStage {
 	EnterCode = "EnterCode",
@@ -194,6 +194,7 @@ function App() {
 	const playerId = useSelector((state: RootState) => state.client.id);
 	const roomRole = players[playerId]?.roomRole;
 	const gameRole = players[playerId]?.gameRole;
+	const [mountId, setMountId] = useState(Date.now());
 
 	const isFirstPhase = useSelector(
 		(state: RootState) => state.game.isFirstPhase
@@ -208,6 +209,19 @@ function App() {
 		gameRole,
 		isFirstPhase,
 	});
+
+	useEffect(() => {
+		function visibilityChangeHandler() {
+			if (!document.hidden) {
+				setMountId(Date.now());
+			}
+		}
+
+		document.addEventListener("visibilitychange", visibilityChangeHandler);
+		return () => {
+			document.removeEventListener("visibilitychange", visibilityChangeHandler);
+		};
+	}, []);
 
 	const enteredRoomCode = useSelector(
 		(state: RootState) => state.client.enteredRoomCode
@@ -231,9 +245,10 @@ function App() {
 						mass: 1,
 						restDelta: 0.01,
 					}}
-					reducedMotion="always"
+					// reducedMotion="always"
 				>
 					<AnimatePresenceWithDirection
+						key={mountId}
 						initial={false}
 						mode="sync"
 						direction={direction}
