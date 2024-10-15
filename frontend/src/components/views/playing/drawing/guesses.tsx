@@ -59,9 +59,9 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 					/>
 				))}
 			</ul>
-			{isGuessing &&
+			{isGuessing && 
 				(hasGuessedCorrect ? (
-					<div className="shadow-accent w-full flex items-center justify-center h-16 bg-background rounded-lg font-bold text-xl">
+					<div className="font-bold text-xl bg-background rounded-lg h-14 px-4 py-3.5 w-full -translate-y-1.5 translate-x-1.5 shadow-accent">
 						<span className="translate-y-0.5 flex items-center justify-center gap-2">
 							Guessed it!{" "}
 							<span className="text-lg">
@@ -160,7 +160,7 @@ export function GuessForm() {
 											autoComplete="off"
 											placeholder="Guess"
 											{...field}
-											className="font-bold text-xl text-zinc-400 placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-full -translate-y-1.5 translate-x-1.5"
+											className="font-bold text-xl text-foreground placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-full -translate-y-1.5 translate-x-1.5"
 										/>
 									</div>
 									<div className="">

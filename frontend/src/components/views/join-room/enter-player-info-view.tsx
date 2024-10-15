@@ -139,7 +139,7 @@ export function PlayerInfoForm() {
 											autoComplete="off"
 											placeholder="Name"
 											{...field}
-											className="font-bold text-xl text-zinc-400 placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-full -translate-y-1.5 translate-x-1.5"
+											className="font-bold text-xl text-foreground placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-full -translate-y-1.5 translate-x-1.5"
 										/>
 										<div className="absolute -right-[3.25rem] top-2">
 											<RaisedButton

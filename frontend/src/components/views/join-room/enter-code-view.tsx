@@ -64,7 +64,7 @@ function CodeForm() {
 											{...field}
 											autoComplete="off"
 											placeholder="Room code"
-											className="font-bold text-xl text-zinc-400 placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-64 -translate-y-1.5 translate-x-1.5"
+											className="font-bold text-xl text-foreground placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-64 -translate-y-1.5 translate-x-1.5"
 										/>
 									</div>
 									<div className="absolute -right-14 top-2">
