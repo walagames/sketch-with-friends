@@ -139,8 +139,11 @@ export function GuessForm() {
 	});
 
 	async function onSubmit(data: z.infer<typeof FormSchema>) {
-		dispatch({ type: "game/submitGuess", payload: data.guess });
-		form.reset();
+		const trimmedGuess = data.guess.trim();
+		if (trimmedGuess) {
+			dispatch({ type: "game/submitGuess", payload: trimmedGuess });
+			form.reset();
+		}
 	}
 	return (
 		<Form {...form}>
