@@ -48,12 +48,14 @@ const socketMiddleware: Middleware = (store) => {
 							store.dispatch(enterRoomCode(""));
 							break;
 						default:
-							toast.error(e.reason ?? "Unknown error occurred");
+							toast.error(e.reason ? e.reason : "Disconnected from server");
 							break;
 					}
-					store.dispatch({ type: "room/reset", fromServer: true });
-					store.dispatch({ type: "game/reset", fromServer: true });
-					store.dispatch({ type: "client/reset", fromServer: true });
+					setTimeout(() => {
+						store.dispatch({ type: "room/reset", fromServer: true });
+						store.dispatch({ type: "game/reset", fromServer: true });
+						store.dispatch({ type: "client/reset", fromServer: true });
+					}, 100);
 				};
 				socket.onmessage = (event) => {
 					const actions = JSON.parse(event.data);
