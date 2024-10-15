@@ -269,12 +269,12 @@ func (phase DrawingPhase) Begin(g *gameState) {
 	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
 	fmt.Println("Drawing phase started", "duration", phaseDuration)
 
-	// Initialize hinted word with one hint applied
-	g.hintedWord = applyHint(g.currentWord, g.currentWord)
-
 	// Calculate number of hints and interval
 	totalHints := int(float64(len(g.currentWord)) * 0.6)
-	hintInterval := phaseDuration / time.Duration(totalHints+1)
+	hintInterval := phaseDuration / time.Duration(totalHints + 1)
+
+	// Initialize hinted word with all blanks
+	g.hintedWord = strings.Repeat("*", len(g.currentWord))
 
 	// Create a context that can be canceled
 	ctx, cancel := context.WithCancel(context.Background())
@@ -285,7 +285,7 @@ func (phase DrawingPhase) Begin(g *gameState) {
 		ticker := time.NewTicker(hintInterval)
 		defer ticker.Stop()
 
-		hintCount := 1 // We've already applied one hint
+		hintCount := 0
 		for {
 			select {
 			case <-ctx.Done():
