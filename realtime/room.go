@@ -25,9 +25,8 @@ type RoomSettings struct {
 type RoomStage string
 
 const (
-	PreGame  RoomStage = "preGame"
-	Playing  RoomStage = "playing"
-	PostGame RoomStage = "postGame"
+	PreGame RoomStage = "preGame"
+	Playing RoomStage = "playing"
 )
 
 type room struct {
@@ -178,8 +177,8 @@ func (r *room) unregister(player *player) {
 		}
 	}
 
-	if len(r.Players) < 2 {
-		if r.Stage == Playing && r.game != nil && r.game.currentPhase.Name() == "drawing" {
+	if len(r.Players) < 2 && r.Stage == Playing {
+		if r.game != nil && r.game.currentPhase.Name() == "drawing" {
 			r.game.cancelHintRoutine()
 		}
 		r.Stage = PreGame
