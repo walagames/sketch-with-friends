@@ -142,16 +142,7 @@ export function PlayerInfoForm() {
 											className="font-bold text-xl text-foreground placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-full -translate-y-1.5 translate-x-1.5"
 										/>
 										<div className="absolute -right-[3.25rem] top-2">
-											<RaisedButton
-												data-m:click={
-													enteredRoomCode === "new"
-														? "action=create_room_attempt"
-														: "action=join_room_attempt"
-												}
-												shift={false}
-												variant="action"
-												size="icon"
-											>
+											<RaisedButton shift={false} variant="action" size="icon">
 												<StepForwardIcon className="w-6 h-6" />
 											</RaisedButton>
 										</div>
