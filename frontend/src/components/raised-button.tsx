@@ -37,15 +37,13 @@ export interface ButtonProps
 
 interface RaisedButtonProps extends ButtonProps {
 	shift?: boolean;
-	track?: string;
 }
 
 const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
-	({ className, variant, size, shift = true, track, ...props }, ref) => {
+	({ className, variant, size, shift = true, ...props }, ref) => {
 		return (
 			<div className="flex items-center gap-3 bg-secondary-foreground rounded-lg h-full">
 				<motion.button
-					data-m:click={track}
 					className={cn(buttonVariants({ variant, size, className }))}
 					ref={ref}
 					style={{
