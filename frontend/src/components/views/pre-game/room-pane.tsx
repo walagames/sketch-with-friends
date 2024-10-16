@@ -82,11 +82,11 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 					<PlayerCards players={Object.values(players)} />
 				)}
 			</div>
-			<button data-m:click="action=test_event">test</button>
+			<button data-m:click="action=test">test</button>
 			{isHost && (
 				<RaisedButton
 					data-m:click={
-						Object.keys(players).length > 1 ? "action=game_started" : ""
+						Object.keys(players).length > 1 ? "action=gamestarted" : ""
 					}
 					size="xl"
 					variant="action"
