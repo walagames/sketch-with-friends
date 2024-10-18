@@ -1,8 +1,11 @@
 <p align="center">
   <picture>
     <source srcset="./.github/images/logo.svg">
-    <a href="https://sketchwithfriends.com"><img alt="Sketch with Friends: Multiplayer drawing and guessing game" src="./.github/images/logo.svg"></a>
+     <a href="https://sketchwithfriends.com"><img alt="Sketch with Friends: Multiplayer drawing and guessing game" src="./.github/images/logo.svg"></a>
   </picture>
+  <br>
+  <a href="https://sketchwithfriends.com">Website</a> | <a href="#local-development">Setup</a> | <a href="#contributing">Contact</a>
+
 </p>
 
 ## Overview
