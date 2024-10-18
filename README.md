@@ -1,37 +1,36 @@
-# Sketch with Friends
+<p align="center">
+  <picture>
+    <source srcset="./.github/images/logo.svg">
+     <a href="https://sketchwithfriends.com"><img alt="Sketch with Friends: Multiplayer drawing and guessing game" src="./.github/images/logo.svg"></a>
+  </picture>
+  <br>
+  <a href="https://sketchwithfriends.com">Website</a> | <a href="#local-development">Setup</a> | <a href="#contributing">Contact</a>
 
-> Real-time, multiplayer drawing games
+</p>
 
-## Setup
+## Overview
 
-- [Frontend instructions](frontend/README.md)
-- [Real-time instructions](realtime/README.md)
+Sketch with Friends is a real-time multiplayer drawing game. Players take turns sketching and guessing words. Create private rooms for you and your friends or play with people from around the world.
+
+<p align="center">
+    <a href="https://sketchwithfriends.com" target="_blank">
+        <img src="./.github/images/demo.gif" alt="Demo" width="70%" height="70%">
+    </a>
+</p>
+
+### Features
+
+- 🌍 **Global Matchmaking:** Connect with players worldwide
+- 💬 **In-Game Chat:** Communicate with other players in real-time
+- 📱 **Mobile Support:** Full touch and keyboard support
+- 🔒 **Private Rooms:** Create private rooms for you and your friends
+- 🎨 **Custom Words:** Bring your own custom words to the guessing pool
+
+## Local development
+
+- [Frontend](frontend/README.md)
+- [Backend](realtime/README.md)
 
 ## Contributing
 
-### Issues
-We use [GitHub Issues](https://github.com/walagames/sketch-with-friends/issues) as our main source of truth for tracking bugs and new features.
-
-### Pull Requests
-
-1. Checkout a new branch `git checkout -b my-branch`
-2. Commit your changes `git commit -m 'feat: add some feature'`
-3. Push to the branch `git push origin my-branch`
-4. Create a pull request
-5. Fill out the PR template
-6. Mark the PR as draft while under development
-7. When your changes are complete, mark the PR as ready for review
-
-### Preview deployments
-
-When you push commits to your PR, your changes will automatically be deployed to a dedicated preview environment. You can view the preview deployment by following these steps:
-
-1. Look for a comment left by the walagames-infra bot on your PR.
-2. Find the "Open Preview" link in this comment.
-3. Click on the link to access the preview environment.
-
-This preview allows you to see and interact with your changes in a production environment before merging, helping to catch any issues not seen in local development.
-
-## Documentation
-
-To learn more about the application and its architecture, see the [wiki](https://github.com/walagames/sketch-with-friends/wiki).
+If you're looking to contribute to Sketch with Friends or any of our other projects, we'd love your help! Shoot us an email at [hello@walagames.com](mailto:hello@walagames.com) and we'll get you set up.
