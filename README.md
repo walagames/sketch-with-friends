@@ -1,11 +1,8 @@
 <p align="center">
   <picture>
     <source srcset="./.github/images/logo.svg">
-    <img alt="Sketch with Friends: Multiplayer drawing and guessing game" src="./.github/images/logo.svg">
+    <a href="https://sketchwithfriends.com"><img alt="Sketch with Friends: Multiplayer drawing and guessing game" src="./.github/images/logo.svg"></a>
   </picture>
-  <br>
-  <a href="#local-development">Setup</a> |
-  <a href="https://sketchwithfriends.com">Demo</a> | <a href="#contributing">Contribute</a>
 </p>
 
 ## Overview
@@ -14,7 +11,7 @@ Sketch with Friends is a real-time multiplayer drawing game. Players take turns 
 
 <p align="center">
     <a href="https://sketchwithfriends.com" target="_blank">
-        <img style="border-radius: 16px; border: 3px solid #6637ED;" src="./.github/images/demo.gif" alt="Demo" width="70%" height="70%">
+        <img src="./.github/images/demo.gif" alt="Demo" width="70%" height="70%">
     </a>
 </p>
 
