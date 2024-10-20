@@ -55,7 +55,7 @@ func (c *client) run(roomCtx context.Context) {
 	// block return until both routines start
 	<-ready
 	<-ready
-	slog.Info("client is ready", "player_id", c.player.ID)
+	slog.Debug("client is ready", "playerId", c.player.ID)
 }
 
 func (c *client) close(cause error) {
@@ -69,11 +69,11 @@ func (c *client) close(cause error) {
 // reads from this goroutine
 // Read more: https://pkg.go.dev/github.com/gorilla/websocket?utm_source=godoc#hdr-Concurrency
 func (c *client) read(ctx context.Context, ready chan<- bool) {
-	slog.Debug("read routine started", "player", c.player.ID)
+	slog.Debug("read routine started", "playerId", c.player.ID)
 	ready <- true
 	defer func() {
 		c.conn.Close()
-		slog.Debug("read routine exited", "player", c.player.ID)
+		slog.Debug("read routine exited", "playerId", c.player.ID)
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -82,14 +82,14 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 	for {
 		select {
 		case <-ctx.Done():
-			slog.Debug("read routine cancelled", "player", c.player.ID, "cause", context.Cause(ctx))
+			slog.Debug("read routine cancelled", "playerId", c.player.ID, "cause", context.Cause(ctx))
 			c.room.disconnect <- c.player
 			return
 		default:
 			_, msgBytes, err := c.conn.ReadMessage()
 			if err != nil {
 				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					slog.Error("unexpected close error", "player", c.player.ID, "error", err)
+					slog.Warn("unexpected close error", "playerId", c.player.ID, "error", err)
 				}
 				c.cancel(err)
 				break
@@ -97,7 +97,7 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 			if c.limiter.Allow() {
 				action, err := decodeAction(msgBytes)
 				if err != nil {
-					slog.Error("Error un-marshalling message", "player", c.player.ID, "error", err)
+					slog.Warn("Error un-marshalling message", "playerId", c.player.ID, "error", err)
 					c.cancel(err)
 					break
 				}
@@ -105,7 +105,7 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 				action.Player = c.player
 				c.room.action <- action
 			} else {
-				slog.Debug("dropped event", "player", c.player.ID)
+				slog.Debug("dropped event", "playerId", c.player.ID)
 				c.send <- []*Action{
 					{
 						Type:    Warning,
@@ -125,13 +125,13 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 // executing all writes from this goroutine.
 // Read more: https://pkg.go.dev/github.com/gorilla/websocket?utm_source=godoc#hdr-Concurrency
 func (c *client) write(ctx context.Context, ready chan<- bool) {
-	slog.Debug("write routine started", "player", c.player.ID)
+	slog.Debug("write routine started", "playerId", c.player.ID)
 	ready <- true
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
 		c.conn.Close()
-		slog.Debug("write routine exited", "player", c.player.ID)
+		slog.Debug("write routine exited", "playerId", c.player.ID)
 	}()
 	for {
 		select {
@@ -140,20 +140,20 @@ func (c *client) write(ctx context.Context, ready chan<- bool) {
 			closeMsg := websocket.FormatCloseMessage(websocket.CloseNormalClosure, context.Cause(ctx).Error())
 			err := c.conn.WriteControl(websocket.CloseMessage, closeMsg, time.Now().Add(writeWait))
 			if err != nil && websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				slog.Error("error sending close message", "player", c.player.ID, "error", err)
+				slog.Warn("error sending close message", "playerId", c.player.ID, "error", err)
 			}
 			return
 		case actions, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				slog.Debug("write routine channel closed", "player", c.player.ID)
+				slog.Debug("write routine channel closed", "playerId", c.player.ID)
 				c.cancel(nil)
 				break
 			}
 
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
-				slog.Error("error getting next writer", "player", c.player.ID, "error", err)
+				slog.Warn("error getting next writer", "playerId", c.player.ID, "error", err)
 				c.cancel(err)
 				break
 			}
