@@ -28,14 +28,14 @@ export function CanvasTools() {
 				>
 					<Brush />
 				</RaisedButton>
-				<RaisedButton
+				{/* <RaisedButton
 					size="icon"
 					shift={false}
 					variant={tool === CanvasTool.Eraser ? "action" : "default"}
 					onClick={() => dispatch(changeTool(CanvasTool.Eraser))}
 				>
 					<EraserIcon />
-				</RaisedButton>
+				</RaisedButton> */}
 			</div>
 			<div className="flex gap-2">
 				<RaisedButton
