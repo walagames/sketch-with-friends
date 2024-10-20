@@ -16,9 +16,16 @@ const variants = {
 					y: direction === Direction.DOWN ? "100%" : "-100%",
 			  };
 	},
-	target: {
-		x: "0%",
-		y: "0%",
+	target: (direction: Direction) => {
+		const isHorizontal =
+			direction === Direction.RIGHT || direction === Direction.LEFT;
+		return isHorizontal
+			? {
+					x: "0%",
+			  }
+			: {
+					y: "0%",
+			  };
 	},
 	exit: (direction: Direction) => {
 		const isHorizontal =
