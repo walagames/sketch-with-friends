@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"strconv"
 
 	"github.com/lmittmann/tint"
 )
@@ -12,10 +13,18 @@ import (
 func init() {
 	w := os.Stderr
 
-	logLevel := slog.LevelInfo
+	logLevel := slog.LevelDebug
+
 	if env := os.Getenv("LOGGER"); env != "" {
-		logLevel = slog.LevelDebug
+		level, err := strconv.Atoi(env)
+		if err != nil {
+			slog.Warn("invalid LOGGER env, defaulting", "level", logLevel, "error", err)
+		} else {
+			slog.Info("setting logger", "level", slog.Level(level))
+			logLevel = slog.Level(level)
+		}
 	}
+
 	// set global logger with custom options
 	slog.SetDefault(slog.New(
 		tint.NewHandler(w, &tint.Options{
