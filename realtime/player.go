@@ -76,7 +76,7 @@ func (p *player) UpdateLimiter() {
 		// 500 actions per second
 		// Needs to be high to allow for fast drawing
 		// Ideally we should batch stroke points at the client to lower the rate needed here
-		p.client.limiter = rate.NewLimiter(500, 1)
+		p.client.limiter = rate.NewLimiter(500, 20)
 	} else {
 		// 2 actions per second, 4 actions in a burst
 		// This is to prevent players from guessing too quickly

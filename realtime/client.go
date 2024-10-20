@@ -108,7 +108,6 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 
 				action.Player = c.player
 				c.room.action <- action
-				slog.Debug("received action from client", "player", c.player.ID, "action", action.Type)
 			} else {
 				slog.Debug("dropped event", "player", c.player.ID)
 				c.send <- []*Action{
