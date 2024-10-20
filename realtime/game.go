@@ -203,11 +203,13 @@ func (phase PickingPhase) Begin(g *gameState) {
 
 	for _, p := range g.room.Players {
 		p.GameRole = GameRoleGuessing
+		p.UpdateLimiter()
 	}
 
 	// update next drawer's role
 	nextDrawer.GameRole = GameRoleDrawing
 	g.currentDrawer = nextDrawer
+	nextDrawer.UpdateLimiter()
 
 	// send next drawer their word options
 	g.wordOptions = wordOptions(3)
@@ -271,7 +273,7 @@ func (phase DrawingPhase) Begin(g *gameState) {
 
 	// Calculate number of hints and interval
 	totalHints := int(float64(len(g.currentWord)) * 0.6)
-	hintInterval := phaseDuration / time.Duration(totalHints + 1)
+	hintInterval := phaseDuration / time.Duration(totalHints+1)
 
 	// Initialize hinted word with all blanks
 	g.hintedWord = strings.Repeat("*", len(g.currentWord))

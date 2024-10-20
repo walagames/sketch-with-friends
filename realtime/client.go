@@ -4,10 +4,8 @@ import (
 	"context"
 	"log/slog"
 
-	// "os"
-
 	"github.com/gorilla/websocket"
-	// "golang.org/x/time/rate"
+	"golang.org/x/time/rate"
 
 	"time"
 )
@@ -32,24 +30,26 @@ var (
 )
 
 type client struct {
-	room   *room
-	player *player
-	conn   *websocket.Conn
-	send   chan []*Action
-	cancel context.CancelFunc
+	room    *room
+	player  *player
+	conn    *websocket.Conn
+	limiter *rate.Limiter
+	send    chan []*Action
+	cancel  context.CancelCauseFunc
 }
 
 func NewClient(conn *websocket.Conn, room *room, player *player) *client {
 	return &client{
-		room:   room,
-		player: player,
-		conn:   conn,
-		send:   make(chan []*Action, 256),
+		room:    room,
+		player:  player,
+		conn:    conn,
+		limiter: rate.NewLimiter(0.5, 5),
+		send:    make(chan []*Action, 256),
 	}
 }
 
 func (c *client) run(roomCtx context.Context) {
-	ctx, cancel := context.WithCancel(roomCtx)
+	ctx, cancel := context.WithCancelCause(roomCtx)
 	c.cancel = cancel
 
 	ready := make(chan bool, 2)
@@ -63,114 +63,115 @@ func (c *client) run(roomCtx context.Context) {
 	slog.Info("client is ready", "player_id", c.player.ID)
 }
 
-func (c *client) close() {
-	c.cancel()
-	c.room.disconnect <- c.player
-	slog.Info("client disconnected", "player", c.player.ID)
+func (c *client) close(cause error) {
+	c.cancel(cause)
 }
 
-// readPump pumps messages from the websocket connection to the room.
+// read decodes and sends messages from the player's websocket connection to the room.
 //
-// The application runs readPump in a per-connection goroutine. The application
+// The application runs read in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine
 func (c *client) read(ctx context.Context, ready chan<- bool) {
-	slog.Debug("Read routine started", "player", c.player.ID)
+	slog.Debug("read routine started", "player", c.player.ID)
 	ready <- true
 	defer func() {
 		c.conn.Close()
-		c.close()
-		slog.Debug("Read routine exited: ", "player", c.player.ID)
+		slog.Debug("read routine exited", "player", c.player.ID)
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 
-	// limiter := rate.NewLimiter(0.5, 5)
-
 	for {
 		select {
 		case <-ctx.Done():
+			slog.Debug("read routine cancelled", "player", c.player.ID, "cause", context.Cause(ctx))
+			c.room.disconnect <- c.player
 			return
 		default:
 			_, msgBytes, err := c.conn.ReadMessage()
 			if err != nil {
 				if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-					slog.Warn("unexpected close error", "player", c.player.ID, "error", err)
-					return
+					slog.Error("unexpected close error", "player", c.player.ID, "error", err)
 				}
-				return
+				c.cancel(err)
+				break
 			}
-			// if limiter.Allow() {
-			if true {
+			if c.limiter.Allow() {
 				action, err := decode(msgBytes)
 				if err != nil {
 					slog.Error("Error un-marshalling message", "player", c.player.ID, "error", err)
-					return
+					c.cancel(err)
+					break
 				}
 
 				action.Player = c.player
 				c.room.action <- action
 				slog.Debug("received action from client", "player", c.player.ID, "action", action.Type)
 			} else {
-				slog.Warn("dropped event", "player", c.player.ID)
+				slog.Debug("dropped event", "player", c.player.ID)
+				c.send <- []*Action{
+					{
+						Type:    Warning,
+						Payload: "Slow down! You're sending messages too quickly!",
+					},
+				}
 			}
 
 		}
 	}
 }
 
-// writePump pumps messages from the room to the websocket connection.
+// write encodes and sends messages to the player's websocket connection.
 //
-// A goroutine running writePump is started for each connection. The
-// application ensures that there is at most one writer to a connection by
+// A goroutine running write is started for each player connection.
+// This ensures that there is at most one writer to a connection by
 // executing all writes from this goroutine.
+// Read more: https://pkg.go.dev/github.com/gorilla/websocket?utm_source=godoc#hdr-Concurrency
 func (c *client) write(ctx context.Context, ready chan<- bool) {
-	slog.Debug("Write routine started", "player", c.player.ID)
+	slog.Debug("write routine started", "player", c.player.ID)
 	ready <- true
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
 		c.conn.Close()
-		slog.Info("Write routine exited", "player", c.player.ID)
+		slog.Debug("write routine exited", "player", c.player.ID)
 	}()
 	for {
 		select {
 		case <-ctx.Done():
+			slog.Debug("write routine cancelled", "player", c.player.ID, "cause", context.Cause(ctx))
+			closeMsg := websocket.FormatCloseMessage(websocket.CloseNormalClosure, context.Cause(ctx).Error())
+			err := c.conn.WriteControl(websocket.CloseMessage, closeMsg, time.Now().Add(writeWait))
+			if err != nil && websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				slog.Error("error sending close message", "player", c.player.ID, "error", err)
+			}
 			return
 		case actions, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
-				// The room closed the channel.
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
-				return
+				slog.Debug("write routine channel closed", "player", c.player.ID)
+				c.cancel(nil)
+				break
 			}
 
 			w, err := c.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				slog.Error("error getting next writer", "player", c.player.ID, "error", err)
-				return
+				c.cancel(err)
+				break
 			}
 
 			w.Write(encode(actions))
 
-			// TODO: reformat this to send multiple messages at once, switch to an array of events
-			// Can reduce latency by sending multiple events / messages at once
-
-			// Add queued messages to the current websocket message.
-			// n := len(c.Send)
-			// for i := 0; i < n; i++ {
-			// 	w.Write(newline)
-			// 	w.Write(<-c.Send)
-			// }
-
 			if err := w.Close(); err != nil {
-				return
+				c.cancel(err)
 			}
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
-				return
+				c.cancel(err)
 			}
 		}
 	}

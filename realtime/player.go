@@ -1,9 +1,12 @@
 package main
 
 import (
+	"errors"
 	"log/slog"
+	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/time/rate"
 )
 
 type RoomRole string
@@ -21,15 +24,21 @@ const (
 	GameRoleAny      GameRole = "any"
 )
 
+var (
+	ErrPlayerKicked = errors.New("ErrPlayerKicked")
+)
+
 type player struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	RoomRole    RoomRole  `json:"roomRole"`
-	GameRole    GameRole  `json:"gameRole"`
-	AvatarSeed  string    `json:"avatarSeed"`
-	AvatarColor string    `json:"avatarColor"`
-	Score       int       `json:"score"`
-	client      *client
+	ID                uuid.UUID `json:"id"`
+	Name              string    `json:"name"`
+	RoomRole          RoomRole  `json:"roomRole"`
+	GameRole          GameRole  `json:"gameRole"`
+	AvatarSeed        string    `json:"avatarSeed"`
+	AvatarColor       string    `json:"avatarColor"`
+	Score             int       `json:"score"`
+	lastInteractionAt time.Time
+	client            *client
+	limiter           *rate.Limiter
 }
 
 type playerOptions struct {
@@ -41,25 +50,36 @@ type playerOptions struct {
 
 func NewPlayer(opts *playerOptions) *player {
 	return &player{
-		ID:          uuid.New(),
-		Name:        opts.name,
-		AvatarSeed:  opts.avatarSeed,
-		AvatarColor: opts.avatarColor,
-		RoomRole:    opts.roomRole,
-		Score:       0,
-		GameRole:    GameRoleGuessing,
+		ID:                uuid.New(),
+		Name:              opts.name,
+		AvatarSeed:        opts.avatarSeed,
+		AvatarColor:       opts.avatarColor,
+		RoomRole:          opts.roomRole,
+		Score:             0,
+		GameRole:          GameRoleGuessing,
+		lastInteractionAt: time.Now(),
 	}
 }
 
 func (p *player) Send(actions ...*Action) {
-	actionList := []*Action{}
-	for _, action := range actions {
-		actionList = append(actionList, action)
-	}
+	actionList := append([]*Action{}, actions...)
 	p.client.send <- actionList
 }
 
 func (p *player) Kick() {
 	slog.Info("kicking player", "player", p.ID)
-	p.client.close()
+	p.client.close(ErrPlayerKicked)
+}
+
+func (p *player) UpdateLimiter() {
+	if p.GameRole == GameRoleDrawing {
+		// 500 actions per second, 1 action in a burst
+		// Needs to be high to allow for fast drawing
+		// Ideally we should batch stroke points at the client to lower the rate needed here
+		p.client.limiter = rate.NewLimiter(500, 1)
+	} else {
+		// 1 action per second, 3 actions in a burst
+		// This is to prevent players from guessing too quickly
+		p.client.limiter = rate.NewLimiter(1, 3)
+	}
 }
