@@ -1,16 +1,15 @@
 <p align="center">
   <picture>
     <source srcset="./.github/images/logo.svg">
-     <a href="https://sketchwithfriends.com"><img alt="Sketch with Friends: Multiplayer drawing and guessing game" src="./.github/images/logo.svg"></a>
+     <a href="https://sketchwithfriends.com"><img width="338" alt="Sketch with Friends: Multiplayer drawing and guessing game" src="./.github/images/logo.png"></a>
   </picture>
-  <br>
-  <a href="https://sketchwithfriends.com">Website</a> | <a href="#local-development">Setup</a> | <a href="#contributing">Contact</a>
-
 </p>
 
 ## Overview
 
-Sketch with Friends is a real-time multiplayer drawing game. Players take turns sketching and guessing words. Create private rooms for you and your friends or play with people from around the world.
+Sketch with Friends is a real-time multiplayer drawing game. Players take turns
+sketching and guessing words. Create private rooms for you and your friends or
+play with people from around the world.
 
 <p align="center">
     <a href="https://sketchwithfriends.com" target="_blank">
@@ -33,4 +32,6 @@ Sketch with Friends is a real-time multiplayer drawing game. Players take turns 
 
 ## Contributing
 
-If you're looking to contribute to Sketch with Friends or any of our other projects, we'd love your help! Shoot us an email at [hello@walagames.com](mailto:hello@walagames.com) and we'll get you set up.
+If you're looking to contribute to Sketch with Friends or any of our other
+projects, we'd love your help! Shoot us an email at
+[hello@walagames.com](mailto:hello@walagames.com) and we'll get you set up.
