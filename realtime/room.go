@@ -172,14 +172,15 @@ func (r *room) register(ctx context.Context, player *player) error {
 func (r *room) unregister(player *player) {
 	r.lastInteractionAt = time.Now()
 
-	r.broadcast(
-		GameRoleAny,
-		message(PlayerLeft, player.ID),
-	)
 	slog.Info("player unregistered", "player", player.ID)
 	if r.game != nil {
 		r.game.removePlayerGuesses(player)
 	}
+
+	r.broadcast(
+		GameRoleAny,
+		message(PlayerLeft, player.ID),
+	)
 
 	delete(r.Players, player.ID)
 	if len(r.Players) == 0 {

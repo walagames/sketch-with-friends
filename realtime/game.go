@@ -34,7 +34,7 @@ type game struct {
 	currentPhaseDeadline time.Time
 	isCountdownActive    bool
 	guesses              []guess
-	correctGuessers      []uuid.UUID
+	correctGuessers      map[uuid.UUID]bool
 	cancelHintRoutine    context.CancelFunc
 	isFirstPicking       bool
 }
@@ -52,7 +52,7 @@ func NewGame(initialPhase Phase, r *room) *game {
 		hintedWord:        "",
 		isCountdownActive: false,
 		guesses:           make([]guess, 0),
-		correctGuessers:   make([]uuid.UUID, 0),
+		correctGuessers:   make(map[uuid.UUID]bool),
 		isFirstPicking:    true,
 		cancelHintRoutine: nil,
 	}
@@ -139,14 +139,8 @@ func (g *game) nextDrawer() *player {
 
 func (g *game) removePlayerGuesses(player *player) {
 	if g.currentPhase.Name() == Drawing {
-		// Filter out the player from the correct guessers
-		newCorrectGuessers := make([]uuid.UUID, 0)
-		for _, p := range g.correctGuessers {
-			if p != player.ID {
-				newCorrectGuessers = append(newCorrectGuessers, p)
-			}
-		}
-		g.correctGuessers = newCorrectGuessers
+		// Remove the player from the correct guessers
+		delete(g.correctGuessers, player.ID)
 
 		// Filter out the player's guesses
 		newGuesses := make([]guess, 0)
@@ -170,6 +164,7 @@ func (g *game) removePlayerGuesses(player *player) {
 
 		if g.currentPhase.Name() == Drawing {
 			slog.Info("drawer left during drawing phase, skipping to post drawing phase")
+			g.cancelHintRoutine()
 			g.room.timer.Stop()
 			g.AdvanceToNextPhase()
 		}
@@ -390,7 +385,12 @@ func (phase DrawingPhase) Start(g *game) {
 					return
 				}
 				g.applyHint()
-				g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
+				for _, p := range g.room.Players {
+					// Only send the hint to guessing players who haven't guessed correctly yet
+					if p.GameRole == GameRoleGuessing && !g.correctGuessers[p.ID] {
+						p.Send(message(SelectWord, g.hintedWord))
+					}
+				}
 				slog.Info("select word", "hinted word", g.hintedWord)
 				hintCount++
 			}
@@ -415,7 +415,7 @@ func (phase DrawingPhase) Start(g *game) {
 }
 func (phase DrawingPhase) End(g *game) {
 	g.clearGuesses()
-	g.correctGuessers = make([]uuid.UUID, 0)
+	g.correctGuessers = make(map[uuid.UUID]bool)
 	g.hintedWord = ""
 	g.currentWord = ""
 	fmt.Println("Drawing phase ended")
@@ -472,7 +472,7 @@ func (phase PostDrawingPhase) Next(g *game) {
 
 func (g *game) clearGuesses() {
 	g.guesses = make([]guess, 0)
-	g.correctGuessers = make([]uuid.UUID, 0)
+	g.correctGuessers = make(map[uuid.UUID]bool)
 	g.room.broadcast(GameRoleAny, message(SetGuesses, g.guesses))
 }
 
@@ -493,7 +493,7 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessText string) {
 		result.PointsAwarded = g.calculatePoints(400)
 		g.room.Players[playerID].Score += result.PointsAwarded
 		result.Guess = ""
-		g.correctGuessers = append(g.correctGuessers, playerID)
+		g.correctGuessers[playerID] = true
 		g.room.Players[playerID].Send(message(SelectWord, g.currentWord))
 		slog.Info("select word", "word", g.currentWord)
 

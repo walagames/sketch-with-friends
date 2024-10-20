@@ -39,9 +39,9 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 
 	return (
 		<div className="flex flex-col h-[700px] w-[20rem]">
-			<div className="flex gap-4 ml-auto">
-				<div className="flex gap-2 text-lg font-bold items-center">
-					<Tally5Icon className="h-5 w-5 mb-0.5" /> {currentRound}/{totalRounds}
+			<div className="flex w-full justify-between">
+				<div className="flex gap-2 text-lg font-semibold items-center">
+					Round {currentRound} of {totalRounds}
 				</div>
 				<div className="flex gap-2 text-lg font-bold items-center">
 					<UsersIcon className="h-5 w-5 mb-0.5" /> {Object.keys(players).length}
@@ -59,7 +59,7 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 					/>
 				))}
 			</ul>
-			{isGuessing && 
+			{isGuessing &&
 				(hasGuessedCorrect ? (
 					<div className="font-bold text-xl bg-background rounded-lg h-14 px-4 py-3.5 w-full -translate-y-1.5 translate-x-1.5 shadow-accent">
 						<span className="translate-y-0.5 flex items-center justify-center gap-2">
