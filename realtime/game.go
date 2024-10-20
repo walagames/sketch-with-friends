@@ -31,6 +31,7 @@ var (
 )
 
 type guess struct {
+	ID            uuid.UUID `json:"id"`
 	PlayerID      uuid.UUID `json:"playerId"`
 	Guess         string    `json:"guess"`
 	IsCorrect     bool      `json:"isCorrect"`
@@ -168,7 +169,7 @@ func (g *game) handlePlayerLeave(player *player) {
 		if g.currentPhase.Name() == Drawing {
 			g.cancelHintRoutine()
 			g.room.timer.Stop()
-			g.AdvanceToNextPhase()
+			g.currentPhase.Next(g)
 		}
 	}
 }
@@ -248,6 +249,7 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessText string) {
 		g.currentDrawer.Score += g.calculatePoints(100)
 
 		result = guess{
+			ID:            uuid.New(),
 			PlayerID:      playerID,
 			Guess:         "", // Dont leak the correct word to the other players
 			IsCorrect:     true,
@@ -258,6 +260,7 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessText string) {
 		g.room.Players[playerID].Send(message(SelectWord, g.currentWord))
 	} else {
 		result = guess{
+			ID:       uuid.New(),
 			PlayerID: playerID,
 			Guess:    guessText,
 			IsClose:  g.isGuessClose(lowerGuess),
@@ -280,7 +283,7 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessText string) {
 		time.Sleep(time.Duration(1 * time.Second)) // Short delay to display the word
 
 		// Advance to the next phase
-		g.AdvanceToNextPhase()
+		g.currentPhase.Next(g)
 	}
 }
 
@@ -338,6 +341,8 @@ func (g *game) applyHint() {
 // Launched as a goroutine in the Drawing phase.
 func (g *game) hintRoutine(ctx context.Context, phaseDuration time.Duration) {
 	g.hintedWord = strings.Repeat("*", len(g.currentWord))
+	// Send the initial hinted word with all blanks
+	g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
 
 	// Will apply up to 60% of the word length as hints
 	totalHints := int(float64(len(g.currentWord)) * 0.6)
@@ -415,13 +420,6 @@ func (g *game) setPhase(phase Phase) {
 	g.currentPhase.End(g)
 	g.currentPhase = phase
 	g.currentPhase.Start(g)
-}
-
-// Advances to the next game phase.
-// The timer calls this when it fires in the room routine.
-// We also call this manually to skip to the next phase.
-func (g *game) AdvanceToNextPhase() {
-	g.currentPhase.Next(g)
 }
 
 type PickingPhase struct{}

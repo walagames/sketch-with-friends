@@ -53,7 +53,7 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 			>
 				{guesses.map((guess) => (
 					<GuessCard
-						key={guess.playerId}
+						key={guess.id}
 						guess={guess}
 						player={players[guess.playerId]}
 					/>

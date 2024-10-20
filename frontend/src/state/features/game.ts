@@ -36,6 +36,7 @@ const initialState: GameState = {
 };
 
 export type Guess = {
+	id: string;
 	playerId: string;
 	guess: boolean;
 	isCorrect: boolean;
