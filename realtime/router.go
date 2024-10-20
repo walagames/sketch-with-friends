@@ -118,6 +118,7 @@ func host(rm RoomManager) http.HandlerFunc {
 			avatarColor: avatarColor,
 		})
 		room.Connect(conn, player)
+		slog.Info("Player created and connected to room", "playerId", player.ID, "roomCode", room.Code())
 	}
 }
 
@@ -163,6 +164,7 @@ func join(rm RoomManager) http.HandlerFunc {
 			CloseConnectionWithReason(conn, err.Error())
 			return
 		}
+		slog.Info("Player connected to room", "playerId", player.ID, "roomCode", room.Code())
 	}
 }
 

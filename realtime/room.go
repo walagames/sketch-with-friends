@@ -31,6 +31,7 @@ type Room interface {
 	Connect(conn *websocket.Conn, player *player) error
 	Run(rm RoomManager)
 	LastInteractionAt() time.Time
+	Code() string
 }
 
 type RoomSettings struct {
@@ -83,6 +84,10 @@ func NewRoom(id string) Room {
 		},
 		Stage: PreGame,
 	}
+}
+
+func (r *room) Code() string {
+	return r.ID
 }
 
 func (r *room) LastInteractionAt() time.Time {
@@ -140,7 +145,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 	player.client.run(ctx)
 	r.Players[player.ID] = player
 
-	slog.Info("player connected", "player", player.ID)
+	slog.Debug("player connected", "player", player.ID)
 
 	r.broadcast(GameRoleAny,
 		message(PlayerJoined, player),
@@ -172,7 +177,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 func (r *room) unregister(player *player) {
 	r.lastInteractionAt = time.Now()
 
-	slog.Info("player unregistered", "player", player.ID)
+	slog.Debug("player unregistered", "player", player.ID)
 	if r.game != nil && r.game.currentPhase.Name() == Drawing {
 		r.game.handlePlayerLeave(player)
 	}
@@ -199,7 +204,7 @@ func (r *room) unregister(player *player) {
 				GameRoleAny,
 				message(SetPlayers, r.Players),
 			)
-			slog.Info("host changed", "player", player.Name)
+			slog.Debug("host changed", "player", player.Name)
 			break
 		}
 	}
@@ -217,7 +222,7 @@ func (r *room) unregister(player *player) {
 }
 
 func (r *room) Run(rm RoomManager) {
-	slog.Info("Room routine started", "id", r.ID)
+	slog.Info("Room created", "id", r.ID)
 	ctx, cancel := context.WithCancelCause(context.Background())
 	r.cancel = cancel
 	defer cancel(nil)
@@ -234,7 +239,7 @@ func (r *room) Run(rm RoomManager) {
 			r.game.cancelHintRoutine()
 		}
 
-		slog.Info("Room routine exited", "id", r.ID)
+		slog.Debug("Room routine exited", "id", r.ID)
 		rm.Unregister(r.ID)
 	}()
 	for {
@@ -271,21 +276,21 @@ func (r *room) dispatch(a *Action) {
 
 	def, exists := ActionDefinitions[a.Type]
 	if !exists {
-		slog.Warn("unknown action", "action", a.Type)
+		slog.Debug("unknown action", "action", a.Type)
 		a.Player.Send(message(Error, "unknown action"))
 		return
 	}
 
 	err := def.ValidateAction(r, a)
 	if err != nil {
-		slog.Warn("action validation failed", "reason", err)
+		slog.Debug("action validation failed", "reason", err)
 		a.Player.Send(message(Error, err.Error()))
 		return
 	}
 
 	err = def.execute(r, a)
 	if err != nil {
-		slog.Warn("action execution failed", "reason", err)
+		slog.Debug("action execution failed", "reason", err)
 		a.Player.Send(message(Error, err.Error()))
 		return
 	}

@@ -8,6 +8,8 @@ type Stroke struct {
 	Width  int     `json:"width"`
 }
 
+// Decodes the raw payload into a Stroke.
+// Throws an error if the payload is not a valid Stroke.
 func decodeStroke(payload interface{}) (Stroke, error) {
 	stroke, err := decodePayload[Stroke](payload)
 	if err != nil {
@@ -17,6 +19,8 @@ func decodeStroke(payload interface{}) (Stroke, error) {
 	return stroke, nil
 }
 
+// Decodes the raw payload into a slice of integers.
+// Throws an error if the payload is not a valid slice of integers.
 func decodeStrokePoint(payload interface{}) ([]int, error) {
 	point, err := decodePayload[[]int](payload)
 	if err != nil {
@@ -35,12 +39,12 @@ func appendStrokePoint(strokes []Stroke, point []int) []Stroke {
 	return strokes
 }
 
-// Removes all strokes from the strokes slice by creating a new empty slice
+// Returns a new empty slice of strokes.
 func emptyStrokeSlice() []Stroke {
 	return make([]Stroke, 0)
 }
 
-// Removes the most recent stroke from the strokes slice
+// Returns a new slice of strokes with the most recent stroke removed.
 func removeLastStroke(strokes []Stroke) []Stroke {
 	if len(strokes) > 0 {
 		return strokes[:len(strokes)-1]

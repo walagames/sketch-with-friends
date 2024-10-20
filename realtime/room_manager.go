@@ -40,7 +40,7 @@ func (rm *roomManager) Run(ctx context.Context) {
 	defer cleanupTicker.Stop()
 
 	defer func() {
-		slog.Info("Room manager exited")
+		slog.Info("Room manager shutting down")
 	}()
 	for {
 		select {

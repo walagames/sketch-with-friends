@@ -59,23 +59,42 @@ type Action struct {
 	Player  *player     `json:"-"`
 }
 
-/*
-Action Definitions help encapsulate the logic for performing actions and validating preconditions
-
-Before performing actions we usually want to:
- 1. Check if the actor has permission to perform that action ex. only host can change settings
- 2. Check if the game state allows the action to be performed ex. can't submit guess if not in guessing phase
- 3. Perform any side effects related to the action ex. change game state, update player scores
- 4. Inform clients of the action or state changes ex. re-broadcast a stroke point to guessing players
-
-Action definitions help us encapsulate this logic in a single place
-*/
+// Action Definitions help encapsulate the logic for validating preconditions and performing actions.
+//
+// Before performing actions we usually want to:
+// 1. Check if the actor has permission to perform that action ex. only host can change settings
+// 2. Check if the game state allows the action to be performed ex. can't submit guess if not in guessing phase
+// 3. Perform any side effects related to the action ex. change game state, update player scores
+// 4. Inform clients of the action or state changes ex. re-broadcast a stroke point to guessing players
+//
+// Action definitions help us encapsulate this logic in a single place, reducing code duplication and improving readability.
 type ActionDefinition struct {
 	RoomRoleRequired RoomRole
 	GameRoleRequired GameRole
 	PayloadType      interface{}
 	validator        func(room *room) error
 	execute          func(room *room, a *Action) error
+}
+
+// ValidateAction checks if the action is valid given the current game state
+func (def *ActionDefinition) ValidateAction(room *room, a *Action) error {
+	// Check permissions
+	if def.RoomRoleRequired != RoomRoleAny && def.RoomRoleRequired != a.Player.RoomRole {
+		return fmt.Errorf("player doesn't have required permission for action: %s", a.Type)
+	}
+
+	// Check roles
+	if def.GameRoleRequired != GameRoleAny && def.GameRoleRequired != a.Player.GameRole {
+		return fmt.Errorf("player doesn't have required role for action: %s", a.Type)
+	}
+
+	// Validate payload type
+	if reflect.TypeOf(a.Payload) != reflect.TypeOf(def.PayloadType) {
+		return fmt.Errorf("invalid payload type for action: %s, expected %s, got %s", a.Type, reflect.TypeOf(def.PayloadType), reflect.TypeOf(a.Payload))
+	}
+
+	// Check game state conditions
+	return def.validator(room)
 }
 
 var ActionDefinitions = map[ActionType]ActionDefinition{
@@ -278,27 +297,6 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 	},
 }
 
-// ValidateAction checks if the action is valid given the current game state
-func (def *ActionDefinition) ValidateAction(room *room, a *Action) error {
-	// Check permissions
-	if def.RoomRoleRequired != RoomRoleAny && def.RoomRoleRequired != a.Player.RoomRole {
-		return fmt.Errorf("player doesn't have required permission for action: %s", a.Type)
-	}
-
-	// Check roles
-	if def.GameRoleRequired != GameRoleAny && def.GameRoleRequired != a.Player.GameRole {
-		return fmt.Errorf("player doesn't have required role for action: %s", a.Type)
-	}
-
-	// Validate payload type
-	if reflect.TypeOf(a.Payload) != reflect.TypeOf(def.PayloadType) {
-		return fmt.Errorf("invalid payload type for action: %s, expected %s, got %s", a.Type, reflect.TypeOf(def.PayloadType), reflect.TypeOf(a.Payload))
-	}
-
-	// Check game state conditions
-	return def.validator(room)
-}
-
 func message(actionType ActionType, payload interface{}) *Action {
 	return &Action{
 		Type:    actionType,
@@ -330,7 +328,7 @@ func decodePayload[T any](payload interface{}) (T, error) {
 	var target T
 	err := mapstructure.Decode(payload, &target)
 	if err != nil {
-		slog.Warn("failed to decode payload", "error", err)
+		slog.Debug("failed to decode payload", "error", err)
 		return target, err
 	}
 	return target, nil
