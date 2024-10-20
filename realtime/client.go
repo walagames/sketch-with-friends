@@ -43,7 +43,7 @@ func NewClient(conn *websocket.Conn, room *room, player *player) *client {
 		room:    room,
 		player:  player,
 		conn:    conn,
-		limiter: rate.NewLimiter(0.5, 5),
+		limiter: rate.NewLimiter(2, 4),
 		send:    make(chan []*Action, 256),
 	}
 }
