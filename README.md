@@ -1,8 +1,13 @@
 <p align="center">
   <picture>
     <source srcset="./.github/images/logo.svg">
-     <a href="https://sketchwithfriends.com"><img width="338" alt="Sketch with Friends: Multiplayer drawing and guessing game" src="./.github/images/logo.png"></a>
+    <a href="https://sketchwithfriends.com"><img width="338" alt="Sketch with Friends: Multiplayer drawing and guessing game" src="./.github/images/logo.png"></a>
   </picture>
+</p>
+
+<p align="center">
+  <a href="https://sketchwithfriends.com"><img src="https://img.shields.io/badge/Demo-Website-6637EE" alt="Demo"></a>
+  <a href="https://github.com/walagames/sketch-with-friends/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/walagames/sketch-with-friends"></a>
 </p>
 
 ## Overview
