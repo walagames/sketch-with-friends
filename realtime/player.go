@@ -1,8 +1,6 @@
 package main
 
 import (
-	"errors"
-	"log/slog"
 	"time"
 
 	"github.com/google/uuid"
@@ -22,10 +20,6 @@ const (
 	GameRoleGuessing GameRole = "guessing"
 	GameRoleDrawing  GameRole = "drawing"
 	GameRoleAny      GameRole = "any"
-)
-
-var (
-	ErrPlayerKicked = errors.New("ErrPlayerKicked")
 )
 
 type player struct {
@@ -66,19 +60,14 @@ func (p *player) Send(actions ...*Action) {
 	p.client.send <- actionList
 }
 
-func (p *player) Kick() {
-	slog.Info("kicking player", "player", p.ID)
-	p.client.close(ErrPlayerKicked)
-}
-
 func (p *player) UpdateLimiter() {
 	if p.GameRole == GameRoleDrawing {
-		// 500 actions per second, 20 actions in a burst
 		// Needs to be high to allow for fast drawing
+		// 500 actions per second, 20 actions in a burst
 		p.client.limiter = rate.NewLimiter(500, 20)
 	} else {
+		// This is mostly to prevent players from spamming guesses
 		// 2 actions per second, 4 actions in a burst
-		// This is to prevent players from guessing too quickly
 		p.client.limiter = rate.NewLimiter(2, 4)
 	}
 }

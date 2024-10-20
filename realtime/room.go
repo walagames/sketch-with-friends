@@ -152,7 +152,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 	)
 
 	if r.Stage == Playing {
-		r.game.queueLateJoiner(player)
+		r.game.enqueueDrawingPlayer(player)
 		player.Send(
 			message(ChangePhase, PhaseChangeMessage{
 				Phase:    r.game.currentPhase.Name(),
@@ -173,8 +173,8 @@ func (r *room) unregister(player *player) {
 	r.lastInteractionAt = time.Now()
 
 	slog.Info("player unregistered", "player", player.ID)
-	if r.game != nil {
-		r.game.removePlayerGuesses(player)
+	if r.game != nil && r.game.currentPhase.Name() == Drawing {
+		r.game.handlePlayerLeave(player)
 	}
 
 	r.broadcast(
@@ -184,7 +184,7 @@ func (r *room) unregister(player *player) {
 
 	delete(r.Players, player.ID)
 	if len(r.Players) == 0 {
-		if r.Stage == Playing && r.game != nil && r.game.currentPhase.Name() == "drawing" {
+		if r.Stage == Playing && r.game != nil && r.game.currentPhase.Name() == Drawing {
 			r.game.cancelHintRoutine()
 		}
 		r.cancel(errors.New("no players left in room"))
@@ -205,7 +205,7 @@ func (r *room) unregister(player *player) {
 	}
 
 	if len(r.Players) < 2 && r.Stage == Playing {
-		if r.game != nil && r.game.currentPhase.Name() == "drawing" {
+		if r.game != nil && r.game.currentPhase.Name() == Drawing {
 			r.game.cancelHintRoutine()
 		}
 		r.Stage = PreGame
