@@ -90,6 +90,7 @@ func host(rm RoomManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		username, avatarSeed, avatarColor, err := extractUserParams(r)
 		if err != nil {
+			slog.Warn("error extracting user params", "error", err, "query", r.URL.Query().Encode())
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -97,6 +98,7 @@ func host(rm RoomManager) http.HandlerFunc {
 		// Upgrade the HTTP connection to a WebSocket connection
 		conn, err := UpgradeConnection(w, r)
 		if err != nil {
+			slog.Warn("Failed to upgrade to websocket connection", "error", err)
 			http.Error(w, "Failed to upgrade to websocket connection", http.StatusInternalServerError)
 			return
 		}
@@ -104,6 +106,7 @@ func host(rm RoomManager) http.HandlerFunc {
 		// Register a new room
 		room, err := rm.Register()
 		if err != nil {
+			slog.Warn("Failed to register room", "error", err)
 			http.Error(w, "Failed to create room", http.StatusInternalServerError)
 			return
 		}
@@ -117,8 +120,13 @@ func host(rm RoomManager) http.HandlerFunc {
 			avatarSeed:  avatarSeed,
 			avatarColor: avatarColor,
 		})
-		room.Connect(conn, player)
-		slog.Info("Player connected to room", "playerId", player.ID, "roomCode", room.Code())
+		err = room.Connect(conn, player)
+		if err != nil {
+			slog.Warn("Failed to connect player to room", "roomId", room.Code(), "playerId", player.ID, "error", err)
+			CloseConnectionWithReason(conn, err.Error())
+			return
+		}
+		slog.Info("Player connected to room", "roomId", room.Code(), "playerId", player.ID)
 	}
 }
 
@@ -127,6 +135,7 @@ func join(rm RoomManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		username, avatarSeed, avatarColor, err := extractUserParams(r)
 		if err != nil {
+			slog.Warn("Invalid query parameters", "error", err, "query", r.URL.Query().Encode())
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -141,6 +150,7 @@ func join(rm RoomManager) http.HandlerFunc {
 		// Upgrade the HTTP connection to a WebSocket connection
 		conn, err := UpgradeConnection(w, r)
 		if err != nil {
+			slog.Warn("Failed to upgrade to websocket connection", "error", err)
 			http.Error(w, "Failed to upgrade to websocket connection", http.StatusInternalServerError)
 			return
 		}
@@ -148,6 +158,7 @@ func join(rm RoomManager) http.HandlerFunc {
 		// Check if the room exists
 		room, err := rm.Room(code)
 		if err != nil {
+			slog.Warn("Failed to get room", "roomId", code, "error", err)
 			CloseConnectionWithReason(conn, ErrRoomNotFound.Error())
 			return
 		}
@@ -161,10 +172,11 @@ func join(rm RoomManager) http.HandlerFunc {
 		})
 		err = room.Connect(conn, player)
 		if err != nil {
+			slog.Warn("Failed to connect player to room", "roomId", room.Code(), "playerId", player.ID, "error", err)
 			CloseConnectionWithReason(conn, err.Error())
 			return
 		}
-		slog.Info("Player connected to room", "playerId", player.ID, "roomCode", room.Code())
+		slog.Info("Player connected to room", "roomId", room.Code(), "playerId", player.ID)
 	}
 }
 
