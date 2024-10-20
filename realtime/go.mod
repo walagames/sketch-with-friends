@@ -7,4 +7,5 @@ require (
 	github.com/gorilla/websocket v1.5.3
 	github.com/lmittmann/tint v1.0.4
 	github.com/mitchellh/mapstructure v1.5.0
+	golang.org/x/time v0.7.0
 )
