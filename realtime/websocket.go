@@ -3,6 +3,8 @@ package main
 import (
 	"log/slog"
 	"net/http"
+	"os"
+	"regexp"
 
 	"github.com/gorilla/websocket"
 )
@@ -12,8 +14,21 @@ var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		// !!! We need to set this up in production
-		return true
+		origin := r.Header.Get("Origin")
+
+		// Allow local development
+		if origin == "http://localhost:3000" && os.Getenv("ENVIRONMENT") != "PRODUCTION" {
+			return true
+		}
+
+		// Allow production
+		if origin == "https://sketchwithfriends.com" {
+			return true
+		}
+
+		// Allow preview environments
+		match, _ := regexp.MatchString(`^https?:\/\/([\w-]+\.)*sketch-with-friends\.pages\.dev$`, origin)
+		return match
 	},
 }
 
