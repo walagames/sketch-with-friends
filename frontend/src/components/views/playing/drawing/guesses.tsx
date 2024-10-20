@@ -12,7 +12,7 @@ import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
 import { useDispatch, useSelector } from "react-redux";
 import { Input } from "@/components/ui/input";
 import { RaisedButton } from "@/components/raised-button";
-import { SendIcon, Tally5Icon, UsersIcon } from "lucide-react";
+import { SendIcon, UsersIcon } from "lucide-react";
 
 export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 	const guesses = useSelector((state: RootState) => state.game.guesses);
