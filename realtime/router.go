@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log/slog"
 	"net/http"
-
-	"errors"
+	"strings"
 	"sync"
 	"time"
 )
@@ -56,14 +56,16 @@ func logMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 
-		slog.Info("Request",
-			"method", r.Method,
-			"path", r.URL.Path,
-			"remote_addr", r.RemoteAddr,
-			"user_agent", r.UserAgent(),
-			"duration", time.Since(start),
-			"query", r.URL.Query().Encode(),
-		)
+		if !strings.HasPrefix(r.RemoteAddr, "[::1]") {
+			slog.Info("Request",
+				"method", r.Method,
+				"path", r.URL.Path,
+				"remote_addr", r.RemoteAddr,
+				"user_agent", r.UserAgent(),
+				"duration", time.Since(start),
+				"query", r.URL.Query().Encode(),
+			)
+		}
 	})
 }
 
