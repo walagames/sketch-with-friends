@@ -84,9 +84,6 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		GameRoleRequired: GameRoleAny,
 		PayloadType:      nil,
 		validator: func(r *room) error {
-			if r.game != nil {
-				return fmt.Errorf("game already is initialized")
-			}
 			if r.Stage != PreGame {
 				return fmt.Errorf("can only start game in pre game stage")
 			}
