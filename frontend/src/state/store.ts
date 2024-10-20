@@ -2,26 +2,29 @@ import { configureStore, Middleware } from "@reduxjs/toolkit";
 import canvasReducer from "./features/canvas";
 import roomReducer from "./features/room";
 import gameReducer from "./features/game";
-import clientReducer, { enterRoomCode } from "./features/client";
+import clientReducer from "./features/client";
 import { clearQueryParams } from "@/lib/params";
 import { toast } from "sonner";
 
-// const logger: Middleware = (store) => (next) => (action) => {
-// 	console.log("dispatching", action);
-// 	const result = next(action);
-// 	console.log("next state", store.getState());
-// 	return result;
-// };
-
-enum ConnectionError {
-	RoomNotFound = "ErrRoomNotFound",
-	RoomFull = "ErrRoomFull",
-	RoomClosed = "ErrRoomClosed",
-	ConnectionTimeout = "ErrConnectionTimeout",
-}
+const ErrorMessages = {
+	ErrRoomNotFound: "Room not found",
+	ErrRoomFull: "Room is full",
+	ErrRoomClosed: "Room closed",
+	ErrConnectionTimeout: "Connection timed out",
+	ErrRoomIdle: "Room closed because it was inactive for too long",
+	ErrPlayerIdle: "You were inactive for too long and were kicked",
+};
 
 const socketMiddleware: Middleware = (store) => {
 	let socket: WebSocket | null = null;
+
+	function clearStateAfterDelay() {
+		setTimeout(() => {
+			store.dispatch({ type: "room/reset", fromServer: true });
+			store.dispatch({ type: "game/reset", fromServer: true });
+			store.dispatch({ type: "client/reset", fromServer: true });
+		}, 100);
+	}
 
 	return (next) => (action: any) => {
 		switch (action.type) {
@@ -33,35 +36,27 @@ const socketMiddleware: Middleware = (store) => {
 				socket = new WebSocket(action.payload);
 
 				socket.onclose = (e) => {
-					switch (e.reason) {
-						case ConnectionError.RoomNotFound:
-							toast.error("Room not found");
-							clearQueryParams();
-							store.dispatch(enterRoomCode(""));
-							break;
-						case ConnectionError.RoomFull:
-							toast.error("Room is full");
-							store.dispatch(enterRoomCode(""));
-							break;
-						case ConnectionError.ConnectionTimeout:
-							toast.error("Connection timed out");
-							store.dispatch(enterRoomCode(""));
-							break;
-						default:
-							toast.error(e.reason ? e.reason : "Disconnected from server");
-							break;
+					const errorMessage =
+						ErrorMessages[e.reason as keyof typeof ErrorMessages];
+					toast.error(errorMessage || "Unknown error occurred");
+
+					// Remove the code from url if the room was not found
+					if (e.reason === "ErrRoomNotFound") {
+						clearQueryParams();
 					}
-					setTimeout(() => {
-						store.dispatch({ type: "room/reset", fromServer: true });
-						store.dispatch({ type: "game/reset", fromServer: true });
-						store.dispatch({ type: "client/reset", fromServer: true });
-					}, 100);
+
+					// Clear after short delay to avoid visual shift if disconnect is caused by page reload
+					clearStateAfterDelay();
 				};
 				socket.onmessage = (event) => {
 					const actions = JSON.parse(event.data);
 					actions.forEach((action: any) => {
-						if (action.type === "error") {
-							toast.error(action.payload);
+						if (
+							action.type === "error" ||
+							action.type === "warning" ||
+							action.type === "info"
+						) {
+							toast(action.payload || "Unknown error occurred");
 						} else {
 							store.dispatch({
 								...action,
@@ -82,7 +77,6 @@ const socketMiddleware: Middleware = (store) => {
 			default:
 				// Check if the action should be sent to the server
 				if (!action.type.startsWith("client") && !action.fromServer) {
-					// console.log("sending action to server", action);
 					if (!action.payload) {
 						action.payload = null;
 					}
@@ -102,10 +96,7 @@ export const store = configureStore({
 		client: clientReducer,
 	},
 	middleware: (getDefaultMiddleware) =>
-		getDefaultMiddleware({ serializableCheck: false }).concat(
-			// logger,
-			socketMiddleware
-		),
+		getDefaultMiddleware({ serializableCheck: false }).concat(socketMiddleware),
 });
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
