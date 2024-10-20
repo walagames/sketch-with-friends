@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	MAX_LOBBIES   = 20
-	LOBBY_TIMEOUT = 15 * time.Minute
+	MAX_LOBBIES  = 20
+	CLEANUP_TICK = 1 * time.Minute  // How often to check for idle rooms
+	ROOM_TIMEOUT = 20 * time.Minute // How long a room can be idle before it is disconnected
 )
 
 type RoomManager interface {
@@ -23,7 +24,7 @@ type RoomManager interface {
 
 type roomManager struct {
 	rooms map[string]Room
-	mu    sync.Mutex
+	mu    sync.RWMutex
 }
 
 func NewRoomManager() RoomManager {
@@ -35,6 +36,9 @@ func NewRoomManager() RoomManager {
 func (rm *roomManager) Run(ctx context.Context) {
 	slog.Info("Room manager started")
 
+	cleanupTicker := time.NewTicker(CLEANUP_TICK)
+	defer cleanupTicker.Stop()
+
 	defer func() {
 		slog.Info("Room manager exited")
 	}()
@@ -42,23 +46,40 @@ func (rm *roomManager) Run(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
+		case <-cleanupTicker.C:
+			rm.cleanup()
+		}
+	}
+}
+
+func (rm *roomManager) cleanup() {
+	rm.mu.Lock()
+	defer rm.mu.Unlock()
+
+	for id, room := range rm.rooms {
+		if time.Since(room.LastInteractionAt()) > ROOM_TIMEOUT {
+			slog.Info("Closing idle room", "id", id, "idle_time", time.Since(room.LastInteractionAt()).Round(time.Second).String())
+			room.Close(ErrRoomIdle)
 		}
 	}
 }
 
 func (rm *roomManager) Register() (Room, error) {
 	rm.mu.Lock()
+	defer rm.mu.Unlock()
+
 	if len(rm.rooms) >= MAX_LOBBIES {
-		rm.mu.Unlock()
 		slog.Warn("maximum number of rooms reached, cannot create a new room")
 		return nil, fmt.Errorf("maximum number of rooms reached")
 	}
 
-	id := rm.uniqueRoomID()
-	room := NewRoom(id)
+	id, err := rm.uniqueRoomID()
+	if err != nil {
+		return nil, err
+	}
 
+	room := NewRoom(id)
 	rm.rooms[id] = room
-	rm.mu.Unlock()
 
 	return room, nil
 }
@@ -66,8 +87,8 @@ func (rm *roomManager) Register() (Room, error) {
 func (rm *roomManager) Unregister(id string) error {
 	if _, err := rm.Room(id); err == nil {
 		rm.mu.Lock()
+		defer rm.mu.Unlock()
 		delete(rm.rooms, id)
-		rm.mu.Unlock()
 		slog.Info("Room deleted", "id", id)
 		return nil
 	}
@@ -77,8 +98,8 @@ func (rm *roomManager) Unregister(id string) error {
 }
 
 func (rm *roomManager) Room(id string) (Room, error) {
-	rm.mu.Lock()
-	defer rm.mu.Unlock()
+	rm.mu.RLock()
+	defer rm.mu.RUnlock()
 	if room, ok := rm.rooms[id]; ok {
 		return room, nil
 	}
@@ -86,26 +107,29 @@ func (rm *roomManager) Room(id string) (Room, error) {
 	return nil, fmt.Errorf("room not found")
 }
 
-func (rm *roomManager) uniqueRoomID() string {
-	id := randomID(6)
-
-	if _, ok := rm.rooms[id]; ok {
-		slog.Warn("Room code already exists", "code", id)
-		return randomID(6)
+func (rm *roomManager) uniqueRoomID() (string, error) {
+	id, err := randomID(6)
+	if err != nil {
+		return "", err
 	}
 
-	return id
+	if _, ok := rm.rooms[id]; ok {
+		slog.Warn("Room code already exists, retrying", "code", id)
+		return rm.uniqueRoomID()
+	}
+
+	return id, nil
 }
 
-func randomID(length int) string {
+func randomID(length int) (string, error) {
 	const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 	b := make([]byte, length)
 	if _, err := rand.Read(b); err != nil {
-		// This should never happen; if it does, there is a critical system error
-		panic(err)
+		// This should never happen
+		return "", err
 	}
 	for i := 0; i < length; i++ {
 		b[i] = charset[b[i]%byte(len(charset))]
 	}
-	return string(b)
+	return string(b), nil
 }
