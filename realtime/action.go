@@ -14,7 +14,9 @@ type ActionType string
 
 const (
 	// generic actions
-	Error ActionType = "error"
+	Error   ActionType = "error"
+	Warning ActionType = "warning"
+	Info    ActionType = "info"
 
 	// client actions
 	InitializeClient ActionType = "client/initializeClient"
