@@ -61,9 +61,15 @@ func NewServer(
 
 	mux.Handle("/host", host(rm))
 	mux.Handle("/join/{code}", join(rm))
-
+	mux.Handle("/reporting", reporting(rm))
 	var handler http.Handler = mux
 	return &handler
+}
+
+func reporting(rm RoomManager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}
 }
 
 // host handles the HTTP request for creating and joining a new room
