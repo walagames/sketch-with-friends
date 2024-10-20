@@ -4,10 +4,8 @@ import (
 	"log/slog"
 	"net/http"
 
-
 	"github.com/gorilla/websocket"
 )
-
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,

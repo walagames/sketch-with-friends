@@ -15,6 +15,17 @@ const (
 	PLAYER_TIMEOUT = 10 * time.Minute // How long a player can be idle before the room disconnects them
 )
 
+// Error codes
+var (
+	ErrRoomNotFound      = errors.New("ErrRoomNotFound")
+	ErrRoomFull          = errors.New("ErrRoomFull")
+	ErrRoomClosed        = errors.New("ErrRoomClosed")
+	ErrConnectionTimeout = errors.New("ErrConnectionTimeout")
+	ErrRoomIdle          = errors.New("ErrRoomIdle")
+	ErrPlayerIdle        = errors.New("ErrPlayerIdle")
+	ErrRoomEmpty         = errors.New("ErrRoomEmpty")
+)
+
 type Room interface {
 	Close(cause error)
 	Connect(conn *websocket.Conn, player *player) error
@@ -43,7 +54,7 @@ type room struct {
 
 	// game state
 	Stage RoomStage `json:"stage"`
-	game  *gameState
+	game  *game
 
 	// channels
 	connect    chan *connectionAttempt
@@ -78,6 +89,10 @@ func (r *room) LastInteractionAt() time.Time {
 	return r.lastInteractionAt
 }
 
+func (r *room) setStage(stage RoomStage) {
+	r.Stage = stage
+}
+
 // Broadcast actions to players with a specific game role or all players if role is GameRoleAny
 func (r *room) broadcast(role GameRole, actions ...*Action) {
 	for _, player := range r.Players {
@@ -86,18 +101,6 @@ func (r *room) broadcast(role GameRole, actions ...*Action) {
 		}
 	}
 }
-
-// Connection failure codes
-var (
-	ErrRoomNotFound      = errors.New("ErrRoomNotFound")
-	ErrRoomFull          = errors.New("ErrRoomFull")
-	ErrRoomClosed        = errors.New("ErrRoomClosed")
-	ErrConnectionTimeout = errors.New("ErrConnectionTimeout")
-	ErrRoomIdle          = errors.New("ErrRoomIdle")
-	ErrPlayerIdle        = errors.New("ErrPlayerIdle")
-	ErrRoomEmpty         = errors.New("ErrRoomEmpty")
-	ErrRoomRoutineExited = errors.New("ErrRoomRoutineExited")
-)
 
 type connectionAttempt struct {
 	player *player
@@ -149,6 +152,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 	)
 
 	if r.Stage == Playing {
+		r.game.queueLateJoiner(player)
 		player.Send(
 			message(ChangePhase, PhaseChangeMessage{
 				Phase:    r.game.currentPhase.Name(),
@@ -167,11 +171,15 @@ func (r *room) register(ctx context.Context, player *player) error {
 // TODO: reduce cognitive load of this function
 func (r *room) unregister(player *player) {
 	r.lastInteractionAt = time.Now()
-	slog.Info("player unregistered", "player", player.ID)
+
 	r.broadcast(
 		GameRoleAny,
 		message(PlayerLeft, player.ID),
 	)
+	slog.Info("player unregistered", "player", player.ID)
+	if r.game != nil {
+		r.game.removePlayerGuesses(player)
+	}
 
 	delete(r.Players, player.ID)
 	if len(r.Players) == 0 {
@@ -211,7 +219,7 @@ func (r *room) Run(rm RoomManager) {
 	slog.Info("Room routine started", "id", r.ID)
 	ctx, cancel := context.WithCancelCause(context.Background())
 	r.cancel = cancel
-	defer cancel(ErrRoomRoutineExited)
+	defer cancel(nil)
 
 	idleTicker := time.NewTicker(IDLE_TICK)
 	defer idleTicker.Stop()
@@ -231,7 +239,7 @@ func (r *room) Run(rm RoomManager) {
 	for {
 		select {
 		case <-ctx.Done():
-			slog.Info("Room routine cancelled", "id", r.ID, "cause", context.Cause(ctx))
+			slog.Debug("Room routine cancelled", "id", r.ID, "cause", context.Cause(ctx))
 			return
 		case <-idleTicker.C:
 			for _, player := range r.Players {
@@ -244,8 +252,7 @@ func (r *room) Run(rm RoomManager) {
 				}
 			}
 		case <-r.timer.C:
-			slog.Info("Room tick", "id", r.ID)
-			r.game.Transition()
+			r.game.AdvanceToNextPhase()
 		case req := <-r.connect:
 			req.result <- r.register(ctx, req.player)
 		case player := <-r.disconnect:
@@ -263,28 +270,21 @@ func (r *room) dispatch(a *Action) {
 
 	def, exists := ActionDefinitions[a.Type]
 	if !exists {
-		slog.Warn("action definition not found", "action", a.Type)
-		a.Player.Send(message(Error, "action definition not found"))
+		slog.Warn("unknown action", "action", a.Type)
+		a.Player.Send(message(Error, "unknown action"))
 		return
 	}
 
-	err := def.Before(r, a)
+	err := def.ValidateAction(r, a)
 	if err != nil {
 		slog.Warn("action validation failed", "reason", err)
 		a.Player.Send(message(Error, err.Error()))
 		return
 	}
 
-	err = def.Execute(r, a)
+	err = def.execute(r, a)
 	if err != nil {
 		slog.Warn("action execution failed", "reason", err)
-		a.Player.Send(message(Error, err.Error()))
-		return
-	}
-
-	err = def.After(r, a)
-	if err != nil {
-		slog.Warn("action after failed", "reason", err)
 		a.Player.Send(message(Error, err.Error()))
 		return
 	}

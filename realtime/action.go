@@ -10,18 +10,21 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// Action types are used to identify the action being performed.
+// These types are designed to closely mirror the Redux actions on the frontend,
+// facilitating simpler state synchronization between the client and server.
 type ActionType string
 
 const (
-	// generic actions
+	// Generic message types to trigger alert messages on frontend
 	Error   ActionType = "error"
 	Warning ActionType = "warning"
 	Info    ActionType = "info"
 
-	// client actions
+	// Client actions
 	InitializeClient ActionType = "client/initializeClient"
 
-	// Drawing actions
+	// Canvas actions
 	AddStroke      ActionType = "canvas/addStroke"
 	AddStrokePoint ActionType = "canvas/addStrokePoint"
 	ClearStrokes   ActionType = "canvas/clearStrokes"
@@ -29,19 +32,19 @@ const (
 	SetStrokes     ActionType = "canvas/setStrokes"
 
 	// Game actions
-	SetWord      ActionType = "game/setWord"      // picker sends real word, guessers get hinted word
-	SubmitGuess  ActionType = "game/submitGuess"  // only sent from client
-	WordOptions  ActionType = "game/wordOptions"  // only sent from server to picker
-	StartGame    ActionType = "game/startGame"    // only sent to server from host
-	GuessResult  ActionType = "game/guessResult"  // added to guess chat when a player guess is processed
-	ClearGuesses ActionType = "game/clearGuesses" // clears the guess chat
-	SetGuesses   ActionType = "game/setGuesses"   // sets the guess chat
-	ChangePhase  ActionType = "game/changePhase"  // changes the game phase
-	SelectWord   ActionType = "game/selectWord"   // picker selects a word from options
-	SetRound     ActionType = "game/setRound"     // sets the current round number
+	SetWord      ActionType = "game/setWord"
+	SubmitGuess  ActionType = "game/submitGuess"
+	WordOptions  ActionType = "game/wordOptions"
+	StartGame    ActionType = "game/startGame"
+	GuessResult  ActionType = "game/guessResult"
+	ClearGuesses ActionType = "game/clearGuesses"
+	SetGuesses   ActionType = "game/setGuesses"
+	ChangePhase  ActionType = "game/changePhase"
+	SelectWord   ActionType = "game/selectWord"
+	SetRound     ActionType = "game/setRound"
 
 	// Room actions
-	InitializeRoom     ActionType = "room/initializeRoom" // send initial state to client including playerId and existing game state
+	InitializeRoom     ActionType = "room/initializeRoom"
 	ChangeRoomSettings ActionType = "room/changeRoomSettings"
 	SetPlayers         ActionType = "room/setPlayers"
 	PlayerJoined       ActionType = "room/playerJoined"
@@ -50,41 +53,60 @@ const (
 	ChangeStage        ActionType = "room/changeStage"
 )
 
-// ActionDefinition struct to encapsulate action metadata
-type ActionDefinition struct {
-	Permission  RoomRole
-	Role        GameRole
-	PayloadType interface{}
-	validator   func(room *room) error
-	Execute     func(room *room, a *Action) error
-	After       func(room *room, a *Action) error
+type Action struct {
+	Type    ActionType  `json:"type"`
+	Payload interface{} `json:"payload"`
+	Player  *player     `json:"-"`
 }
 
-// Update ActionType constants with metadata
+/*
+Action Definitions help encapsulate the logic for performing actions and validating preconditions
+
+Before performing actions we usually want to:
+ 1. Check if the actor has permission to perform that action ex. only host can change settings
+ 2. Check if the game state allows the action to be performed ex. can't submit guess if not in guessing phase
+ 3. Perform any side effects related to the action ex. change game state, update player scores
+ 4. Inform clients of the action or state changes ex. re-broadcast a stroke point to guessing players
+
+Action definitions help us encapsulate this logic in a single place
+*/
+type ActionDefinition struct {
+	RoomRoleRequired RoomRole
+	GameRoleRequired GameRole
+	PayloadType      interface{}
+	validator        func(room *room) error
+	execute          func(room *room, a *Action) error
+}
+
 var ActionDefinitions = map[ActionType]ActionDefinition{
 	StartGame: {
-		Permission:  RoomRoleHost,
-		Role:        GameRoleAny,
-		PayloadType: nil,
+		RoomRoleRequired: RoomRoleHost,
+		GameRoleRequired: GameRoleAny,
+		PayloadType:      nil,
 		validator: func(r *room) error {
-			// if !(r.Stage == PreGame || r.Stage == PostGame) {
-			// 	return fmt.Errorf("game can only be started in pre or post game stage")
-			// }
+			if r.game != nil {
+				return fmt.Errorf("game already is initialized")
+			}
+			if r.Stage != PreGame {
+				return fmt.Errorf("can only start game in pre game stage")
+			}
 			if len(r.Players) < 2 {
-				return fmt.Errorf("game can only be started with at least 2 players")
+				return fmt.Errorf("can only start game with at least 2 players")
 			}
 			return nil
 		},
-		Execute: func(r *room, a *Action) error {
-			slog.Info("starting game")
-			r.timer.Stop()
-			r.Stage = Playing
-			r.game = NewGameState(PickingPhase{}, r)
-			r.game.initDrawQueue()
-			r.game.currentPhase.Begin(r.game)
-			return nil
-		},
-		After: func(r *room, a *Action) error {
+		execute: func(r *room, a *Action) error {
+			slog.Debug("starting game")
+
+			// Advance room stage
+			r.setStage(Playing)
+
+			// Initialize game state
+			r.game = NewGame(&PickingPhase{}, r)
+			r.game.fillDrawingQueue()
+			r.game.currentPhase.Start(r.game)
+
+			// Inform clients of the stage change
 			r.broadcast(GameRoleAny,
 				message(ChangeStage, r.Stage),
 			)
@@ -92,48 +114,70 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		},
 	},
 	SelectWord: {
-		Permission:  RoomRoleAny,
-		Role:        GameRoleDrawing,
-		PayloadType: "string",
+		RoomRoleRequired: RoomRoleAny,
+		GameRoleRequired: GameRoleDrawing,
+		PayloadType:      "string",
 		validator: func(r *room) error {
-			// TODO: check if word is in options
-			// TODO: check if word is already selected
-			// TODO: check if timer is running
-			// TODO: check if game is in picking phase
-			// TODO: check if game is in playing stage
+			if r.game == nil {
+				return fmt.Errorf("game is not initialized")
+			}
+			if r.Stage != Playing {
+				return fmt.Errorf("game is not in playing stage")
+			}
+			if r.game.currentPhase.Name() != "picking" {
+				return fmt.Errorf("game is not in picking phase")
+			}
+			if r.game.currentWord != "" {
+				return fmt.Errorf("word already selected")
+			}
+
 			return nil
 		},
-		Execute: func(r *room, a *Action) error {
-			slog.Info("picker selected word", "word", a.Payload)
-			return nil
-		},
-		After: func(r *room, a *Action) error {
+		execute: func(r *room, a *Action) error {
 			r.timer.Stop()
-			r.game.currentWord = a.Payload.(string)
-			r.game.Transition()
+
+			// Check if selected word is actually an option
+			selectedWord := a.Payload.(string)
+			isValidOption := false
+			for _, option := range r.game.wordOptions {
+				if option == selectedWord {
+					isValidOption = true
+					break
+				}
+			}
+			if !isValidOption {
+				return fmt.Errorf("selected word is not a valid option")
+			}
+
+			// Start drawing phase
+			r.game.currentWord = selectedWord
+			r.game.AdvanceToNextPhase()
+
 			return nil
 		},
 	},
 	AddStroke: {
-		Permission:  RoomRoleAny,
-		Role:        GameRoleDrawing,
-		PayloadType: map[string]interface{}{},
+		RoomRoleRequired: RoomRoleAny,
+		GameRoleRequired: GameRoleDrawing,
+		PayloadType:      map[string]interface{}{},
 		validator: func(r *room) error {
-			// TODO
-			if r.game.currentDrawer == nil {
-				return fmt.Errorf("no drawer found")
+			if r.game == nil {
+				return fmt.Errorf("game is not initialized")
+			}
+			if r.Stage != Playing {
+				return fmt.Errorf("game is not in playing stage")
+			}
+			if r.game.currentPhase.Name() != "drawing" {
+				return fmt.Errorf("not in drawing phase")
 			}
 			return nil
 		},
-		Execute: func(r *room, a *Action) error {
+		execute: func(r *room, a *Action) error {
 			stroke, err := decodeStroke(a.Payload)
 			if err != nil {
 				return fmt.Errorf("failed to decode stroke: %w", err)
 			}
 			r.game.strokes = append(r.game.strokes, stroke)
-			return nil
-		},
-		After: func(r *room, a *Action) error {
 			r.broadcast(GameRoleGuessing,
 				message(AddStroke, a.Payload),
 			)
@@ -141,9 +185,9 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		},
 	},
 	AddStrokePoint: {
-		Permission:  RoomRoleAny,
-		Role:        GameRoleDrawing,
-		PayloadType: []interface{}{},
+		RoomRoleRequired: RoomRoleAny,
+		GameRoleRequired: GameRoleDrawing,
+		PayloadType:      []interface{}{},
 		validator: func(r *room) error {
 			// TODO
 			if r.game.currentDrawer == nil {
@@ -154,15 +198,12 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			}
 			return nil
 		},
-		Execute: func(r *room, a *Action) error {
+		execute: func(r *room, a *Action) error {
 			point, err := decodeStrokePoint(a.Payload)
 			if err != nil {
 				return fmt.Errorf("failed to decode stroke point: %w", err)
 			}
 			r.game.strokes = appendStrokePoint(r.game.strokes, point)
-			return nil
-		},
-		After: func(r *room, a *Action) error {
 			r.broadcast(GameRoleGuessing,
 				message(AddStrokePoint, a.Payload),
 			)
@@ -170,17 +211,14 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		},
 	},
 	ClearStrokes: {
-		Permission: RoomRoleAny,
-		Role:       GameRoleDrawing,
+		RoomRoleRequired: RoomRoleAny,
+		GameRoleRequired: GameRoleDrawing,
 		validator: func(r *room) error {
 			// TODO
 			return nil
 		},
-		Execute: func(r *room, a *Action) error {
+		execute: func(r *room, a *Action) error {
 			r.game.strokes = make([]Stroke, 0)
-			return nil
-		},
-		After: func(r *room, a *Action) error {
 			r.broadcast(GameRoleAny,
 				message(ClearStrokes, nil),
 			)
@@ -188,17 +226,14 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		},
 	},
 	UndoStroke: {
-		Permission: RoomRoleAny,
-		Role:       GameRoleDrawing,
+		RoomRoleRequired: RoomRoleAny,
+		GameRoleRequired: GameRoleDrawing,
 		validator: func(r *room) error {
 			// TODO
 			return nil
 		},
-		Execute: func(r *room, a *Action) error {
+		execute: func(r *room, a *Action) error {
 			r.game.strokes = removeLastStroke(r.game.strokes)
-			return nil
-		},
-		After: func(r *room, a *Action) error {
 			r.broadcast(GameRoleAny,
 				message(UndoStroke, nil),
 			)
@@ -206,9 +241,9 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		},
 	},
 	SubmitGuess: {
-		Permission:  RoomRoleAny,
-		Role:        GameRoleGuessing,
-		PayloadType: "string",
+		RoomRoleRequired: RoomRoleAny,
+		GameRoleRequired: GameRoleGuessing,
+		PayloadType:      "string",
 		validator: func(r *room) error {
 			// TODO
 			if r.game.currentPhase.Name() != "drawing" {
@@ -219,33 +254,25 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			}
 			return nil
 		},
-		Execute: func(r *room, a *Action) error {
+		execute: func(r *room, a *Action) error {
 			// TODO
 			r.game.judgeGuess(a.Player.ID, a.Payload.(string))
 			return nil
 		},
-		After: func(r *room, a *Action) error {
-			// TODO
-			return nil
-		},
 	},
 	ChangeRoomSettings: {
-		Permission:  RoomRoleHost,
-		Role:        GameRoleAny,
-		PayloadType: map[string]interface{}{},
+		RoomRoleRequired: RoomRoleHost,
+		GameRoleRequired: GameRoleAny,
+		PayloadType:      map[string]interface{}{},
 		validator: func(r *room) error {
 			// TODO
 			return nil
 		},
-		Execute: func(r *room, a *Action) error {
+		execute: func(r *room, a *Action) error {
 			// ! i hate this
 			r.Settings.DrawingTimeAllowed = int(a.Payload.(map[string]interface{})["drawingTimeAllowed"].(float64))
 			r.Settings.PlayerLimit = int(a.Payload.(map[string]interface{})["playerLimit"].(float64))
 			r.Settings.TotalRounds = int(a.Payload.(map[string]interface{})["totalRounds"].(float64))
-			return nil
-		},
-		After: func(r *room, a *Action) error {
-			// TODO
 			r.broadcast(GameRoleAny,
 				message(ChangeRoomSettings, r.Settings),
 			)
@@ -254,10 +281,25 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 	},
 }
 
-type Action struct {
-	Type    ActionType  `json:"type"`
-	Payload interface{} `json:"payload"`
-	Player  *player     `json:"-"`
+// ValidateAction checks if the action is valid given the current game state
+func (def *ActionDefinition) ValidateAction(room *room, a *Action) error {
+	// Check permissions
+	if def.RoomRoleRequired != RoomRoleAny && def.RoomRoleRequired != a.Player.RoomRole {
+		return fmt.Errorf("player doesn't have required permission for action: %s", a.Type)
+	}
+
+	// Check roles
+	if def.GameRoleRequired != GameRoleAny && def.GameRoleRequired != a.Player.GameRole {
+		return fmt.Errorf("player doesn't have required role for action: %s", a.Type)
+	}
+
+	// Validate payload type
+	if reflect.TypeOf(a.Payload) != reflect.TypeOf(def.PayloadType) {
+		return fmt.Errorf("invalid payload type for action: %s, expected %s, got %s", a.Type, reflect.TypeOf(def.PayloadType), reflect.TypeOf(a.Payload))
+	}
+
+	// Check game state conditions
+	return def.validator(room)
 }
 
 func message(actionType ActionType, payload interface{}) *Action {
@@ -267,7 +309,7 @@ func message(actionType ActionType, payload interface{}) *Action {
 	}
 }
 
-func encode(actions []*Action) []byte {
+func encodeActions(actions []*Action) []byte {
 	jsonBytes, err := json.Marshal(actions)
 	if err != nil {
 		slog.Error("error marshalling events", "error", err)
@@ -276,7 +318,7 @@ func encode(actions []*Action) []byte {
 	return jsonBytes
 }
 
-func decode(bytes []byte) (*Action, error) {
+func decodeAction(bytes []byte) (*Action, error) {
 	var action *Action
 	err := json.Unmarshal(bytes, &action)
 	if err != nil {
@@ -295,25 +337,4 @@ func decodePayload[T any](payload interface{}) (T, error) {
 		return target, err
 	}
 	return target, nil
-}
-
-// ValidateAction checks if the action is valid given the current game state
-func (def *ActionDefinition) Before(room *room, a *Action) error {
-	// Check permissions
-	if def.Permission != RoomRoleAny && def.Permission != a.Player.RoomRole {
-		return fmt.Errorf("player doesn't have required permission for action: %s", a.Type)
-	}
-
-	// Check roles
-	if def.Role != GameRoleAny && def.Role != a.Player.GameRole {
-		return fmt.Errorf("player doesn't have required role for action: %s", a.Type)
-	}
-
-	// Validate payload type
-	if reflect.TypeOf(a.Payload) != reflect.TypeOf(def.PayloadType) {
-		return fmt.Errorf("invalid payload type for action: %s, expected %s, got %s", a.Type, reflect.TypeOf(def.PayloadType), reflect.TypeOf(a.Payload))
-	}
-
-	// Check game state conditions
-	return def.validator(room)
 }

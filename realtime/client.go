@@ -24,11 +24,6 @@ const (
 	maxMessageSize = 512
 )
 
-var (
-	newline = []byte{'\n'}
-	space   = []byte{' '}
-)
-
 type client struct {
 	room    *room
 	player  *player
@@ -57,7 +52,7 @@ func (c *client) run(roomCtx context.Context) {
 	go c.read(ctx, ready)
 	go c.write(ctx, ready)
 
-	// block return until both go routines start
+	// block return until both routines start
 	<-ready
 	<-ready
 	slog.Info("client is ready", "player_id", c.player.ID)
@@ -72,6 +67,7 @@ func (c *client) close(cause error) {
 // The application runs read in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine
+// Read more: https://pkg.go.dev/github.com/gorilla/websocket?utm_source=godoc#hdr-Concurrency
 func (c *client) read(ctx context.Context, ready chan<- bool) {
 	slog.Debug("read routine started", "player", c.player.ID)
 	ready <- true
@@ -99,7 +95,7 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 				break
 			}
 			if c.limiter.Allow() {
-				action, err := decode(msgBytes)
+				action, err := decodeAction(msgBytes)
 				if err != nil {
 					slog.Error("Error un-marshalling message", "player", c.player.ID, "error", err)
 					c.cancel(err)
@@ -162,7 +158,7 @@ func (c *client) write(ctx context.Context, ready chan<- bool) {
 				break
 			}
 
-			w.Write(encode(actions))
+			w.Write(encodeActions(actions))
 
 			if err := w.Close(); err != nil {
 				c.cancel(err)

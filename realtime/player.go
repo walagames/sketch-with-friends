@@ -73,9 +73,8 @@ func (p *player) Kick() {
 
 func (p *player) UpdateLimiter() {
 	if p.GameRole == GameRoleDrawing {
-		// 500 actions per second
+		// 500 actions per second, 20 actions in a burst
 		// Needs to be high to allow for fast drawing
-		// Ideally we should batch stroke points at the client to lower the rate needed here
 		p.client.limiter = rate.NewLimiter(500, 20)
 	} else {
 		// 2 actions per second, 4 actions in a burst

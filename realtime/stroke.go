@@ -8,8 +8,6 @@ type Stroke struct {
 	Width  int     `json:"width"`
 }
 
-
-
 func decodeStroke(payload interface{}) (Stroke, error) {
 	stroke, err := decodePayload[Stroke](payload)
 	if err != nil {

@@ -12,7 +12,7 @@ import (
 const (
 	MAX_LOBBIES  = 20
 	CLEANUP_TICK = 1 * time.Minute  // How often to check for idle rooms
-	ROOM_TIMEOUT = 20 * time.Minute // How long a room can be idle before it is disconnected
+	ROOM_TIMEOUT = 20 * time.Minute // How long a room can be idle before it gets cleaned up
 )
 
 type RoomManager interface {
