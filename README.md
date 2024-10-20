@@ -12,6 +12,7 @@ sketching and guessing words. Create private rooms for you and your friends or
 play with people from around the world.
 
 <p align="center">
+<br>
     <a href="https://sketchwithfriends.com" target="_blank">
         <img src="./.github/images/demo.gif" alt="Demo" width="70%" height="70%">
     </a>
