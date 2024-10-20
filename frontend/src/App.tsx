@@ -1,14 +1,15 @@
 import "./App.css";
 import { RoomRole, RoomStage } from "@/state/features/room";
-import {
-	AnimatePresence,
-	AnimatePresenceProps,
-	MotionConfig,
-} from "framer-motion";
 import { Toaster } from "@/components/ui/sonner";
 import { useSelector } from "react-redux";
 import { RootState } from "./state/store";
 import { GamePhase, GameRole } from "./state/features/game";
+import {
+	AnimatePresenceWithDirection,
+	Direction,
+} from "@/components/animation/direction-context";
+import { TransitionContainer } from "@/components/animation/transition-container";
+import { MotionConfig } from "framer-motion";
 import {
 	EnterCodeView,
 	EnterPlayerInfoView,
@@ -20,36 +21,38 @@ import {
 	DrawingGuesserView,
 	PostDrawingView,
 } from "@/components/views";
-import { createContext, useContext, useEffect, useState } from "react";
-import { motion } from "framer-motion";
-enum JoinStage {
-	EnterCode = "EnterCode",
-	ChoosePlayerInfo = "ChoosePlayerInfo",
-}
+import { useEffect, useState } from "react";
 
-enum Direction {
-	UP,
-	DOWN,
-	LEFT,
-	RIGHT,
-}
+type ViewComponent = {
+	Component: React.ComponentType;
+	key: string;
+	transition: Direction;
+};
+
+const joinViews: Record<string, ViewComponent> = {
+	EnterCode: {
+		Component: EnterCodeView,
+		key: "join-enter-code",
+		transition: Direction.RIGHT,
+	},
+	ChoosePlayerInfo: {
+		Component: EnterPlayerInfoView,
+		key: "join-choose-player-info",
+		transition: Direction.LEFT,
+	},
+};
+
 const roomViews = {
 	[RoomStage.PreGame]: {
 		[RoomRole.Host]: {
 			Component: PreGameHostView,
 			key: "pre-game-host",
-			direction: {
-				enter: Direction.DOWN,
-				exit: Direction.DOWN,
-			},
+			transition: Direction.UP,
 		},
 		[RoomRole.Player]: {
 			Component: PreGamePlayerView,
 			key: "pre-game-player",
-			direction: {
-				enter: Direction.DOWN,
-				exit: Direction.DOWN,
-			},
+			transition: Direction.UP,
 		},
 	},
 	[RoomStage.Playing]: {
@@ -57,152 +60,84 @@ const roomViews = {
 			[GameRole.Drawing]: {
 				Component: PickingDrawerView,
 				key: "playing-picking-drawer",
-				direction: {
-					enter: Direction.UP,
-					exit: Direction.UP,
-				},
+				transition: Direction.LEFT,
 			},
 			[GameRole.Guessing]: {
 				Component: PickingGuesserView,
 				key: "playing-picking-guesser",
-				direction: {
-					enter: Direction.UP,
-					exit: Direction.UP,
-				},
+				transition: Direction.LEFT,
 			},
 		},
 		[GamePhase.Drawing]: {
 			[GameRole.Drawing]: {
 				Component: DrawingDrawerView,
 				key: "playing-drawing-drawer",
-				direction: {
-					enter: Direction.RIGHT,
-					exit: Direction.RIGHT,
-				},
+				transition: Direction.LEFT,
 			},
 			[GameRole.Guessing]: {
 				Component: DrawingGuesserView,
 				key: "playing-drawing-guesser",
-				direction: {
-					enter: Direction.RIGHT,
-					exit: Direction.RIGHT,
-				},
+				transition: Direction.LEFT,
 			},
 		},
 		[GamePhase.PostDrawing]: {
 			Component: PostDrawingView,
 			key: "playing-post-drawing",
-			direction: {
-				enter: Direction.LEFT,
-				exit: Direction.LEFT,
-			},
+			transition: Direction.LEFT,
 		},
 	},
-};
+} as const;
 
-const variants = {
-	initial: (direction: { enter: Direction; exit: Direction }) => {
-		const isHorizontal =
-			direction.enter === Direction.RIGHT || direction.enter === Direction.LEFT;
-		return isHorizontal
-			? {
-					x: direction.enter === Direction.RIGHT ? "-100%" : "100%",
-			  }
-			: {
-					y: direction.enter === Direction.DOWN ? "-100%" : "100%",
-			  };
-	},
-	target: {
-		x: "0%",
-		y: "0%",
-	},
-	exit: (direction: { enter: Direction; exit: Direction }) => {
-		const isHorizontal =
-			direction.exit === Direction.RIGHT || direction.exit === Direction.LEFT;
-		return isHorizontal
-			? {
-					x: direction.exit === Direction.RIGHT ? "100%" : "-100%",
-			  }
-			: {
-					y: direction.exit === Direction.DOWN ? "100%" : "-100%",
-			  };
-	},
-};
+function roomView({
+	roomStage,
+	roomRole,
+	gamePhase,
+	gameRole,
+	isFirstPhase,
+}: {
+	roomStage: RoomStage;
+	roomRole: RoomRole;
+	gamePhase: GamePhase;
+	gameRole: GameRole;
+	isFirstPhase: boolean;
+}): ViewComponent {
+	if (roomStage === RoomStage.Playing) {
+		const phaseView = roomViews[RoomStage.Playing][gamePhase];
+		if ("Component" in phaseView) {
+			return phaseView;
+		}
 
-const DirectionContext = createContext<{
-	enter: Direction;
-	exit: Direction;
-}>({ enter: Direction.RIGHT, exit: Direction.RIGHT });
+		const view = phaseView[gameRole];
+		return isFirstPhase ? { ...view, transition: Direction.DOWN } : view;
+	}
 
-type AnimatePresenceWithDirectionProps = {
-	children: React.ReactNode;
-	direction: { enter: Direction; exit: Direction };
-} & Omit<AnimatePresenceProps, "custom">;
+	return roomViews[roomStage][roomRole];
+}
 
-const AnimatePresenceWithDirection = ({
-	children,
-	direction,
-	...props
-}: AnimatePresenceWithDirectionProps) => {
-	return (
-		<DirectionContext.Provider value={direction}>
-			<AnimatePresence {...props} custom={direction}>
-				{children}
-			</AnimatePresence>
-		</DirectionContext.Provider>
-	);
-};
-
-export const useDirectionAnimation = () => {
-	const { enter, exit } = useContext(DirectionContext);
-
-	return {
-		variants,
-		custom: { enter, exit },
-		initial: "initial",
-		animate: "target",
-		exit: "exit",
-	};
-};
-
-const joinViews = {
-	[JoinStage.EnterCode]: {
-		Component: EnterCodeView,
-		key: "join-enter-code",
-		direction: { enter: Direction.RIGHT, exit: Direction.RIGHT },
-	},
-	[JoinStage.ChoosePlayerInfo]: {
-		Component: EnterPlayerInfoView,
-		key: "join-choose-player-info",
-		direction: { enter: Direction.LEFT, exit: Direction.LEFT },
-	},
-};
-
-function TransitionChild({ children }: { children: React.ReactNode }) {
-	const animationProps = useDirectionAnimation();
-	return (
-		<motion.div className="absolute inset-0" {...animationProps}>
-			{children}
-		</motion.div>
-	);
+function joinView(enteredRoomCode: string): ViewComponent {
+	return joinViews[enteredRoomCode ? "ChoosePlayerInfo" : "EnterCode"];
 }
 
 function App() {
+	const [mountId, setMountId] = useState(Date.now());
+
 	const roomStage = useSelector((state: RootState) => state.room.stage);
 	const gamePhase = useSelector((state: RootState) => state.game.phase);
 	const players = useSelector((state: RootState) => state.room.players);
 	const playerId = useSelector((state: RootState) => state.client.id);
-	const roomRole = players[playerId]?.roomRole;
-	const gameRole = players[playerId]?.gameRole;
-	const [mountId, setMountId] = useState(Date.now());
-
 	const isFirstPhase = useSelector(
 		(state: RootState) => state.game.isFirstPhase
 	);
-
 	const roomId = useSelector((state: RootState) => state.room.id);
+	const enteredRoomCode = useSelector(
+		(state: RootState) => state.client.enteredRoomCode
+	);
 
-	const RoomView = getView(roomViews, {
+	const roomRole = players[playerId]?.roomRole;
+	const gameRole = players[playerId]?.gameRole;
+
+	const JoinView = joinView(enteredRoomCode);
+	const RoomView = roomView({
 		roomStage,
 		roomRole,
 		gamePhase,
@@ -210,6 +145,11 @@ function App() {
 		isFirstPhase,
 	});
 
+	const View = roomId ? RoomView : JoinView;
+
+	// This is a workaround to prevent AnimatePresence from getting out of sync by forcing
+	// it to remount when the browser tab regains focus.
+	// This is necessary because browsers throttle javascript execution on inactive tabs.
 	useEffect(() => {
 		function visibilityChangeHandler() {
 			if (!document.hidden) {
@@ -218,21 +158,11 @@ function App() {
 		}
 
 		document.addEventListener("visibilitychange", visibilityChangeHandler);
+		// cleanup the event lister on unmount to prevent memory leak
 		return () => {
 			document.removeEventListener("visibilitychange", visibilityChangeHandler);
 		};
 	}, []);
-
-	const enteredRoomCode = useSelector(
-		(state: RootState) => state.client.enteredRoomCode
-	);
-
-	const JoinView =
-		joinViews[
-			enteredRoomCode ? JoinStage.ChoosePlayerInfo : JoinStage.EnterCode
-		];
-
-	const direction = roomId ? RoomView.direction : JoinView.direction;
 
 	return (
 		<main className="flex min-h-screen flex-col items-center justify-between relative">
@@ -245,23 +175,16 @@ function App() {
 						mass: 1,
 						restDelta: 0.01,
 					}}
-					// reducedMotion="always"
 				>
 					<AnimatePresenceWithDirection
 						key={mountId}
 						initial={false}
 						mode="sync"
-						direction={direction}
+						direction={View.transition}
 					>
-						{roomId ? (
-							<TransitionChild key={RoomView.key}>
-								<RoomView.Component />
-							</TransitionChild>
-						) : (
-							<TransitionChild key={JoinView.key}>
-								<JoinView.Component />
-							</TransitionChild>
-						)}
+						<TransitionContainer key={View.key}>
+							<View.Component />
+						</TransitionContainer>
 					</AnimatePresenceWithDirection>
 				</MotionConfig>
 			</div>
@@ -282,83 +205,6 @@ function App() {
 			/>
 		</main>
 	);
-}
-
-function getView(
-	viewsObj: any,
-	{
-		roomStage,
-		roomRole,
-		gamePhase,
-		gameRole,
-		isFirstPhase,
-	}: {
-		roomStage: RoomStage;
-		roomRole: RoomRole;
-		gamePhase: GamePhase;
-		gameRole: GameRole;
-		isFirstPhase: boolean;
-	}
-): {
-	Component: React.ComponentType;
-	key: string;
-	direction: { enter: Direction; exit: Direction };
-} {
-	const stageView = viewsObj[roomStage];
-	if (!stageView) {
-		console.error(`Invalid room stage: ${roomStage}`);
-		return {
-			Component: () => null,
-			key: "error",
-			direction: { enter: Direction.LEFT, exit: Direction.LEFT },
-		};
-	}
-
-	if (roomStage === RoomStage.Playing) {
-		const phaseView = stageView[gamePhase];
-		if (!phaseView) {
-			console.error(`Invalid game phase: ${gamePhase}`);
-			return {
-				Component: () => null,
-				key: "error",
-				direction: { enter: Direction.LEFT, exit: Direction.LEFT },
-			};
-		}
-
-		if (gamePhase === GamePhase.PostDrawing) {
-			return phaseView;
-		} else {
-			const roleView = phaseView[gameRole];
-			if (!roleView) {
-				console.error(`Invalid game role: ${gameRole}`);
-				return {
-					Component: () => null,
-					key: "error",
-					direction: { enter: Direction.LEFT, exit: Direction.LEFT },
-				};
-			}
-			if (!isFirstPhase) {
-				return {
-					...roleView,
-					direction: { enter: Direction.LEFT, exit: Direction.LEFT },
-				};
-			}
-
-			return roleView;
-		}
-	} else {
-		const roleView = stageView[roomRole];
-		if (!roleView) {
-			console.error(`Invalid room role: ${roomRole}`);
-			return {
-				Component: () => null,
-				key: "error",
-				direction: { enter: Direction.LEFT, exit: Direction.LEFT },
-			};
-		}
-
-		return roleView;
-	}
 }
 
 export default App;
