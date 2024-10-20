@@ -10,10 +10,16 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const (
+	IDLE_TICK      = 1 * time.Minute  // How often to check for idle players
+	PLAYER_TIMEOUT = 10 * time.Minute // How long a player can be idle before the room disconnects them
+)
+
 type Room interface {
-	Close()
+	Close(cause error)
 	Connect(conn *websocket.Conn, player *player) error
 	Run(rm RoomManager)
+	LastInteractionAt() time.Time
 }
 
 type RoomSettings struct {
@@ -30,9 +36,10 @@ const (
 )
 
 type room struct {
-	ID       string                `json:"id"`
-	Settings RoomSettings          `json:"settings"`
-	Players  map[uuid.UUID]*player `json:"players"`
+	ID                string                `json:"id"`
+	Settings          RoomSettings          `json:"settings"`
+	Players           map[uuid.UUID]*player `json:"players"`
+	lastInteractionAt time.Time
 
 	// game state
 	Stage RoomStage `json:"stage"`
@@ -47,16 +54,17 @@ type room struct {
 	timer *time.Timer
 
 	// context
-	cancel context.CancelFunc
+	cancel context.CancelCauseFunc
 }
 
 func NewRoom(id string) Room {
 	return &room{
-		ID:         id,
-		Players:    make(map[uuid.UUID]*player),
-		connect:    make(chan *connectionAttempt),
-		disconnect: make(chan *player),
-		action:     make(chan *Action, 5),
+		ID:                id,
+		Players:           make(map[uuid.UUID]*player),
+		connect:           make(chan *connectionAttempt),
+		disconnect:        make(chan *player),
+		action:            make(chan *Action, 5),
+		lastInteractionAt: time.Now(),
 		Settings: RoomSettings{
 			PlayerLimit:        6,
 			DrawingTimeAllowed: 60,
@@ -64,6 +72,10 @@ func NewRoom(id string) Room {
 		},
 		Stage: PreGame,
 	}
+}
+
+func (r *room) LastInteractionAt() time.Time {
+	return r.lastInteractionAt
 }
 
 // Broadcast actions to players with a specific game role or all players if role is GameRoleAny
@@ -81,6 +93,10 @@ var (
 	ErrRoomFull          = errors.New("ErrRoomFull")
 	ErrRoomClosed        = errors.New("ErrRoomClosed")
 	ErrConnectionTimeout = errors.New("ErrConnectionTimeout")
+	ErrRoomIdle          = errors.New("ErrRoomIdle")
+	ErrPlayerIdle        = errors.New("ErrPlayerIdle")
+	ErrRoomEmpty         = errors.New("ErrRoomEmpty")
+	ErrRoomRoutineExited = errors.New("ErrRoomRoutineExited")
 )
 
 type connectionAttempt struct {
@@ -108,11 +124,12 @@ func (r *room) Connect(conn *websocket.Conn, p *player) error {
 	return err
 }
 
-func (r *room) Close() {
-	r.cancel()
+func (r *room) Close(cause error) {
+	r.cancel(cause)
 }
 
 func (r *room) register(ctx context.Context, player *player) error {
+	r.lastInteractionAt = time.Now()
 	if len(r.Players) >= r.Settings.PlayerLimit {
 		return ErrRoomFull
 	}
@@ -149,6 +166,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 
 // TODO: reduce cognitive load of this function
 func (r *room) unregister(player *player) {
+	r.lastInteractionAt = time.Now()
 	slog.Info("player unregistered", "player", player.ID)
 	r.broadcast(
 		GameRoleAny,
@@ -160,7 +178,7 @@ func (r *room) unregister(player *player) {
 		if r.Stage == Playing && r.game != nil && r.game.currentPhase.Name() == "drawing" {
 			r.game.cancelHintRoutine()
 		}
-		r.cancel()
+		r.cancel(errors.New("no players left in room"))
 		return
 	}
 
@@ -191,9 +209,12 @@ func (r *room) unregister(player *player) {
 
 func (r *room) Run(rm RoomManager) {
 	slog.Info("Room routine started", "id", r.ID)
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancelCause(context.Background())
 	r.cancel = cancel
-	defer cancel()
+	defer cancel(ErrRoomRoutineExited)
+
+	idleTicker := time.NewTicker(IDLE_TICK)
+	defer idleTicker.Stop()
 
 	// set timer to a very large number so it doesn't trigger until the first transition
 	r.timer = time.NewTimer(time.Duration(1<<63 - 1))
@@ -210,10 +231,18 @@ func (r *room) Run(rm RoomManager) {
 	for {
 		select {
 		case <-ctx.Done():
-			for _, p := range r.Players {
-				p.client.close()
-			}
+			slog.Info("Room routine cancelled", "id", r.ID, "cause", context.Cause(ctx))
 			return
+		case <-idleTicker.C:
+			for _, player := range r.Players {
+				if time.Since(player.lastInteractionAt) > PLAYER_TIMEOUT {
+					slog.Info("Player is idle, disconnecting",
+						"player", player.ID,
+						"time_since", time.Since(player.lastInteractionAt).Round(time.Second).String(),
+					)
+					player.client.close(ErrPlayerIdle)
+				}
+			}
 		case <-r.timer.C:
 			slog.Info("Room tick", "id", r.ID)
 			r.game.Transition()
@@ -229,6 +258,9 @@ func (r *room) Run(rm RoomManager) {
 }
 
 func (r *room) dispatch(a *Action) {
+	r.lastInteractionAt = time.Now()
+	a.Player.lastInteractionAt = time.Now()
+
 	def, exists := ActionDefinitions[a.Type]
 	if !exists {
 		slog.Warn("action definition not found", "action", a.Type)
