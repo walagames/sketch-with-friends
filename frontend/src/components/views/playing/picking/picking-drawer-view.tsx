@@ -2,8 +2,8 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { selectWord } from "@/state/features/game";
 import { useDispatch } from "react-redux";
-import { RaisedButton } from "@/components/raised-button";
-import { Timer } from "@/components/timer";
+import { RaisedButton } from "@/components/ui/raised-button";
+import { Timer } from "@/components/ui/timer";
 import { HillScene } from "@/components/scenes/hill-scene";
 export function PickingDrawerView() {
 	const dispatch = useDispatch();

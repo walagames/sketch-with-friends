@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 import { DicesIcon, StepBackIcon, StepForwardIcon } from "lucide-react";
 import { getRealtimeHref } from "@/lib/realtime";
 import { useDispatch, useSelector } from "react-redux";
-import { RaisedButton } from "@/components/raised-button";
+import { RaisedButton } from "@/components/ui/raised-button";
 import { Input } from "@/components/ui/input";
 import { enterRoomCode } from "@/state/features/client";
 import { HillScene } from "@/components/scenes/hill-scene";

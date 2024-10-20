@@ -1,4 +1,4 @@
-import { Brush, Undo2, Trash, EraserIcon } from "lucide-react";
+import { Brush, Undo2, Trash } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { Slider } from "./ui/slider";
@@ -11,7 +11,7 @@ import {
 } from "@/state/features/client";
 
 import { undoStroke, clearStrokes } from "@/state/features/canvas";
-import { RaisedButton } from "./raised-button";
+import { RaisedButton } from "./ui/raised-button";
 
 export function CanvasTools() {
 	const dispatch = useDispatch();

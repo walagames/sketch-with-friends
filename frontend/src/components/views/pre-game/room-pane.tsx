@@ -1,7 +1,7 @@
-import { PlayerCards } from "@/components/player-card";
+import { PlayerCards } from "./player-cards";
 import { useDispatch } from "react-redux";
 import { copyRoomLink } from "@/lib/realtime";
-import { RaisedButton } from "@/components/raised-button";
+import { RaisedButton } from "@/components/ui/raised-button";
 import { useState } from "react";
 import {
 	ClockIcon,

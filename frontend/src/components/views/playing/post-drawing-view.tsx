@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
-import { Timer } from "@/components/timer";
+import { Timer } from "@/components/ui/timer";
 import { HillScene } from "@/components/scenes/hill-scene";
 import { Player } from "@/state/features/room";
 import { generateAvatar } from "@/lib/avatar";

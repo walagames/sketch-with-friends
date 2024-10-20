@@ -4,7 +4,7 @@ import Canvas from "@/components/canvas";
 import { GameRole } from "@/state/features/game";
 import { getPickingPlayer } from "@/lib/player";
 import { Guesses } from "./guesses";
-import { Timer } from "@/components/timer";
+import { Timer } from "@/components/ui/timer";
 import { HillScene } from "@/components/scenes/hill-scene";
 
 export function DrawingGuesserView() {

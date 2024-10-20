@@ -86,7 +86,6 @@ export const gameSlice = createSlice({
 	},
 });
 
-export const { changeRound, changePhase, selectWord } =
-	gameSlice.actions;
+export const { changeRound, changePhase, selectWord } = gameSlice.actions;
 
 export default gameSlice.reducer;

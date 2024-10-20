@@ -2,7 +2,7 @@ import { generateAvatar } from "@/lib/avatar";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { getPickingPlayer } from "@/lib/player";
-import { Timer } from "@/components/timer";
+import { Timer } from "@/components/ui/timer";
 import { HillScene } from "@/components/scenes/hill-scene";
 
 export function PickingGuesserView() {

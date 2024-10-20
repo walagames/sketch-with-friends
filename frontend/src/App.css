@@ -26,43 +26,6 @@
 	box-shadow: -0.2rem 0.2rem 0px #333333;
 }
 
-.radial-gradient {
-	background: radial-gradient(
-		circle,
-		hsla(240, 4.8%, 95.9%, 0.7) 0%,
-		transparent 100%
-	);
-}
-
-.shake {
-	animation: shake 0.5s ease-in-out;
-}
-@keyframes shake {
-	0% {
-		transform: translateX(0);
-	}
-
-	20% {
-		transform: translateX(-3px);
-	}
-
-	40% {
-		transform: translateX(3px);
-	}
-
-	60% {
-		transform: translateX(-3px);
-	}
-
-	80% {
-		transform: translateX(3px);
-	}
-
-	100% {
-		transform: translateX(0);
-	}
-}
-
 .custom-pointers .react-colorful__saturation-pointer {
 	width: 20px;
 	height: 20px;

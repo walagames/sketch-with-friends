@@ -2,7 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useDispatch } from "react-redux";
-import { RaisedButton } from "@/components/raised-button";
+import { RaisedButton } from "@/components/ui/raised-button";
 import { enterRoomCode } from "@/state/features/client";
 import { useEffect } from "react";
 import { StepForwardIcon } from "lucide-react";

@@ -4,7 +4,7 @@ import Canvas from "@/components/canvas";
 import { CanvasTools, ColorSliders } from "@/components/canvas-tools";
 import { GameRole } from "@/state/features/game";
 import { Guesses } from "./guesses";
-import { Timer } from "@/components/timer";
+import { Timer } from "@/components/ui/timer";
 import { HillScene } from "@/components/scenes/hill-scene";
 export function DrawingDrawerView() {
 	const deadline = useSelector(

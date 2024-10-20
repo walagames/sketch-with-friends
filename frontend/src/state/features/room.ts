@@ -5,7 +5,6 @@ import { toast } from "sonner";
 export enum RoomStage {
 	PreGame = "preGame",
 	Playing = "playing",
-	PostGame = "postGame",
 }
 
 export type Player = {
@@ -94,11 +93,7 @@ export const roomSlice = createSlice({
 	},
 });
 
-export const {
-	changeStage,
-	setPlayers,
-	playerLeft,
-	changeRoomSettings,
-} = roomSlice.actions;
+export const { changeStage, setPlayers, playerLeft, changeRoomSettings } =
+	roomSlice.actions;
 
 export default roomSlice.reducer;

@@ -6,6 +6,7 @@ import clientReducer from "./features/client";
 import { clearQueryParams } from "@/lib/params";
 import { toast } from "sonner";
 
+// Used to display toast notifications from the server
 const ErrorMessages = {
 	ErrRoomNotFound: "Room not found",
 	ErrRoomFull: "Room is full",
@@ -40,7 +41,7 @@ const socketMiddleware: Middleware = (store) => {
 						ErrorMessages[e.reason as keyof typeof ErrorMessages];
 					toast.error(errorMessage || "Unknown error occurred");
 
-					// Remove the code from url if the room was not found
+					// Clear the code from the url if the room does not exist
 					if (e.reason === "ErrRoomNotFound") {
 						clearQueryParams();
 					}
@@ -76,6 +77,12 @@ const socketMiddleware: Middleware = (store) => {
 				break;
 			default:
 				// Check if the action should be sent to the server
+				//
+				// The client slice is not meant to be synced with the server
+				// and is only used on the client.
+				//
+				// Actions that are dispatched from the websocket middleware are marked with
+				// fromServer: true, so we don't re-send them to the server.
 				if (!action.type.startsWith("client") && !action.fromServer) {
 					if (!action.payload) {
 						action.payload = null;

@@ -11,7 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
 import { useDispatch, useSelector } from "react-redux";
 import { Input } from "@/components/ui/input";
-import { RaisedButton } from "@/components/raised-button";
+import { RaisedButton } from "@/components/ui/raised-button";
 import { SendIcon, UsersIcon } from "lucide-react";
 
 export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
