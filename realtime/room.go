@@ -198,18 +198,20 @@ func (r *room) register(ctx context.Context, player *player) error {
 func (r *room) unregister(player *player) {
 	r.lastInteractionAt = time.Now()
 
+	// Tell the other players that a player left
+	// Note: This needs to be done before we remove the player from the room state
+	// otherwise the alert will not display to the other players.
+	r.broadcast(
+		GameRoleAny,
+		message(PlayerLeft, player.ID),
+	)
+
 	// If a game is in progress, we need to purge them from the game state
 	// and handle the necessary game state changes. ex. If they were drawing,
 	// we need to manually force the game to the next phase.
 	if r.game != nil && r.game.currentPhase.Name() == Drawing {
 		r.game.handlePlayerLeave(player)
 	}
-
-	// Tell the other players that a player left
-	r.broadcast(
-		GameRoleAny,
-		message(PlayerLeft, player.ID),
-	)
 
 	// Remove the player from the room state
 	delete(r.Players, player.ID)
