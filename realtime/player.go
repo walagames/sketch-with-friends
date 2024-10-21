@@ -8,7 +8,6 @@ import (
 )
 
 type RoomRole string
-type GameRole string
 
 const (
 	RoomRoleHost   RoomRole = "host"
@@ -16,12 +15,28 @@ const (
 	RoomRoleAny    RoomRole = "any"
 )
 
+type GameRole string
+
 const (
 	GameRoleGuessing GameRole = "guessing"
 	GameRoleDrawing  GameRole = "drawing"
 	GameRoleAny      GameRole = "any"
 )
 
+// We use this to create a new player based on params passed
+// in form route handlers.
+type playerOptions struct {
+	roomRole    RoomRole
+	name        string
+	avatarSeed  string
+	avatarColor string
+}
+
+// player represents an individual participant in the game.
+//
+// Players are created when a user joins a room and are maintained throughout
+// the game session. The player struct is central to many game operations,
+// including scoring, role assignment, and message routing.
 type player struct {
 	ID                uuid.UUID `json:"id"`
 	Name              string    `json:"name"`
@@ -33,13 +48,6 @@ type player struct {
 	lastInteractionAt time.Time
 	client            *client
 	limiter           *rate.Limiter
-}
-
-type playerOptions struct {
-	roomRole    RoomRole
-	name        string
-	avatarSeed  string
-	avatarColor string
 }
 
 func NewPlayer(opts *playerOptions) *player {
@@ -55,18 +63,24 @@ func NewPlayer(opts *playerOptions) *player {
 	}
 }
 
+// Passes messages to the player's client.
 func (p *player) Send(actions ...*Action) {
 	actionList := append([]*Action{}, actions...)
 	p.client.send <- actionList
 }
 
+// Updates the player's rate limiter based on their game role.
+//
+// We use this to prevent spamming and server abuse by applying
+// different limits to drawing and guessing.
+//
+// Drawing players send many more messages to add strokes to drawings,
+// so we need to account for that.
 func (p *player) UpdateLimiter() {
 	if p.GameRole == GameRoleDrawing {
-		// Needs to be high to allow for fast drawing
 		// 500 actions per second, 20 actions in a burst
 		p.client.limiter = rate.NewLimiter(500, 20)
 	} else {
-		// This is mostly to prevent players from spamming guesses
 		// 2 actions per second, 4 actions in a burst
 		p.client.limiter = rate.NewLimiter(2, 4)
 	}

@@ -12,7 +12,6 @@ import (
 
 func init() {
 	w := os.Stderr
-
 	logLevel := slog.LevelDebug
 
 	if env := os.Getenv("LOGGER"); env != "" {
@@ -25,7 +24,7 @@ func init() {
 		}
 	}
 
-	// set global logger with custom options
+	// Set global logger with custom formatting
 	slog.SetDefault(slog.New(
 		tint.NewHandler(w, &tint.Options{
 			Level:      logLevel,

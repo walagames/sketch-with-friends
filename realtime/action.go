@@ -53,6 +53,7 @@ const (
 	ChangeStage        ActionType = "room/changeStage"
 )
 
+// Action are used to communicate between the client and server.
 type Action struct {
 	Type    ActionType  `json:"type"`
 	Payload interface{} `json:"payload"`
@@ -112,9 +113,6 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
-			slog.Debug("starting game")
-
-			// Advance room stage
 			r.setStage(Playing)
 
 			// Initialize game state
@@ -126,6 +124,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			r.broadcast(GameRoleAny,
 				message(ChangeStage, r.Stage),
 			)
+
 			return nil
 		},
 	},
@@ -140,7 +139,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			if r.Stage != Playing {
 				return fmt.Errorf("game is not in playing stage")
 			}
-			if r.game.currentPhase.Name() != "picking" {
+			if r.game.currentPhase.Name() != Picking {
 				return fmt.Errorf("game is not in picking phase")
 			}
 			if r.game.currentWord != "" {
@@ -183,17 +182,22 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			if r.Stage != Playing {
 				return fmt.Errorf("game is not in playing stage")
 			}
-			if r.game.currentPhase.Name() != "drawing" {
+			if r.game.currentPhase.Name() != Drawing {
 				return fmt.Errorf("not in drawing phase")
 			}
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
+			// Decode the stroke from the payload
 			stroke, err := decodeStroke(a.Payload)
 			if err != nil {
 				return fmt.Errorf("failed to decode stroke: %w", err)
 			}
+
+			// Add the stroke to the game state
 			r.game.strokes = append(r.game.strokes, stroke)
+
+			// Re-broadcast the stroke to the rest of the players
 			r.broadcast(GameRoleGuessing,
 				message(AddStroke, a.Payload),
 			)
@@ -205,21 +209,25 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		GameRoleRequired: GameRoleDrawing,
 		PayloadType:      []interface{}{},
 		validator: func(r *room) error {
-			// TODO
 			if r.game.currentDrawer == nil {
 				return fmt.Errorf("no drawer found")
 			}
-			if r.game.currentPhase.Name() != "drawing" {
+			if r.game.currentPhase.Name() != Drawing {
 				return fmt.Errorf("not in drawing phase")
 			}
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
+			// Decode the stroke point from the payload
 			point, err := decodeStrokePoint(a.Payload)
 			if err != nil {
 				return fmt.Errorf("failed to decode stroke point: %w", err)
 			}
+
+			// Add the stroke point to the most recent stroke
 			r.game.strokes = appendStrokePoint(r.game.strokes, point)
+
+			// Re-broadcast the stroke point to the rest of the players
 			r.broadcast(GameRoleGuessing,
 				message(AddStrokePoint, a.Payload),
 			)
@@ -230,12 +238,17 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		RoomRoleRequired: RoomRoleAny,
 		GameRoleRequired: GameRoleDrawing,
 		validator: func(r *room) error {
-			// TODO
+			if r.game.currentPhase.Name() != Drawing {
+				return fmt.Errorf("not in drawing phase")
+			}
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
+			// Clear the strokes from the game state
 			r.game.strokes = make([]Stroke, 0)
-			r.broadcast(GameRoleAny,
+
+			// Tell the other players to clear their strokes
+			r.broadcast(GameRoleGuessing,
 				message(ClearStrokes, nil),
 			)
 			return nil
@@ -245,12 +258,17 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		RoomRoleRequired: RoomRoleAny,
 		GameRoleRequired: GameRoleDrawing,
 		validator: func(r *room) error {
-			// TODO
+			if r.game.currentPhase.Name() != Drawing {
+				return fmt.Errorf("not in drawing phase")
+			}
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
+			// Remove the most recent stroke from the game state
 			r.game.strokes = removeLastStroke(r.game.strokes)
-			r.broadcast(GameRoleAny,
+
+			// Tell the other players to undo their last stroke
+			r.broadcast(GameRoleGuessing,
 				message(UndoStroke, nil),
 			)
 			return nil
@@ -261,8 +279,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		GameRoleRequired: GameRoleGuessing,
 		PayloadType:      "string",
 		validator: func(r *room) error {
-			// TODO
-			if r.game.currentPhase.Name() != "drawing" {
+			if r.game.currentPhase.Name() != Drawing {
 				return fmt.Errorf("not in guessing phase")
 			}
 			if r.Stage != Playing {
@@ -271,7 +288,6 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
-			// TODO
 			r.game.judgeGuess(a.Player.ID, a.Payload.(string))
 			return nil
 		},
@@ -281,14 +297,18 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		GameRoleRequired: GameRoleAny,
 		PayloadType:      map[string]interface{}{},
 		validator: func(r *room) error {
-			// TODO
+			if r.Stage != PreGame {
+				return fmt.Errorf("can only change room settings in pre game stage")
+			}
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
-			// ! i hate this
+			// ! need a better way to do this
 			r.Settings.DrawingTimeAllowed = int(a.Payload.(map[string]interface{})["drawingTimeAllowed"].(float64))
 			r.Settings.PlayerLimit = int(a.Payload.(map[string]interface{})["playerLimit"].(float64))
 			r.Settings.TotalRounds = int(a.Payload.(map[string]interface{})["totalRounds"].(float64))
+
+			// Inform clients of the room settings change
 			r.broadcast(GameRoleAny,
 				message(ChangeRoomSettings, r.Settings),
 			)
@@ -297,6 +317,8 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 	},
 }
 
+// Construct an action message
+// It's named "message" instead of "action" to make it easier to read when used in broadcasts
 func message(actionType ActionType, payload interface{}) *Action {
 	return &Action{
 		Type:    actionType,
@@ -304,6 +326,7 @@ func message(actionType ActionType, payload interface{}) *Action {
 	}
 }
 
+// Encode a slice of actions into a JSON byte slice
 func encodeActions(actions []*Action) []byte {
 	jsonBytes, err := json.Marshal(actions)
 	if err != nil {
@@ -313,6 +336,7 @@ func encodeActions(actions []*Action) []byte {
 	return jsonBytes
 }
 
+// Decode a JSON byte slice into an action
 func decodeAction(bytes []byte) (*Action, error) {
 	var action *Action
 	err := json.Unmarshal(bytes, &action)
