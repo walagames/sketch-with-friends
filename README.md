@@ -25,11 +25,12 @@ play with people from around the world.
 
 ### Features
 
-- 🌍 **Global Matchmaking:** Connect with players worldwide
+- 🌍 **Global Matchmaking (coming soon):** Connect with players worldwide
 - 💬 **In-Game Chat:** Communicate with other players in real-time
-- 📱 **Mobile Support:** Full touch and keyboard support
+- 📱 **Mobile Support (coming soon):** Full touch and keyboard support
 - 🔒 **Private Rooms:** Create private rooms for you and your friends
-- 🎨 **Custom Words:** Bring your own custom words to the guessing pool
+- 🎨 **Custom Words (coming soon):** Bring your own custom words to the guessing
+  pool
 
 ## Local development
 
