@@ -258,7 +258,7 @@ func (r *room) Run(rm RoomManager) {
 				}
 			}
 		case <-r.timer.C:
-			r.game.AdvanceToNextPhase()
+			r.game.currentPhase.Next(r.game)
 		case req := <-r.connect:
 			req.result <- r.register(ctx, req.player)
 		case player := <-r.disconnect:

@@ -167,7 +167,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Start drawing phase
 			r.game.currentWord = selectedWord
-			r.game.AdvanceToNextPhase()
+			r.game.currentPhase.Next(r.game)
 
 			return nil
 		},
