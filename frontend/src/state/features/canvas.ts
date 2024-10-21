@@ -25,6 +25,9 @@ export const canvasSlice = createSlice({
 			state.strokes.push(action.payload);
 		},
 		addStrokePoint: (state, action: PayloadAction<number[]>) => {
+			if (state.strokes.length === 0) {
+				return;
+			}
 			state.strokes[state.strokes.length - 1].points.push(action.payload);
 		},
 		clearStrokes: (state) => {
