@@ -3,16 +3,6 @@
 
 ### Relevant issues
 [Provide a list of issues addressed by this PR, if applicable. ex. Fixes #123]
-### Tasks
-[This section is used to outline individual tasks planned for this PR. It serves as a personal task management tool for the PR author and provides reviewers with an overview of completed and pending tasks. Feel free to add, remove, or modify tasks as needed throughout the development process.]
-
-- [ ] My great task 
-
-## Impact
-[Discuss the impact of your changes on the project. This might include effects on performance, new dependencies, or changes in behaviour.]
-
-## Additional Information
-[Any additional information that reviewers should be aware of.]
 
 ## Checklist
 - [ ] I have performed a self-review of my own code.
