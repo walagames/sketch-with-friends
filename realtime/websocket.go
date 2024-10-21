@@ -3,27 +3,43 @@ package main
 import (
 	"log/slog"
 	"net/http"
-
+	"os"
+	"regexp"
 
 	"github.com/gorilla/websocket"
 )
 
-
+// WebSocket upgrader config
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
 	CheckOrigin: func(r *http.Request) bool {
-		// allowedOrigin := os.Getenv("CORS_ORIGIN") // Adjust this to match your Next.js app's origin
-		// return r.Header.Get("Origin") == allowedOrigin
-		// ! This is a security risk, but it's fine for local development
-		return true
+		origin := r.Header.Get("Origin")
+
+		// Allow local development
+		if origin == "http://localhost:3000" && os.Getenv("ENVIRONMENT") != "PRODUCTION" {
+			return true
+		}
+
+		// Allow production
+		if origin == "https://sketchwithfriends.com" {
+			return true
+		}
+
+		// Allow preview environments
+		match, _ := regexp.MatchString(`^https?:\/\/([\w-]+\.)*sketch-with-friends\.pages\.dev$`, origin)
+		return match
 	},
 }
 
+// Upgrades an HTTP connection to a WebSocket connection.
 func UpgradeConnection(w http.ResponseWriter, r *http.Request) (*websocket.Conn, error) {
 	return upgrader.Upgrade(w, r, nil)
 }
 
+// Closes a WebSocket connection with a reason.
+// This is useful for sending a message to the client before closing the connection.
+// Ex. Telling the client the room is full on first connection attempt.
 func CloseConnectionWithReason(conn *websocket.Conn, reason string) {
 	closeMessage := websocket.FormatCloseMessage(websocket.CloseNormalClosure, reason)
 	err := conn.WriteMessage(websocket.CloseMessage, closeMessage)

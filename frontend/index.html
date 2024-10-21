@@ -1,14 +1,22 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/logo.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sketch with Friends</title>
-    <meta name="description" content="An interactive multiplayer drawing game" />
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+	<head>
+		<meta charset="UTF-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Sketch with Friends - Free Multiplayer Drawing Game</title>
+		<meta
+			name="description"
+			content="A free multiplayer game where you take turns drawing and guessing words with friends and players worldwide."
+		/>
+		<script>
+			/*to prevent Firefox FOUC, this must be here*/
+			let FF_FOUC_FIX;
+		</script>
+		<script defer src="https://analytics.walagames.com/script.js"></script>
+	</head>
+	<body>
+		<div id="root"></div>
+		<script type="module" src="/src/main.tsx"></script>
+	</body>
 </html>

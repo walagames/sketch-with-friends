@@ -1,4 +1,3 @@
-
 .Toaster {
 	--width: unset !important;
 	width: 100%;
@@ -20,41 +19,11 @@
 	}
 }
 
-.radial-gradient {
-	background: radial-gradient(
-		circle,
-		hsla(240, 4.8%, 95.9%, 0.7) 0%,
-		transparent 100%
-	);
+.shadow-accent {
+	box-shadow: -0.4rem 0.4rem 0px #333333;
 }
-
-.shake {
-	animation: shake 0.5s ease-in-out;
-}
-@keyframes shake {
-	0% {
-		transform: translateX(0);
-	}
-
-	20% {
-		transform: translateX(-3px);
-	}
-
-	40% {
-		transform: translateX(3px);
-	}
-
-	60% {
-		transform: translateX(-3px);
-	}
-
-	80% {
-		transform: translateX(3px);
-	}
-
-	100% {
-		transform: translateX(0);
-	}
+.shadow-accent-sm {
+	box-shadow: -0.2rem 0.2rem 0px #333333;
 }
 
 .custom-pointers .react-colorful__saturation-pointer {
@@ -94,9 +63,9 @@
 	box-shadow: 0 6px 12px #999;
 }
 .custom-pointers .react-colorful__saturation {
-  border-radius: 1px 1px 0 0;
+	border-radius: 1px 1px 0 0;
 }
 .custom-pointers .react-colorful__hue {
-  height: 30px;
-  border-radius: 0 0 1px 1px;
+	height: 30px;
+	border-radius: 0 0 1px 1px;
 }

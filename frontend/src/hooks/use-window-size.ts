@@ -6,14 +6,14 @@ interface UseWindowSizeOptions {
 }
 
 export const useWindowSize = (
-	options?: UseWindowSizeOptions,
+	options?: UseWindowSizeOptions
 ): [number, number] => {
 	const [width, setWidth] = React.useState(0);
 	const [height, setHeight] = React.useState(0);
 
 	const handleResize = React.useCallback(() => {
-		const maxWidth = options?.maxWidth || window.innerWidth;
-		const maxHeight = options?.maxHeight || window.innerHeight;
+		const maxWidth = options?.maxWidth ?? window.innerWidth;
+		const maxHeight = options?.maxHeight ?? window.innerHeight;
 
 		setWidth(Math.min(window.innerWidth, maxWidth));
 		setHeight(Math.min(window.innerHeight, maxHeight));

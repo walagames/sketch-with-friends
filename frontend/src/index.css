@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Nokora:wght@100;300;400;700;900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 html {
-	font-family: 'DM Sans', sans-serif;
+	font-family: "Nokora", sans-serif;
 }
 
 @layer base {
@@ -18,14 +18,14 @@ html {
 		--popover: 0 0% 100%;
 		--popover-foreground: 240 10% 3.9%;
 
-		--primary: 240 5.9% 10%;
+		--primary: 255 84% 57%;
 		--primary-foreground: 0 0% 98%;
 
 		--secondary: 240 4.8% 95.9%;
 		--secondary-foreground: 240 5.9% 10%;
 
 		--muted: 240 4.8% 95.9%;
-		--muted-foreground: 240 5% 57%;
+		--muted-foreground: 30 12% 20%;
 
 		--accent: 240 4.8% 95.9%;
 		--accent-foreground: 240 5.9% 10%;
@@ -33,7 +33,7 @@ html {
 		--destructive: 0 84.2% 60.2%;
 		--destructive-foreground: 0 0% 98%;
 
-		--border: 240 5.9% 90%;
+		--border: 30 12% 20%;
 		--input: 240 5.9% 90%;
 		--ring: 240 10% 3.9%;
 
@@ -76,6 +76,20 @@ html {
 		@apply border-border;
 	}
 	body {
-		@apply bg-background text-foreground;
+		@apply text-foreground;
 	}
+}
+
+@layer utilities {
+	.scrollbar-hide {
+		-ms-overflow-style: none; /* IE and Edge */
+		scrollbar-width: none; /* Firefox */
+	}
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none; /* Chrome, Safari and Opera */
+	}
+}
+
+body {
+	background-color: #aef1fe;
 }

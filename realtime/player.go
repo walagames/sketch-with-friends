@@ -1,146 +1,87 @@
 package main
 
 import (
-	"sync"
+	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/time/rate"
 )
 
-type PlayerRole string
+type RoomRole string
 
 const (
-	RoleHost   PlayerRole = "HOST"
-	RolePlayer PlayerRole = "PLAYER"
+	RoomRoleHost   RoomRole = "host"
+	RoomRolePlayer RoomRole = "player"
+	RoomRoleAny    RoomRole = "any"
 )
 
-type PlayerConnectionStatus string
+type GameRole string
 
 const (
-	StatusJoining   PlayerConnectionStatus = "JOINING"
-	StatusConnected PlayerConnectionStatus = "CONNECTED"
+	GameRoleGuessing GameRole = "guessing"
+	GameRoleDrawing  GameRole = "drawing"
+	GameRoleAny      GameRole = "any"
 )
 
-type PlayerInfo struct {
-	ID          string                 `json:"id"`
-	Name        string                 `json:"name"`
-	Role        PlayerRole             `json:"role"`
-	GameRole    GameRole               `json:"gameRole"`
-	Status      PlayerConnectionStatus `json:"status"`
-	AvatarSeed  string                 `json:"avatarSeed"`
-	AvatarColor string                 `json:"avatarColor"`
-	Score       int                    `json:"score"`
-}
-
-type Player interface {
-	Status() PlayerConnectionStatus
-	ChangeStatus(status PlayerConnectionStatus)
-	Role() PlayerRole
-	ChangeRole(role PlayerRole)
-	GameRole() GameRole
-	ChangeGameRole(role GameRole)
-	SetClient(client *client)
-	Client() *client
-	Info() *PlayerInfo
-	Score() int
-	ChangeScore(score int)
-}
-
-type player struct {
-	id          uuid.UUID
+// We use this to create a new player based on params passed
+// in form route handlers.
+type playerOptions struct {
+	roomRole    RoomRole
 	name        string
 	avatarSeed  string
 	avatarColor string
-	role        PlayerRole
-	status      PlayerConnectionStatus
-	score       int
-	mu          sync.RWMutex
-	gameRole    GameRole
-	client      *client
 }
 
-func NewPlayer(role PlayerRole, name string, avatarSeed string, avatarColor string) Player {
+// player represents an individual participant in the game.
+//
+// Players are created when a user joins a room and are maintained throughout
+// the game session. The player struct is central to many game operations,
+// including scoring, role assignment, and message routing.
+type player struct {
+	ID                uuid.UUID `json:"id"`
+	Name              string    `json:"name"`
+	RoomRole          RoomRole  `json:"roomRole"`
+	GameRole          GameRole  `json:"gameRole"`
+	AvatarSeed        string    `json:"avatarSeed"`
+	AvatarColor       string    `json:"avatarColor"`
+	Score             int       `json:"score"`
+	lastInteractionAt time.Time
+	client            *client
+	limiter           *rate.Limiter
+}
+
+func NewPlayer(opts *playerOptions) *player {
 	return &player{
-		id:          uuid.New(),
-		name:        name,
-		avatarSeed:  avatarSeed,
-		avatarColor: avatarColor,
-		role:        role,
-		status:      StatusJoining,
-		score:       0,
-		gameRole:    Guessing,
+		ID:                uuid.New(),
+		Name:              opts.name,
+		AvatarSeed:        opts.avatarSeed,
+		AvatarColor:       opts.avatarColor,
+		RoomRole:          opts.roomRole,
+		Score:             0,
+		GameRole:          GameRoleGuessing,
+		lastInteractionAt: time.Now(),
 	}
 }
 
-func (p *player) SetClient(client *client) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.client = client
+// Passes messages to the player's client.
+func (p *player) Send(actions ...*Action) {
+	actionList := append([]*Action{}, actions...)
+	p.client.send <- actionList
 }
 
-func (p *player) Client() *client {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-	return p.client
-}
-
-func (p *player) Status() PlayerConnectionStatus {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-	return p.status
-}
-
-func (p *player) ChangeStatus(newStatus PlayerConnectionStatus) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.status = newStatus
-}
-
-func (p *player) GameRole() GameRole {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-	return p.gameRole
-}
-
-func (p *player) ChangeGameRole(role GameRole) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.gameRole = role
-}
-
-func (p *player) Role() PlayerRole {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-	return p.role
-}
-
-func (p *player) ChangeRole(r PlayerRole) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.role = r
-}
-
-func (p *player) Info() *PlayerInfo {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-	return &PlayerInfo{
-		ID:          p.id.String(),
-		Name:        p.name,
-		Role:        p.role,
-		Status:      p.status,
-		AvatarSeed:  p.avatarSeed,
-		AvatarColor: p.avatarColor,
-		GameRole:    p.gameRole,
+// Updates the player's rate limiter based on their game role.
+//
+// We use this to prevent spamming and server abuse by applying
+// different limits to drawing and guessing.
+//
+// Drawing players send many more messages to add strokes to drawings,
+// so we need to account for that.
+func (p *player) UpdateLimiter() {
+	if p.GameRole == GameRoleDrawing {
+		// 500 actions per second, 20 actions in a burst
+		p.client.limiter = rate.NewLimiter(500, 20)
+	} else {
+		// 2 actions per second, 4 actions in a burst
+		p.client.limiter = rate.NewLimiter(2, 4)
 	}
-}
-
-func (p *player) Score() int {
-	p.mu.RLock()
-	defer p.mu.RUnlock()
-	return p.score
-}
-
-func (p *player) ChangeScore(score int) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.score = score
 }

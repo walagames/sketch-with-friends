@@ -2,11 +2,13 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
-import { RoomProvider } from "./contexts/room-context";
+import { Provider } from "react-redux";
+import { store } from "./state/store";
+
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
-		<RoomProvider>
+		<Provider store={store}>
 			<App />
-		</RoomProvider>
+		</Provider>
 	</StrictMode>
 );
