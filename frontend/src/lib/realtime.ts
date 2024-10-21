@@ -4,7 +4,7 @@ export const getRealtimeHref = () => {
 	const isDev = import.meta.env.DEV;
 	const protocol = isDev ? "ws" : "wss";
 	const branchSocketHost = import.meta.env.BRANCH_SOCKET_HOST;
-	const socketHost = import.meta.env.SOCKET_HOST;
+	const socketHost = import.meta.env.VITE_SOCKET_HOST;
 
 	let host;
 	if (socketHost) {
