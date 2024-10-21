@@ -3,17 +3,15 @@ import { toast } from "sonner";
 export const getRealtimeHref = () => {
 	const isDev = import.meta.env.DEV;
 	const protocol = isDev ? "ws" : "wss";
-	const isBranch = import.meta.env.BRANCH_SOCKET_HOST;
+	const branchSocketHost = import.meta.env.BRANCH_SOCKET_HOST;
+	const socketHost = import.meta.env.VITE_SOCKET_HOST;
 
 	let host;
-	if (isDev) {
-		host = import.meta.env.VITE_SOCKET_HOST;
-	} else if (isBranch) {
-		host = import.meta.env.BRANCH_SOCKET_HOST;
-	} else {
-		host = "realtime.sketchwithfriends.com";
+	if (socketHost) {
+		host = socketHost;
+	} else if (branchSocketHost) {
+		host = branchSocketHost;
 	}
-
 	return `${protocol}://${host}`;
 };
 
