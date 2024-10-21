@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { generateAvatar } from "@/lib/avatar";
 import { Player, RoomRole } from "@/state/features/room";
+import { forwardRef } from "react";
 const CrownIcon = (props: React.SVGProps<SVGSVGElement>) => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
@@ -32,41 +33,43 @@ const variants = {
 	exit: { opacity: 0, scale: 0.95 },
 };
 
-function PlayerCard({ player }: { player: Player }) {
-	const { roomRole, avatarSeed } = player;
-	const avatarSvg = generateAvatar(avatarSeed);
-	return (
-		<div className="flex items-center gap-2 ml-auto">
-			{roomRole === RoomRole.Host && (
-				<div className="translate-y-2">
-					<CrownIcon className="w-8 h-8 text-yellow-400" />
-				</div>
-			)}
-			<motion.div
-				layout
-				variants={variants}
-				initial="initial"
-				animate="animate"
-				exit="exit"
-				transition={{
-					type: "spring",
-					stiffness: 500,
-					damping: 50,
-					mass: 1,
-				}}
-				className="flex items-center gap-3 bg-background shadow-accent rounded-lg mt-2 mr-auto w-64 min-h-0 h-14"
-			>
-				<img
-					className="rounded-l-lg h-full aspect-square relative"
-					src={avatarSvg}
-				/>
-				<p className="text-xl leading-0 font-bold truncate px-4 translate-y-0.5">
-					{player.name}
-				</p>
-			</motion.div>
-		</div>
-	);
-}
+const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
+	({ player }, ref) => {
+		const { roomRole, avatarSeed } = player;
+		const avatarSvg = generateAvatar(avatarSeed);
+		return (
+			<div className="flex items-center gap-2 ml-auto" ref={ref}>
+				{roomRole === RoomRole.Host && (
+					<div className="translate-y-2">
+						<CrownIcon className="w-8 h-8 text-yellow-400" />
+					</div>
+				)}
+				<motion.div
+					layout
+					variants={variants}
+					initial="initial"
+					animate="animate"
+					exit="exit"
+					transition={{
+						type: "spring",
+						stiffness: 500,
+						damping: 50,
+						mass: 1,
+					}}
+					className="flex items-center gap-3 bg-background shadow-accent rounded-lg mt-2 mr-auto w-64 min-h-0 h-14"
+				>
+					<img
+						className="rounded-l-lg h-full aspect-square relative"
+						src={avatarSvg}
+					/>
+					<p className="text-xl leading-0 font-bold truncate px-4 translate-y-0.5">
+						{player.name}
+					</p>
+				</motion.div>
+			</div>
+		);
+	}
+);
 
 export function PlayerCards({ players }: { players: Player[] }) {
 	return (

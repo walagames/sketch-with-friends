@@ -43,8 +43,6 @@ const variants = {
 export const useDirectionAnimation = () => {
 	const direction = useContext(DirectionContext);
 
-	console.log("direction in useDirectionAnimation", direction);
-
 	return {
 		variants,
 		custom: direction,

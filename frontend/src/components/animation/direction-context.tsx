@@ -20,7 +20,6 @@ export const AnimatePresenceWithDirection = ({
 	direction,
 	...props
 }: AnimatePresenceWithDirectionProps) => {
-	console.log("AnimatePresenceWithDirection", direction);
 	return (
 		<DirectionContext.Provider value={direction}>
 			<AnimatePresence {...props} custom={direction}>
