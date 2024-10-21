@@ -40,17 +40,19 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 	return (
 		<div className="max-w-3xl w-full flex flex-col items-end gap-4">
 			<div className="flex gap-6 items-center w-full">
-				<RaisedButton
-					size="lg"
-					className="group w-40"
-					onClick={() => copyRoomLink(roomId)}
-				>
-					<span className="group-hover:block hidden">Copy room link</span>
-					<span className="flex items-center gap-2 group-hover:hidden text-lg">
-						<LinkIcon className="w-5 h-5 mb-1" />
-						{roomId}
-					</span>
-				</RaisedButton>
+				<div>
+					<RaisedButton
+						size="lg"
+						className="group w-40"
+						onClick={() => copyRoomLink(roomId)}
+					>
+						<span className="group-hover:block hidden">Copy room link</span>
+						<span className="flex items-center gap-2 group-hover:hidden text-lg">
+							<LinkIcon className="w-5 h-5 mb-1" />
+							{roomId}
+						</span>
+					</RaisedButton>
+				</div>
 				<span className="font-bold text-xl flex items-center gap-2">
 					<UsersIcon className="w-5 h-5 mb-1" />
 					{Object.keys(players).length}/{settings.playerLimit}
@@ -83,13 +85,15 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 				)}
 			</div>
 			{isHost && (
-				<RaisedButton
-					size="xl"
-					variant="action"
-					onClick={() => dispatch({ type: "game/startGame" })}
-				>
-					Start game
-				</RaisedButton>
+				<div>
+					<RaisedButton
+						size="xl"
+						variant="action"
+						onClick={() => dispatch({ type: "game/startGame" })}
+					>
+						Start game
+					</RaisedButton>
+				</div>
 			)}
 		</div>
 	);

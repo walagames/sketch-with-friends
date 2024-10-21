@@ -42,7 +42,7 @@ interface RaisedButtonProps extends ButtonProps {
 const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 	({ className, variant, size, shift = true, ...props }, ref) => {
 		return (
-			<div className="flex items-center gap-3 bg-secondary-foreground rounded-lg h-full">
+			<div className="flex items-center gap-3 bg-secondary-foreground rounded-lg h-full w-full">
 				<motion.button
 					className={cn(buttonVariants({ variant, size, className }))}
 					ref={ref}

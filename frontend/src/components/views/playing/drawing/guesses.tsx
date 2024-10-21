@@ -10,9 +10,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
 import { useDispatch, useSelector } from "react-redux";
-import { Input } from "@/components/ui/input";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { SendIcon, UsersIcon } from "lucide-react";
+import { RaisedInput } from "@/components/ui/raised-input";
 
 export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 	const guesses = useSelector((state: RootState) => state.game.guesses);
@@ -155,14 +155,11 @@ export function GuessForm() {
 						<FormItem className="relative space-y-0">
 							<FormControl>
 								<div className="flex items-center gap-3 ">
-									<div className="flex items-center gap-3 bg-secondary-foreground rounded-lg flex-1">
-										<Input
-											autoComplete="off"
-											placeholder="Guess"
-											{...field}
-											className="font-bold text-xl text-foreground placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-full -translate-y-1.5 translate-x-1.5"
-										/>
-									</div>
+									<RaisedInput
+										autoComplete="off"
+										placeholder="Guess"
+										{...field}
+									/>
 									<div className="">
 										<RaisedButton shift={false} variant="action" size="icon">
 											<SendIcon className="w-6 h-6" />

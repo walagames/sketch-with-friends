@@ -15,7 +15,7 @@ import {
 	FormItem,
 	FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { RaisedInput } from "@/components/ui/raised-input";
 import { Logo } from "@/components/logo";
 
 const CodeFormSchema = z.object({
@@ -58,15 +58,8 @@ function CodeForm() {
 					render={({ field }) => (
 						<FormItem>
 							<FormControl>
-								<div className="relative">
-									<div className="flex items-center gap-3 bg-secondary-foreground rounded-lg">
-										<Input
-											{...field}
-											autoComplete="off"
-											placeholder="Room code"
-											className="font-bold text-xl text-foreground placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-64 -translate-y-1.5 translate-x-1.5"
-										/>
-									</div>
+								<div className="relative w-full">
+									<RaisedInput placeholder="Room code" {...field} />
 									<div className="absolute -right-14 top-2">
 										<RaisedButton
 											type="submit"
@@ -94,7 +87,7 @@ export function EnterCodeView() {
 	return (
 		<HillScene>
 			<Logo />
-			<div className="flex flex-col items-center gap-4">
+			<div className="flex flex-col items-center gap-4 max-w-64">
 				<RaisedButton
 					size="xl"
 					variant="action"

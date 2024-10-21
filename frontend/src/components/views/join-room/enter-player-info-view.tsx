@@ -15,9 +15,9 @@ import { DicesIcon, StepBackIcon, StepForwardIcon } from "lucide-react";
 import { getRealtimeHref } from "@/lib/realtime";
 import { useDispatch, useSelector } from "react-redux";
 import { RaisedButton } from "@/components/ui/raised-button";
-import { Input } from "@/components/ui/input";
 import { enterRoomCode } from "@/state/features/client";
 import { HillScene } from "@/components/scenes/hill-scene";
+import { RaisedInput } from "@/components/ui/raised-input";
 export function EnterPlayerInfoView() {
 	return (
 		<HillScene>
@@ -43,9 +43,14 @@ function randomAvatarSeed() {
 }
 
 const JoinRoomFormSchema = z.object({
-	username: z.string().min(2, {
-		message: "Username must be at least 2 characters.",
-	}),
+	username: z
+		.string()
+		.min(2, {
+			message: "Username must be at least 2 characters.",
+		})
+		.max(16, {
+			message: "Username must be at most 16 characters.",
+		}),
 });
 
 export function PlayerInfoForm() {
@@ -110,7 +115,7 @@ export function PlayerInfoForm() {
 	}
 
 	return (
-		<div className="max-w-[16rem] w-full flex flex-col gap-5 items-start">
+		<div className="max-w-56 w-full flex flex-col gap-5 items-center">
 			<div className="flex justify-center items-center gap-2">
 				<div className="w-40 aspect-square shadow-accent rounded-lg ml-2">
 					<img className="rounded-lg" src={avatarSvg} />
@@ -127,19 +132,18 @@ export function PlayerInfoForm() {
 				</div>
 			</div>
 			<Form {...form}>
-				<form onSubmit={form.handleSubmit(onSubmit)} className="">
+				<form className="w-full" onSubmit={form.handleSubmit(onSubmit)}>
 					<FormField
 						control={form.control}
 						name="username"
 						render={({ field }) => (
 							<FormItem>
 								<FormControl>
-									<div className="flex items-center gap-3 bg-secondary-foreground rounded-lg w-56 relative">
-										<Input
+									<div className="relative w-full">
+										<RaisedInput
 											autoComplete="off"
 											placeholder="Name"
 											{...field}
-											className="font-bold text-xl text-foreground placeholder:text-zinc-400 bg-background rounded-lg h-14 px-4 py-3.5 w-full -translate-y-1.5 translate-x-1.5"
 										/>
 										<div className="absolute -right-[3.25rem] top-2">
 											<RaisedButton shift={false} variant="action" size="icon">
