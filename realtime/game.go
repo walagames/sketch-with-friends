@@ -24,7 +24,7 @@ var wordBank = []string{
 }
 
 func init() {
-	slog.Info("Initializing game constants")
+	slog.Info("Initializing game constants2")
 }
 
 var (
