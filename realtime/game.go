@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log/slog"
 	"math/rand"
 	"strings"
 	"time"
@@ -20,6 +21,10 @@ var wordBank = []string{
 	"moon",
 	"flower",
 	"computer",
+}
+
+func init() {
+	slog.Info("Initializing game constants")
 }
 
 var (
