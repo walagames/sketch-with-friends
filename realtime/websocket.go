@@ -22,7 +22,7 @@ var upgrader = websocket.Upgrader{
 		}
 
 		// Allow production
-		if origin == "https://www.sketchwithfriends.com" {
+		if origin == "https://sketchwithfriends.com" {
 			return true
 		}
 
