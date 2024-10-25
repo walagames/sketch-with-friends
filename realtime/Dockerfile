@@ -22,8 +22,11 @@ WORKDIR /app
 # Step 8: Copy the Pre-built binary file from the build stage
 COPY --from=build /app/main .
 
-# Step 9: Expose the port the app runs on
+# Step 9: Copy the words.csv file into the container
+COPY words.csv .
+
+# Step 10: Expose the port the app runs on
 EXPOSE 3000
 
-# Step 10: Command to run the executable
+# Step 11: Command to run the executable
 CMD ["./main"]
