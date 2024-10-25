@@ -142,7 +142,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			if r.game.currentPhase.Name() != Picking {
 				return fmt.Errorf("game is not in picking phase")
 			}
-			if r.game.currentWord != "" {
+			if r.game.currentWord != nil {
 				return fmt.Errorf("word already selected")
 			}
 
@@ -153,19 +153,19 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Check if selected word is actually an option
 			selectedWord := a.Payload.(string)
-			isValidOption := false
+			var foundDrawingWord *DrawingWord
 			for _, option := range r.game.wordOptions {
-				if option == selectedWord {
-					isValidOption = true
+				if option.Value == selectedWord {
+					foundDrawingWord = &option
 					break
 				}
 			}
-			if !isValidOption {
+			if foundDrawingWord == nil {
 				return fmt.Errorf("selected word is not a valid option")
 			}
 
 			// Start drawing phase
-			r.game.currentWord = selectedWord
+			r.game.currentWord = foundDrawingWord
 			r.game.currentPhase.Next(r.game)
 
 			return nil

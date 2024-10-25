@@ -2,30 +2,16 @@ package main
 
 import (
 	"context"
+	"encoding/csv"
+	"log"
 	"log/slog"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 )
-
-var wordBank = []string{
-	"cat",
-	"dog",
-	"house",
-	"tree",
-	"book",
-	"chair",
-	"sun",
-	"moon",
-	"flower",
-	"computer",
-}
-
-func init() {
-	slog.Info("Initializing game constants2")
-}
 
 var (
 	// Duration allowed for players to pick a word
@@ -34,6 +20,21 @@ var (
 	// Duration after drawing for score updates and displaying the word
 	PostDrawingPhaseDuration = time.Second * 5
 )
+
+// DrawingWord represents a word that the drawer can choose from.
+type DrawingWord struct {
+	Category   string
+	Value      string
+	Difficulty string
+}
+
+var wordBank []DrawingWord
+
+// This runs when the package is first imported.
+// We use this to load the word bank from the CSV file once at startup.
+func init() {
+	loadWordBank()
+}
 
 type guess struct {
 	ID            uuid.UUID `json:"id"`
@@ -59,8 +60,8 @@ type game struct {
 	currentDrawer  *player
 
 	// Word and drawing
-	wordOptions     []string
-	currentWord     string
+	wordOptions     []DrawingWord
+	currentWord     *DrawingWord
 	hintedWord      string
 	strokes         []Stroke
 	guesses         []guess
@@ -78,10 +79,10 @@ func NewGame(initialPhase Phase, r *room) *game {
 		currentPhase:      initialPhase,
 		currentRound:      1,
 		drawingQueue:      make([]uuid.UUID, 0),
-		wordOptions:       make([]string, 0),
+		wordOptions:       make([]DrawingWord, 0),
 		strokes:           make([]Stroke, 0),
 		currentDrawer:     nil,
-		currentWord:       "",
+		currentWord:       nil,
 		hintedWord:        "",
 		isCountdownActive: false,
 		guesses:           make([]guess, 0),
@@ -165,7 +166,7 @@ func (g *game) handlePlayerLeave(player *player) {
 			// 2. If we don't clear the word here, the action validator will prevent
 			//    the next drawer from picking their word, as it would think a word
 			//    is already selected.
-			g.currentWord = ""
+			g.currentWord = nil
 		}
 
 		// If the player left during the drawing phase, we need to skip to the post drawing phase.
@@ -206,9 +207,9 @@ func levenshteinDistance(s1, s2 string) int {
 // Checks if a guess is close to the current word.
 // We use this to indicate in chat that a guess was incorrect but close.
 func (g *game) isGuessClose(guess string) bool {
-	distance := levenshteinDistance(guess, g.currentWord)
+	distance := levenshteinDistance(guess, g.currentWord.Value)
 	// Allow up to 1/3 of the word length to be different
-	maxDistance := len(g.currentWord) / 3
+	maxDistance := len(g.currentWord.Value) / 3
 
 	return distance <= maxDistance
 }
@@ -242,7 +243,7 @@ func (g *game) calculatePoints(pointsPerGuess int) int {
 func (g *game) judgeGuess(playerID uuid.UUID, guessText string) {
 	// Convert both guess and current word to lowercase for case-insensitive comparison
 	lowerGuess := strings.ToLower(guessText)
-	lowerActualWord := strings.ToLower(g.currentWord)
+	lowerActualWord := strings.ToLower(g.currentWord.Value)
 	var result guess
 
 	// Check if the guess is correct
@@ -262,7 +263,7 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessText string) {
 		}
 
 		g.correctGuessers[playerID] = true
-		g.room.Players[playerID].Send(message(SelectWord, g.currentWord))
+		g.room.Players[playerID].Send(message(SelectWord, g.currentWord.Value))
 	} else {
 		result = guess{
 			ID:       uuid.New(),
@@ -283,7 +284,7 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessText string) {
 		g.cancelHintRoutine()
 
 		// Display the word
-		g.hintedWord = g.currentWord
+		g.hintedWord = g.currentWord.Value
 		g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
 		time.Sleep(time.Duration(1 * time.Second)) // Short delay to display the word
 
@@ -292,11 +293,45 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessText string) {
 	}
 }
 
-// Returns a slice of unique, random words from the word bank.
+// Loads the word bank from the CSV file.
+func loadWordBank() {
+	file, err := os.Open("words.csv")
+	if err != nil {
+		log.Fatalf("Failed to open CSV file: %v", err)
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	// Skip header row
+	if _, err := reader.Read(); err != nil {
+		log.Fatalf("Failed to read CSV header: %v", err)
+	}
+
+	records, err := reader.ReadAll()
+	if err != nil {
+		log.Fatalf("Failed to read CSV data: %v", err)
+	}
+
+	wordBank = make([]DrawingWord, 0, len(records))
+	for _, record := range records {
+		if len(record) == 3 {
+			wordBank = append(wordBank, DrawingWord{
+				Category:   record[0],
+				Value:      record[1],
+				Difficulty: record[2],
+			})
+		}
+	}
+
+	slog.Info("Loaded word bank", "word_count", len(wordBank))
+}
+
+// Returns unique, random words from the word bank.
+// The words are returned as a slice of DrawingWord structs and as a slice of strings.
 // We use this to give the drawer a selection of words to choose from.
-func wordOptions(n int) []string {
+func wordOptions(n int) ([]DrawingWord, []string) {
 	// Create a set to ensure uniqueness
-	wordSet := make(map[string]struct{})
+	wordSet := make(map[DrawingWord]struct{})
 
 	// Keep adding words until we have the required number
 	for len(wordSet) < n {
@@ -305,12 +340,18 @@ func wordOptions(n int) []string {
 	}
 
 	// Convert set to slice
-	words := make([]string, 0, n)
+	words := make([]DrawingWord, 0, n)
 	for word := range wordSet {
 		words = append(words, word)
 	}
 
-	return words
+	// Extract just the values so we can send them to the drawer
+	values := make([]string, 0, n)
+	for _, word := range words {
+		values = append(values, word.Value)
+	}
+
+	return words, values
 }
 
 // Applies a new hint to the hinted word.
@@ -319,7 +360,7 @@ func (g *game) applyHint() {
 	fullWord := g.currentWord
 
 	prevRunes := []rune(prevWord)
-	fullRunes := []rune(fullWord)
+	fullRunes := []rune(fullWord.Value)
 	hiddenIndices := []int{}
 
 	// Find all hidden letter positions
@@ -345,12 +386,12 @@ func (g *game) applyHint() {
 // Applies hints to the hinted word at a regular interval.
 // Launched as a goroutine in the Drawing phase.
 func (g *game) hintRoutine(ctx context.Context, phaseDuration time.Duration) {
-	g.hintedWord = strings.Repeat("*", len(g.currentWord))
+	g.hintedWord = strings.Repeat("*", len(g.currentWord.Value))
 	// Send the initial hinted word with all blanks
 	g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
 
 	// Will apply up to 60% of the word length as hints
-	totalHints := int(float64(len(g.currentWord)) * 0.6)
+	totalHints := int(float64(len(g.currentWord.Value)) * 0.6)
 	// Apply hints at a regular interval so the last hint is applied with one interval left
 	hintInterval := phaseDuration / time.Duration(totalHints+1)
 
@@ -455,8 +496,9 @@ func (phase PickingPhase) Start(g *game) {
 	g.currentDrawer.UpdateLimiter()
 
 	// Send the drawer their word options
-	g.wordOptions = wordOptions(3)
-	g.currentDrawer.Send(message(WordOptions, g.wordOptions))
+	words, values := wordOptions(3)
+	g.wordOptions = words
+	g.currentDrawer.Send(message(WordOptions, values))
 
 	// Set the deadline to 1 second before the phase ends to allow
 	// some buffer for the countdown timer to display.
@@ -481,13 +523,13 @@ func (phase PickingPhase) Start(g *game) {
 
 func (phase PickingPhase) End(g *game) {
 	// If the player never choose a word, we pick one for them
-	if g.currentWord == "" {
+	if g.currentWord == nil {
 		// Select a random word from the options
 		randomIndex := rand.Intn(len(g.wordOptions) - 1)
-		g.currentWord = g.wordOptions[randomIndex]
+		g.currentWord = &g.wordOptions[randomIndex]
 
 		// Notify all players of the chosen word
-		g.room.broadcast(GameRoleAny, message(SelectWord, g.currentWord))
+		g.room.broadcast(GameRoleAny, message(SelectWord, g.currentWord.Value))
 	}
 }
 
@@ -580,7 +622,7 @@ func (phase PostDrawingPhase) End(g *game) {
 	// Clear state for the next round
 	g.strokes = emptyStrokeSlice()
 	g.hintedWord = ""
-	g.currentWord = ""
+	g.currentWord = nil
 
 	// Reset everyones role so we can pick a new drawing
 	// player in the next picking phase.
