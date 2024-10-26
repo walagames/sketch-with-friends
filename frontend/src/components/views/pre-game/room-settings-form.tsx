@@ -33,9 +33,8 @@ const RoomFormSchema = z.object({
 
 export function RoomSettingsForm() {
 	const dispatch = useDispatch();
-	const { playerLimit, drawingTimeAllowed, totalRounds } = useSelector(
-		(state: RootState) => state.room.settings
-	);
+	const { playerLimit, drawingTimeAllowed, totalRounds, wordDifficulty } =
+		useSelector((state: RootState) => state.room.settings);
 
 	const form = useForm<z.infer<typeof RoomFormSchema>>({
 		resolver: zodResolver(RoomFormSchema),
@@ -43,7 +42,7 @@ export function RoomSettingsForm() {
 			drawingTimeAllowed,
 			totalRounds,
 			playerLimit,
-			wordDifficulty: WordDifficulty.Easy,
+			wordDifficulty,
 		},
 	});
 
