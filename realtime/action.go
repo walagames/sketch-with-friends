@@ -307,6 +307,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			r.Settings.DrawingTimeAllowed = int(a.Payload.(map[string]interface{})["drawingTimeAllowed"].(float64))
 			r.Settings.PlayerLimit = int(a.Payload.(map[string]interface{})["playerLimit"].(float64))
 			r.Settings.TotalRounds = int(a.Payload.(map[string]interface{})["totalRounds"].(float64))
+			r.Settings.WordDifficulty = WordDifficulty(a.Payload.(map[string]interface{})["wordDifficulty"].(string))
 
 			// Inform clients of the room settings change
 			r.broadcast(GameRoleAny,

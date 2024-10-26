@@ -326,27 +326,39 @@ func loadWordBank() {
 	slog.Info("Loaded word bank", "word_count", len(wordBank))
 }
 
-// Returns unique, random words from the word bank.
-// The words are returned as a slice of DrawingWord structs and as a slice of strings.
-// We use this to give the drawer a selection of words to choose from.
-func wordOptions(n int) ([]DrawingWord, []string) {
+// Returns unique, random words from the word bank based on the specified difficulty.
+func wordOptions(n int, difficulty WordDifficulty) ([]DrawingWord, []string) {
+	// Create a slice to hold words of the specified difficulty
+	// If the difficulty is random, we use the entire word bank
+	filteredWords := wordBank
+
+	// If the difficulty is not random, we filter the word bank
+	if difficulty != WordDifficultyRandom {
+		filteredWords = make([]DrawingWord, 0)
+		for _, word := range wordBank {
+			if word.Difficulty == string(difficulty) {
+				filteredWords = append(filteredWords, word)
+			}
+		}
+	}
+
 	// Create a set to ensure uniqueness
 	wordSet := make(map[DrawingWord]struct{})
 
-	// Keep adding words until we have the required number
-	for len(wordSet) < n {
-		word := wordBank[rand.Intn(len(wordBank))]
+	// Keep adding words until we have the required number or run out of words
+	for len(wordSet) < n && len(wordSet) < len(filteredWords) {
+		word := filteredWords[rand.Intn(len(filteredWords))]
 		wordSet[word] = struct{}{}
 	}
 
 	// Convert set to slice
-	words := make([]DrawingWord, 0, n)
+	words := make([]DrawingWord, 0, len(wordSet))
 	for word := range wordSet {
 		words = append(words, word)
 	}
 
 	// Extract just the values so we can send them to the drawer
-	values := make([]string, 0, n)
+	values := make([]string, 0, len(words))
 	for _, word := range words {
 		values = append(values, word.Value)
 	}
@@ -496,7 +508,7 @@ func (phase PickingPhase) Start(g *game) {
 	g.currentDrawer.UpdateLimiter()
 
 	// Send the drawer their word options
-	words, values := wordOptions(3)
+	words, values := wordOptions(3, g.room.Settings.WordDifficulty)
 	g.wordOptions = words
 	g.currentDrawer.Send(message(WordOptions, values))
 

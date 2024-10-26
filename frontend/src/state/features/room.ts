@@ -27,10 +27,18 @@ export enum PlayerConnectionStatus {
 	Connected = "connected",
 }
 
+export enum WordDifficulty {
+	Easy = "easy",
+	Medium = "medium",
+	Hard = "hard",
+	Random = "random",
+}
+
 type RoomSettings = {
 	playerLimit: number;
 	drawingTimeAllowed: number;
 	totalRounds: number;
+	wordDifficulty: WordDifficulty;
 };
 
 export interface RoomState {
@@ -46,6 +54,7 @@ const initialState: RoomState = {
 		playerLimit: 6,
 		drawingTimeAllowed: 60,
 		totalRounds: 4,
+		wordDifficulty: WordDifficulty.Easy,
 	},
 	players: {},
 	stage: RoomStage.PreGame,

@@ -29,10 +29,20 @@ var (
 	ErrRoomEmpty         = errors.New("ErrRoomEmpty")
 )
 
+type WordDifficulty string
+
+const (
+	WordDifficultyEasy   WordDifficulty = "easy"
+	WordDifficultyMedium WordDifficulty = "medium"
+	WordDifficultyHard   WordDifficulty = "hard"
+	WordDifficultyRandom WordDifficulty = "random"
+)
+
 type RoomSettings struct {
-	PlayerLimit        int `json:"playerLimit"`
-	DrawingTimeAllowed int `json:"drawingTimeAllowed"`
-	TotalRounds        int `json:"totalRounds"`
+	PlayerLimit        int            `json:"playerLimit"`
+	DrawingTimeAllowed int            `json:"drawingTimeAllowed"`
+	TotalRounds        int            `json:"totalRounds"`
+	WordDifficulty     WordDifficulty `json:"wordDifficulty"`
 }
 
 type RoomStage string
@@ -91,6 +101,7 @@ func NewRoom(id string) Room {
 			PlayerLimit:        6,
 			DrawingTimeAllowed: 60,
 			TotalRounds:        3,
+			WordDifficulty:     WordDifficultyEasy,
 		},
 		Stage: PreGame,
 	}
