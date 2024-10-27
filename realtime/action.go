@@ -309,6 +309,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			r.Settings.TotalRounds = int(a.Payload.(map[string]interface{})["totalRounds"].(float64))
 			r.Settings.WordDifficulty = WordDifficulty(a.Payload.(map[string]interface{})["wordDifficulty"].(string))
 			r.Settings.WordBank = WordBank(a.Payload.(map[string]interface{})["wordBank"].(string))
+			r.Settings.GameMode = GameMode(a.Payload.(map[string]interface{})["gameMode"].(string))
 
 			// Inform clients of the room settings change
 			r.broadcast(GameRoleAny,

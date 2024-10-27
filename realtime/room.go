@@ -60,6 +60,7 @@ type RoomSettings struct {
 	WordDifficulty     WordDifficulty `json:"wordDifficulty"`
 	GameMode           GameMode       `json:"gameMode"`
 	WordBank           WordBank       `json:"wordBank"`
+	CustomWords        []string       `json:"customWords"`
 }
 
 type RoomStage string

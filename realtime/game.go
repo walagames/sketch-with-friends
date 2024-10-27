@@ -398,10 +398,6 @@ func (g *game) applyHint() {
 // Applies hints to the hinted word at a regular interval.
 // Launched as a goroutine in the Drawing phase.
 func (g *game) hintRoutine(ctx context.Context, phaseDuration time.Duration) {
-	g.hintedWord = strings.Repeat("*", len(g.currentWord.Value))
-	// Send the initial hinted word with all blanks
-	g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
-
 	// Will apply up to 60% of the word length as hints
 	totalHints := int(float64(len(g.currentWord.Value)) * 0.6)
 	// Apply hints at a regular interval so the last hint is applied with one interval left
@@ -561,16 +557,19 @@ func (phase DrawingPhase) Start(g *game) {
 	// some buffer for the countdown timer to display.
 	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
 
-	// We create a cancelable context for the hint routine
-	// so we can cancel it if the drawing phase ends prematurely.
-	ctx, cancel := context.WithCancel(context.Background())
-	g.cancelHintRoutine = cancel
-	// This will apply hints to the hinted word at a regular interval
-	go g.hintRoutine(ctx, phaseDuration)
-
-	// Only send the hinted word to the guessing players since the drawing
-	// player already has the actual word.
+	// Initialize the hinted word with all blanks for the guessing players
+	g.hintedWord = strings.Repeat("*", len(g.currentWord.Value))
 	g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
+
+	// If the game mode is not no hints, we start the hint routine
+	if g.room.Settings.GameMode != GameModeNoHints {
+		// We create a cancelable context for the hint routine
+		// so we can cancel it if the drawing phase ends prematurely.
+		ctx, cancel := context.WithCancel(context.Background())
+		g.cancelHintRoutine = cancel
+		// This will apply hints to the hinted word at a regular interval
+		go g.hintRoutine(ctx, phaseDuration)
+	}
 
 	// Inform players of the phase change
 	g.room.broadcast(GameRoleAny,
