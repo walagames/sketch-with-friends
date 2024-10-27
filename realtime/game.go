@@ -561,12 +561,13 @@ func (phase DrawingPhase) Start(g *game) {
 	g.hintedWord = strings.Repeat("*", len(g.currentWord.Value))
 	g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
 
+	// We create a cancelable context for the hint routine
+	// so we can cancel it if the drawing phase ends prematurely.
+	ctx, cancel := context.WithCancel(context.Background())
+	g.cancelHintRoutine = cancel
+
 	// If the game mode is not no hints, we start the hint routine
 	if g.room.Settings.GameMode != GameModeNoHints {
-		// We create a cancelable context for the hint routine
-		// so we can cancel it if the drawing phase ends prematurely.
-		ctx, cancel := context.WithCancel(context.Background())
-		g.cancelHintRoutine = cancel
 		// This will apply hints to the hinted word at a regular interval
 		go g.hintRoutine(ctx, phaseDuration)
 	}
