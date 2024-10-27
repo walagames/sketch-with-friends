@@ -1,13 +1,11 @@
 import { PlayerCards } from "./player-cards";
 import { useDispatch } from "react-redux";
-import { copyRoomLink } from "@/lib/realtime";
+import { copyInviteLink } from "@/lib/realtime";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { useState } from "react";
 import {
-	ClockIcon,
 	LinkIcon,
 	SettingsIcon,
-	Tally5Icon,
 	UsersIcon,
 } from "lucide-react";
 import { useSelector } from "react-redux";
@@ -29,9 +27,9 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 					<RaisedButton
 						size="lg"
 						className="group w-40"
-						onClick={() => copyRoomLink(roomId)}
+						onClick={() => copyInviteLink(roomId)}
 					>
-						<span className="group-hover:block hidden">Copy room link</span>
+						<span className="group-hover:block hidden">Copy invite link</span>
 						<span className="flex items-center gap-2 group-hover:hidden text-lg">
 							<LinkIcon className="w-5 h-5 mb-1" />
 							{roomId}
@@ -42,14 +40,14 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 					<UsersIcon className="w-5 h-5 mb-1" />
 					{Object.keys(players).length}/{settings.playerLimit}
 				</span>
-				<span className="font-bold text-xl flex items-center gap-2">
+				{/* <span className="font-bold text-xl flex items-center gap-2">
 					<Tally5Icon className="w-5 h-5 mb-1" />
 					{settings.totalRounds}
 				</span>
 				<span className="font-bold text-xl flex items-center gap-1.5">
 					<ClockIcon className="w-5 h-5 mb-1" />
 					{settings.drawingTimeAllowed}s
-				</span>
+				</span> */}
 				{isHost && (
 					<div className="ml-auto">
 						<RaisedButton
