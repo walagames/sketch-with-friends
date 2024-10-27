@@ -218,6 +218,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 			message(SelectWord, r.game.hintedWord),
 			message(SetRound, r.game.currentRound),
 			message(SetGuesses, r.game.guesses),
+			message(PointsAwarded, r.game.pointsAwarded),
 		)
 	}
 

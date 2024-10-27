@@ -7,6 +7,7 @@ import { generateAvatar } from "@/lib/avatar";
 import { CrownIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedNumber } from "@/components/ui/animated-number";
+import { motion } from "framer-motion";
 // import { RaisedButton } from "@/components/raised-button";
 export function PostDrawingView() {
 	const deadline = useSelector(
@@ -63,7 +64,7 @@ function Podium({ players }: { players: Player[] }) {
 	const thirdPlace = players[2];
 
 	return (
-		<div className="grid grid-cols-3 gap-10 items-end max-w-lg w-full">
+		<div className="grid grid-cols-3 gap-10 items-end max-w-xl w-full">
 			<PodiumPlace player={secondPlace} place={2} />
 			<PodiumPlace player={firstPlace} place={1} />
 			<PodiumPlace player={thirdPlace} place={3} />
@@ -91,6 +92,11 @@ function LeaderboardPlace({
 	const { name, score, avatarSeed } = player;
 	const avatarSvg = generateAvatar(avatarSeed);
 
+	const points =
+		useSelector(
+			(state: RootState) => state.game.pointsAwarded[player.id]
+		) ?? 0;
+
 	return (
 		<div className="flex gap-6 w-full items-center">
 			<p className="text-lg font-bold text-foreground">{index + 4}th</p>
@@ -99,7 +105,14 @@ function LeaderboardPlace({
 				src={avatarSvg}
 			/>
 			<p className="text-xl font-bold text-foreground">{name}</p>
-			<p className="text-lg font-medium text-foreground ml-auto">{score} pts</p>
+			<div className="relative text-lg font-medium text-foreground ml-auto">
+				{points > 0 && (
+					<p className="absolute -top-1.5 right-24 bg-white rounded-lg px-3 py-1.5">
+						+{points}
+					</p>
+				)}
+				<AnimatedNumber value={score} previous={score - points} /> pts
+			</div>
 		</div>
 	);
 }
@@ -122,22 +135,44 @@ function PodiumPlace({
 	const avatarSvg = generateAvatar(avatarSeed);
 
 	const podiumColor = {
-		1: { color: "bg-primary", height: "h-36", placeText: "1st" },
-		2: { color: "bg-sky-500", height: "h-28", placeText: "2nd" },
-		3: { color: "bg-red-500", height: "h-20", placeText: "3rd" },
+		1: { color: "bg-primary", height: 180, placeText: "1st", delay: 0.4 },
+		2: { color: "bg-sky-500", height: 140, placeText: "2nd", delay: 0.3 },
+		3: { color: "bg-red-500", height: 120, placeText: "3rd", delay: 0.2 },
 	};
 
-	const { color, height, placeText } =
+	const { color, height, placeText, delay } =
 		podiumColor[place as keyof typeof podiumColor];
+
+	const springConfig = {
+		type: "spring",
+		stiffness: 100,
+		damping: 13,
+	};
 
 	return (
 		<div
 			className={cn(
-				"flex flex-col gap-2 items-center",
+				"flex flex-col gap-2 items-center justify-end",
 				place === 1 && "col-start-2"
 			)}
+			style={{
+				height: 380,
+			}}
 		>
-			<div className="relative">
+			<motion.div
+				layout
+				className="relative"
+				initial={{
+					opacity: 0,
+				}}
+				animate={{
+					opacity: 1,
+				}}
+				transition={{
+					delay: delay + 0.2,
+					...springConfig,
+				}}
+			>
 				{place === 1 && (
 					<CrownIcon className="w-14 h-14 text-yellow-400 absolute -top-9 -left-6 -rotate-[22deg] z-10" />
 				)}
@@ -145,21 +180,40 @@ function PodiumPlace({
 					className="rounded-lg aspect-square relative border-4 w-20"
 					src={avatarSvg}
 				/>
-			</div>
-			<p className="text-xl font-bold text-foreground">{name}</p>
-			<div
+			</motion.div>
+			<motion.p layout className="text-xl font-bold text-foreground">{name}</motion.p>
+			<motion.div
 				className={cn(
 					"flex flex-col items-center p-4 rounded-lg w-full shadow-accent",
-					color,
-					height
+					color
 				)}
+				initial={{ opacity: 0, height: 0 }}
+				layout
+				animate={{ opacity: 1, height }}
+				transition={{ delay: delay, ...springConfig }}
 			>
-				<p className="font-medium text-background text-lg">
+				<p className="font-medium text-background text-xl">
 					<AnimatedNumber delay={450} previous={score - points} value={score} />{" "}
 					pts
 				</p>
-			</div>
-			<p className="text-2xl font-bold text-foreground py-2">{placeText}</p>
+				{points > 0 && <AwardedPointsCard points={points} />}
+			</motion.div>
+			<motion.p className="text-2xl font-bold text-foreground py-2">{placeText}</motion.p>
 		</div>
+	);
+}
+
+
+function AwardedPointsCard({ points }: { points: number }) {
+	return (
+		<motion.div 
+			className="relative mt-2.5 bg-white border border-gray-300 rounded-lg px-3 py-1.5 shadow-lg"
+			initial={{ opacity: 0, y: -6 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{ delay: 0.7, duration: 0.2, ease: "easeInOut" }}
+		>
+			<div className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[10px] border-b-white" />
+			<p className="text-md">+ {points}</p>
+		</motion.div>
 	);
 }

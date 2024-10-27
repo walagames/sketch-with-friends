@@ -18,7 +18,7 @@ var (
 	PickingPhaseDuration = time.Second * 15
 
 	// Duration after drawing for score updates and displaying the word
-	PostDrawingPhaseDuration = time.Second * 30
+	PostDrawingPhaseDuration = time.Second * 5
 )
 
 // DrawingWord represents a word that the drawer can choose from.
