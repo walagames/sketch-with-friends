@@ -51,7 +51,7 @@ type RoomSettings = {
 	totalRounds: number;
 	wordDifficulty: WordDifficulty;
 	wordBank: WordBank;
-	customWords?: string; // Add this line
+	customWords?: string;
 	gameMode: GameMode;
 };
 

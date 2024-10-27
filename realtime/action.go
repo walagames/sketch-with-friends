@@ -297,6 +297,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		GameRoleRequired: GameRoleAny,
 		PayloadType:      map[string]interface{}{},
 		validator: func(r *room) error {
+			// TODO: validate settings inputs
 			if r.Stage != PreGame {
 				return fmt.Errorf("can only change room settings in pre game stage")
 			}
@@ -310,6 +311,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			r.Settings.WordDifficulty = WordDifficulty(a.Payload.(map[string]interface{})["wordDifficulty"].(string))
 			r.Settings.WordBank = WordBank(a.Payload.(map[string]interface{})["wordBank"].(string))
 			r.Settings.GameMode = GameMode(a.Payload.(map[string]interface{})["gameMode"].(string))
+			r.Settings.CustomWords = a.Payload.(map[string]interface{})["customWords"].(string)
 
 			// Inform clients of the room settings change
 			r.broadcast(GameRoleAny,

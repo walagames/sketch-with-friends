@@ -327,16 +327,30 @@ func loadWordBank() {
 }
 
 // Returns unique, random words from the word bank based on the specified difficulty.
-func wordOptions(n int, difficulty WordDifficulty) ([]DrawingWord, []string) {
-	// Create a slice to hold words of the specified difficulty
-	// If the difficulty is random, we use the entire word bank
+func (g *game) randomWordOptions(n int) ([]DrawingWord, []string) {
 	filteredWords := wordBank
+	customWords := make([]DrawingWord, 0)
 
-	// If the difficulty is not random, we filter the word bank
-	if difficulty != WordDifficultyRandom {
+	// Convert the string of custom words into a slice of DrawingWords
+	for _, word := range strings.Split(g.room.Settings.CustomWords, ",") {
+		customWords = append(customWords, DrawingWord{Value: word, Difficulty: "custom", Category: "custom"})
+	}
+
+	// If the word bank is custom only, we use the custom words if there are any
+	if g.room.Settings.WordBank == WordBankCustom && len(customWords) > 0 {
+		filteredWords = customWords
+	} 
+
+	// If the word bank is mixed, we use the default word bank + custom words
+	if g.room.Settings.WordBank == WordBankMixed {
+		filteredWords = append(filteredWords, wordBank...)
+	}
+
+	// If the difficulty is not random or custom only, we filter the word bank based on the difficulty
+	if g.room.Settings.WordDifficulty != WordDifficultyRandom && g.room.Settings.WordBank != WordBankCustom {
 		filteredWords = make([]DrawingWord, 0)
 		for _, word := range wordBank {
-			if word.Difficulty == string(difficulty) {
+			if word.Difficulty == string(g.room.Settings.WordDifficulty) || word.Difficulty == "custom" {
 				filteredWords = append(filteredWords, word)
 			}
 		}
@@ -504,7 +518,7 @@ func (phase PickingPhase) Start(g *game) {
 	g.currentDrawer.UpdateLimiter()
 
 	// Send the drawer their word options
-	words, values := wordOptions(3, g.room.Settings.WordDifficulty)
+	words, values := g.randomWordOptions(3)
 	g.wordOptions = words
 	g.currentDrawer.Send(message(WordOptions, values))
 

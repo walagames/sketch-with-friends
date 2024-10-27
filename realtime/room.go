@@ -60,7 +60,7 @@ type RoomSettings struct {
 	WordDifficulty     WordDifficulty `json:"wordDifficulty"`
 	GameMode           GameMode       `json:"gameMode"`
 	WordBank           WordBank       `json:"wordBank"`
-	CustomWords        []string       `json:"customWords"`
+	CustomWords        string         `json:"customWords"`
 }
 
 type RoomStage string
@@ -122,6 +122,7 @@ func NewRoom(id string) Room {
 			WordDifficulty:     WordDifficultyEasy,
 			GameMode:           GameModeClassic,
 			WordBank:           WordBankMixed,
+			CustomWords:        "",
 		},
 		Stage: PreGame,
 	}

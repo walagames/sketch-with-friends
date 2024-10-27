@@ -38,23 +38,7 @@ const RoomFormSchema = z.object({
 	wordDifficulty: z.nativeEnum(WordDifficulty),
 	wordBank: z.nativeEnum(WordBank),
 	gameMode: z.nativeEnum(GameMode),
-	customWords: z
-		.string()
-		.optional()
-		.refine(
-			(val) => {
-				if (!val) return true; // Allow empty string
-				const words = val.split(",").map((word) => word.trim());
-				return words.every(
-					(word) =>
-						word.length >= 2 && word.length <= 20 && /^[a-zA-Z\s]+$/.test(word)
-				);
-			},
-			{
-				message:
-					"Custom words must be comma-separated, 2-20 characters long, and contain only letters and spaces.",
-			}
-		),
+	customWords: z.string(),
 });
 
 export function RoomSettingsForm() {
@@ -66,6 +50,7 @@ export function RoomSettingsForm() {
 		wordDifficulty,
 		wordBank,
 		gameMode,
+		customWords,
 	} = useSelector((state: RootState) => state.room.settings);
 
 	const form = useForm<z.infer<typeof RoomFormSchema>>({
@@ -77,7 +62,7 @@ export function RoomSettingsForm() {
 			wordDifficulty,
 			wordBank,
 			gameMode,
-			customWords: "",
+			customWords,
 		},
 	});
 
@@ -287,6 +272,9 @@ export function RoomSettingsForm() {
 										rows={5}
 										{...field}
 										spellCheck={false}
+										onChange={(e) => {
+											field.onChange(e.target.value.replaceAll(" ", ""));
+										}}
 									/>
 								</FormControl>
 								<FormDescription>
