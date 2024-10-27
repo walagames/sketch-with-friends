@@ -1,14 +1,16 @@
+import React, { forwardRef } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-export function RaisedInput({
-	placeholder,
-	className,
-	...props
-}: React.InputHTMLAttributes<HTMLInputElement>) {
+
+export const RaisedInput = forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement>
+>(({ placeholder, className, ...props }, ref) => {
 	return (
 		<div className="bg-secondary-foreground rounded-lg w-full">
 			<Input
 				{...props}
+				ref={ref}
 				autoComplete="off"
 				placeholder={placeholder}
 				className={cn(
@@ -18,4 +20,6 @@ export function RaisedInput({
 			/>
 		</div>
 	);
-}
+});
+
+RaisedInput.displayName = "RaisedInput";
