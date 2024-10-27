@@ -25,6 +25,9 @@
 .shadow-accent-sm {
 	box-shadow: -0.2rem 0.2rem 0px #333333;
 }
+.shadow-accent-md {
+	box-shadow: -0.3rem 0.3rem 0px #333333;
+}
 
 .custom-pointers .react-colorful__saturation-pointer {
 	width: 20px;

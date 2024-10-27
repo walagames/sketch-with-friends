@@ -34,11 +34,25 @@ export enum WordDifficulty {
 	Random = "random",
 }
 
+export enum WordBank {
+	Default = "default",
+	Custom = "custom",
+	Mixed = "mixed",
+}
+
+export enum GameMode {
+	Classic = "classic",
+	NoHints = "noHints",
+}
+
 type RoomSettings = {
 	playerLimit: number;
 	drawingTimeAllowed: number;
 	totalRounds: number;
 	wordDifficulty: WordDifficulty;
+	wordBank: WordBank;
+	customWords?: string; // Add this line
+	gameMode: GameMode;
 };
 
 export interface RoomState {
@@ -55,6 +69,9 @@ const initialState: RoomState = {
 		drawingTimeAllowed: 60,
 		totalRounds: 4,
 		wordDifficulty: WordDifficulty.Easy,
+		wordBank: WordBank.Mixed,
+		customWords: "",
+		gameMode: GameMode.Classic,
 	},
 	players: {},
 	stage: RoomStage.PreGame,
@@ -104,5 +121,6 @@ export const roomSlice = createSlice({
 
 export const { changeStage, setPlayers, playerLeft, changeRoomSettings } =
 	roomSlice.actions;
+
 
 export default roomSlice.reducer;

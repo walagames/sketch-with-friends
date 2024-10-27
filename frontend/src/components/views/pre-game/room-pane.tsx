@@ -4,7 +4,6 @@ import { copyRoomLink } from "@/lib/realtime";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { useState } from "react";
 import {
-	BrainIcon,
 	ClockIcon,
 	LinkIcon,
 	SettingsIcon,
@@ -51,10 +50,6 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 					<ClockIcon className="w-5 h-5 mb-1" />
 					{settings.drawingTimeAllowed}s
 				</span>
-				<span className="font-bold text-xl flex items-center gap-1.5 capitalize">
-					<BrainIcon className="w-5 h-5 mb-1" />
-					{settings.wordDifficulty}
-				</span>
 				{isHost && (
 					<div className="ml-auto">
 						<RaisedButton
@@ -67,7 +62,7 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 					</div>
 				)}
 			</div>
-			<div className="w-full aspect-[4/3] bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex items-start justify-center py-8 px-6">
+			<div className="w-full aspect-[4/3] bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex items-start justify-center py-6 px-6">
 				{showSettings ? (
 					<RoomSettingsForm />
 				) : (

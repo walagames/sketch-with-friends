@@ -38,11 +38,28 @@ const (
 	WordDifficultyRandom WordDifficulty = "random"
 )
 
+type WordBank string
+
+const (
+	WordBankDefault WordBank = "default"
+	WordBankCustom  WordBank = "custom"
+	WordBankMixed   WordBank = "mixed"
+)
+
+type GameMode string
+
+const (
+	GameModeClassic GameMode = "classic"
+	GameModeNoHints GameMode = "noHints"
+)
+
 type RoomSettings struct {
 	PlayerLimit        int            `json:"playerLimit"`
 	DrawingTimeAllowed int            `json:"drawingTimeAllowed"`
 	TotalRounds        int            `json:"totalRounds"`
 	WordDifficulty     WordDifficulty `json:"wordDifficulty"`
+	GameMode           GameMode       `json:"gameMode"`
+	WordBank           WordBank       `json:"wordBank"`
 }
 
 type RoomStage string
@@ -102,6 +119,8 @@ func NewRoom(id string) Room {
 			DrawingTimeAllowed: 60,
 			TotalRounds:        3,
 			WordDifficulty:     WordDifficultyEasy,
+			GameMode:           GameModeClassic,
+			WordBank:           WordBankMixed,
 		},
 		Stage: PreGame,
 	}
