@@ -32,16 +32,17 @@ const (
 	SetStrokes     ActionType = "canvas/setStrokes"
 
 	// Game actions
-	SetWord      ActionType = "game/setWord"
-	SubmitGuess  ActionType = "game/submitGuess"
-	WordOptions  ActionType = "game/wordOptions"
-	StartGame    ActionType = "game/startGame"
-	GuessResult  ActionType = "game/guessResult"
-	ClearGuesses ActionType = "game/clearGuesses"
-	SetGuesses   ActionType = "game/setGuesses"
-	ChangePhase  ActionType = "game/changePhase"
-	SelectWord   ActionType = "game/selectWord"
-	SetRound     ActionType = "game/setRound"
+	SetWord       ActionType = "game/setWord"
+	SubmitGuess   ActionType = "game/submitGuess"
+	WordOptions   ActionType = "game/wordOptions"
+	StartGame     ActionType = "game/startGame"
+	GuessResult   ActionType = "game/guessResult"
+	ClearGuesses  ActionType = "game/clearGuesses"
+	SetGuesses    ActionType = "game/setGuesses"
+	ChangePhase   ActionType = "game/changePhase"
+	SelectWord    ActionType = "game/selectWord"
+	SetRound      ActionType = "game/setRound"
+	PointsAwarded ActionType = "game/pointsAwarded"
 
 	// Room actions
 	InitializeRoom     ActionType = "room/initializeRoom"

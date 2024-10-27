@@ -18,7 +18,7 @@ var (
 	PickingPhaseDuration = time.Second * 15
 
 	// Duration after drawing for score updates and displaying the word
-	PostDrawingPhaseDuration = time.Second * 5
+	PostDrawingPhaseDuration = time.Second * 30
 )
 
 // DrawingWord represents a word that the drawer can choose from.
@@ -66,6 +66,7 @@ type game struct {
 	strokes         []Stroke
 	guesses         []guess
 	correctGuessers map[uuid.UUID]bool
+	pointsAwarded   map[uuid.UUID]int
 
 	// Time management
 	currentPhaseDeadline time.Time
@@ -87,6 +88,7 @@ func NewGame(initialPhase Phase, r *room) *game {
 		isCountdownActive: false,
 		guesses:           make([]guess, 0),
 		correctGuessers:   make(map[uuid.UUID]bool),
+		pointsAwarded:     make(map[uuid.UUID]int),
 		isFirstPicking:    true,
 		cancelHintRoutine: nil,
 	}
@@ -135,10 +137,11 @@ func (g *game) handlePlayerLeave(player *player) {
 	// 2. Useful for scenarios like kicking players for offensive language
 	// Note: This is a design choice that may have future benefits.
 	if g.currentPhase.Name() == Drawing {
-		// Remove the player from the correct guessers map.
+		// Remove the player from the correct guessers map and points awarded map.
 		// This is necessary because the guessers map is used to determine if all
 		// guessing players have guessed correctly.
 		delete(g.correctGuessers, player.ID)
+		delete(g.pointsAwarded, player.ID)
 
 		// Filter out the player's guesses
 		newGuesses := make([]guess, 0)
@@ -251,8 +254,11 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessText string) {
 		// Award points to the guesser for getting it right
 		pointsEarned := g.calculatePoints(400)
 		g.room.Players[playerID].Score += pointsEarned
+		g.pointsAwarded[playerID] = pointsEarned
 		// Award points to the drawer for making a good drawing
-		g.currentDrawer.Score += g.calculatePoints(100)
+		drawerPoints := g.calculatePoints(100)
+		g.currentDrawer.Score += drawerPoints
+		g.pointsAwarded[g.currentDrawer.ID] = drawerPoints
 
 		result = guess{
 			ID:            uuid.New(),
@@ -339,21 +345,22 @@ func (g *game) randomWordOptions(n int) ([]DrawingWord, []string) {
 	// If the word bank is custom only, we use the custom words if there are any
 	if g.room.Settings.WordBank == WordBankCustom && len(customWords) > 0 {
 		filteredWords = customWords
-	} 
+	}
 
 	// If the word bank is mixed, we use the default word bank + custom words
 	if g.room.Settings.WordBank == WordBankMixed {
-		filteredWords = append(filteredWords, wordBank...)
+		filteredWords = append(filteredWords, customWords...)
 	}
 
 	// If the difficulty is not random or custom only, we filter the word bank based on the difficulty
 	if g.room.Settings.WordDifficulty != WordDifficultyRandom && g.room.Settings.WordBank != WordBankCustom {
-		filteredWords = make([]DrawingWord, 0)
+		wordsByDifficulty := make([]DrawingWord, 0)
 		for _, word := range wordBank {
 			if word.Difficulty == string(g.room.Settings.WordDifficulty) || word.Difficulty == "custom" {
-				filteredWords = append(filteredWords, word)
+				wordsByDifficulty = append(wordsByDifficulty, word)
 			}
 		}
+		filteredWords = wordsByDifficulty
 	}
 
 	// Create a set to ensure uniqueness
@@ -603,7 +610,10 @@ func (phase DrawingPhase) Start(g *game) {
 
 func (phase DrawingPhase) End(g *game) {
 	g.clearGuesses()
-	g.room.broadcast(GameRoleAny, message(SetPlayers, g.room.Players))
+	g.room.broadcast(GameRoleAny,
+		message(SetPlayers, g.room.Players),
+		message(SelectWord, g.currentWord.Value),
+	)
 }
 
 func (phase DrawingPhase) Next(g *game) {
@@ -630,15 +640,17 @@ func (phase PostDrawingPhase) Start(g *game) {
 	// some buffer for the countdown timer to display.
 	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
 
-	// Inform players of the phase change
+	// Inform players of the phase change and points awarded
 	g.room.broadcast(GameRoleAny,
+		message(PointsAwarded, g.pointsAwarded),
 		message(ChangePhase,
 			PhaseChangeMessage{
 				Phase:        g.currentPhase.Name(),
 				Deadline:     g.currentPhaseDeadline,
 				IsLastPhase:  isLastPhase,
 				IsFirstPhase: false,
-			}))
+			}),
+	)
 
 	// Start the timer
 	g.room.timer.Reset(phaseDuration)
@@ -647,6 +659,7 @@ func (phase PostDrawingPhase) Start(g *game) {
 func (phase PostDrawingPhase) End(g *game) {
 	// Clear state for the next round
 	g.strokes = emptyStrokeSlice()
+	g.pointsAwarded = make(map[uuid.UUID]int)
 	g.hintedWord = ""
 	g.currentWord = nil
 

@@ -6,11 +6,15 @@ import { Player } from "@/state/features/room";
 import { generateAvatar } from "@/lib/avatar";
 import { CrownIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatNumber } from "@/lib/format";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 // import { RaisedButton } from "@/components/raised-button";
 export function PostDrawingView() {
 	const deadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
 	);
+
+	const word = useSelector((state: RootState) => state.game.selectedWord);
 
 	const players = useSelector((state: RootState) => state.room.players);
 	const sortedPlayers = Object.values(players).sort(
@@ -22,10 +26,13 @@ export function PostDrawingView() {
 	// const dispatch = useDispatch();
 
 	return (
-		<HillScene>
+		<HillScene className="">
 			<div className="absolute top-10 right-10">
 				<Timer endTime={deadline} />
 			</div>
+			<h1 className="text-2xl py-8">
+				The word was: <span className="text-3xl font-bold">{word}</span>
+			</h1>
 			<Podium players={sortedPlayers.slice(0, 3)} />
 			{sortedPlayers.length > 3 && (
 				<Leaderboard players={sortedPlayers.slice(3)} />
@@ -105,6 +112,11 @@ function PodiumPlace({
 	player: Player | undefined;
 	place: number;
 }) {
+	const points =
+		useSelector(
+			(state: RootState) => state.game.pointsAwarded[player?.id || ""]
+		) ?? 0;
+
 	if (!player) return null;
 
 	const { name, score, avatarSeed } = player;
@@ -144,17 +156,11 @@ function PodiumPlace({
 				)}
 			>
 				<p className="font-medium text-background text-lg">
-					{formatNumber(score)} pts
+					<AnimatedNumber delay={450} previous={score - points} value={score} />{" "}
+					pts
 				</p>
 			</div>
 			<p className="text-2xl font-bold text-foreground py-2">{placeText}</p>
 		</div>
 	);
-}
-
-function formatNumber(num: number): string {
-	return new Intl.NumberFormat("en-US", {
-		minimumFractionDigits: 0,
-		maximumFractionDigits: 0,
-	}).format(num);
 }
