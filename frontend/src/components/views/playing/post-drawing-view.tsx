@@ -30,7 +30,7 @@ export function PostDrawingView() {
 			<div className="absolute top-10 right-10">
 				<Timer endTime={deadline} />
 			</div>
-			<h1 className="text-2xl py-8">
+			<h1 className="text-2xl py-2">
 				The word was: <span className="text-3xl font-bold">{word}</span>
 			</h1>
 			<Podium players={sortedPlayers.slice(0, 3)} />
@@ -74,7 +74,7 @@ function Podium({ players }: { players: Player[] }) {
 
 function Leaderboard({ players }: { players: Player[] }) {
 	return (
-		<div className="w-full max-w-xl overflow-x-hidden scrollbar-hide max-h-60 bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex flex-col items-center justify-start px-10 py-6 gap-3 overflow-y-auto">
+		<div className="w-full max-w-xl overflow-x-hidden scrollbar-hide max-h-56 bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex flex-col items-center justify-start px-10 py-6 gap-3 overflow-y-auto">
 			{players.map((player, index) => (
 				<LeaderboardPlace key={player.id} player={player} index={index} />
 			))}
