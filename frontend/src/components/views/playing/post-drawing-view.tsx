@@ -6,7 +6,6 @@ import { Player } from "@/state/features/room";
 import { generateAvatar } from "@/lib/avatar";
 import { CrownIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatNumber } from "@/lib/format";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 // import { RaisedButton } from "@/components/raised-button";
 export function PostDrawingView() {
