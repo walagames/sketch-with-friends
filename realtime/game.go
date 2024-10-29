@@ -504,8 +504,10 @@ func (phase PickingPhase) Name() PhaseName {
 }
 
 func (phase PickingPhase) Start(g *game) {
+	g.currentDrawer = g.dequeueDrawingPlayer()
+
 	// If the queue is empty, we're at the end of a round
-	if len(g.drawingQueue) == 0 {
+	if g.currentDrawer == nil {
 		// It's the last round, end the game
 		if g.currentRound >= g.room.Settings.TotalRounds {
 			g.room.Stage = PreGame
@@ -517,12 +519,6 @@ func (phase PickingPhase) Start(g *game) {
 		g.currentRound++
 		g.fillDrawingQueue()
 		g.currentDrawer = g.dequeueDrawingPlayer()
-	}
-
-	// The player disconnected in the middle of the phase, try again
-	if g.currentDrawer == nil {
-		g.setPhase(&PickingPhase{})
-		return
 	}
 
 	// Update the drawer's role and limiter
