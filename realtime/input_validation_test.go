@@ -203,3 +203,57 @@ func TestSanitizeGuess(t *testing.T) {
 		})
 	}
 }
+
+func TestFilterDuplicateWords(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    []string
+		expected []string
+	}{
+		{
+			name:     "empty slice",
+			input:    []string{},
+			expected: []string{},
+		},
+		{
+			name:     "no duplicates",
+			input:    []string{"hello", "world", "test"},
+			expected: []string{"hello", "world", "test"},
+		},
+		{
+			name:     "with duplicates",
+			input:    []string{"hello", "world", "hello", "test", "world"},
+			expected: []string{"hello", "world", "test"},
+		},
+		{
+			name:     "all duplicates",
+			input:    []string{"test", "test", "test"},
+			expected: []string{"test"},
+		},
+		{
+			name:     "case sensitive duplicates",
+			input:    []string{"hello", "Hello", "HELLO"},
+			expected: []string{"hello", "Hello", "HELLO"},
+		},
+		{
+			name:     "with empty strings",
+			input:    []string{"", "test", ""},
+			expected: []string{"", "test"},
+		},
+		{
+			name:     "with spaces",
+			input:    []string{"hello world", "hello world", "test"},
+			expected: []string{"hello world", "test"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := filterDuplicateWords(tt.input)
+			if !reflect.DeepEqual(got, tt.expected) {
+				t.Errorf("filterDuplicateWords() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}
+

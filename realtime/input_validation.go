@@ -45,6 +45,20 @@ func filterInvalidWords(words []string) []string {
 	return result
 }
 
+func filterDuplicateWords(words []string) []string {
+	seen := make(map[string]bool)
+	result := make([]string, 0)
+
+	for _, word := range words {
+		if !seen[word] {
+			seen[word] = true
+			result = append(result, word)
+		}
+	}
+
+	return result
+}
+
 func sanitizeGuess(guess string) string {
 	return strings.TrimSpace(strings.ToLower(guess))
 }
