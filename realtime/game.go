@@ -7,7 +7,6 @@ import (
 	"log/slog"
 	"math/rand"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -61,6 +60,7 @@ type game struct {
 
 	// Word and drawing
 	wordOptions     []DrawingWord
+	customWords     []DrawingWord
 	currentWord     *DrawingWord
 	hintedWord      string
 	strokes         []Stroke
@@ -75,12 +75,18 @@ type game struct {
 }
 
 func NewGame(initialPhase Phase, r *room) *game {
+	customWords := make([]DrawingWord, 0)
+	for _, word := range r.Settings.CustomWords {
+		customWords = append(customWords, DrawingWord{Value: word, Difficulty: "custom", Category: "custom"})
+	}
+
 	return &game{
 		room:              r,
 		currentPhase:      initialPhase,
 		currentRound:      1,
 		drawingQueue:      make([]uuid.UUID, 0),
 		wordOptions:       make([]DrawingWord, 0),
+		customWords:       customWords,
 		strokes:           make([]Stroke, 0),
 		currentDrawer:     nil,
 		currentWord:       nil,
@@ -243,14 +249,11 @@ func (g *game) calculatePoints(pointsPerGuess int) int {
 }
 
 // Judges a guess and updates the game state accordingly.
-func (g *game) judgeGuess(playerID uuid.UUID, guessText string) {
-	// Convert both guess and current word to lowercase for case-insensitive comparison
-	lowerGuess := strings.ToLower(guessText)
-	lowerActualWord := strings.ToLower(g.currentWord.Value)
+func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 	var result guess
 
 	// Check if the guess is correct
-	if lowerGuess == lowerActualWord {
+	if guessValue == g.currentWord.Value {
 		// Award points to the guesser for getting it right
 		pointsEarned := g.calculatePoints(400)
 		g.room.Players[playerID].Score += pointsEarned
@@ -274,8 +277,8 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessText string) {
 		result = guess{
 			ID:       uuid.New(),
 			PlayerID: playerID,
-			Guess:    guessText,
-			IsClose:  g.isGuessClose(lowerGuess),
+			Guess:    guessValue,
+			IsClose:  g.isGuessClose(guessValue),
 		}
 	}
 
@@ -337,14 +340,9 @@ func (g *game) randomWordOptions(n int) ([]DrawingWord, []string) {
 	filteredWords := wordBank
 	customWords := make([]DrawingWord, 0)
 
-	// Convert the string of custom words into a slice of DrawingWords
-	for _, word := range strings.Split(g.room.Settings.CustomWords, ",") {
-		customWords = append(customWords, DrawingWord{Value: word, Difficulty: "custom", Category: "custom"})
-	}
-
 	// If the word bank is custom only, we use the custom words if there are any
-	if g.room.Settings.WordBank == WordBankCustom && len(customWords) > 0 {
-		filteredWords = customWords
+	if g.room.Settings.WordBank == WordBankCustom && len(g.customWords) > 0 {
+		filteredWords = g.customWords
 	}
 
 	// If the word bank is mixed, we use the default word bank + custom words
@@ -579,8 +577,17 @@ func (phase DrawingPhase) Start(g *game) {
 	// some buffer for the countdown timer to display.
 	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
 
-	// Initialize the hinted word with all blanks for the guessing players
-	g.hintedWord = strings.Repeat("*", len(g.currentWord.Value))
+	// Initialize the hinted word with blanks but preserve spaces
+	wordRunes := []rune(g.currentWord.Value)
+	hintRunes := make([]rune, len(wordRunes))
+	for i, r := range wordRunes {
+		if r == ' ' {
+			hintRunes[i] = ' '
+		} else {
+			hintRunes[i] = '*'
+		}
+	}
+	g.hintedWord = string(hintRunes)
 	g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
 
 	// We create a cancelable context for the hint routine

@@ -6,6 +6,7 @@ import { getPickingPlayer } from "@/lib/player";
 import { Guesses } from "./guesses";
 import { Timer } from "@/components/ui/timer";
 import { HillScene } from "@/components/scenes/hill-scene";
+import { cn } from "@/lib/utils";
 
 export function DrawingGuesserView() {
 	const players = useSelector((state: RootState) => state.room.players);
@@ -45,7 +46,9 @@ function WordWithLetterBlanks({ word }: { word: string }) {
 	return (
 		<span className="text-3xl font-bold inline-flex gap-1 px-2">
 			{wordLetters.map((letter, index) => (
-				<span key={index}>{letter}</span>
+				<span key={index} className={cn(letter === " " && "px-1")}>
+					{letter}
+				</span>
 			))}
 		</span>
 	);
