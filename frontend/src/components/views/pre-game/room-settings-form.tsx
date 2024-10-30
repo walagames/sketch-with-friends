@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { BrainIcon, ClockIcon, Tally5Icon, UsersIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const RoomFormSchema = z.object({
 	drawingTimeAllowed: z.number().min(15).max(180),
@@ -53,6 +54,8 @@ export function RoomSettingsForm() {
 		customWords,
 	} = useSelector((state: RootState) => state.room.settings);
 
+	const [isEditing, setIsEditing] = useState(false);
+
 	const form = useForm<z.infer<typeof RoomFormSchema>>({
 		resolver: zodResolver(RoomFormSchema),
 		defaultValues: {
@@ -62,13 +65,20 @@ export function RoomSettingsForm() {
 			wordDifficulty,
 			wordBank,
 			gameMode,
-			customWords,
+			customWords: customWords.join(","),
 		},
 	});
 
+	useEffect(() => {
+		if (!isEditing) {
+			form.setValue("customWords", customWords.join(","));
+		}
+	}, [customWords, isEditing]);
+
 	const handleChange = useDebouncedCallback(() => {
 		const values = form.getValues();
-		dispatch(changeRoomSettings(values));
+		const customWords = values.customWords.split(",");
+		dispatch(changeRoomSettings({ ...values, customWords }));
 	}, 300);
 
 	return (
@@ -268,13 +278,12 @@ export function RoomSettingsForm() {
 							<FormItem>
 								<FormLabel>Custom Words</FormLabel>
 								<FormControl>
-									<Textarea
-										rows={5}
-										{...field}
+									<Textarea 
+										rows={5} 
+										{...field} 
 										spellCheck={false}
-										onChange={(e) => {
-											field.onChange(e.target.value.replaceAll(" ", ""));
-										}}
+										onFocus={() => setIsEditing(true)}
+										onBlur={() => setIsEditing(false)}
 									/>
 								</FormControl>
 								<FormDescription>

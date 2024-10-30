@@ -51,7 +51,7 @@ type RoomSettings = {
 	totalRounds: number;
 	wordDifficulty: WordDifficulty;
 	wordBank: WordBank;
-	customWords?: string;
+	customWords: string[];
 	gameMode: GameMode;
 };
 
@@ -70,7 +70,7 @@ const initialState: RoomState = {
 		totalRounds: 4,
 		wordDifficulty: WordDifficulty.Easy,
 		wordBank: WordBank.Mixed,
-		customWords: "",
+		customWords: [],
 		gameMode: GameMode.Classic,
 	},
 	players: {},
