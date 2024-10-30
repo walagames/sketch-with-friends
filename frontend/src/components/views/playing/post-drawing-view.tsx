@@ -8,7 +8,12 @@ import { CrownIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { motion } from "framer-motion";
-// import { RaisedButton } from "@/components/raised-button";
+
+const springConfig = {
+	type: "spring",
+	stiffness: 100,
+	damping: 14,
+};
 export function PostDrawingView() {
 	const deadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
@@ -20,10 +25,6 @@ export function PostDrawingView() {
 	const sortedPlayers = Object.values(players).sort(
 		(a, b) => b.score - a.score
 	);
-
-	// const isLastPhase = useSelector((state: RootState) => state.game.isLastPhase);
-
-	// const dispatch = useDispatch();
 
 	return (
 		<HillScene className="">
@@ -37,23 +38,6 @@ export function PostDrawingView() {
 			{sortedPlayers.length > 3 && (
 				<Leaderboard players={sortedPlayers.slice(3)} />
 			)}
-			{/* {isLastPhase && (
-				<div className="absolute bottom-8 right-8 z-50">
-					<RaisedButton
-						onClick={() => {
-							dispatch({
-								type: "room/changeStage",
-								payload: RoomStage.PreGame,
-								fromServer: true,
-							});
-						}}
-						variant="action"
-						size="xl"
-					>
-						Return to room
-					</RaisedButton>
-				</div>
-			)} */}
 		</HillScene>
 	);
 }
@@ -93,9 +77,7 @@ function LeaderboardPlace({
 	const avatarSvg = generateAvatar(avatarSeed);
 
 	const points =
-		useSelector(
-			(state: RootState) => state.game.pointsAwarded[player.id]
-		) ?? 0;
+		useSelector((state: RootState) => state.game.pointsAwarded[player.id]) ?? 0;
 
 	return (
 		<div className="flex gap-6 w-full items-center">
@@ -143,12 +125,6 @@ function PodiumPlace({
 	const { color, height, placeText, delay } =
 		podiumColor[place as keyof typeof podiumColor];
 
-	const springConfig = {
-		type: "spring",
-		stiffness: 100,
-		damping: 13,
-	};
-
 	return (
 		<div
 			className={cn(
@@ -181,7 +157,9 @@ function PodiumPlace({
 					src={avatarSvg}
 				/>
 			</motion.div>
-			<motion.p layout className="text-xl font-bold text-foreground">{name}</motion.p>
+			<motion.p layout className="text-xl font-bold text-foreground">
+				{name}
+			</motion.p>
 			<motion.div
 				className={cn(
 					"flex flex-col items-center p-4 rounded-lg w-full shadow-accent",
@@ -198,15 +176,28 @@ function PodiumPlace({
 				</p>
 				{points > 0 && <AwardedPointsCard points={points} />}
 			</motion.div>
-			<motion.p className="text-2xl font-bold text-foreground py-2">{placeText}</motion.p>
+			<motion.p
+				initial={{
+					opacity: 0,
+				}}
+				animate={{
+					opacity: 1,
+				}}
+				transition={{
+					delay: delay,
+					...springConfig,
+				}}
+				className="text-2xl font-bold text-foreground py-2"
+			>
+				{placeText}
+			</motion.p>
 		</div>
 	);
 }
 
-
 function AwardedPointsCard({ points }: { points: number }) {
 	return (
-		<motion.div 
+		<motion.div
 			className="relative mt-2.5 bg-white border border-gray-300 rounded-lg px-3 py-1.5 shadow-lg"
 			initial={{ opacity: 0, y: -6 }}
 			animate={{ opacity: 1, y: 0 }}
