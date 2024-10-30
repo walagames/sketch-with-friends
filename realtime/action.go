@@ -106,10 +106,13 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		PayloadType:      nil,
 		validator: func(r *room) error {
 			if r.Stage != PreGame {
-				return fmt.Errorf("can only start game in pre game stage")
+				return fmt.Errorf("you can only start the game from the pre-game stage")
 			}
 			if len(r.Players) < 2 {
-				return fmt.Errorf("can only start game with at least 2 players")
+				return fmt.Errorf("you need at least 2 players to start the game")
+			}
+			if len(r.Settings.CustomWords) < 3 && r.Settings.WordBank == WordBankCustom {
+				return fmt.Errorf("you need to provide at least 3 custom words in custom only mode")
 			}
 			return nil
 		},
@@ -316,12 +319,12 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			r.Settings.WordDifficulty = WordDifficulty(a.Payload.(map[string]interface{})["wordDifficulty"].(string))
 			r.Settings.WordBank = WordBank(a.Payload.(map[string]interface{})["wordBank"].(string))
 			r.Settings.GameMode = GameMode(a.Payload.(map[string]interface{})["gameMode"].(string))
-			customWords := a.Payload.(map[string]interface{})["customWords"].([]interface{})
-			slice := make([]string, len(customWords))
-			for i, word := range customWords {
-				slice[i] = word.(string)
+			rawCustomWords := a.Payload.(map[string]interface{})["customWords"].([]interface{})
+			customWords := make([]string, len(rawCustomWords))
+			for i, word := range rawCustomWords {
+				customWords[i] = word.(string)
 			}
-			r.Settings.CustomWords = filterInvalidWords(slice)
+			r.Settings.CustomWords = filterDuplicateWords(filterInvalidWords(customWords))
 
 			// Inform clients of the room settings change
 			r.broadcast(GameRoleAny,
