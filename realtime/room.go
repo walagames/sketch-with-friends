@@ -120,7 +120,7 @@ func NewRoom(id string) Room {
 			PlayerLimit:        6,
 			DrawingTimeAllowed: 60,
 			TotalRounds:        3,
-			WordDifficulty:     WordDifficultyEasy,
+			WordDifficulty:     WordDifficultyRandom,
 			GameMode:           GameModeClassic,
 			WordBank:           WordBankMixed,
 			CustomWords:        make([]string, 0),
