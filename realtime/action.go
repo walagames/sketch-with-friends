@@ -289,7 +289,11 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
-			r.game.judgeGuess(a.Player.ID, a.Payload.(string))
+			guess := sanitizeGuess(a.Payload.(string))
+			if guess == "" {
+				return fmt.Errorf("invalid guess")
+			}
+			r.game.judgeGuess(a.Player.ID, guess)
 			return nil
 		},
 	},
@@ -312,7 +316,12 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			r.Settings.WordDifficulty = WordDifficulty(a.Payload.(map[string]interface{})["wordDifficulty"].(string))
 			r.Settings.WordBank = WordBank(a.Payload.(map[string]interface{})["wordBank"].(string))
 			r.Settings.GameMode = GameMode(a.Payload.(map[string]interface{})["gameMode"].(string))
-			r.Settings.CustomWords = a.Payload.(map[string]interface{})["customWords"].(string)
+			customWords := a.Payload.(map[string]interface{})["customWords"].([]interface{})
+			slice := make([]string, len(customWords))
+			for i, word := range customWords {
+				slice[i] = word.(string)
+			}
+			r.Settings.CustomWords = filterInvalidWords(slice)
 
 			// Inform clients of the room settings change
 			r.broadcast(GameRoleAny,
