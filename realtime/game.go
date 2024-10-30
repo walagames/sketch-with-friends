@@ -24,7 +24,7 @@ var (
 type DrawingWord struct {
 	Category   string
 	Value      string
-	Difficulty string
+	Difficulty WordDifficulty
 }
 
 var wordBank []DrawingWord
@@ -77,7 +77,7 @@ type game struct {
 func NewGame(initialPhase Phase, r *room) *game {
 	customWords := make([]DrawingWord, 0)
 	for _, word := range r.Settings.CustomWords {
-		customWords = append(customWords, DrawingWord{Value: word, Difficulty: "custom", Category: "custom"})
+		customWords = append(customWords, DrawingWord{Value: word, Difficulty: WordDifficultyCustom, Category: "custom"})
 	}
 
 	return &game{
@@ -327,7 +327,7 @@ func loadWordBank() {
 			wordBank = append(wordBank, DrawingWord{
 				Category:   record[0],
 				Value:      record[1],
-				Difficulty: record[2],
+				Difficulty: WordDifficulty(record[2]),
 			})
 		}
 	}
@@ -338,7 +338,6 @@ func loadWordBank() {
 // Returns unique, random words from the word bank based on the specified difficulty.
 func (g *game) randomWordOptions(n int) ([]DrawingWord, []string) {
 	filteredWords := wordBank
-	customWords := make([]DrawingWord, 0)
 
 	// If the word bank is custom only, we use the custom words if there are any
 	if g.room.Settings.WordBank == WordBankCustom && len(g.customWords) > 0 {
@@ -347,14 +346,14 @@ func (g *game) randomWordOptions(n int) ([]DrawingWord, []string) {
 
 	// If the word bank is mixed, we use the default word bank + custom words
 	if g.room.Settings.WordBank == WordBankMixed {
-		filteredWords = append(filteredWords, customWords...)
+		filteredWords = append(filteredWords, g.customWords...)
 	}
 
 	// If the difficulty is not random or custom only, we filter the word bank based on the difficulty
 	if g.room.Settings.WordDifficulty != WordDifficultyRandom && g.room.Settings.WordBank != WordBankCustom {
 		wordsByDifficulty := make([]DrawingWord, 0)
-		for _, word := range wordBank {
-			if word.Difficulty == string(g.room.Settings.WordDifficulty) || word.Difficulty == "custom" {
+		for _, word := range filteredWords {
+			if word.Difficulty == g.room.Settings.WordDifficulty || word.Difficulty == WordDifficultyCustom {
 				wordsByDifficulty = append(wordsByDifficulty, word)
 			}
 		}

@@ -36,6 +36,7 @@ const (
 	WordDifficultyMedium WordDifficulty = "medium"
 	WordDifficultyHard   WordDifficulty = "hard"
 	WordDifficultyRandom WordDifficulty = "random"
+	WordDifficultyCustom WordDifficulty = "custom"
 )
 
 type WordBank string
