@@ -15,7 +15,7 @@ export const getRealtimeHref = () => {
 	return `${protocol}://${host}`;
 };
 
-export const copyRoomLink = (roomId: string) => {
+export const copyInviteLink = (roomId: string) => {
 	navigator.clipboard.writeText(`${window.location.origin}/?room=${roomId}`);
-	toast.success("Room link copied to clipboard");
+	toast.success("Invite link copied to clipboard");
 };

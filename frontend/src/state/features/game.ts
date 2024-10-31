@@ -21,6 +21,7 @@ export interface GameState {
 	selectedWord: string;
 	isLastPhase: boolean;
 	isFirstPhase: boolean;
+	pointsAwarded: Record<string, number>;
 }
 
 const initialState: GameState = {
@@ -33,6 +34,7 @@ const initialState: GameState = {
 	selectedWord: "",
 	isLastPhase: false,
 	isFirstPhase: false,
+	pointsAwarded: {},
 };
 
 export type Guess = {
@@ -51,6 +53,9 @@ export const gameSlice = createSlice({
 		reset: () => initialState,
 		changeRound: (state, action: PayloadAction<number>) => {
 			state.round = action.payload;
+		},
+		pointsAwarded: (state, action: PayloadAction<Record<string, number>>) => {
+			state.pointsAwarded = action.payload;
 		},
 		changePhase: (
 			state,

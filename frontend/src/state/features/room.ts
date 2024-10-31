@@ -27,10 +27,32 @@ export enum PlayerConnectionStatus {
 	Connected = "connected",
 }
 
+export enum WordDifficulty {
+	Easy = "easy",
+	Medium = "medium",
+	Hard = "hard",
+	Random = "random",
+}
+
+export enum WordBank {
+	Default = "default",
+	Custom = "custom",
+	Mixed = "mixed",
+}
+
+export enum GameMode {
+	Classic = "classic",
+	NoHints = "noHints",
+}
+
 type RoomSettings = {
 	playerLimit: number;
 	drawingTimeAllowed: number;
 	totalRounds: number;
+	wordDifficulty: WordDifficulty;
+	wordBank: WordBank;
+	customWords: string[];
+	gameMode: GameMode;
 };
 
 export interface RoomState {
@@ -46,6 +68,10 @@ const initialState: RoomState = {
 		playerLimit: 6,
 		drawingTimeAllowed: 60,
 		totalRounds: 4,
+		wordDifficulty: WordDifficulty.Easy,
+		wordBank: WordBank.Mixed,
+		customWords: [],
+		gameMode: GameMode.Classic,
 	},
 	players: {},
 	stage: RoomStage.PreGame,
@@ -95,5 +121,6 @@ export const roomSlice = createSlice({
 
 export const { changeStage, setPlayers, playerLeft, changeRoomSettings } =
 	roomSlice.actions;
+
 
 export default roomSlice.reducer;

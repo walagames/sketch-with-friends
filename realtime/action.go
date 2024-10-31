@@ -32,16 +32,17 @@ const (
 	SetStrokes     ActionType = "canvas/setStrokes"
 
 	// Game actions
-	SetWord      ActionType = "game/setWord"
-	SubmitGuess  ActionType = "game/submitGuess"
-	WordOptions  ActionType = "game/wordOptions"
-	StartGame    ActionType = "game/startGame"
-	GuessResult  ActionType = "game/guessResult"
-	ClearGuesses ActionType = "game/clearGuesses"
-	SetGuesses   ActionType = "game/setGuesses"
-	ChangePhase  ActionType = "game/changePhase"
-	SelectWord   ActionType = "game/selectWord"
-	SetRound     ActionType = "game/setRound"
+	SetWord       ActionType = "game/setWord"
+	SubmitGuess   ActionType = "game/submitGuess"
+	WordOptions   ActionType = "game/wordOptions"
+	StartGame     ActionType = "game/startGame"
+	GuessResult   ActionType = "game/guessResult"
+	ClearGuesses  ActionType = "game/clearGuesses"
+	SetGuesses    ActionType = "game/setGuesses"
+	ChangePhase   ActionType = "game/changePhase"
+	SelectWord    ActionType = "game/selectWord"
+	SetRound      ActionType = "game/setRound"
+	PointsAwarded ActionType = "game/pointsAwarded"
 
 	// Room actions
 	InitializeRoom     ActionType = "room/initializeRoom"
@@ -105,10 +106,13 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		PayloadType:      nil,
 		validator: func(r *room) error {
 			if r.Stage != PreGame {
-				return fmt.Errorf("can only start game in pre game stage")
+				return fmt.Errorf("you can only start the game from the pre-game stage")
 			}
 			if len(r.Players) < 2 {
-				return fmt.Errorf("can only start game with at least 2 players")
+				return fmt.Errorf("you need at least 2 players to start the game")
+			}
+			if len(r.Settings.CustomWords) < 3 && r.Settings.WordBank == WordBankCustom {
+				return fmt.Errorf("you need to provide at least 3 custom words in custom only mode")
 			}
 			return nil
 		},
@@ -142,7 +146,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			if r.game.currentPhase.Name() != Picking {
 				return fmt.Errorf("game is not in picking phase")
 			}
-			if r.game.currentWord != "" {
+			if r.game.currentWord != nil {
 				return fmt.Errorf("word already selected")
 			}
 
@@ -153,19 +157,19 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Check if selected word is actually an option
 			selectedWord := a.Payload.(string)
-			isValidOption := false
+			var foundDrawingWord *DrawingWord
 			for _, option := range r.game.wordOptions {
-				if option == selectedWord {
-					isValidOption = true
+				if option.Value == selectedWord {
+					foundDrawingWord = &option
 					break
 				}
 			}
-			if !isValidOption {
+			if foundDrawingWord == nil {
 				return fmt.Errorf("selected word is not a valid option")
 			}
 
 			// Start drawing phase
-			r.game.currentWord = selectedWord
+			r.game.currentWord = foundDrawingWord
 			r.game.currentPhase.Next(r.game)
 
 			return nil
@@ -288,7 +292,11 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
-			r.game.judgeGuess(a.Player.ID, a.Payload.(string))
+			guess := sanitizeGuess(a.Payload.(string))
+			if guess == "" {
+				return fmt.Errorf("invalid guess")
+			}
+			r.game.judgeGuess(a.Player.ID, guess)
 			return nil
 		},
 	},
@@ -297,6 +305,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		GameRoleRequired: GameRoleAny,
 		PayloadType:      map[string]interface{}{},
 		validator: func(r *room) error {
+			// TODO: validate settings inputs
 			if r.Stage != PreGame {
 				return fmt.Errorf("can only change room settings in pre game stage")
 			}
@@ -307,6 +316,15 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			r.Settings.DrawingTimeAllowed = int(a.Payload.(map[string]interface{})["drawingTimeAllowed"].(float64))
 			r.Settings.PlayerLimit = int(a.Payload.(map[string]interface{})["playerLimit"].(float64))
 			r.Settings.TotalRounds = int(a.Payload.(map[string]interface{})["totalRounds"].(float64))
+			r.Settings.WordDifficulty = WordDifficulty(a.Payload.(map[string]interface{})["wordDifficulty"].(string))
+			r.Settings.WordBank = WordBank(a.Payload.(map[string]interface{})["wordBank"].(string))
+			r.Settings.GameMode = GameMode(a.Payload.(map[string]interface{})["gameMode"].(string))
+			rawCustomWords := a.Payload.(map[string]interface{})["customWords"].([]interface{})
+			customWords := make([]string, len(rawCustomWords))
+			for i, word := range rawCustomWords {
+				customWords[i] = word.(string)
+			}
+			r.Settings.CustomWords = filterDuplicateWords(filterInvalidWords(customWords))
 
 			// Inform clients of the room settings change
 			r.broadcast(GameRoleAny,

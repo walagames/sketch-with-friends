@@ -56,7 +56,7 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 					}}
 					{...(props as HTMLMotionProps<"button">)}
 				>
-					<span className={cn("block py-2", shift && "translate-y-0.5")}>
+					<span className={cn("block py-2 whitespace-nowrap", shift && "translate-y-0.5")}>
 						{props.children}
 					</span>
 				</motion.button>

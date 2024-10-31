@@ -29,10 +29,39 @@ var (
 	ErrRoomEmpty         = errors.New("ErrRoomEmpty")
 )
 
+type WordDifficulty string
+
+const (
+	WordDifficultyEasy   WordDifficulty = "easy"
+	WordDifficultyMedium WordDifficulty = "medium"
+	WordDifficultyHard   WordDifficulty = "hard"
+	WordDifficultyRandom WordDifficulty = "random"
+	WordDifficultyCustom WordDifficulty = "custom"
+)
+
+type WordBank string
+
+const (
+	WordBankDefault WordBank = "default"
+	WordBankCustom  WordBank = "custom"
+	WordBankMixed   WordBank = "mixed"
+)
+
+type GameMode string
+
+const (
+	GameModeClassic GameMode = "classic"
+	GameModeNoHints GameMode = "noHints"
+)
+
 type RoomSettings struct {
-	PlayerLimit        int `json:"playerLimit"`
-	DrawingTimeAllowed int `json:"drawingTimeAllowed"`
-	TotalRounds        int `json:"totalRounds"`
+	PlayerLimit        int            `json:"playerLimit"`
+	DrawingTimeAllowed int            `json:"drawingTimeAllowed"`
+	TotalRounds        int            `json:"totalRounds"`
+	WordDifficulty     WordDifficulty `json:"wordDifficulty"`
+	GameMode           GameMode       `json:"gameMode"`
+	WordBank           WordBank       `json:"wordBank"`
+	CustomWords        []string       `json:"customWords"`
 }
 
 type RoomStage string
@@ -91,6 +120,10 @@ func NewRoom(id string) Room {
 			PlayerLimit:        6,
 			DrawingTimeAllowed: 60,
 			TotalRounds:        3,
+			WordDifficulty:     WordDifficultyRandom,
+			GameMode:           GameModeClassic,
+			WordBank:           WordBankMixed,
+			CustomWords:        make([]string, 0),
 		},
 		Stage: PreGame,
 	}
@@ -186,6 +219,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 			message(SelectWord, r.game.hintedWord),
 			message(SetRound, r.game.currentRound),
 			message(SetGuesses, r.game.guesses),
+			message(PointsAwarded, r.game.pointsAwarded),
 		)
 	}
 
