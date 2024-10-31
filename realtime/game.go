@@ -522,7 +522,7 @@ func (phase PickingPhase) Start(g *game) {
 
 	// Set the deadline to 1 second before the phase ends to allow
 	// some buffer for the countdown timer to display.
-	g.currentPhaseDeadline = time.Now().Add(PickingPhaseDuration - time.Second*1).UTC()
+	g.currentPhaseDeadline = time.Now().Add(PickingPhaseDuration).UTC()
 	// Start the timer
 	g.room.timer.Reset(PickingPhaseDuration)
 
@@ -567,7 +567,7 @@ func (phase DrawingPhase) Start(g *game) {
 	phaseDuration := time.Duration(g.room.Settings.DrawingTimeAllowed) * time.Second
 	// Set the deadline to 1 second before the phase ends to allow
 	// some buffer for the countdown timer to display.
-	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
+	g.currentPhaseDeadline = time.Now().Add(phaseDuration).UTC()
 
 	// Initialize the hinted word with blanks but preserve spaces
 	wordRunes := []rune(g.currentWord.Value)
@@ -614,14 +614,28 @@ func (phase DrawingPhase) End(g *game) {
 	g.cancelHintRoutine()
 	g.clearGuesses()
 
-	// Display the word
+	// Reveal the word
 	g.hintedWord = g.currentWord.Value
+	g.currentPhaseDeadline = time.Now().UTC()
+
+	g.room.broadcast(GameRoleAny,
+		message(SelectWord, g.hintedWord),
+		// Send another phase change message to stop the countdown timer
+		// in the case we advance early because everyone guessed correctly.
+		message(ChangePhase, PhaseChangeMessage{
+			Phase:        g.currentPhase.Name(),
+			Deadline:     g.currentPhaseDeadline, // Stop the timer
+			IsLastPhase:  false,
+			IsFirstPhase: false,
+		}))
+
+	// Let players see the word for a few seconds before transitioning
+	time.Sleep(time.Second * 2)
 
 	// Inform players of the state changes
 	g.room.broadcast(GameRoleAny,
 		message(SetGuesses, g.guesses),
 		message(SetPlayers, g.room.Players),
-		message(SelectWord, g.hintedWord),
 	)
 }
 
