@@ -331,9 +331,15 @@ func (g *game) randomWordOptions(n int) ([]DrawingWord, []string) {
 		filteredWords = g.customWords
 	}
 
-	// If the word bank is mixed, we use the default word bank + custom words
-	if g.room.Settings.WordBank == WordBankMixed {
-		filteredWords = append(filteredWords, g.customWords...)
+	// If the word bank is mixed, we duplicate custom words multiple times to increase their probability
+	if g.room.Settings.WordBank == WordBankMixed && len(g.customWords) > 0 {
+		// Add custom words multiple times to increase their weight
+		const customWordWeight = 3 // Custom words are 3x more likely to be selected
+		weightedCustomWords := make([]DrawingWord, 0, len(g.customWords)*customWordWeight)
+		for i := 0; i < customWordWeight; i++ {
+			weightedCustomWords = append(weightedCustomWords, g.customWords...)
+		}
+		filteredWords = append(filteredWords, weightedCustomWords...)
 	}
 
 	// If the difficulty is not random or custom only, we filter the word bank based on the difficulty
