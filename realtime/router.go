@@ -50,7 +50,6 @@ func logMiddleware(next http.Handler) http.Handler {
 				"remote_addr", r.RemoteAddr,
 				"user_agent", r.UserAgent(),
 				"duration", time.Since(start),
-				"query", r.URL.Query().Encode(),
 				"request_id", requestID,
 			)
 		}
