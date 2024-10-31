@@ -228,9 +228,6 @@ func (g *game) isGuessClose(guess string) bool {
 func (g *game) clearGuesses() {
 	g.guesses = make([]guess, 0)
 	g.correctGuessers = make(map[uuid.UUID]bool)
-	g.room.broadcast(GameRoleAny,
-		message(SetGuesses, g.guesses),
-	)
 }
 
 // Calculates the point award for guessing a word correctly.
@@ -288,16 +285,6 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 
 	// Skip to the next phase if everyone has guessed correctly already
 	if len(g.correctGuessers) >= len(g.room.Players)-1 {
-		// Cancel timers
-		g.room.timer.Stop()
-		g.cancelHintRoutine()
-
-		// Display the word
-		g.hintedWord = g.currentWord.Value
-		g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
-		time.Sleep(time.Duration(1 * time.Second)) // Short delay to display the word
-
-		// Advance to the next phase
 		g.currentPhase.Next(g)
 	}
 }
@@ -616,10 +603,19 @@ func (phase DrawingPhase) Start(g *game) {
 }
 
 func (phase DrawingPhase) End(g *game) {
+	// Cleanup
+	g.room.timer.Stop()
+	g.cancelHintRoutine()
 	g.clearGuesses()
+
+	// Display the word
+	g.hintedWord = g.currentWord.Value
+
+	// Inform players of the state changes
 	g.room.broadcast(GameRoleAny,
+		message(SetGuesses, g.guesses),
 		message(SetPlayers, g.room.Players),
-		message(SelectWord, g.currentWord.Value),
+		message(SelectWord, g.hintedWord),
 	)
 }
 
