@@ -12,9 +12,9 @@
 
 ## Overview
 
-Sketch with Friends is a real-time multiplayer drawing game. Players take turns
-sketching and guessing words. Create private rooms for you and your friends or
-play with people from around the world.
+Sketch with Friends is a real-time, multiplayer, browser-based drawing game.
+Players take turns drawing and guessing words with their friends or people from
+around the world!
 
 <p align="center">
 <br>
@@ -25,12 +25,11 @@ play with people from around the world.
 
 ### Features
 
-- 🌍 **Global Matchmaking (coming soon):** Connect with players worldwide
+- 🔒 **Private Rooms:** Create private rooms for you and your friends
+- 🎨 **Custom Words:** Play with your own custom words
 - 💬 **In-Game Chat:** Communicate with other players in real-time
 - 📱 **Mobile Support (coming soon):** Full touch and keyboard support
-- 🔒 **Private Rooms:** Create private rooms for you and your friends
-- 🎨 **Custom Words (coming soon):** Bring your own custom words to the guessing
-  pool
+- 🌍 **Global Matchmaking (coming soon):** Connect with players worldwide
 
 ## Local development
 
