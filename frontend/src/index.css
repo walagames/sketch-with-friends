@@ -7,6 +7,12 @@ html {
 	font-family: "Nokora", sans-serif;
 }
 
+html,
+body {
+	height: 100dvh;
+	overflow: hidden;
+}
+
 @layer base {
 	:root {
 		--background: 0 0% 100%;

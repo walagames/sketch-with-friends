@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { GameRole } from "@/state/features/game";
 import { addStroke, addStrokePoint, Stroke } from "@/state/features/canvas";
+import { useWindowSize } from "@/hooks/use-window-size";
 
 // make canvas less pixelated
 const CANVAS_SCALE = 2;
@@ -60,6 +61,8 @@ function Canvas({
 	const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 	const cursorRef = React.useRef<HTMLDivElement | null>(null);
 	const strokeCountRef = React.useRef(0);
+
+	const [windowWidth, windowHeight] = useWindowSize();
 
 	const dispatch = useDispatch();
 
@@ -157,11 +160,32 @@ function Canvas({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [strokes]);
 
+	// Add scale factor state
+	const [scaleFactor, setScaleFactor] = React.useState(1);
+
+	// Calculate scale factor when window or desired dimensions change
+	React.useEffect(() => {
+		const widthScale = windowWidth / width;
+		const heightScale = windowHeight / height;
+		const newScale = Math.min(widthScale, heightScale, 1); // Never scale up, only down
+		setScaleFactor(newScale);
+	}, [windowWidth, windowHeight, width, height]);
+
+	// Update stroke coordinate calculations
+	const getScaledCoordinates = React.useCallback(
+		(clientX: number, clientY: number, rect: DOMRect) => {
+			const x = ((clientX - rect.left) / scaleFactor) * CANVAS_SCALE;
+			const y = ((clientY - rect.top) / scaleFactor) * CANVAS_SCALE;
+			return [x, y];
+		},
+		[scaleFactor]
+	);
+
+	// Update handlers to use scaled coordinates
 	const handleNewStroke = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
 			const rect = e.currentTarget.getBoundingClientRect();
-			const x = (e.clientX - rect.left) * CANVAS_SCALE;
-			const y = (e.clientY - rect.top) * CANVAS_SCALE;
+			const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
 			dispatch(
 				addStroke({
 					color: strokeColor,
@@ -170,20 +194,17 @@ function Canvas({
 				})
 			);
 		},
-		[strokeColor, strokeWidth]
+		[strokeColor, strokeWidth, getScaledCoordinates]
 	);
 
 	const handleStrokePoint = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
-			// Only draw when left click is held down
 			if (e.buttons !== 1) return;
-
 			const rect = e.currentTarget.getBoundingClientRect();
-			const x = (e.clientX - rect.left) * CANVAS_SCALE;
-			const y = (e.clientY - rect.top) * CANVAS_SCALE;
+			const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
 			dispatch(addStrokePoint([x, y]));
 		},
-		[dispatch]
+		[dispatch, getScaledCoordinates]
 	);
 
 	React.useEffect(() => {
@@ -226,9 +247,49 @@ function Canvas({
 		cursor.style.boxShadow = `0 0 0 1px grey`;
 	}, [strokeColor, strokeWidth]);
 
+	// Update touch handlers
+	const handleTouchStart = React.useCallback(
+		(e: React.TouchEvent<HTMLCanvasElement>) => {
+			if (role === GameRole.Drawing) {
+				e.preventDefault();
+				const rect = e.currentTarget.getBoundingClientRect();
+				const touch = e.touches[0];
+				const [x, y] = getScaledCoordinates(touch.clientX, touch.clientY, rect);
+				dispatch(
+					addStroke({
+						color: strokeColor,
+						width: strokeWidth,
+						points: [[x, y]],
+					})
+				);
+			}
+		},
+		[strokeColor, strokeWidth, role, getScaledCoordinates]
+	);
+
+	const handleTouchMove = React.useCallback(
+		(e: React.TouchEvent<HTMLCanvasElement>) => {
+			if (role === GameRole.Drawing) {
+				e.preventDefault();
+				const rect = e.currentTarget.getBoundingClientRect();
+				const touch = e.touches[0];
+				const [x, y] = getScaledCoordinates(touch.clientX, touch.clientY, rect);
+				dispatch(addStrokePoint([x, y]));
+			}
+		},
+		[dispatch, role, getScaledCoordinates]
+	);
+
 	return (
 		<ContextMenu>
-			<ContextMenuTrigger style={{ width, height }} className="relative">
+			<ContextMenuTrigger
+				style={{
+					width: width * scaleFactor,
+					height: height * scaleFactor,
+					// transform: `scale(${scaleFactor})`,
+				}}
+				className="relative"
+			>
 				<canvas
 					className={`border-[3px] border-border rounded-lg bg-background w-full h-full relative z-10 ${
 						role === GameRole.Drawing ? "cursor-none" : ""
@@ -245,6 +306,8 @@ function Canvas({
 							handleStrokePoint(e);
 						}
 					}}
+					onTouchStart={handleTouchStart}
+					onTouchMove={handleTouchMove}
 					ref={canvasRef}
 				/>
 				<div className=" w-[98%] h-full bg-border absolute left-1/2 rounded-xl -translate-x-1/2 -bottom-1.5" />
