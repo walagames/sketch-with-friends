@@ -231,7 +231,14 @@ func (r *room) register(ctx context.Context, player *player) error {
 // and handles necessary game state changes if they disconnect mid-game.
 func (r *room) unregister(player *player) {
 	r.lastInteractionAt = time.Now()
-
+	
+	// If a game is in progress, we need to purge them from the game state
+	// and handle the necessary game state changes. ex. If they were drawing,
+	// we need to manually force the game to the next phase.
+	if r.game != nil && r.game.currentPhase.Name() == Drawing {
+		r.game.handlePlayerLeave(player)
+	}	
+	
 	// Tell the other players that a player left
 	// Note: This needs to be done before we remove the player from the room state
 	// otherwise the alert will not display to the other players.
@@ -240,26 +247,8 @@ func (r *room) unregister(player *player) {
 		message(PlayerLeft, player.ID),
 	)
 
-	// If a game is in progress, we need to purge them from the game state
-	// and handle the necessary game state changes. ex. If they were drawing,
-	// we need to manually force the game to the next phase.
-	if r.game != nil && r.game.currentPhase.Name() == Drawing {
-		r.game.handlePlayerLeave(player)
-	}
-
 	// Remove the player from the room state
 	delete(r.Players, player.ID)
-
-	// If there are no players left in the room, we need to cancel the game
-	// and reset the room stage.
-	if len(r.Players) == 0 {
-		if r.Stage == Playing && r.game != nil && r.game.currentPhase.Name() == Drawing {
-			r.game.cancelHintRoutine()
-		}
-		r.cancel(errors.New("no players left in room"))
-		slog.Debug("no players left in room, closing room", "id", r.ID)
-		return
-	}
 
 	// If the player is the host, we need to migrate the host role to a new player
 	if player.RoomRole == RoomRoleHost {
@@ -273,6 +262,17 @@ func (r *room) unregister(player *player) {
 			slog.Debug("host changed to", "playerId", p.ID)
 			break
 		}
+	}
+
+	// If there are no players left in the room, we need to cancel the game
+	// and reset the room stage.
+	if len(r.Players) == 0 {
+		if r.Stage == Playing && r.game != nil && r.game.currentPhase.Name() == Drawing {
+			r.game.cancelHintRoutine()
+		}
+		r.cancel(errors.New("no players left in room"))
+		slog.Debug("no players left in room, closing room", "id", r.ID)
+		return
 	}
 
 	// If there are less than 2 players left in the room, we need to cancel the game
@@ -290,7 +290,10 @@ func (r *room) unregister(player *player) {
 		r.game = nil
 
 		// Tell the remaining player that the game has ended
-		r.broadcast(GameRoleAny, message(ChangeStage, r.Stage), message(Error, "Not enough players to continue game"))
+		r.broadcast(GameRoleAny,
+			message(ChangeStage, r.Stage),
+			message(Error, "Not enough players to continue game"),
+		)
 	}
 
 	slog.Debug("player unregistered", "playerId", player.ID)
