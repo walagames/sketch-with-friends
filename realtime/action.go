@@ -120,12 +120,16 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			r.setStage(Playing)
 
 			// Initialize game state
+			for _, p := range r.Players {
+				p.GameRole = GameRoleGuessing
+			}
 			r.game = NewGame(&PickingPhase{}, r)
 			r.game.fillDrawingQueue()
 			r.game.currentPhase.Start(r.game)
 
 			// Inform clients of the stage change
 			r.broadcast(GameRoleAny,
+				message(SetPlayers, r.Players),
 				message(ChangeStage, r.Stage),
 			)
 
