@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import Canvas from "@/components/canvas";
-import { CanvasTools, ColorSliders } from "@/components/canvas-tools";
+import { CanvasTools } from "@/components/canvas-tools";
 import { GameRole } from "@/state/features/game";
 import { Guesses } from "./guesses";
 import { Timer } from "@/components/ui/timer";
@@ -16,20 +16,20 @@ export function DrawingDrawerView() {
 
 	return (
 		<HillScene>
-			<div className="mx-auto my-auto flex flex-col gap-2 items-center relative z-50">
-				<div className="flex w-full h-full items-start justify-center gap-6">
-					<div className="py-16 mt-auto">
+			<div className="mx-auto mb-auto lg:my-auto flex flex-col lg:gap-2 gap-1 items-center relative z-50">
+				<div className="flex w-full h-full items-start justify-center lg:gap-6 flex-col lg:flex-row">
+					{/* <div className="py-16 mt-auto">
 						<ColorSliders />
-					</div>
-					<div className="flex flex-col items-center justify-center w-[800px]">
+					</div> */}
+					<div className="flex flex-col items-center justify-center max-w-[800px]">
 						<div className="flex justify-between w-full items-center py-2">
-							<div className="text-2xl">
+							<div className="text-lg lg:text-2xl">
 								You're drawing:{" "}
-								<span className="text-3xl font-bold">{selectedWord}</span>
+								<span className="text-xl lg:text-3xl font-bold">{selectedWord}</span>
 							</div>
 							<Timer endTime={deadline} />
 						</div>
-						<Canvas width={800} height={600} role={GameRole.Drawing} />
+						<Canvas padding={10} width={800} height={600} role={GameRole.Drawing} />
 						<CanvasTools />
 					</div>
 					<Guesses />

@@ -38,9 +38,16 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 	);
 
 	return (
-		<div className="flex flex-col h-full w-[20rem] items-start max-h-[660px]">
-			<div className="flex w-full justify-between h-14">
-				<div className="flex gap-2 text-xl font-semibold items-center">
+		<div
+			className={cn(
+				"flex flex-col lg:h-full lg:w-[20rem] w-full lg:max-h-[660px] px-1.5 lg:px-0",
+				isGuessing
+					? "h-[var(--max-chat-height)]"
+					: "h-[var(--max-chat-height-drawing)]"
+			)}
+		>
+			<div className="flex w-full justify-between items-center lg:h-14 pt-3 pb-1">
+				<div className="flex gap-2 text-lg lg:text-xl font-semibold items-center">
 					Round {currentRound} of {totalRounds}
 				</div>
 				<div className="flex gap-2 text-xl font-bold items-center">
@@ -60,7 +67,7 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 				))}
 			</ul>
 			{isGuessing && (
-				<div className="mt-6 w-full">
+				<div className="lg:mt-6 mt-4 w-full">
 					{hasGuessedCorrect ? (
 						<div className="font-bold w-full text-xl bg-background rounded-lg h-14 px-4 py-3.5 -translate-y-1.5 translate-x-1.5 shadow-accent">
 							<span className="translate-y-0.5 flex items-center justify-center gap-2">
@@ -114,7 +121,12 @@ function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
 						isOwnMessage ? "justify-end order-2" : "justify-between"
 					)}
 				>
-					<p className={cn("text-sm truncate", isOwnMessage && "order-2 ml-auto")}>
+					<p
+						className={cn(
+							"text-sm truncate",
+							isOwnMessage && "order-2 ml-auto"
+						)}
+					>
 						{name}
 					</p>
 					{!!guess.pointsAwarded && (
@@ -137,12 +149,7 @@ function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
 							<span className="px-3 py-2 break-all">{guess.guess}</span>
 						)}
 						{!guess.isCorrect && guess.isClose && (
-							<div
-								className={cn(
-									"w-1.5 bg-blue-500",
-									isOwnMessage ? "order-first mr-auto" : "ml-auto"
-								)}
-							/>
+							<div className="w-1.5 bg-blue-500 ml-auto" />
 						)}
 					</div>
 					<div

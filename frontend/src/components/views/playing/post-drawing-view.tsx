@@ -27,12 +27,12 @@ export function PostDrawingView() {
 	);
 
 	return (
-		<HillScene className="">
+		<HillScene className="px-4 lg:px-0">
 			<div className="absolute top-10 right-10">
 				<Timer endTime={deadline} />
 			</div>
-			<h1 className="text-2xl py-2">
-				The word was: <span className="text-3xl font-bold">{word}</span>
+			<h1 className="text-xl lg:text-2xl lg:py-2">
+				The word was: <span className="lg:text-3xl text-2xl font-bold">{word}</span>
 			</h1>
 			<Podium players={sortedPlayers.slice(0, 3)} />
 			{sortedPlayers.length > 3 && (
@@ -48,7 +48,7 @@ function Podium({ players }: { players: Player[] }) {
 	const thirdPlace = players[2];
 
 	return (
-		<div className="grid grid-cols-3 gap-10 items-end max-w-xl w-full">
+		<div className="grid grid-cols-3 lg:gap-10 gap-4 items-end max-w-xl w-full">
 			<PodiumPlace player={secondPlace} place={2} />
 			<PodiumPlace player={firstPlace} place={1} />
 			<PodiumPlace player={thirdPlace} place={3} />
@@ -58,7 +58,7 @@ function Podium({ players }: { players: Player[] }) {
 
 function Leaderboard({ players }: { players: Player[] }) {
 	return (
-		<div className="w-full max-w-xl overflow-x-hidden scrollbar-hide max-h-56 bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex flex-col items-center justify-start px-10 py-6 gap-3 overflow-y-auto">
+		<div className=" w-full max-w-xl overflow-x-hidden scrollbar-hide max-h-56 bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex flex-col items-center justify-start px-10 py-6 gap-3 overflow-y-auto">
 			{players.map((player, index) => (
 				<LeaderboardPlace key={player.id} player={player} index={index} />
 			))}
@@ -157,7 +157,7 @@ function PodiumPlace({
 					src={avatarSvg}
 				/>
 			</motion.div>
-			<motion.p layout className="text-xl font-bold text-foreground">
+			<motion.p layout className="text-lg lg:text-xl font-bold text-foreground">
 				{name}
 			</motion.p>
 			<motion.div
@@ -170,7 +170,7 @@ function PodiumPlace({
 				animate={{ opacity: 1, height }}
 				transition={{ delay: delay, ...springConfig }}
 			>
-				<p className="font-medium text-background text-xl">
+				<p className="font-medium text-background text-lg lg:text-xl">
 					<AnimatedNumber delay={450} previous={score - points} value={score} />{" "}
 					pts
 				</p>
@@ -187,7 +187,7 @@ function PodiumPlace({
 					delay: delay,
 					...springConfig,
 				}}
-				className="text-2xl font-bold text-foreground py-2"
+				className="text-lg lg:text-2xl font-bold text-foreground py-2"
 			>
 				{placeText}
 			</motion.p>

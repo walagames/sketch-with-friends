@@ -46,6 +46,12 @@ body {
 		--hills: 146.8 100% 50%;
 
 		--radius: 0.6rem;
+
+		--aspect-ratio: 0.75;
+		--header-height: 4rem;
+		--tools-height: 3.75rem;
+		--max-chat-height: calc(100dvh - calc(100vw * var(--aspect-ratio)) - var(--header-height));
+		--max-chat-height-drawing: calc(100dvh - calc(100vw * var(--aspect-ratio)) - var(--header-height) - var(--tools-height));
 	}
 
 	.dark {

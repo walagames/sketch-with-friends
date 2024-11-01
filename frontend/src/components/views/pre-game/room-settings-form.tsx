@@ -82,14 +82,14 @@ export function RoomSettingsForm() {
 	}, 300);
 
 	return (
-		<div className=" w-full flex flex-col gap-4">
-			<h1 className="text-3xl font-bold">Room settings</h1>
+		<div className=" w-full flex flex-col lg:gap-4 gap-1">
+			<h1 className="lg:text-3xl text-2xl font-bold">Room settings</h1>
 			<Form {...form}>
 				<form
 					onChange={handleChange}
 					className="flex flex-col w-full gap-4 justify-between"
 				>
-					<div className="flex gap-8 w-full">
+					<div className="flex lg:gap-8 gap-4 w-full">
 						<div className="flex flex-col gap-4 w-full order-2">
 							<FormField
 								control={form.control}

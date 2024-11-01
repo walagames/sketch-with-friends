@@ -50,12 +50,14 @@ function getSvgPathFromStroke(stroke: number[][]) {
 }
 
 function Canvas({
+	padding,
 	width,
 	height,
 	role,
 }: {
 	width: number;
 	height: number;
+	padding?: number;
 	role: GameRole;
 }) {
 	const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
@@ -284,9 +286,8 @@ function Canvas({
 		<ContextMenu>
 			<ContextMenuTrigger
 				style={{
-					width: width * scaleFactor,
-					height: height * scaleFactor,
-					// transform: `scale(${scaleFactor})`,
+					width: width * scaleFactor - (padding ?? 0),
+					height: height * scaleFactor - (padding ?? 0),
 				}}
 				className="relative"
 			>
@@ -294,8 +295,8 @@ function Canvas({
 					className={`border-[3px] border-border rounded-lg bg-background w-full h-full relative z-10 ${
 						role === GameRole.Drawing ? "cursor-none" : ""
 					}`}
-					width={width * CANVAS_SCALE}
-					height={height * CANVAS_SCALE}
+					width={width * CANVAS_SCALE - (padding ?? 0)}
+					height={height * CANVAS_SCALE - (padding ?? 0)}
 					onMouseDown={(e) => {
 						if (e.button === 0 && role === GameRole.Drawing) {
 							handleNewStroke(e);
