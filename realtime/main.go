@@ -47,7 +47,7 @@ func run(ctx context.Context) error {
 	}
 	if host == "" {
 		slog.Warn("HOST env not set, defaulting to localhost")
-		host = "localhost"
+		host = "0.0.0.0"
 	}
 
 	cfg := &HTTPConfig{
