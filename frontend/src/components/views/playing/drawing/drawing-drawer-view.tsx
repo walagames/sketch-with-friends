@@ -17,8 +17,8 @@ export function DrawingDrawerView() {
 	return (
 		<HillScene>
 			<div className="mx-auto my-auto flex flex-col gap-2 items-center relative z-50">
-				<div className="flex w-full h-full items-end justify-center gap-6">
-					<div className="py-16">
+				<div className="flex w-full h-full items-start justify-center gap-6">
+					<div className="py-16 mt-auto">
 						<ColorSliders />
 					</div>
 					<div className="flex flex-col items-center justify-center w-[800px]">

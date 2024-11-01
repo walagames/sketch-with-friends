@@ -38,18 +38,18 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 	);
 
 	return (
-		<div className="flex flex-col h-[700px] w-[20rem]">
-			<div className="flex w-full justify-between">
-				<div className="flex gap-2 text-lg font-semibold items-center">
+		<div className="flex flex-col h-full w-[20rem] items-start max-h-[660px]">
+			<div className="flex w-full justify-between h-14">
+				<div className="flex gap-2 text-xl font-semibold items-center">
 					Round {currentRound} of {totalRounds}
 				</div>
-				<div className="flex gap-2 text-lg font-bold items-center">
-					<UsersIcon className="h-5 w-5 mb-0.5" /> {Object.keys(players).length}
+				<div className="flex gap-2 text-xl font-bold items-center">
+					<UsersIcon className="h-5 w-5 mb-1" /> {Object.keys(players).length}
 				</div>
 			</div>
 			<ul
 				ref={listRef}
-				className="h-full w-full mb-6 mt-2 flex gap-3 bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex-col items-start justify-start py-8 px-6 overflow-y-auto overflow-x-hidden scrollbar-hide"
+				className=" flex-1 w-full flex gap-3 bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex-col items-start justify-start p-5 overflow-y-auto overflow-x-hidden scrollbar-hide"
 			>
 				{guesses.map((guess) => (
 					<GuessCard
@@ -59,67 +59,100 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 					/>
 				))}
 			</ul>
-			{isGuessing &&
-				(hasGuessedCorrect ? (
-					<div className="font-bold text-xl bg-background rounded-lg h-14 px-4 py-3.5 w-full -translate-y-1.5 translate-x-1.5 shadow-accent">
-						<span className="translate-y-0.5 flex items-center justify-center gap-2">
-							Guessed it!{" "}
-							<span className="text-lg">
-								+{hasGuessedCorrect.pointsAwarded} pts
+			{isGuessing && (
+				<div className="mt-6 w-full">
+					{hasGuessedCorrect ? (
+						<div className="font-bold w-full text-xl bg-background rounded-lg h-14 px-4 py-3.5 -translate-y-1.5 translate-x-1.5 shadow-accent">
+							<span className="translate-y-0.5 flex items-center justify-center gap-2">
+								Guessed it!{" "}
+								<span className="text-lg">
+									+{hasGuessedCorrect.pointsAwarded} pts
+								</span>
 							</span>
-						</span>
-					</div>
-				) : (
-					<GuessForm />
-				))}
+						</div>
+					) : (
+						<GuessForm />
+					)}
+				</div>
+			)}
 		</div>
 	);
 }
 
 function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
 	const { avatarSeed, name } = player;
-
 	const avatarSvg = generateAvatar(avatarSeed);
+	const playerId = useSelector((state: RootState) => state.client.id);
+	const isOwnMessage = playerId === guess.playerId;
+
 	return (
 		<motion.li
 			initial={{ opacity: 0, y: 3 }}
 			animate={{ opacity: 1, y: 0 }}
-			className="flex items-start gap-1"
+			className={cn(
+				"flex items-start gap-1 w-full",
+				isOwnMessage && "flex-row-reverse items-end pt-2 -mb-2"
+			)}
 		>
 			<img
 				alt={player.name + " profile picture"}
-				className="rounded-lg h-8 aspect-square relative border-2"
+				className={cn(
+					"h-8 aspect-square relative border-2 shrink-0",
+					isOwnMessage ? "rounded-lg" : "rounded-lg"
+				)}
 				src={avatarSvg}
 			/>
-			<div className="flex flex-col">
-				<div className="flex gap-2 justify-between font-medium">
-					<p className="text-sm">{name}</p>
+			<div
+				className={cn(
+					"flex flex-col min-w-0 flex-1",
+					isOwnMessage && "items-end"
+				)}
+			>
+				<div
+					className={cn(
+						"flex gap-2 font-medium w-full",
+						isOwnMessage ? "justify-end order-2" : "justify-between"
+					)}
+				>
+					<p className={cn("text-sm truncate", isOwnMessage && "order-2 ml-auto")}>
+						{name}
+					</p>
 					{!!guess.pointsAwarded && (
-						<p className="text-sm">+{guess.pointsAwarded} pts</p>
+						<p className="text-sm shrink-0">+{guess.pointsAwarded} pts</p>
 					)}
 				</div>
-				<div className="relative">
+				<div className="w-full relative">
 					<div
 						className={cn(
-							"bg-background rounded-lg rounded-tl-none border-2 relative z-10 font-semibold flex overflow-hidden",
+							"bg-background border-2 relative z-10 font-semibold flex overflow-hidden w-full",
+							isOwnMessage
+								? "rounded-lg rounded-br-none"
+								: "rounded-lg rounded-tl-none",
 							guess.isCorrect && "bg-[#40FF00]"
 						)}
 					>
 						{guess.isCorrect ? (
 							<span className="px-3 py-2">guessed the word!</span>
 						) : (
-							<span className="px-3 py-2">"{guess.guess}"</span>
+							<span className="px-3 py-2 break-all">{guess.guess}</span>
 						)}
-						{!guess.isCorrect && (
-							<span
+						{!guess.isCorrect && guess.isClose && (
+							<div
 								className={cn(
-									"w-2 block",
-									guess.isClose ? "bg-blue-500" : "bg-red-500"
+									"w-1.5 bg-blue-500",
+									isOwnMessage ? "order-first mr-auto" : "ml-auto"
 								)}
 							/>
 						)}
 					</div>
-					<div className="rounded-lg rounded-tl-none bg-foreground -bottom-0.5 -left-0.5 h-full w-full absolute"></div>
+					<div
+						className={cn(
+							"bg-foreground h-full w-full absolute",
+							isOwnMessage
+								? "rounded-lg rounded-br-none -bottom-0.5 -right-0.5"
+								: "rounded-lg rounded-tl-none -bottom-0.5 -left-0.5"
+						)}
+					/>
 				</div>
 			</div>
 		</motion.li>

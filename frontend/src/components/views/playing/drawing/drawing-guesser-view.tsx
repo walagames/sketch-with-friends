@@ -23,8 +23,8 @@ export function DrawingGuesserView() {
 	return (
 		<HillScene>
 			<div className="mx-auto my-auto flex flex-col gap-2 items-center relative z-50">
-				<div className="flex w-full h-full items-center justify-center gap-6">
-					<div className="flex flex-col items-center justify-centerw-[800px]">
+				<div className="flex w-full h-full justify-center items-center gap-6">
+					<div className="flex flex-col items-start justify-start w-[800px]">
 						<div className="flex justify-between w-full items-center py-2">
 							<div className="text-2xl">
 								{drawingPlayer?.name} is drawing:{" "}
