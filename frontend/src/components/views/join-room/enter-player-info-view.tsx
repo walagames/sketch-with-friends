@@ -145,12 +145,12 @@ export function PlayerInfoForm() {
 											placeholder="Name"
 											{...field}
 										/>
-										<div className="absolute -right-[3.5rem] top-2">
+										<div className="absolute -right-[3.5rem] lg:top-2 top-0">
 											<RaisedButton shift={false} variant="action" size="icon">
 												<StepForwardIcon className="w-6 h-6" />
 											</RaisedButton>
 										</div>
-										<div className="absolute -left-[3.5rem] top-2">
+										<div className="absolute -left-[3.5rem] lg:top-2 top-1">
 											<RaisedButton
 												onClick={() => dispatch(enterRoomCode(""))}
 												type="button"

@@ -21,8 +21,8 @@ import { Logo } from "@/components/logo";
 const CodeFormSchema = z.object({
 	roomCode: z
 		.string()
-		.length(6, {
-			message: "Room code must be 6 characters long.",
+		.length(4, {
+			message: "Room code must be 4 characters long.",
 		})
 		.regex(/^[A-Za-z]+$/, {
 			message: "Room code must contain only letters.",
@@ -59,8 +59,14 @@ function CodeForm() {
 						<FormItem>
 							<FormControl>
 								<div className="relative w-full">
-									<RaisedInput placeholder="Room code" {...field} />
-									<div className="absolute -right-14 top-2">
+									<RaisedInput
+										placeholder="Room code"
+										{...field}
+										onChange={(e) => {
+											field.onChange(e.target.value.toUpperCase());
+										}}
+									/>
+									<div className="absolute -right-14 lg:top-2 top-0">
 										<RaisedButton
 											type="submit"
 											shift={false}
