@@ -74,6 +74,10 @@ function Canvas({
 		(state: RootState) => state.client.canvas.lightness
 	);
 
+	const currentPhaseDeadline = useSelector(
+		(state: RootState) => state.game.currentPhaseDeadline
+	);
+
 	const strokeColor = React.useMemo(() => {
 		const hslToHex = (h: number, s: number, l: number): string => {
 			l /= 100;
@@ -107,6 +111,10 @@ function Canvas({
 		},
 		[]
 	);
+
+	const roundIsActive = React.useMemo(() => {
+		return new Date(currentPhaseDeadline).getTime() > Date.now();
+	}, [currentPhaseDeadline]);
 
 	const clearCanvas = React.useCallback(
 		(ctx: CanvasRenderingContext2D) => {
@@ -186,6 +194,7 @@ function Canvas({
 	// Update handlers to use scaled coordinates
 	const handleNewStroke = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
+			if (!roundIsActive) return;
 			const rect = e.currentTarget.getBoundingClientRect();
 			const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
 			dispatch(
@@ -196,17 +205,17 @@ function Canvas({
 				})
 			);
 		},
-		[strokeColor, strokeWidth, getScaledCoordinates]
+		[strokeColor, strokeWidth, getScaledCoordinates, roundIsActive]
 	);
 
 	const handleStrokePoint = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
-			if (e.buttons !== 1) return;
+			if (e.buttons !== 1 || !roundIsActive) return;
 			const rect = e.currentTarget.getBoundingClientRect();
 			const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
 			dispatch(addStrokePoint([x, y]));
 		},
-		[dispatch, getScaledCoordinates]
+		[dispatch, getScaledCoordinates, roundIsActive]
 	);
 
 	React.useEffect(() => {
@@ -252,7 +261,7 @@ function Canvas({
 	// Update touch handlers
 	const handleTouchStart = React.useCallback(
 		(e: React.TouchEvent<HTMLCanvasElement>) => {
-			if (role === GameRole.Drawing) {
+			if (role === GameRole.Drawing && roundIsActive) {
 				e.preventDefault();
 				const rect = e.currentTarget.getBoundingClientRect();
 				const touch = e.touches[0];
@@ -266,12 +275,12 @@ function Canvas({
 				);
 			}
 		},
-		[strokeColor, strokeWidth, role, getScaledCoordinates]
+		[strokeColor, strokeWidth, role, getScaledCoordinates, roundIsActive]
 	);
 
 	const handleTouchMove = React.useCallback(
 		(e: React.TouchEvent<HTMLCanvasElement>) => {
-			if (role === GameRole.Drawing) {
+			if (role === GameRole.Drawing && roundIsActive) {
 				e.preventDefault();
 				const rect = e.currentTarget.getBoundingClientRect();
 				const touch = e.touches[0];
@@ -279,7 +288,7 @@ function Canvas({
 				dispatch(addStrokePoint([x, y]));
 			}
 		},
-		[dispatch, role, getScaledCoordinates]
+		[dispatch, role, getScaledCoordinates, roundIsActive]
 	);
 
 	return (
@@ -327,7 +336,7 @@ function Canvas({
 				<HexColorPicker
 					className="custom-pointers"
 					color={strokeColor}
-					// onChange={(color) => dispatch(changeStrokeColor(color))}
+					// onChange={(color) => dispatch(change)}
 				/>
 			</ContextMenuContent>
 		</ContextMenu>
