@@ -21,7 +21,7 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 
 	const dispatch = useDispatch();
 	return (
-		<div className="max-w-3xl w-full flex flex-col items-end gap-4 p-2.5 lg:px-0 h-full lg:h-auto">
+		<div className="relative z-10 max-w-3xl w-full flex flex-col items-end gap-4 p-2.5 lg:px-0 h-full lg:h-auto">
 			<div className="flex gap-6 items-center w-full">
 				<div>
 					<RaisedButton

@@ -40,7 +40,7 @@ const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 		return (
 			<div className="flex items-center gap-4 ml-auto w-full lg:w-auto px-1" ref={ref}>
 				{roomRole === RoomRole.Host && (
-					<div className="translate-y-2 lg:order-first order-2">
+					<div className="translate-y-2">
 						<CrownIcon className="w-8 h-8 text-yellow-400" />
 					</div>
 				)}
@@ -56,7 +56,7 @@ const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 						damping: 50,
 						mass: 1,
 					}}
-					className="flex items-center gap-3 bg-background shadow-accent rounded-lg mt-2 lg:w-64 w-[calc(100%-3rem)] mr-auto min-h-0 h-14"
+					className="flex items-center gap-3 bg-background shadow-accent rounded-lg mt-2 lg:w-64 w-[calc(100%-3rem)] ml-auto min-h-0 h-14"
 				>
 					<img
 						className="rounded-l-lg h-full aspect-square relative"

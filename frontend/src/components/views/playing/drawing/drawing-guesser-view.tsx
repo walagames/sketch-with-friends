@@ -7,6 +7,9 @@ import { Guesses } from "./guesses";
 import { Timer } from "@/components/ui/timer";
 import { HillScene } from "@/components/scenes/hill-scene";
 import { cn } from "@/lib/utils";
+import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
+import { AnimatePresence } from "framer-motion";
+import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 
 export function DrawingGuesserView() {
 	const players = useSelector((state: RootState) => state.room.players);
@@ -32,11 +35,29 @@ export function DrawingGuesserView() {
 							</div>
 							<Timer endTime={deadline} />
 						</div>
-						<Canvas padding={10} width={800} height={600} role={GameRole.Guessing} />
+						<Canvas
+							padding={10}
+							width={800}
+							height={600}
+							role={GameRole.Guessing}
+						/>
 					</div>
 					<Guesses isGuessing />
 				</div>
 			</div>
+			<AnimatePresence>
+				<BobbingDoodle
+					duration={4}
+					style={{ top: "8%", left: "6%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+			</AnimatePresence>
+			<AirplaneDoodle
+				skipTransition
+				startAt={{ left: "-15%", top: "75%", rotate: 30 }}
+				animateTo={{ left: "5%", top: "55%", rotate: 30 }}
+				leaveTo={{ left: "105%", top: "55%", rotate: 20 }}
+			/>
 		</HillScene>
 	);
 }

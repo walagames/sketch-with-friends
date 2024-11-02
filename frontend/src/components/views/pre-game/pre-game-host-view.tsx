@@ -1,9 +1,10 @@
 import { RoomPane } from "./room-pane";
+import { SkyScene } from "@/components/scenes/sky-scene";
 
 export function PreGameHostView() {
 	return (
-		<div className="flex h-full flex-col items-center justify-center w-full">
+		<SkyScene>
 			<RoomPane isHost={true} />
-		</div>
+		</SkyScene>
 	);
 }

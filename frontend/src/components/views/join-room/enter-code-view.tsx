@@ -1,91 +1,14 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { useDispatch } from "react-redux";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { enterRoomCode } from "@/state/features/client";
-import { useEffect } from "react";
-import { StepForwardIcon } from "lucide-react";
 import { clearQueryParams } from "@/lib/params";
 import { HillScene } from "@/components/scenes/hill-scene";
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormMessage,
-} from "@/components/ui/form";
-import { RaisedInput } from "@/components/ui/raised-input";
 import { Logo } from "@/components/logo";
-
-const CodeFormSchema = z.object({
-	roomCode: z
-		.string()
-		.length(4, {
-			message: "Room code must be 4 characters long.",
-		})
-		.regex(/^[A-Za-z]+$/, {
-			message: "Room code must contain only letters.",
-		}),
-});
-
-function CodeForm() {
-	const dispatch = useDispatch();
-	const searchParams = new URLSearchParams(location.search);
-	const roomCodeParam = searchParams.get("room");
-
-	const form = useForm<z.infer<typeof CodeFormSchema>>({
-		resolver: zodResolver(CodeFormSchema),
-		defaultValues: {
-			roomCode: roomCodeParam ?? "",
-		},
-	});
-
-	useEffect(() => {
-		form.setValue("roomCode", roomCodeParam ?? "");
-	}, [roomCodeParam, form]);
-
-	function onSubmit(data: z.infer<typeof CodeFormSchema>) {
-		dispatch(enterRoomCode(data.roomCode));
-	}
-
-	return (
-		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-				<FormField
-					control={form.control}
-					name="roomCode"
-					render={({ field }) => (
-						<FormItem>
-							<FormControl>
-								<div className="relative w-full">
-									<RaisedInput
-										placeholder="Room code"
-										{...field}
-										onChange={(e) => {
-											field.onChange(e.target.value.toUpperCase());
-										}}
-									/>
-									<div className="absolute -right-14 lg:top-2 top-0">
-										<RaisedButton
-											type="submit"
-											shift={false}
-											variant="action"
-											size="icon"
-										>
-											<StepForwardIcon className="w-6 h-6" />
-										</RaisedButton>
-									</div>
-								</div>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-			</form>
-		</Form>
-	);
-}
+import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
+import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
+import { CodeForm } from "./code-form";
+import { AnimatePresence } from "framer-motion";
+import { Doodle } from "@/components/doodle/doodle";
 
 export function EnterCodeView() {
 	const dispatch = useDispatch();
@@ -107,6 +30,54 @@ export function EnterCodeView() {
 				</RaisedButton>
 				<CodeForm />
 			</div>
+
+			<AnimatePresence>
+				<BobbingDoodle
+					duration={4}
+					style={{ top: "20%", left: "12%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+				<BobbingDoodle
+					duration={5}
+					style={{ top: "8%", left: "20%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+				<BobbingDoodle
+					duration={4.5}
+					style={{ top: "10%", right: "10%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+				<Doodle
+					style={{ top: "28%", left: "36%", width: "7rem" }}
+					src="/doodles/sparkles.png"
+				/>
+				<Doodle
+					style={{ top: "45%", left: "34%", width: "9rem" }}
+					src="/doodles/ice-cream.png"
+				/>
+				<Doodle
+					style={{ top: "64%", right: "35%", width: "7rem" }}
+					src="/doodles/gift.png"
+				/>
+				<Doodle
+					style={{ top: "38%", right: "34%", width: "7rem" }}
+					src="/doodles/hearts.png"
+				/>
+				<Doodle
+					style={{ top: "65%", left: "33%", width: "6rem" }}
+					src="/doodles/music.png"
+				/>
+				<Doodle
+					style={{ top: "64%", left: "30%", rotate: "15deg", width: "5rem" }}
+					src="/doodles/music.png"
+				/>
+			</AnimatePresence>
+
+			<AirplaneDoodle
+				startAt={{ left: "135%", top: "70%", rotate: 40 }}
+				animateTo={{ left: "75%", top: "50%", rotate: 30 }}
+				leaveTo={{ left: "135%", top: "70%", rotate: 40 }}
+			/>
 		</HillScene>
 	);
 }

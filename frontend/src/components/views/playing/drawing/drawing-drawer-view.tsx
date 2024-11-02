@@ -6,6 +6,9 @@ import { GameRole } from "@/state/features/game";
 import { Guesses } from "./guesses";
 import { Timer } from "@/components/ui/timer";
 import { HillScene } from "@/components/scenes/hill-scene";
+import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
+import { AnimatePresence } from "framer-motion";
+import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 export function DrawingDrawerView() {
 	const deadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
@@ -25,16 +28,37 @@ export function DrawingDrawerView() {
 						<div className="flex justify-between w-full items-center py-2">
 							<div className="text-lg lg:text-2xl">
 								You're drawing:{" "}
-								<span className="text-xl lg:text-3xl font-bold">{selectedWord}</span>
+								<span className="text-xl lg:text-3xl font-bold">
+									{selectedWord}
+								</span>
 							</div>
 							<Timer endTime={deadline} />
 						</div>
-						<Canvas padding={10} width={800} height={600} role={GameRole.Drawing} />
+						<Canvas
+							padding={10}
+							width={800}
+							height={600}
+							role={GameRole.Drawing}
+						/>
 						<CanvasTools />
 					</div>
 					<Guesses />
 				</div>
 			</div>
+			<AnimatePresence>
+				<BobbingDoodle
+					duration={4}
+					style={{ top: "8%", left: "6%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+			</AnimatePresence>
+
+			<AirplaneDoodle
+				skipTransition
+				startAt={{ left: "-15%", top: "75%", rotate: 30 }}
+				animateTo={{ left: "5%", top: "55%", rotate: 30 }}
+				leaveTo={{ left: "105%", top: "55%", rotate: 20 }}
+			/>
 		</HillScene>
 	);
 }

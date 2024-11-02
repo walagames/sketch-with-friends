@@ -7,7 +7,9 @@ import { generateAvatar } from "@/lib/avatar";
 import { CrownIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedNumber } from "@/components/ui/animated-number";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
+import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 
 const springConfig = {
 	type: "spring",
@@ -26,18 +28,48 @@ export function PostDrawingView() {
 		(a, b) => b.score - a.score
 	);
 
+	const isLastPhase = useSelector((state: RootState) => state.game.isLastPhase);
+
 	return (
 		<HillScene className="px-4 lg:px-0">
 			<div className="absolute top-10 right-10">
 				<Timer endTime={deadline} />
 			</div>
 			<h1 className="text-xl lg:text-2xl lg:py-2">
-				The word was: <span className="lg:text-3xl text-2xl font-bold">{word}</span>
+				The word was:{" "}
+				<span className="lg:text-3xl text-2xl font-bold">{word}</span>
 			</h1>
 			<Podium players={sortedPlayers.slice(0, 3)} />
 			{sortedPlayers.length > 3 && (
 				<Leaderboard players={sortedPlayers.slice(3)} />
 			)}
+			<AnimatePresence>
+				<BobbingDoodle
+					duration={4}
+					style={{ top: "20%", left: "12%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+				<BobbingDoodle
+					duration={5}
+					style={{ top: "8%", left: "20%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+				<BobbingDoodle
+					duration={4.5}
+					style={{ top: "10%", right: "10%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+			</AnimatePresence>
+			<AirplaneDoodle
+				skipTransition
+				startAt={{ left: "-15%", top: "75%", rotate: 20 }}
+				animateTo={{ left: "5%", top: "55%", rotate: 20 }}
+				leaveTo={
+					isLastPhase
+						? { left: "80%", top: "-20%", rotate: -5 }
+						: { left: "145%", top: "65%", rotate: 30 }
+				}
+			/>
 		</HillScene>
 	);
 }
