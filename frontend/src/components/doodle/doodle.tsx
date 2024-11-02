@@ -9,7 +9,7 @@ export const Doodle = forwardRef<
 >((props, ref) => {
 	return (
 		<motion.img
-			className={cn("absolute w-36 hidden lg:block", props.className)}
+			className={cn("absolute w-36", props.className)}
 			ref={ref}
 			{...props}
 		/>

@@ -29,8 +29,8 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 						className="group w-40"
 						onClick={() => copyInviteLink(roomId)}
 					>
-						<span className="group-hover:block hidden">Copy invite link</span>
-						<span className="flex items-center gap-2 group-hover:hidden text-lg">
+						<span className="lg:group-hover:block hidden">Copy invite link</span>
+						<span className="flex items-center gap-2 lg:group-hover:hidden text-lg">
 							<LinkIcon className="w-5 h-5 mb-1" />
 							{roomId}
 						</span>

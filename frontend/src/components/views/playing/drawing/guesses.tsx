@@ -47,10 +47,10 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 			)}
 		>
 			<div className="flex w-full justify-between items-center lg:h-14 pt-3 pb-1">
-				<div className="flex gap-2 text-lg lg:text-xl font-medium items-center">
+				<div className="flex gap-2 text-lg lg:text-xl font-bold items-center ">
 					Round {currentRound} of {totalRounds}
 				</div>
-				<div className="flex gap-2 text-xl font-medium items-center">
+				<div className="flex gap-2 text-xl font-bold items-center">
 					<UsersIcon className="h-5 w-5 mb-1" /> {Object.keys(players).length}
 				</div>
 			</div>

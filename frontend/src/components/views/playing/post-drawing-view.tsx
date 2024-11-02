@@ -32,7 +32,7 @@ export function PostDrawingView() {
 
 	return (
 		<HillScene className="px-4 lg:px-0">
-			<div className="absolute top-10 right-10">
+			<div className="absolute lg:top-10 lg:right-10 top-4 right-4">
 				<Timer endTime={deadline} />
 			</div>
 			<h1 className="text-xl lg:text-2xl lg:py-2">
@@ -45,16 +45,19 @@ export function PostDrawingView() {
 			)}
 			<AnimatePresence>
 				<BobbingDoodle
+					hideOnSmallViewports
 					duration={4}
 					style={{ top: "20%", left: "12%" }}
 					src="/doodles/rain-cloud.png"
 				/>
 				<BobbingDoodle
+					hideOnSmallViewports
 					duration={5}
 					style={{ top: "8%", left: "20%" }}
 					src="/doodles/rain-cloud.png"
 				/>
 				<BobbingDoodle
+					hideOnSmallViewports
 					duration={4.5}
 					style={{ top: "10%", right: "10%" }}
 					src="/doodles/rain-cloud.png"
@@ -90,7 +93,7 @@ function Podium({ players }: { players: Player[] }) {
 
 function Leaderboard({ players }: { players: Player[] }) {
 	return (
-		<div className=" w-full max-w-xl overflow-x-hidden scrollbar-hide max-h-56 bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex flex-col items-center justify-start px-10 py-6 gap-3 overflow-y-auto">
+		<div className="realtive z-50 w-full max-w-xl overflow-x-hidden scrollbar-hide max-h-56 bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex flex-col items-center justify-start px-10 py-6 gap-3 overflow-y-auto">
 			{players.map((player, index) => (
 				<LeaderboardPlace key={player.id} player={player} index={index} />
 			))}

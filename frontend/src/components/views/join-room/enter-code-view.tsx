@@ -15,67 +15,78 @@ export function EnterCodeView() {
 
 	return (
 		<HillScene>
-			<Logo />
-			<div className="flex flex-col items-center gap-4 max-w-64">
-				<RaisedButton
-					size="xl"
-					variant="action"
-					className="w-full"
-					onClick={() => {
-						clearQueryParams();
-						dispatch(enterRoomCode("new"));
+			<div className="flex flex-col items-center gap-4 max-w-64 relative">
+				<Logo />
+				<div className="flex flex-col items-center gap-4 max-w-64">
+					<RaisedButton
+						size="xl"
+						variant="action"
+						className="w-full"
+						onClick={() => {
+							clearQueryParams();
+							dispatch(enterRoomCode("new"));
+						}}
+					>
+						Create room
+					</RaisedButton>
+					<CodeForm />
+				</div>
+				<Doodle
+					style={{ top: "-57%", left: "-25%", width: "6rem" }}
+					src="/doodles/sparkles.png"
+				/>
+				<Doodle
+					style={{ bottom: "10%", left: "-75%", width: "8rem" }}
+					src="/doodles/ice-cream.png"
+				/>
+				<Doodle
+					style={{ top: "-50%", right: "-35%", width: "6rem" }}
+					src="/doodles/gift.png"
+				/>
+				<Doodle
+					style={{ bottom: "-65%", right: "-30%", width: "7rem" }}
+					src="/doodles/hearts.png"
+				/>
+				<Doodle
+					style={{ bottom: "-65%", left: "-20%", width: "6rem" }}
+					src="/doodles/music.png"
+				/>
+				<Doodle
+					style={{
+						bottom: "-70%",
+						left: "-45%",
+						rotate: "15deg",
+						width: "5rem",
 					}}
-				>
-					Create room
-				</RaisedButton>
-				<CodeForm />
+					src="/doodles/music.png"
+				/>
 			</div>
 
 			<AnimatePresence>
 				<BobbingDoodle
+					hideOnSmallViewports
 					duration={4}
-					style={{ top: "20%", left: "12%" }}
+					className="lg:top-[20%] top-[4%] lg:left-[12%] left-[32%] absolute h-32"
+					// style={{ top: "20%", left: "12%" }}
 					src="/doodles/rain-cloud.png"
 				/>
 				<BobbingDoodle
+					hideOnSmallViewports
 					duration={5}
 					style={{ top: "8%", left: "20%" }}
 					src="/doodles/rain-cloud.png"
 				/>
 				<BobbingDoodle
+					hideOnSmallViewports
 					duration={4.5}
 					style={{ top: "10%", right: "10%" }}
 					src="/doodles/rain-cloud.png"
-				/>
-				<Doodle
-					style={{ top: "28%", left: "36%", width: "7rem" }}
-					src="/doodles/sparkles.png"
-				/>
-				<Doodle
-					style={{ top: "45%", left: "34%", width: "9rem" }}
-					src="/doodles/ice-cream.png"
-				/>
-				<Doodle
-					style={{ top: "64%", right: "35%", width: "7rem" }}
-					src="/doodles/gift.png"
-				/>
-				<Doodle
-					style={{ top: "38%", right: "34%", width: "7rem" }}
-					src="/doodles/hearts.png"
-				/>
-				<Doodle
-					style={{ top: "65%", left: "33%", width: "6rem" }}
-					src="/doodles/music.png"
-				/>
-				<Doodle
-					style={{ top: "64%", left: "30%", rotate: "15deg", width: "5rem" }}
-					src="/doodles/music.png"
 				/>
 			</AnimatePresence>
 
 			<AirplaneDoodle
 				startAt={{ left: "135%", top: "70%", rotate: 40 }}
-				animateTo={{ left: "75%", top: "50%", rotate: 30 }}
+				animateTo={{ left: "65%", top: "45%", rotate: 30 }}
 				leaveTo={{ left: "135%", top: "70%", rotate: 40 }}
 			/>
 		</HillScene>

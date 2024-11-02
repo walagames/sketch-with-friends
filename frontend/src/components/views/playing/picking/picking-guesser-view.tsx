@@ -22,7 +22,7 @@ export function PickingGuesserView() {
 
 	return (
 		<HillScene>
-			<div className="absolute top-10 right-10">
+			<div className="absolute lg:top-10 lg:right-10 top-4 right-4">
 				<Timer endTime={deadline} />
 			</div>
 			<img src={avatarSvg} className="w-20 h-20 rounded-lg shadow-accent" />
@@ -31,6 +31,7 @@ export function PickingGuesserView() {
 			</h1>
 			<AnimatePresence>
 				<BobbingDoodle
+					hideOnSmallViewports
 					duration={4}
 					style={{ top: "20%", left: "12%" }}
 					src="/doodles/rain-cloud.png"
@@ -41,6 +42,7 @@ export function PickingGuesserView() {
 					src="/doodles/rain-cloud.png"
 				/>
 				<BobbingDoodle
+					hideOnSmallViewports
 					duration={4.5}
 					style={{ top: "10%", right: "10%" }}
 					src="/doodles/rain-cloud.png"

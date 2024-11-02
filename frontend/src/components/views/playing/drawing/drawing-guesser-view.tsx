@@ -47,6 +47,7 @@ export function DrawingGuesserView() {
 			</div>
 			<AnimatePresence>
 				<BobbingDoodle
+					hideOnSmallViewports
 					duration={4}
 					style={{ top: "8%", left: "6%" }}
 					src="/doodles/rain-cloud.png"

@@ -16,10 +16,11 @@ export function EnterPlayerInfoView() {
 			<AnimatePresence>
 				<BobbingDoodle
 					duration={6}
-					style={{ top: "8%", left: "12%" }}
+					style={{ top: "5%", left: "12%" }}
 					src="/doodles/rain-cloud.png"
 				/>
 				<BobbingDoodle
+					hideOnSmallViewports
 					duration={4}
 					style={{ top: "24%", right: "10%" }}
 					src="/doodles/rain-cloud.png"
