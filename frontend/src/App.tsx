@@ -85,6 +85,11 @@ const roomViews = {
 			key: "playing-post-drawing",
 			transition: Direction.LEFT,
 		},
+		[GamePhase.Unanimous]: {
+			Component: () => <></>,
+			key: "unanimous",
+			transition: Direction.LEFT,
+		},
 	},
 } as const;
 

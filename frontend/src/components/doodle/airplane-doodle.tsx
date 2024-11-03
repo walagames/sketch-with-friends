@@ -12,7 +12,7 @@ export type DoodlePosition = {
 
 const InstantConfig = {
 	duration: 0,
-	delay: 1,
+	delay: 1.2,
 };
 
 export const AirplaneDoodle = forwardRef<
@@ -24,10 +24,12 @@ export const AirplaneDoodle = forwardRef<
 			animateTo?: DoodlePosition;
 			leaveTo?: DoodlePosition;
 			skipTransition?: boolean;
+			layoutId?: string;
 		}
->(({ skipTransition = false, ...props }, ref) => {
+>(({ skipTransition = false, layoutId = "airplane", ...props }, ref) => {
 	return (
 		<motion.img
+			layoutId={layoutId}
 			className={cn("absolute w-28 hidden lg:block", props.className)}
 			src="/doodles/paper-plane.png"
 			ref={ref}

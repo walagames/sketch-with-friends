@@ -1,7 +1,6 @@
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/state/store";
 import { selectWord } from "@/state/features/game";
-import { useDispatch } from "react-redux";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { Timer } from "@/components/ui/timer";
 import { HillScene } from "@/components/scenes/hill-scene";
@@ -42,25 +41,41 @@ export function PickingDrawerView() {
 					duration={4}
 					style={{ top: "20%", left: "12%" }}
 					src="/doodles/rain-cloud.png"
+					key="rain-cloud-1"
 				/>
 				<BobbingDoodle
 					duration={5}
 					style={{ top: "8%", left: "20%" }}
 					src="/doodles/rain-cloud.png"
+					key="rain-cloud-2"
 				/>
 				<BobbingDoodle
 					hideOnSmallViewports
 					duration={4.5}
 					style={{ top: "12%", right: "10%" }}
 					src="/doodles/rain-cloud.png"
+					key="rain-cloud-3"
 				/>
 			</AnimatePresence>
 
 			<AirplaneDoodle
 				skipTransition={!isFirstPhase}
-				startAt={{ left: "-15%", top: "75%", rotate: 40 }}
-				animateTo={{ left: "45%", top: "65%", rotate: 30 }}
-				leaveTo={{ left: "105%", top: "55%", rotate: 30 }}
+				style={
+					isFirstPhase
+						? {}
+						: { left: "45%", top: "65%", rotate: "30deg", opacity: 1 }
+				}
+				startAt={
+					isFirstPhase
+						? { left: "-15%", top: "55%", rotate: 20, opacity: 0 }
+						: {}
+				}
+				animateTo={
+					isFirstPhase
+						? { left: "45%", top: "65%", rotate: 30, opacity: 1 }
+						: {}
+				}
+				leaveTo={{ left: "185%", top: "55%", rotate: 30 }}
 			/>
 		</HillScene>
 	);

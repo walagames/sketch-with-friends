@@ -64,19 +64,21 @@ export function EnterCodeView() {
 
 			<AnimatePresence>
 				<BobbingDoodle
+					key="rain-cloud-1"
 					hideOnSmallViewports
 					duration={4}
 					className="lg:top-[20%] top-[4%] lg:left-[12%] left-[32%] absolute h-32"
-					// style={{ top: "20%", left: "12%" }}
 					src="/doodles/rain-cloud.png"
 				/>
 				<BobbingDoodle
+					key="rain-cloud-2"
 					hideOnSmallViewports
 					duration={5}
 					style={{ top: "8%", left: "20%" }}
 					src="/doodles/rain-cloud.png"
 				/>
 				<BobbingDoodle
+					key="rain-cloud-3"
 					hideOnSmallViewports
 					duration={4.5}
 					style={{ top: "10%", right: "10%" }}
@@ -85,6 +87,7 @@ export function EnterCodeView() {
 			</AnimatePresence>
 
 			<AirplaneDoodle
+				layoutId="airplane-enter-code"
 				startAt={{ left: "135%", top: "70%", rotate: 20 }}
 				animateTo={{ left: "75%", top: "45%", rotate: 20 }}
 				leaveTo={{ left: "135%", top: "70%", rotate: 40 }}

@@ -47,11 +47,13 @@ export function DrawingGuesserView() {
 			</div>
 			<AnimatePresence>
 				<BobbingDoodle
+					key="rain-cloud-1"
 					duration={4}
 					className="absolute hidden lg:block top-[2%] right-[4%] w-[7rem]"
 					src="/doodles/rain-cloud.png"
 				/>
 				<BobbingDoodle
+					key="rain-cloud-2"
 					duration={4}
 					className="absolute hidden lg:block top-[4%] left-[5%] w-[7rem] xl:top-[4%] xl:left-[5%]"
 					src="/doodles/rain-cloud.png"
@@ -59,8 +61,7 @@ export function DrawingGuesserView() {
 			</AnimatePresence>
 			<AirplaneDoodle
 				skipTransition
-				startAt={{ left: "-15%", top: "75%", rotate: 30 }}
-				animateTo={{ left: "5%", top: "55%", rotate: 30 }}
+				style={{ left: "85%", top: "55%", rotate: "30deg", opacity: 1 }}
 				leaveTo={{ left: "105%", top: "55%", rotate: 20 }}
 			/>
 		</HillScene>

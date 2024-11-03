@@ -51,9 +51,22 @@ export function PickingGuesserView() {
 
 			<AirplaneDoodle
 				skipTransition={!isFirstPhase}
-				startAt={{ left: "-15%", top: "75%", rotate: 40 }}
-				animateTo={{ left: "45%", top: "65%", rotate: 30 }}
-				leaveTo={{ left: "105%", top: "55%", rotate: 30 }}
+				style={
+					isFirstPhase
+						? {}
+						: { left: "45%", top: "65%", rotate: "30deg", opacity: 1 }
+				}
+				startAt={
+					isFirstPhase
+						? { left: "-15%", top: "55%", rotate: 20, opacity: 0 }
+						: {}
+				}
+				animateTo={
+					isFirstPhase
+						? { left: "45%", top: "65%", rotate: 30, opacity: 1 }
+						: {}
+				}
+				leaveTo={{ left: "185%", top: "55%", rotate: 30 }}
 			/>
 		</HillScene>
 	);
