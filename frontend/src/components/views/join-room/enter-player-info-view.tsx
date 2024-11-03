@@ -14,7 +14,7 @@ export function EnterPlayerInfoView() {
 			case GamePhase.Unanimous:
 				return { left: "80%", top: "-20%", rotate: -5 };
 			default:
-				return { opacity: 0 };
+				return { opacity: 0, left: "-15%", top: "55%", rotate: 20 };
 		}
 	};
 	return (
