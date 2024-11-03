@@ -78,8 +78,6 @@ function Canvas({
 		(state: RootState) => state.game.currentPhaseDeadline
 	);
 
-	const word = useSelector((state: RootState) => state.game.selectedWord);
-
 	const strokeColor = React.useMemo(() => {
 		const hslToHex = (h: number, s: number, l: number): string => {
 			l /= 100;
