@@ -78,6 +78,8 @@ function Canvas({
 		(state: RootState) => state.game.currentPhaseDeadline
 	);
 
+	const word = useSelector((state: RootState) => state.game.selectedWord);
+
 	const strokeColor = React.useMemo(() => {
 		const hslToHex = (h: number, s: number, l: number): string => {
 			l /= 100;
@@ -114,7 +116,7 @@ function Canvas({
 
 	const roundIsActive = React.useMemo(() => {
 		return new Date(currentPhaseDeadline).getTime() > Date.now();
-	}, [currentPhaseDeadline]);
+	}, [currentPhaseDeadline, word]);
 
 	const clearCanvas = React.useCallback(
 		(ctx: CanvasRenderingContext2D) => {
