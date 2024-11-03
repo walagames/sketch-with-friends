@@ -129,14 +129,7 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 				// Send the action to the room to be processed
 				c.room.action <- action
 			} else {
-				// The client has exceeded their rate limit, so send them a warning
-				// and do nothing with the message.
-				c.send <- []*Action{
-					{
-						Type:    Warning,
-						Payload: "Slow down! You're sending messages too quickly!",
-					},
-				}
+				// The client has exceeded their rate limit, do nothing with the message
 				slog.Debug("dropped event", "playerId", c.player.ID)
 			}
 
