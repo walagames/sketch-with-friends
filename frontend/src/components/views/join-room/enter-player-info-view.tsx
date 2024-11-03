@@ -11,14 +11,10 @@ export function EnterPlayerInfoView() {
 
 	const exitPosition = () => {
 		switch (phase) {
-			case GamePhase.Picking:
-				return { left: "145%", top: "65%", rotate: 30, opacity: 1 };
-			case GamePhase.Drawing:
-				return { left: "185%", top: "65%", rotate: 30, opacity: 1 };
-			case GamePhase.PostDrawing:
-				return { left: "105%", top: "55%", rotate: 20, opacity: 1 };
 			case GamePhase.Unanimous:
 				return { left: "80%", top: "-20%", rotate: -5 };
+			default:
+				return { opacity: 0 };
 		}
 	};
 	return (
