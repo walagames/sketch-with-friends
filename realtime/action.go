@@ -190,12 +190,14 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			if r.Stage != Playing {
 				return fmt.Errorf("game is not in playing stage")
 			}
-			if r.game.currentPhase.Name() != Drawing {
-				return fmt.Errorf("not in drawing phase")
-			}
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
+			// If the game is not in the drawing phase, do nothing
+			if r.game.currentPhase.Name() != Drawing {
+				return nil
+			}
+
 			// Decode the stroke from the payload
 			stroke, err := decodeStroke(a.Payload)
 			if err != nil {
@@ -220,12 +222,14 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			if r.game.currentDrawer == nil {
 				return fmt.Errorf("no drawer found")
 			}
-			if r.game.currentPhase.Name() != Drawing {
-				return fmt.Errorf("not in drawing phase")
-			}
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
+			// If the game is not in the drawing phase, do nothing
+			if r.game.currentPhase.Name() != Drawing {
+				return nil
+			}
+
 			// Decode the stroke point from the payload
 			point, err := decodeStrokePoint(a.Payload)
 			if err != nil {

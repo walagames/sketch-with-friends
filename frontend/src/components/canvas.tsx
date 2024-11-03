@@ -115,8 +115,8 @@ function Canvas({
 	);
 
 	const roundIsActive = React.useMemo(() => {
-		return new Date(currentPhaseDeadline).getTime() + 1000 >= Date.now();
-	}, [currentPhaseDeadline, word]);
+		return new Date(currentPhaseDeadline).getTime() > Date.now();
+	}, [currentPhaseDeadline]);
 
 	const clearCanvas = React.useCallback(
 		(ctx: CanvasRenderingContext2D) => {
