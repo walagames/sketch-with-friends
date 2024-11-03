@@ -235,7 +235,7 @@ func (r *room) unregister(player *player) {
 	// If a game is in progress, we need to purge them from the game state
 	// and handle the necessary game state changes. ex. If they were drawing,
 	// we need to manually force the game to the next phase.
-	if r.game != nil && r.game.currentPhase.Name() == Drawing {
+	if r.game != nil {
 		r.game.handlePlayerLeave(player)
 	}	
 	
