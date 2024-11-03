@@ -63,7 +63,7 @@ export function PickingDrawerView() {
 				style={
 					isFirstPhase
 						? {}
-						: { left: "45%", top: "65%", rotate: "30deg", opacity: 1 }
+						: { left: "45%", top: "65%", rotate: 30 as any, opacity: 1 }
 				}
 				startAt={
 					isFirstPhase

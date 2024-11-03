@@ -61,7 +61,7 @@ export function DrawingGuesserView() {
 			</AnimatePresence>
 			<AirplaneDoodle
 				skipTransition
-				style={{ left: "85%", top: "55%", rotate: "30deg", opacity: 1 }}
+				style={{ left: "85%", top: "55%", rotate: 30 as any, opacity: 1 }}
 				leaveTo={{ left: "105%", top: "55%", rotate: 20 }}
 			/>
 		</HillScene>
