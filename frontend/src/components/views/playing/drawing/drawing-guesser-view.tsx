@@ -26,7 +26,7 @@ export function DrawingGuesserView() {
 	return (
 		<HillScene>
 			<div className="mx-auto mb-auto lg:my-auto flex flex-col gap-2 items-center relative z-50">
-				<div className="flex w-full h-full lg:justify-center justify-between items-center lg:gap-6 flex-col lg:flex-row">
+				<div className="flex w-full h-full lg:justify-center justify-between items-center lg:gap-4 flex-col lg:flex-row">
 					<div className="flex flex-col items-start justify-start max-w-[800px]">
 						<div className="flex justify-between w-full items-center py-2">
 							<div className="text-xl lg:text-2xl">
@@ -47,9 +47,13 @@ export function DrawingGuesserView() {
 			</div>
 			<AnimatePresence>
 				<BobbingDoodle
-					hideOnSmallViewports
 					duration={4}
-					style={{ top: "8%", left: "6%" }}
+					className="absolute hidden lg:block top-[2%] right-[4%] w-[7rem]"
+					src="/doodles/rain-cloud.png"
+				/>
+				<BobbingDoodle
+					duration={4}
+					className="absolute hidden lg:block top-[4%] left-[5%] w-[7rem] xl:top-[4%] xl:left-[5%]"
 					src="/doodles/rain-cloud.png"
 				/>
 			</AnimatePresence>

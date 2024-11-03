@@ -44,20 +44,22 @@ export function PostDrawingView() {
 				<Leaderboard players={sortedPlayers.slice(3)} />
 			)}
 			<AnimatePresence>
-				<BobbingDoodle
+				{/* <BobbingDoodle
 					hideOnSmallViewports
 					duration={4}
 					style={{ top: "20%", left: "12%" }}
 					src="/doodles/rain-cloud.png"
-				/>
+				/> */}
 				<BobbingDoodle
-					hideOnSmallViewports
+					// hideOnSmallViewports
+					className="absolute hidden md:block h-32"
 					duration={5}
 					style={{ top: "8%", left: "20%" }}
 					src="/doodles/rain-cloud.png"
 				/>
 				<BobbingDoodle
-					hideOnSmallViewports
+					// hideOnSmallViewports
+					className="absolute hidden md:block h-32"
 					duration={4.5}
 					style={{ top: "10%", right: "10%" }}
 					src="/doodles/rain-cloud.png"
@@ -65,8 +67,8 @@ export function PostDrawingView() {
 			</AnimatePresence>
 			<AirplaneDoodle
 				skipTransition
-				startAt={{ left: "-15%", top: "75%", rotate: 20 }}
-				animateTo={{ left: "5%", top: "55%", rotate: 20 }}
+				startAt={{ left: "-15%", top: "75%", rotate: 30 }}
+				animateTo={{ left: "5%", top: "55%", rotate: 30 }}
 				leaveTo={
 					isLastPhase
 						? { left: "80%", top: "-20%", rotate: -5 }

@@ -51,7 +51,7 @@ export function PickingDrawerView() {
 				<BobbingDoodle
 					hideOnSmallViewports
 					duration={4.5}
-					style={{ top: "10%", right: "10%" }}
+					style={{ top: "12%", right: "10%" }}
 					src="/doodles/rain-cloud.png"
 				/>
 			</AnimatePresence>

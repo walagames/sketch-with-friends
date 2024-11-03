@@ -8,7 +8,7 @@ import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { CodeForm } from "./code-form";
 import { AnimatePresence } from "framer-motion";
-import { Doodle } from "@/components/doodle/doodle";
+// import { Doodle } from "@/components/doodle/doodle";
 
 export function EnterCodeView() {
 	const dispatch = useDispatch();
@@ -31,7 +31,7 @@ export function EnterCodeView() {
 					</RaisedButton>
 					<CodeForm />
 				</div>
-				<Doodle
+				{/* <Doodle
 					style={{ top: "-57%", left: "-25%", width: "6rem" }}
 					src="/doodles/sparkles.png"
 				/>
@@ -59,7 +59,7 @@ export function EnterCodeView() {
 						width: "5rem",
 					}}
 					src="/doodles/music.png"
-				/>
+				/> */}
 			</div>
 
 			<AnimatePresence>
@@ -85,8 +85,8 @@ export function EnterCodeView() {
 			</AnimatePresence>
 
 			<AirplaneDoodle
-				startAt={{ left: "135%", top: "70%", rotate: 40 }}
-				animateTo={{ left: "65%", top: "45%", rotate: 30 }}
+				startAt={{ left: "135%", top: "70%", rotate: 20 }}
+				animateTo={{ left: "75%", top: "45%", rotate: 20 }}
 				leaveTo={{ left: "135%", top: "70%", rotate: 40 }}
 			/>
 		</HillScene>

@@ -40,7 +40,7 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 	return (
 		<div
 			className={cn(
-				"flex flex-col lg:h-full lg:w-[20rem] w-full lg:max-h-[660px] px-1.5 lg:px-0",
+				"flex flex-col lg:h-full xl:w-[18rem] w-full xl:max-h-[660px] min-h-[12rem] px-1.5 lg:px-0",
 				isGuessing
 					? "h-[var(--max-chat-height)]"
 					: "h-[var(--max-chat-height-drawing)]"
@@ -97,8 +97,8 @@ function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
 			initial={{ opacity: 0, y: 3 }}
 			animate={{ opacity: 1, y: 0 }}
 			className={cn(
-				"flex items-start gap-1 w-full",
-				isOwnMessage && "flex-row-reverse items-end pt-2 -mb-2"
+				"flex items-start gap-1 ",
+				isOwnMessage && "flex-row-reverse items-end pt-2 -mb-2 ml-auto"
 			)}
 		>
 			<img
