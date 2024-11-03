@@ -15,7 +15,7 @@ const (
 	IDLE_TICK = 1 * time.Minute
 
 	// How long a player can be idle before the room disconnects them
-	PLAYER_TIMEOUT = 10 * time.Minute
+	PLAYER_TIMEOUT = 15 * time.Minute
 )
 
 // We send these to clients to display alerts
