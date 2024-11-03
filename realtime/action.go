@@ -219,6 +219,9 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		GameRoleRequired: GameRoleDrawing,
 		PayloadType:      []interface{}{},
 		validator: func(r *room) error {
+			if r.game == nil {
+				return fmt.Errorf("game is not initialized")
+			}
 			if r.game.currentDrawer == nil {
 				return fmt.Errorf("no drawer found")
 			}
@@ -250,6 +253,9 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		RoomRoleRequired: RoomRoleAny,
 		GameRoleRequired: GameRoleDrawing,
 		validator: func(r *room) error {
+			if r.game == nil {
+				return fmt.Errorf("game is not initialized")
+			}
 			if r.game.currentPhase.Name() != Drawing {
 				return fmt.Errorf("not in drawing phase")
 			}
@@ -270,6 +276,9 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		RoomRoleRequired: RoomRoleAny,
 		GameRoleRequired: GameRoleDrawing,
 		validator: func(r *room) error {
+			if r.game == nil {
+				return fmt.Errorf("game is not initialized")
+			}
 			if r.game.currentPhase.Name() != Drawing {
 				return fmt.Errorf("not in drawing phase")
 			}
@@ -291,6 +300,9 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		GameRoleRequired: GameRoleGuessing,
 		PayloadType:      "string",
 		validator: func(r *room) error {
+			if r.game == nil {
+				return fmt.Errorf("game is not initialized")
+			}
 			if r.game.currentPhase.Name() != Drawing {
 				return fmt.Errorf("not in guessing phase")
 			}
