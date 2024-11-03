@@ -16,9 +16,9 @@ export function SkyScene({ children }: { children: React.ReactNode }) {
 		<div className="flex h-full flex-col items-center justify-center w-full relative">
 			{children}
 			<AirplaneDoodle
-				layoutId="airplane-sky"
+				// layoutId="airplane-sky"
 				startAt={{ left: "60%", top: "105%", rotate: -5, opacity: 0 }}
-				animateTo={{ opacity: 1, left: "80%", top: "80%", rotate: -5 }}
+				animateTo={{ opacity: 1, left: "80%", top: "80%" }}
 				leaveTo={{ left: "135%", top: "70%", rotate: 40 }}
 				skipTransition={shouldSkipTransition}
 			/>

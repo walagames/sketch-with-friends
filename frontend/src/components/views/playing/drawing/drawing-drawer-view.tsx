@@ -64,7 +64,8 @@ export function DrawingDrawerView() {
 
 			<AirplaneDoodle
 				skipTransition
-				style={{ left: "85%", top: "55%", rotate: 30 as any, opacity: 1 }}
+				startAt={{ left: "85%", top: "55%", rotate: 30, opacity: 0 }}
+				animateTo={{ left: "85%", top: "55%", rotate: 30, opacity: 1 }}
 				leaveTo={{ left: "105%", top: "55%", rotate: 20 }}
 			/>
 		</HillScene>

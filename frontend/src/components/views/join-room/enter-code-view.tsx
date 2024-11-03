@@ -8,6 +8,7 @@ import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { CodeForm } from "./code-form";
 import { AnimatePresence } from "framer-motion";
+import { Doodle } from "@/components/doodle/doodle";
 // import { Doodle } from "@/components/doodle/doodle";
 
 export function EnterCodeView() {
@@ -31,35 +32,35 @@ export function EnterCodeView() {
 					</RaisedButton>
 					<CodeForm />
 				</div>
-				{/* <Doodle
-					style={{ top: "-57%", left: "-25%", width: "6rem" }}
+				<Doodle
+					style={{ top: "-57%", left: "-50%", width: "6rem" }}
 					src="/doodles/sparkles.png"
 				/>
 				<Doodle
-					style={{ bottom: "10%", left: "-75%", width: "8rem" }}
+					style={{ bottom: "10%", left: "-100%", width: "8rem" }}
 					src="/doodles/ice-cream.png"
 				/>
 				<Doodle
-					style={{ top: "-50%", right: "-35%", width: "6rem" }}
+					style={{ top: "-50%", right: "-55%", width: "6rem" }}
 					src="/doodles/gift.png"
 				/>
 				<Doodle
-					style={{ bottom: "-65%", right: "-30%", width: "7rem" }}
+					style={{ bottom: "-65%", right: "-65%", width: "7rem" }}
 					src="/doodles/hearts.png"
 				/>
 				<Doodle
-					style={{ bottom: "-65%", left: "-20%", width: "6rem" }}
+					style={{ bottom: "-65%", left: "-35%", width: "6rem" }}
 					src="/doodles/music.png"
 				/>
 				<Doodle
 					style={{
 						bottom: "-70%",
-						left: "-45%",
+						left: "-65%",
 						rotate: "15deg",
 						width: "5rem",
 					}}
 					src="/doodles/music.png"
-				/> */}
+				/>
 			</div>
 
 			<AnimatePresence>

@@ -61,7 +61,8 @@ export function PostDrawingView() {
 			</AnimatePresence>
 			<AirplaneDoodle
 				skipTransition
-				style={{ left: "5%", top: "55%", rotate: 20 as any }}
+				startAt={{ left: "5%", top: "55%", rotate: 20, opacity: 0 }}
+				animateTo={{ left: "5%", top: "55%", rotate: 20, opacity: 1 }}
 				leaveTo={
 					isLastPhase
 						? { left: "80%", top: "-20%", rotate: -5 }
