@@ -3,11 +3,7 @@ import { useDispatch } from "react-redux";
 import { copyInviteLink } from "@/lib/realtime";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { useState } from "react";
-import {
-	LinkIcon,
-	SettingsIcon,
-	UsersIcon,
-} from "lucide-react";
+import { LinkIcon, SettingsIcon, UsersIcon } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { RoomSettingsForm } from "./room-settings-form";
@@ -29,7 +25,9 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 						className="group w-40"
 						onClick={() => copyInviteLink(roomId)}
 					>
-						<span className="lg:group-hover:block hidden">Copy invite link</span>
+						<span className="lg:group-hover:block hidden">
+							Copy invite link
+						</span>
 						<span className="flex items-center gap-2 lg:group-hover:hidden text-lg">
 							<LinkIcon className="w-5 h-5 mb-1" />
 							{roomId}
@@ -70,6 +68,9 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 			{isHost && (
 				<div>
 					<RaisedButton
+						data-m:click={
+							Object.keys(players).length > 1 && "action=start_game"
+						}
 						size="xl"
 						variant="action"
 						onClick={() => dispatch({ type: "game/startGame" })}
