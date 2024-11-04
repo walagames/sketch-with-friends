@@ -15,7 +15,7 @@ import { DicesIcon, StepBackIcon, StepForwardIcon } from "lucide-react";
 import { getRealtimeHref } from "@/lib/realtime";
 import { useDispatch, useSelector } from "react-redux";
 import { RaisedButton } from "@/components/ui/raised-button";
-import { enterRoomCode } from "@/state/features/client";
+import { enterRoomCode, setIsJoining } from "@/state/features/client";
 import { RaisedInput } from "@/components/ui/raised-input";
 
 const colors = [
@@ -54,6 +54,8 @@ export function PlayerInfoForm() {
 		(state: RootState) => state.client.enteredRoomCode
 	);
 
+	const isJoining = useSelector((state: RootState) => state.client.isJoining);
+
 	// const cycleColor = () => {
 	// 	setColorIndex((prevColorIndex) => {
 	// 		const nextIndex = (prevColorIndex + 1) % colors.length;
@@ -76,6 +78,8 @@ export function PlayerInfoForm() {
 
 	function onSubmit(data: z.infer<typeof JoinRoomFormSchema>) {
 		const { username } = data;
+
+		dispatch(setIsJoining(true));
 
 		if (enteredRoomCode && enteredRoomCode !== "new") {
 			dispatch({
@@ -138,8 +142,17 @@ export function PlayerInfoForm() {
 											{...field}
 										/>
 										<div className="absolute -right-[3.25rem] lg:-right-[3.5rem] lg:top-1.5 top-0.5">
-											<RaisedButton shift={false} variant="action" size="icon">
-												<StepForwardIcon className="w-6 h-6" />
+											<RaisedButton
+												disabled={isJoining}
+												shift={false}
+												variant="action"
+												size="icon"
+											>
+												{isJoining ? (
+													<span className="loader h-5 w-5 mt-1.5" />
+												) : (
+													<StepForwardIcon className="w-6 h-6" />
+												)}
 											</RaisedButton>
 										</div>
 										<div className="absolute -left-[3.25rem] lg:-left-[3.5rem] lg:top-2 top-1.5">
