@@ -365,13 +365,13 @@ func message(actionType ActionType, payload interface{}) *Action {
 }
 
 // Encode a slice of actions into a JSON byte slice
-func encodeActions(actions []*Action) []byte {
+func encodeActions(actions []*Action) ([]byte, error) {
 	jsonBytes, err := json.Marshal(actions)
 	if err != nil {
 		slog.Error("error marshalling events", "error", err)
-		return nil
+		return nil, err
 	}
-	return jsonBytes
+	return jsonBytes, nil
 }
 
 // Decode a JSON byte slice into an action
