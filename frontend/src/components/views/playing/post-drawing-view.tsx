@@ -32,12 +32,12 @@ export function PostDrawingView() {
 
 	return (
 		<HillScene className="px-4 lg:px-0">
-			<div className="absolute lg:top-10 lg:right-10 top-4 right-4">
+			<div className="absolute lg:top-10 lg:right-10 top-2 right-2">
 				<Timer endTime={deadline} />
 			</div>
 			<h1 className="text-xl lg:text-2xl lg:py-2">
 				The word was:{" "}
-				<span className="lg:text-3xl text-2xl font-bold">{word}</span>
+				<span className="lg:text-3xl text-xl font-bold">{word}</span>
 			</h1>
 			<Podium players={sortedPlayers.slice(0, 3)} />
 			{sortedPlayers.length > 3 && (
@@ -89,7 +89,14 @@ function Podium({ players }: { players: Player[] }) {
 
 function Leaderboard({ players }: { players: Player[] }) {
 	return (
-		<div className="realtive z-50 w-full max-w-xl overflow-x-hidden scrollbar-hide max-h-56 bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex flex-col items-center justify-start px-10 py-6 gap-3 overflow-y-auto">
+		<div
+			className={cn(
+				"relative z-50 flex flex-col items-center justify-start overflow-x-hidden overflow-y-auto",
+				"w-full max-w-2xl max-h-80 h-[var(--max-leaderboard-height)] gap-3",
+				"lg:px-10 p-4 lg:py-6 ",
+				"bg-zinc-400/10 border-4 border-border border-dashed rounded-lg scrollbar-hide"
+			)}
+		>
 			{players.map((player, index) => (
 				<LeaderboardPlace key={player.id} player={player} index={index} />
 			))}
@@ -111,18 +118,18 @@ function LeaderboardPlace({
 		useSelector((state: RootState) => state.game.pointsAwarded[player.id]) ?? 0;
 
 	return (
-		<div className="flex gap-6 w-full items-center">
+		<div className="flex lg:gap-6 gap-2 w-full items-center">
 			<p className="text-lg font-bold text-foreground">{index + 4}th</p>
 			<img
 				className="rounded-lg aspect-square relative border-2 w-10"
 				src={avatarSvg}
 			/>
-			<p className="text-xl font-bold text-foreground">{name}</p>
+			<p className="text-xl font-bold text-foreground truncate">{name}</p>
 			<div className="relative text-lg font-medium text-foreground ml-auto">
 				{points > 0 && (
-					<p className="absolute -top-1.5 right-24 bg-white rounded-lg px-3 py-1.5">
+					<div className="absolute lg:text-base text-sm flex -top-1 lg:-top-1.5 right-20 bg-white border border-zinc-300 rounded-lg shadow-sm lg:px-3 px-2 lg:py-1.5 py-1">
 						+{points}
-					</p>
+					</div>
 				)}
 				<AnimatedNumber value={score} previous={score - points} /> pts
 			</div>
@@ -188,7 +195,10 @@ function PodiumPlace({
 					src={avatarSvg}
 				/>
 			</motion.div>
-			<motion.p layout className="text-lg lg:text-xl font-bold text-foreground truncate max-w-full">
+			<motion.p
+				layout
+				className="text-lg lg:text-xl font-bold text-foreground truncate max-w-full"
+			>
 				{name}
 			</motion.p>
 			<motion.div
@@ -229,12 +239,18 @@ function PodiumPlace({
 function AwardedPointsCard({ points }: { points: number }) {
 	return (
 		<motion.div
-			className="relative mt-2.5 bg-white border border-gray-300 rounded-lg px-3 py-1.5 shadow-lg"
+			className="relative mt-2.5 bg-white border border-zinc-300 rounded-lg px-3 py-1.5 shadow-lg"
 			initial={{ opacity: 0, y: -6 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ delay: 0.7, duration: 0.2, ease: "easeInOut" }}
 		>
-			<div className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[10px] border-b-white" />
+			<div
+				className={cn(
+					"absolute top-[-10px] left-1/2 transform -translate-x-1/2",
+					"w-0 h-0",
+					"border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[10px] border-b-white"
+				)}
+			/>
 			<p className="text-md">+ {points}</p>
 		</motion.div>
 	);

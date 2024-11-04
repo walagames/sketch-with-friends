@@ -58,6 +58,13 @@ body {
 			100dvh - calc(100vw * var(--aspect-ratio)) - var(--header-height) -
 				var(--tools-height)
 		);
+
+		--podium-height: 160px;
+		--word-height: 10rem;
+
+		--max-leaderboard-height: calc(
+			100dvh - var(--podium-height) - var(--word-height) - 14rem
+		);
 	}
 
 	.dark {
