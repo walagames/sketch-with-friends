@@ -63,14 +63,14 @@ export function CodeForm() {
 											field.onChange(e.target.value.toUpperCase());
 										}}
 									/>
-									<div className="absolute -right-14 lg:top-2 top-0">
+									<div className="absolute -right-[3.25rem] lg:-right-14 lg:top-2 top-0.5">
 										<RaisedButton
 											type="submit"
 											shift={false}
 											variant="action"
 											size="icon"
 										>
-											<StepForwardIcon className="w-6 h-6" />
+											<StepForwardIcon className="size-5 lg:size-6" />
 										</RaisedButton>
 									</div>
 								</div>

@@ -10,8 +10,7 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
 import { useDispatch, useSelector } from "react-redux";
-import { RaisedButton } from "@/components/ui/raised-button";
-import { SendIcon, UsersIcon } from "lucide-react";
+import { UsersIcon } from "lucide-react";
 import { RaisedInput } from "@/components/ui/raised-input";
 
 export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
@@ -40,23 +39,26 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 	return (
 		<div
 			className={cn(
-				"flex flex-col lg:h-full xl:w-[18rem] w-full xl:max-h-[660px] min-h-[12rem] px-1.5 lg:px-0",
+				"flex flex-col lg:h-full xl:w-[20rem]  w-full xl:max-h-[660px] min-h-[12rem] px-1.5 lg:px-0 relative z-30",
 				isGuessing
 					? "h-[var(--max-chat-height)]"
 					: "h-[var(--max-chat-height-drawing)]"
 			)}
 		>
-			<div className="flex w-full justify-between items-center lg:h-14 pt-3 pb-1">
-				<div className="flex gap-2 text-lg lg:text-xl font-bold items-center ">
+			<div className="flex w-full justify-between items-center lg:items-end lg:h-12 xl:mt-1 py-1.5 lg:py-2  px-0.5">
+				<div className="flex gap-2 lg:text-xl font-bold items-center ">
 					Round {currentRound} of {totalRounds}
 				</div>
-				<div className="flex gap-2 text-xl font-bold items-center">
-					<UsersIcon className="h-5 w-5 mb-1" /> {Object.keys(players).length}
+				<div className="flex gap-1.5 text-lg lg:text-xl font-bold items-center">
+					<UsersIcon className="size-5 mb-1" /> {Object.keys(players).length}
 				</div>
 			</div>
 			<ul
 				ref={listRef}
-				className=" flex-1 w-full flex gap-3 bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex-col items-start justify-start p-5 overflow-y-auto overflow-x-hidden scrollbar-hide"
+				className={cn(
+					"flex-1 w-full flex gap-3 lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-5 overflow-y-auto overflow-x-hidden scrollbar-hide",
+					!isGuessing && "lg:mb-4"
+				)}
 			>
 				{guesses.map((guess) => (
 					<GuessCard
@@ -67,7 +69,7 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 				))}
 			</ul>
 			{isGuessing && (
-				<div className="lg:mt-6 mt-4 w-full">
+				<div className="mt-4 w-full">
 					{hasGuessedCorrect ? (
 						<div className="font-bold w-full text-xl bg-background rounded-lg h-14 px-4 py-3.5 -translate-y-1.5 translate-x-1.5 shadow-accent">
 							<span className="translate-y-0.5 flex items-center justify-center gap-2">
@@ -200,11 +202,11 @@ export function GuessForm() {
 										placeholder="Guess"
 										{...field}
 									/>
-									<div className="">
+									{/* <div className="">
 										<RaisedButton shift={false} variant="action" size="icon">
-											<SendIcon className="w-6 h-6" />
+											<SendIcon className="lg:size-6 size-5" />
 										</RaisedButton>
-									</div>
+									</div> */}
 								</div>
 							</FormControl>
 						</FormItem>

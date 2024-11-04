@@ -26,7 +26,7 @@ export function PickingGuesserView() {
 				<Timer endTime={deadline} />
 			</div>
 			<img src={avatarSvg} className="w-20 h-20 rounded-lg shadow-accent" />
-			<h1 className="text-3xl font-bold">
+			<h1 className="text-2xl lg:text-3xl font-bold px-8 lg:px-0 text-center">
 				{pickingPlayer.name} is picking a word
 			</h1>
 			<AnimatePresence>

@@ -188,7 +188,7 @@ function PodiumPlace({
 					src={avatarSvg}
 				/>
 			</motion.div>
-			<motion.p layout className="text-lg lg:text-xl font-bold text-foreground">
+			<motion.p layout className="text-lg lg:text-xl font-bold text-foreground truncate max-w-full">
 				{name}
 			</motion.p>
 			<motion.div

@@ -13,9 +13,9 @@ export const BobbingDoodle = forwardRef<
 	return (
 		<motion.img
 			className={cn(
-				"absolute w-36",
+				props.className,
 				props.hideOnSmallViewports && "hidden lg:block",
-				props.className
+				"absolute w-36"
 			)}
 			ref={ref}
 			animate={{ y: [0, 15, 0] }}

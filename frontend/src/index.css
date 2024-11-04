@@ -44,14 +44,20 @@ body {
 		--ring: 240 10% 3.9%;
 
 		--hills: 146.8 100% 50%;
+		--background-main: #aef1fe;
 
 		--radius: 0.6rem;
 
 		--aspect-ratio: 0.75;
-		--header-height: 4rem;
+		--header-height: 4.25rem;
 		--tools-height: 3.75rem;
-		--max-chat-height: calc(100dvh - calc(100vw * var(--aspect-ratio)) - var(--header-height));
-		--max-chat-height-drawing: calc(100dvh - calc(100vw * var(--aspect-ratio)) - var(--header-height) - var(--tools-height));
+		--max-chat-height: calc(
+			100dvh - calc(100vw * var(--aspect-ratio)) - var(--header-height)
+		);
+		--max-chat-height-drawing: calc(
+			100dvh - calc(100vw * var(--aspect-ratio)) - var(--header-height) -
+				var(--tools-height)
+		);
 	}
 
 	.dark {

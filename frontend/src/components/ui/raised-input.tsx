@@ -7,7 +7,7 @@ export const RaisedInput = forwardRef<
   React.InputHTMLAttributes<HTMLInputElement>
 >(({ placeholder, className, ...props }, ref) => {
 	return (
-		<div className="bg-secondary-foreground rounded-lg w-full">
+		<div className="bg-secondary-foreground rounded-lg w-full mr-0.5">
 			<Input
 				{...props}
 				ref={ref}

@@ -19,17 +19,17 @@ export function DrawingDrawerView() {
 
 	return (
 		<HillScene>
-			<div className="mx-auto mb-auto xl:my-auto flex flex-col lg:gap-2 gap-1 items-center relative z-50">
-				<div className="flex w-full h-full items-start justify-center xl:gap-6 flex-col xl:flex-row">
+			<div className="mx-auto mb-auto xl:my-auto flex flex-col lg:gap-2 gap-1  relative z-50">
+				<div className="flex w-full h-full xl:items-start items-center justify-center lg:gap-4 flex-col xl:flex-row relative">
 					<div className="flex items-center justify-center gap-6">
 						<div className="py-20 mt-auto hidden lg:block">
 							<ColorSliders />
 						</div>
-						<div className="flex flex-col items-center justify-center max-w-[800px]">
-							<div className="flex justify-between w-full items-center py-2">
-								<div className="text-lg lg:text-2xl">
+						<div className="flex flex-col items-center justify-center max-w-[800px] w-screen lg:w-auto">
+							<div className="flex justify-between w-full items-center lg:items-end py-2 px-2">
+								<div className="lg:text-2xl">
 									You're drawing:{" "}
-									<span className="text-xl lg:text-3xl font-bold">
+									<span className="text-lg lg:text-2xl font-bold">
 										{selectedWord}
 									</span>
 								</div>
@@ -45,22 +45,22 @@ export function DrawingDrawerView() {
 						</div>
 					</div>
 					<Guesses />
+					<AnimatePresence>
+						<BobbingDoodle
+							key="rain-cloud-1"
+							duration={5}
+							className="absolute xl:-top-[10%] xl:-left-[20%] bottom-[6%] right-[10%] w-[8rem] xl:w-[9rem]"
+							src="/doodles/rain-cloud.png"
+						/>
+						<BobbingDoodle
+							key="rain-cloud-2"
+							duration={4}
+							className="absolute hidden lg:block w-[7rem] xl:top-[12%] xl:-right-[20%]"
+							src="/doodles/rain-cloud.png"
+						/>
+					</AnimatePresence>
 				</div>
 			</div>
-			<AnimatePresence>
-				<BobbingDoodle
-					key="rain-cloud-1"
-					duration={4}
-					className="absolute hidden lg:block top-[2%] right-[4%] w-[7rem]"
-					src="/doodles/rain-cloud.png"
-				/>
-				<BobbingDoodle
-					key="rain-cloud-2"
-					duration={4}
-					className="absolute hidden lg:block top-[4%] left-[5%] w-[7rem] xl:top-[4%] xl:left-[5%]"
-					src="/doodles/rain-cloud.png"
-				/>
-			</AnimatePresence>
 
 			<AirplaneDoodle
 				skipTransition

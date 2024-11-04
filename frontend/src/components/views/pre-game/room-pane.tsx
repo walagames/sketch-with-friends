@@ -58,7 +58,7 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 					</div>
 				)}
 			</div>
-			<div className="w-full lg:aspect-[4/3] flex-1 bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex items-start justify-center lg:p-6 px-4 pt-2">
+			<div className="w-full lg:aspect-[4/3] flex-1 bg-[#aef1fe]/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex items-start justify-center lg:p-6 px-4 pt-2">
 				{showSettings ? (
 					<RoomSettingsForm />
 				) : (

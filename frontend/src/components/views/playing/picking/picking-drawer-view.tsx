@@ -23,7 +23,7 @@ export function PickingDrawerView() {
 			</div>
 			<div className="flex flex-col items-center justify-center my-auto gap-12">
 				<h1 className="text-3xl font-bold">Pick a word</h1>
-				<div className="flex items-center justify-center gap-8 px-4">
+				<div className="flex items-center justify-center lg:gap-8 gap-4 px-4 flex-wrap">
 					{wordOptions.map((word) => (
 						<RaisedButton
 							size="lg"
@@ -44,6 +44,7 @@ export function PickingDrawerView() {
 					key="rain-cloud-1"
 				/>
 				<BobbingDoodle
+					className="lg:w-36 w-28 absolute"
 					duration={5}
 					style={{ top: "8%", left: "20%" }}
 					src="/doodles/rain-cloud.png"
@@ -60,12 +61,21 @@ export function PickingDrawerView() {
 
 			<AirplaneDoodle
 				skipTransition={!isFirstPhase}
+				style={
+					isFirstPhase
+						? {}
+						: { left: "45%", top: "65%", rotate: 30 as any, opacity: 1 }
+				}
 				startAt={
 					isFirstPhase
 						? { left: "-15%", top: "55%", rotate: 20, opacity: 0 }
-						: { left: "45%", top: "65%", rotate: 30, opacity: 0 }
+						: {}
 				}
-				animateTo={{ left: "45%", top: "65%", rotate: 30, opacity: 1 }}
+				animateTo={
+					isFirstPhase
+						? { left: "45%", top: "65%", rotate: 30, opacity: 1 }
+						: {}
+				}
 				leaveTo={{ left: "185%", top: "55%", rotate: 30 }}
 			/>
 		</HillScene>
