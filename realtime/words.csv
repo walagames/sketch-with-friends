@@ -1,182 +1,1401 @@
 category,word,difficulty
-animals,elephant,easy
-animals,penguin,easy
-animals,giraffe,easy
-animals,octopus,medium
-animals,kangaroo,medium
-objects,umbrella,easy
-objects,microphone,medium
-objects,telescope,medium
-objects,windmill,medium
-objects,helicopter,medium
-food,pizza,easy
-food,hamburger,easy
-food,pineapple,medium
-food,spaghetti,medium
-actions,dancing,medium
-actions,swimming,easy
-actions,skiing,medium
-actions,juggling,hard
-nature,rainbow,easy
-nature,volcano,medium
-nature,waterfall,medium
-nature,tornado,hard
-places,lighthouse,medium
-places,castle,medium
-places,pyramid,medium
-characters,superhero,medium
-characters,wizard,medium
-characters,robot,easy
-characters,ninja,medium
-fantasy,dragon,medium
-fantasy,unicorn,medium
-fantasy,mermaid,medium
-sports,basketball,easy
-sports,tennis,easy
-sports,bowling,medium
-vehicles,bicycle,easy
-vehicles,sailboat,medium
-vehicles,rocket,medium
-clothing,sunglasses,easy
-clothing,scarf,easy
-clothing,crown,easy
-category,word,difficulty
-animals,elephant,easy
-animals,penguin,easy
-animals,giraffe,easy
-animals,octopus,medium
-animals,kangaroo,medium
-animals,zebra,easy
-animals,dolphin,medium
-animals,butterfly,easy
-animals,rhinoceros,hard
+animals,aardvark,hard
+animals,albatross,medium
+animals,alpaca,medium
+animals,anaconda,medium
+animals,anglerfish,hard
+animals,anteater,medium
+animals,antelope,medium
+animals,armadillo,medium
+animals,axolotl,hard
+animals,baboon,medium
+animals,badger,medium
+animals,barracuda,medium
+animals,basilisk,hard
+animals,beagle,medium
+animals,bison,medium
+animals,bloodhound,hard
+animals,blowfish,medium
+animals,boar,medium
+animals,bobcat,medium
+animals,buffalo,medium
+animals,bulldog,medium
+animals,bullfrog,medium
+animals,bumblebee,easy
+animals,bunny,easy
+animals,buzzard,medium
+animals,capybara,hard
+animals,caribou,medium
+animals,caterpillar,easy
+animals,catfish,medium
+animals,centipede,medium
+animals,chameleon,medium
 animals,cheetah,medium
+animals,chickadee,medium
+animals,chihuahua,medium
+animals,chinchilla,medium
+animals,chipmunk,easy
+animals,cicada,medium
+animals,clownfish,medium
+animals,cobra,medium
+animals,cockatoo,medium
+animals,cockroach,easy
+animals,coyote,medium
+animals,crab,easy
+animals,cricket,easy
 animals,crocodile,medium
-animals,panda,easy
-animals,gorilla,medium
+animals,crow,easy
+animals,cuttlefish,hard
+animals,dachshund,medium
+animals,dalmatian,medium
+animals,dolphin,medium
+animals,donkey,easy
+animals,dragonfly,easy
+animals,duck,easy
+animals,eagle,medium
+animals,earthworm,easy
+animals,echidna,hard
+animals,eel,medium
+animals,elephant,easy
+animals,elk,medium
+animals,emu,medium
+animals,ferret,medium
+animals,firefly,easy
 animals,flamingo,medium
-objects,umbrella,easy
-objects,microphone,medium
-objects,telescope,medium
-objects,windmill,medium
-objects,helicopter,medium
-objects,hourglass,medium
-objects,compass,medium
-objects,microscope,hard
-objects,thermometer,medium
-objects,binoculars,hard
-objects,calculator,medium
-objects,typewriter,hard
-objects,telescope,medium
-objects,chandelier,hard
-food,pizza,easy
-food,hamburger,easy
-food,pineapple,medium
-food,spaghetti,medium
-food,taco,easy
-food,sandwich,easy
-food,popcorn,easy
-food,doughnut,medium
-food,watermelon,medium
-food,ice cream,easy
-food,pancake,easy
-food,burrito,medium
-food,croissant,medium
-actions,dancing,medium
-actions,swimming,easy
-actions,skiing,medium
-actions,juggling,hard
-actions,running,easy
-actions,climbing,medium
-actions,painting,medium
-actions,singing,easy
-actions,skateboarding,hard
-actions,diving,medium
-actions,surfing,medium
-actions,gardening,medium
-actions,cooking,medium
-nature,rainbow,easy
-nature,volcano,medium
-nature,waterfall,medium
-nature,tornado,hard
-nature,mountain,easy
-nature,glacier,hard
-nature,desert,medium
-nature,forest,easy
-nature,island,medium
-nature,canyon,medium
-nature,ocean,easy
-nature,beach,easy
-nature,river,easy
-places,lighthouse,medium
-places,castle,medium
-places,pyramid,medium
-places,museum,medium
-places,airport,medium
-places,stadium,medium
-places,hospital,medium
-places,library,medium
-places,theater,medium
-places,factory,medium
-places,aquarium,medium
-places,skyscraper,medium
-characters,superhero,medium
-characters,wizard,medium
-characters,robot,easy
-characters,ninja,medium
-characters,princess,easy
-characters,pirate,easy
-characters,astronaut,medium
-characters,detective,medium
-characters,knight,medium
-characters,cowboy,easy
-characters,fairy,easy
-characters,vampire,medium
-fantasy,dragon,medium
-fantasy,unicorn,medium
-fantasy,mermaid,medium
-fantasy,phoenix,hard
-fantasy,centaur,hard
-fantasy,griffin,hard
-fantasy,goblin,medium
-fantasy,wizard,medium
-fantasy,troll,medium
-fantasy,elf,medium
-fantasy,ghost,easy
-fantasy,giant,medium
-sports,basketball,easy
-sports,tennis,easy
-sports,bowling,medium
-sports,volleyball,medium
-sports,baseball,easy
-sports,soccer,easy
-sports,hockey,medium
-sports,golf,easy
-sports,rugby,hard
-sports,gymnastics,hard
-sports,wrestling,medium
-sports,badminton,medium
-vehicles,bicycle,easy
-vehicles,sailboat,medium
-vehicles,rocket,medium
-vehicles,submarine,medium
-vehicles,motorcycle,medium
-vehicles,airplane,easy
-vehicles,train,easy
-vehicles,tractor,medium
-vehicles,ambulance,medium
-vehicles,spaceship,medium
-vehicles,helicopter,medium
-vehicles,skateboard,easy
-clothing,sunglasses,easy
-clothing,scarf,easy
-clothing,crown,easy
-clothing,necklace,easy
-clothing,boots,easy
-clothing,gloves,easy
-clothing,umbrella,easy
-clothing,backpack,easy
-clothing,hat,easy
-clothing,sweater,easy
-clothing,jacket,easy
-clothing,sandals,easy
+animals,flounder,medium
+animals,fox,medium
+animals,gazelle,medium
+animals,gecko,medium
+animals,gerbil,medium
+animals,gibbon,medium
+animals,giraffe,easy
+animals,goat,easy
+animals,goldfish,easy
+animals,goose,easy
+animals,gorilla,medium
+animals,grasshopper,easy
+animals,greyhound,medium
+animals,grizzly,medium
+animals,groundhog,medium
+animals,guinea pig,easy
+animals,hamster,easy
+animals,hedgehog,medium
+animals,hermit crab,medium
+animals,hippo,medium
+animals,honeybee,easy
+animals,hornet,medium
+animals,horse,easy
+animals,hummingbird,medium
+animals,hyena,medium
+animals,iguana,medium
+animals,impala,medium
+animals,jellyfish,medium
+animals,kangaroo,medium
+animals,kingfisher,medium
+animals,koala,medium
+animals,komodo dragon,hard
+animals,lemur,medium
+animals,leopard,medium
+animals,lion,medium
+animals,lizard,easy
+animals,llama,medium
+animals,lobster,medium
+animals,lynx,medium
+animals,macaw,medium
+animals,manatee,medium
+animals,manta ray,medium
+animals,meerkat,medium
+animals,millipede,medium
+animals,mockingbird,medium
+animals,mongoose,medium
+animals,monkey,easy
+animals,moose,medium
+animals,moth,easy
+animals,mouse,easy
+animals,narwhal,hard
+animals,octopus,medium
+animals,opossum,medium
+animals,orangutan,medium
+animals,orca,medium
+animals,ostrich,medium
+animals,otter,medium
+animals,owl,medium
+animals,oyster,medium
+animals,panda,easy
+animals,pangolin,hard
+animals,panther,medium
+animals,parakeet,medium
+animals,peacock,medium
+animals,pelican,medium
+animals,penguin,easy
+animals,pigeon,easy
+animals,porcupine,medium
+animals,praying mantis,medium
+animals,pufferfish,medium
+animals,puma,medium
+animals,python,medium
+animals,quail,medium
+animals,rabbit,easy
+animals,raccoon,medium
+animals,rat,easy
+animals,raven,medium
+animals,rhino,medium
+animals,rooster,easy
+animals,salamander,medium
+animals,salmon,medium
+animals,scorpion,medium
+animals,seagull,easy
+animals,seahorse,medium
+animals,seal,medium
+animals,shark,medium
+animals,sheep,easy
+animals,shrimp,easy
+animals,skunk,medium
+animals,sloth,medium
+animals,snail,easy
+animals,snake,medium
+animals,spider,easy
+animals,squid,medium
+animals,squirrel,easy
+animals,starfish,medium
+animals,stingray,medium
+animals,swan,easy
+animals,swordfish,medium
+animals,tadpole,easy
+animals,tarantula,medium
+animals,termite,easy
+animals,tiger,medium
+animals,toad,easy
+animals,toucan,medium
+animals,turkey,easy
+animals,turtle,easy
+animals,vulture,medium
+animals,walrus,medium
+animals,wasp,easy
+animals,weasel,medium
+animals,whale,medium
+animals,wolf,medium
+animals,wolverine,medium
+animals,wombat,medium
+animals,woodpecker,medium
+animals,worm,easy
+animals,zebra,easy
+food_and_drink,apple,easy
+food_and_drink,apricot,easy
+food_and_drink,asparagus,medium
+food_and_drink,avocado,easy
+food_and_drink,bacon,easy
+food_and_drink,bagel,easy
+food_and_drink,baguette,easy
+food_and_drink,banana,easy
+food_and_drink,beans,easy
+food_and_drink,beef,easy
+food_and_drink,beet,easy
+food_and_drink,blackberry,easy
+food_and_drink,blueberry,easy
+food_and_drink,bread,easy
+food_and_drink,broccoli,easy
+food_and_drink,burger,easy
+food_and_drink,burrito,medium
+food_and_drink,butter,easy
+food_and_drink,cake,easy
+food_and_drink,candy,easy
+food_and_drink,carrot,easy
+food_and_drink,cauliflower,easy
+food_and_drink,celery,easy
+food_and_drink,cereal,easy
+food_and_drink,cheese,easy
+food_and_drink,cherry,easy
+food_and_drink,chicken,easy
+food_and_drink,chili,easy
+food_and_drink,chips,easy
+food_and_drink,chocolate,easy
+food_and_drink,coconut,easy
+food_and_drink,coffee,easy
+food_and_drink,cookie,easy
+food_and_drink,corn,easy
+food_and_drink,croissant,easy
+food_and_drink,cucumber,easy
+food_and_drink,cupcake,easy
+food_and_drink,curry,medium
+food_and_drink,donut,easy
+food_and_drink,dumpling,medium
+food_and_drink,egg,easy
+food_and_drink,eggplant,easy
+food_and_drink,falafel,medium
+food_and_drink,fig,medium
+food_and_drink,fish,easy
+food_and_drink,french fries,easy
+food_and_drink,garlic,easy
+food_and_drink,ginger,easy
+food_and_drink,grape,easy
+food_and_drink,grapefruit,easy
+food_and_drink,hamburger,easy
+food_and_drink,honey,easy
+food_and_drink,hotdog,easy
+food_and_drink,ice cream,easy
+food_and_drink,jam,easy
+food_and_drink,kebab,medium
+food_and_drink,ketchup,easy
+food_and_drink,kiwi,easy
+food_and_drink,lemon,easy
+food_and_drink,lettuce,easy
+food_and_drink,lime,easy
+food_and_drink,lollipop,easy
+food_and_drink,mango,easy
+food_and_drink,maple syrup,easy
+food_and_drink,marshmallow,easy
+food_and_drink,meatball,easy
+food_and_drink,melon,easy
+food_and_drink,milk,easy
+food_and_drink,mushroom,easy
+food_and_drink,noodles,easy
+food_and_drink,nuts,easy
+food_and_drink,olive,easy
+food_and_drink,onion,easy
+food_and_drink,orange,easy
+food_and_drink,pancake,easy
+food_and_drink,pasta,easy
+food_and_drink,peach,easy
+food_and_drink,peanut,easy
+food_and_drink,pear,easy
+food_and_drink,peas,easy
+food_and_drink,pepper,easy
+food_and_drink,pickle,easy
+food_and_drink,pie,easy
+food_and_drink,pineapple,easy
+food_and_drink,pizza,easy
+food_and_drink,plum,easy
+food_and_drink,popcorn,easy
+food_and_drink,popsicle,easy
+food_and_drink,potato,easy
+food_and_drink,pretzel,easy
+food_and_drink,pumpkin,easy
+food_and_drink,ramen,medium
+food_and_drink,raspberry,easy
+food_and_drink,rice,easy
+food_and_drink,salad,easy
+food_and_drink,sandwich,easy
+food_and_drink,sausage,easy
+food_and_drink,soda,easy
+food_and_drink,soup,easy
+food_and_drink,spaghetti,easy
+food_and_drink,steak,easy
+food_and_drink,strawberry,easy
+food_and_drink,sushi,medium
+food_and_drink,taco,easy
+food_and_drink,tea,easy
+food_and_drink,toast,easy
+food_and_drink,tomato,easy
+food_and_drink,waffle,easy
+food_and_drink,watermelon,easy
+food_and_drink,wine,medium
+food_and_drink,yogurt,easy
+food_and_drink,zucchini,easy
+household_items,alarm clock,easy
+household_items,armchair,easy
+household_items,backpack,easy
+household_items,bag,easy
+household_items,basket,easy
+household_items,bathtub,easy
+household_items,bed,easy
+household_items,blanket,easy
+household_items,blender,easy
+household_items,book,easy
+household_items,bookshelf,easy
+household_items,broom,easy
+household_items,brush,easy
+household_items,bucket,easy
+household_items,calendar,easy
+household_items,candle,easy
+household_items,chair,easy
+household_items,chandelier,medium
+household_items,clock,easy
+household_items,clothes hanger,easy
+household_items,couch,easy
+household_items,curtain,easy
+household_items,cushion,easy
+household_items,desk,easy
+household_items,doorbell,easy
+household_items,doorknob,easy
+household_items,doormat,easy
+household_items,dresser,easy
+household_items,fan,easy
+household_items,fence,easy
+household_items,fireplace,easy
+household_items,fridge,easy
+household_items,garage,easy
+household_items,garden,easy
+household_items,gate,easy
+household_items,hammer,easy
+household_items,hose,easy
+household_items,kettle,easy
+household_items,key,easy
+household_items,lamp,easy
+household_items,laundry basket,easy
+household_items,light bulb,easy
+household_items,light switch,easy
+household_items,lock,easy
+household_items,mailbox,easy
+household_items,mirror,easy
+household_items,mop,easy
+household_items,newspaper,easy
+household_items,paintbrush,easy
+household_items,pillow,easy
+household_items,plant,easy
+household_items,plunger,easy
+household_items,radio,easy
+household_items,rake,easy
+household_items,remote control,easy
+household_items,rug,easy
+household_items,scissors,easy
+household_items,shelf,easy
+household_items,shovel,easy
+household_items,shower,easy
+household_items,sink,easy
+household_items,soap,easy
+household_items,sofa,easy
+household_items,sponge,easy
+household_items,spoon,easy
+household_items,stairs,easy
+household_items,table,easy
+household_items,telephone,easy
+household_items,television,easy
+household_items,tissue box,easy
+household_items,toilet,easy
+household_items,toothbrush,easy
+household_items,towel,easy
+household_items,trash can,easy
+household_items,umbrella,easy
+household_items,vacuum cleaner,easy
+household_items,vase,easy
+household_items,washing machine,easy
+household_items,window,easy
+vehicles_transportation,airplane,easy
+vehicles_transportation,ambulance,medium
+vehicles_transportation,bicycle,easy
+vehicles_transportation,boat,easy
+vehicles_transportation,bus,easy
+vehicles_transportation,car,easy
+vehicles_transportation,firetruck,easy
+vehicles_transportation,helicopter,medium
+vehicles_transportation,hot air balloon,medium
+vehicles_transportation,jet ski,medium
+vehicles_transportation,limousine,medium
+vehicles_transportation,motorcycle,medium
+vehicles_transportation,police car,easy
+vehicles_transportation,rocket,medium
+vehicles_transportation,roller skates,medium
+vehicles_transportation,sailboat,easy
+vehicles_transportation,scooter,easy
+vehicles_transportation,ship,medium
+vehicles_transportation,skateboard,easy
+vehicles_transportation,submarine,medium
+vehicles_transportation,tank,medium
+vehicles_transportation,taxi,easy
+vehicles_transportation,train,easy
+vehicles_transportation,tram,medium
+vehicles_transportation,truck,easy
+vehicles_transportation,van,easy
+clothing_accessories,belt,easy
+clothing_accessories,boots,easy
+clothing_accessories,bow tie,easy
+clothing_accessories,bracelet,easy
+clothing_accessories,cap,easy
+clothing_accessories,coat,easy
+clothing_accessories,crown,easy
+clothing_accessories,dress,easy
+clothing_accessories,earrings,easy
+clothing_accessories,glasses,easy
+clothing_accessories,gloves,easy
+clothing_accessories,hat,easy
+clothing_accessories,headband,easy
+clothing_accessories,jacket,easy
+clothing_accessories,jeans,easy
+clothing_accessories,mask,easy
+clothing_accessories,necklace,easy
+clothing_accessories,pants,easy
+clothing_accessories,purse,easy
+clothing_accessories,ring,easy
+clothing_accessories,scarf,easy
+clothing_accessories,shirt,easy
+clothing_accessories,shoes,easy
+clothing_accessories,shorts,easy
+clothing_accessories,skirt,easy
+clothing_accessories,socks,easy
+clothing_accessories,sunglasses,easy
+clothing_accessories,sweater,easy
+clothing_accessories,tie,easy
+clothing_accessories,wallet,easy
+clothing_accessories,watch,easy
+sports_equipment,baseball,easy
+sports_equipment,baseball bat,easy
+sports_equipment,basketball,easy
+sports_equipment,bowling ball,easy
+sports_equipment,boxing gloves,medium
+sports_equipment,cricket bat,medium
+sports_equipment,fishing rod,medium
+sports_equipment,football,easy
+sports_equipment,golf club,medium
+sports_equipment,hockey stick,medium
+sports_equipment,ping pong paddle,medium
+sports_equipment,pool cue,medium
+sports_equipment,rugby ball,medium
+sports_equipment,ski,medium
+sports_equipment,snowboard,medium
+sports_equipment,soccer ball,easy
+sports_equipment,tennis racket,easy
+sports_equipment,volleyball,easy
+weather_elements,blizzard,hard
+weather_elements,cloud,easy
+weather_elements,fog,medium
+weather_elements,hail,medium
+weather_elements,hurricane,hard
+weather_elements,lightning,medium
+weather_elements,rain,easy
+weather_elements,rainbow,easy
+weather_elements,snow,easy
+weather_elements,storm,medium
+weather_elements,sun,easy
+weather_elements,thunder,medium
+weather_elements,tornado,hard
+weather_elements,tsunami,hard
+weather_elements,wind,easy
+electronics_technology,battery,easy
+electronics_technology,calculator,easy
+electronics_technology,camera,easy
+electronics_technology,computer,easy
+electronics_technology,drone,hard
+electronics_technology,gamepad,medium
+electronics_technology,headphones,easy
+electronics_technology,keyboard,easy
+electronics_technology,laptop,easy
+electronics_technology,microphone,medium
+electronics_technology,monitor,easy
+electronics_technology,printer,medium
+electronics_technology,robot,medium
+electronics_technology,smartphone,medium
+electronics_technology,speaker,easy
+electronics_technology,tablet,medium
+electronics_technology,usb,easy
+electronics_technology,webcam,medium
+fantasy_mythology,centaur,hard
+fantasy_mythology,dragon,medium
+fantasy_mythology,fairy,medium
+fantasy_mythology,ghost,easy
+fantasy_mythology,giant,medium
+fantasy_mythology,goblin,medium
+fantasy_mythology,griffin,hard
+fantasy_mythology,hydra,hard
+fantasy_mythology,leprechaun,medium
+fantasy_mythology,mermaid,medium
+fantasy_mythology,minotaur,hard
+fantasy_mythology,monster,medium
+fantasy_mythology,phoenix,hard
+fantasy_mythology,unicorn,medium
+fantasy_mythology,vampire,medium
+fantasy_mythology,werewolf,medium
+fantasy_mythology,wizard,medium
+fantasy_mythology,zombie,medium
+emojis_expressions,angry,easy
+emojis_expressions,crying,easy
+emojis_expressions,happy,easy
+emojis_expressions,laugh,easy
+emojis_expressions,love,easy
+emojis_expressions,sad,easy
+emojis_expressions,scared,easy
+emojis_expressions,shocked,easy
+emojis_expressions,sick,easy
+emojis_expressions,sleepy,easy
+emojis_expressions,smile,easy
+emojis_expressions,wink,easy
+emojis_expressions,worried,easy
+internet_social_media,browser,easy
+internet_social_media,discord,easy
+internet_social_media,email,easy
+internet_social_media,emoji,easy
+internet_social_media,facebook,easy
+internet_social_media,instagram,easy
+internet_social_media,internet,easy
+internet_social_media,netflix,easy
+internet_social_media,password,medium
+internet_social_media,snapchat,easy
+internet_social_media,spotify,easy
+internet_social_media,tiktok,easy
+internet_social_media,twitter,easy
+internet_social_media,website,medium
+internet_social_media,wifi,easy
+internet_social_media,youtube,easy
+jobs_occupations,architect,medium
+jobs_occupations,artist,medium
+jobs_occupations,astronaut,hard
+jobs_occupations,baker,medium
+jobs_occupations,barber,medium
+jobs_occupations,builder,medium
+jobs_occupations,cashier,medium
+jobs_occupations,chef,medium
+jobs_occupations,dentist,medium
+jobs_occupations,detective,medium
+jobs_occupations,doctor,medium
+jobs_occupations,engineer,medium
+jobs_occupations,farmer,medium
+jobs_occupations,firefighter,medium
+jobs_occupations,judge,medium
+jobs_occupations,lawyer,medium
+jobs_occupations,mechanic,medium
+jobs_occupations,nurse,medium
+jobs_occupations,pilot,medium
+jobs_occupations,police officer,medium
+jobs_occupations,scientist,medium
+jobs_occupations,teacher,easy
+jobs_occupations,waiter,medium
+video_games,among us,easy
+video_games,angry birds,easy
+video_games,fortnite,easy
+video_games,mario,easy
+video_games,minecraft,easy
+video_games,pacman,easy
+video_games,pokemon,easy
+video_games,sonic,easy
+video_games,tetris,medium
+video_games,xbox,easy
+music_instruments,accordion,hard
+music_instruments,banjo,medium
+music_instruments,bass,medium
+music_instruments,cello,medium
+music_instruments,drum,easy
+music_instruments,flute,medium
+music_instruments,guitar,easy
+music_instruments,harmonica,medium
+music_instruments,harp,medium
+music_instruments,piano,easy
+music_instruments,saxophone,medium
+music_instruments,tambourine,easy
+music_instruments,trumpet,medium
+music_instruments,violin,medium
+music_instruments,xylophone,medium
+weapons_military,arrow,easy
+weapons_military,axe,easy
+weapons_military,bomb,medium
+weapons_military,bow,easy
+weapons_military,cannon,medium
+weapons_military,dagger,medium
+weapons_military,grenade,medium
+weapons_military,missile,medium
+weapons_military,shield,easy
+weapons_military,spear,medium
+weapons_military,sword,easy
+space_astronomy,alien,medium
+space_astronomy,asteroid,medium
+space_astronomy,comet,medium
+space_astronomy,earth,easy
+space_astronomy,galaxy,medium
+space_astronomy,mars,medium
+space_astronomy,meteor,medium
+space_astronomy,moon,easy
+space_astronomy,planet,medium
+space_astronomy,satellite,medium
+space_astronomy,space station,hard
+space_astronomy,star,easy
+space_astronomy,telescope,medium
+medical_health,bandage,easy
+medical_health,blood,medium
+medical_health,brain,medium
+medical_health,cast,medium
+medical_health,crutches,medium
+medical_health,hospital,medium
+medical_health,injection,medium
+medical_health,medicine,medium
+medical_health,pill,medium
+medical_health,stethoscope,medium
+medical_health,syringe,medium
+medical_health,thermometer,easy
+medical_health,wheelchair,easy
+medical_health,x-ray,medium
+superhero_characters,batman,easy
+superhero_characters,captain america,medium
+superhero_characters,flash,medium
+superhero_characters,hulk,easy
+superhero_characters,ironman,medium
+superhero_characters,spiderman,easy
+superhero_characters,superman,easy
+superhero_characters,thor,medium
+superhero_characters,wonder woman,medium
+disney_characters,aladdin,easy
+disney_characters,ariel,medium
+disney_characters,belle,medium
+disney_characters,cinderella,medium
+disney_characters,donald duck,easy
+disney_characters,elsa,easy
+disney_characters,goofy,easy
+disney_characters,mickey mouse,easy
+disney_characters,minnie mouse,easy
+disney_characters,olaf,easy
+disney_characters,peter pan,medium
+disney_characters,pinocchio,medium
+disney_characters,simba,medium
+disney_characters,winnie the pooh,easy
+holidays_celebrations,birthday,easy
+holidays_celebrations,christmas,easy
+holidays_celebrations,easter,easy
+holidays_celebrations,halloween,easy
+holidays_celebrations,new year,easy
+holidays_celebrations,thanksgiving,easy
+holidays_celebrations,valentine,easy
+holidays_celebrations,wedding,medium
+school_education,blackboard,easy
+school_education,classroom,medium
+school_education,diploma,medium
+school_education,eraser,easy
+school_education,exam,medium
+school_education,globe,medium
+school_education,homework,medium
+school_education,library,medium
+school_education,locker,medium
+school_education,notebook,easy
+school_education,pencil,easy
+school_education,ruler,easy
+school_education,student,easy
+school_education,textbook,easy
+school_education,whiteboard,easy
+sports_activities,archery,medium
+sports_activities,bowling,easy
+sports_activities,boxing,medium
+sports_activities,chess,easy
+sports_activities,diving,medium
+sports_activities,fencing,hard
+sports_activities,fishing,medium
+sports_activities,golf,medium
+sports_activities,gymnastics,hard
+sports_activities,hockey,medium
+sports_activities,karate,medium
+sports_activities,paintball,medium
+sports_activities,racing,medium
+sports_activities,rowing,medium
+sports_activities,rugby,medium
+sports_activities,running,easy
+sports_activities,sailing,medium
+sports_activities,skating,medium
+sports_activities,skiing,medium
+sports_activities,soccer,easy
+sports_activities,surfing,medium
+sports_activities,swimming,easy
+sports_activities,tennis,easy
+sports_activities,wrestling,medium
+sports_activities,yoga,medium
+construction_building,apartment,medium
+construction_building,arch,medium
+construction_building,bridge,medium
+construction_building,building,medium
+construction_building,bulldozer,medium
+construction_building,cement,medium
+construction_building,crane,medium
+construction_building,door,easy
+construction_building,elevator,medium
+construction_building,foundation,medium
+construction_building,ladder,easy
+construction_building,paint,easy
+construction_building,roof,easy
+construction_building,scaffold,hard
+construction_building,skyscraper,medium
+construction_building,wall,easy
+historical_items,armor,medium
+historical_items,castle,medium
+historical_items,catapult,medium
+historical_items,fossil,medium
+historical_items,knight,medium
+historical_items,mummy,medium
+historical_items,pyramid,medium
+historical_items,scroll,medium
+historical_items,throne,medium
+historical_items,treasure,medium
+emergency_safety,extinguisher,medium
+emergency_safety,first aid,medium
+emergency_safety,handcuffs,medium
+emergency_safety,life jacket,medium
+emergency_safety,siren,medium
+science_laboratory,atom,medium
+science_laboratory,beaker,medium
+science_laboratory,chemical,medium
+science_laboratory,dna,medium
+science_laboratory,experiment,medium
+science_laboratory,flask,medium
+science_laboratory,laboratory,medium
+science_laboratory,magnet,easy
+science_laboratory,microscope,medium
+science_laboratory,molecule,hard
+science_laboratory,test tube,medium
+movies_entertainment,cinema,medium
+movies_entertainment,director,medium
+movies_entertainment,film,medium
+movies_entertainment,movie,easy
+movies_entertainment,screen,easy
+movies_entertainment,spotlight,medium
+movies_entertainment,stage,medium
+movies_entertainment,theater,medium
+movies_entertainment,ticket,easy
+money_business,atm,easy
+money_business,bank,medium
+money_business,bitcoin,medium
+money_business,cash,easy
+money_business,check,easy
+money_business,coin,easy
+money_business,credit card,easy
+money_business,dollar,easy
+money_business,gold,easy
+money_business,money,easy
+money_business,piggy bank,easy
+money_business,safe,medium
+ancient_civilizations,aztec,hard
+ancient_civilizations,colosseum,hard
+ancient_civilizations,egypt,medium
+ancient_civilizations,gladiator,medium
+ancient_civilizations,hieroglyph,hard
+ancient_civilizations,pharaoh,medium
+ancient_civilizations,rome,medium
+ancient_civilizations,sphinx,hard
+ancient_civilizations,stonehenge,hard
+famous_landmarks,big ben,medium
+famous_landmarks,eiffel tower,medium
+famous_landmarks,golden gate bridge,medium
+famous_landmarks,great wall,hard
+famous_landmarks,leaning tower,medium
+famous_landmarks,mount rushmore,hard
+famous_landmarks,statue of liberty,medium
+famous_landmarks,taj mahal,hard
+famous_landmarks,white house,medium
+garden_plants,bamboo,medium
+garden_plants,cactus,easy
+garden_plants,daisy,easy
+garden_plants,flower,easy
+garden_plants,grass,easy
+garden_plants,leaf,easy
+garden_plants,palm tree,easy
+garden_plants,rose,easy
+garden_plants,sunflower,easy
+garden_plants,tree,easy
+garden_plants,tulip,easy
+garden_plants,vine,medium
+disasters_events,earthquake,medium
+disasters_events,explosion,medium
+disasters_events,fire,easy
+disasters_events,flood,medium
+disasters_events,volcano,medium
+gaming_equipment,arcade,medium
+gaming_equipment,console,medium
+gaming_equipment,controller,medium
+gaming_equipment,gameboy,medium
+gaming_equipment,joystick,medium
+gaming_equipment,nintendo,easy
+gaming_equipment,playstation,easy
+gaming_equipment,video game,medium
+tools_utilities,drill,easy
+tools_utilities,nail,easy
+tools_utilities,pliers,medium
+tools_utilities,saw,easy
+tools_utilities,screwdriver,easy
+tools_utilities,toolbox,easy
+tools_utilities,wrench,easy
+circus_carnival,acrobat,medium
+circus_carnival,balloon,easy
+circus_carnival,carousel,medium
+circus_carnival,circus,medium
+circus_carnival,clown,easy
+circus_carnival,ferris wheel,medium
+circus_carnival,juggler,medium
+circus_carnival,ringmaster,medium
+circus_carnival,tent,easy
+circus_carnival,trapeze,hard
+modern_technology,3d printer,hard
+modern_technology,artificial intelligence,hard
+modern_technology,bluetooth,medium
+modern_technology,microchip,medium
+modern_technology,virtual reality,hard
+beauty_cosmetics,comb,easy
+beauty_cosmetics,hairdryer,easy
+beauty_cosmetics,lipstick,easy
+beauty_cosmetics,makeup,medium
+beauty_cosmetics,nail polish,easy
+beauty_cosmetics,perfume,easy
+beauty_cosmetics,shampoo,easy
+geometric_shapes,circle,easy
+geometric_shapes,cone,medium
+geometric_shapes,cube,easy
+geometric_shapes,cylinder,medium
+geometric_shapes,hexagon,medium
+geometric_shapes,octagon,medium
+geometric_shapes,pentagon,medium
+geometric_shapes,rectangle,easy
+geometric_shapes,sphere,medium
+geometric_shapes,square,easy
+geometric_shapes,triangle,easy
+brands_logos,adidas,easy
+brands_logos,amazon,easy
+brands_logos,bmw,medium
+brands_logos,coca cola,easy
+brands_logos,disney,easy
+brands_logos,ebay,easy
+brands_logos,ferrari,medium
+brands_logos,google,easy
+brands_logos,honda,medium
+brands_logos,lego,easy
+brands_logos,mcdonalds,easy
+brands_logos,mercedes,medium
+brands_logos,microsoft,easy
+brands_logos,nike,easy
+brands_logos,pepsi,easy
+brands_logos,porsche,medium
+brands_logos,samsung,easy
+brands_logos,starbucks,easy
+brands_logos,tesla,medium
+brands_logos,toyota,medium
+brands_logos,uber,easy
+brands_logos,volkswagen,medium
+famous_people,beethoven,medium
+famous_people,biden,medium
+famous_people,einstein,medium
+famous_people,elvis,medium
+famous_people,gandhi,medium
+famous_people,jackson,medium
+famous_people,lincoln,medium
+famous_people,madonna,medium
+famous_people,mandela,medium
+famous_people,mozart,medium
+famous_people,obama,medium
+famous_people,picasso,medium
+famous_people,shakespeare,medium
+famous_people,trump,medium
+famous_people,washington,medium
+games_toys,battleship,medium
+games_toys,cards,easy
+games_toys,dice,easy
+games_toys,dominos,easy
+games_toys,jenga,easy
+games_toys,monopoly,medium
+games_toys,puzzle,easy
+games_toys,rubiks cube,medium
+games_toys,scrabble,medium
+games_toys,teddy bear,easy
+games_toys,uno,easy
+games_toys,yahtzee,medium
+war_combat,ammunition,medium
+war_combat,artillery,medium
+war_combat,battle,medium
+war_combat,battlefield,medium
+war_combat,bullet,medium
+war_combat,bunker,medium
+war_combat,fortress,medium
+war_combat,gun,medium
+war_combat,helmet,easy
+war_combat,knife,easy
+war_combat,soldier,medium
+war_combat,trebuchet,hard
+war_combat,trench,medium
+war_combat,warrior,medium
+war_combat,weapon,medium
+dance_performance,ballet,medium
+dance_performance,breakdance,medium
+dance_performance,dancer,medium
+dance_performance,disco,medium
+dance_performance,flamenco,hard
+dance_performance,hiphop,medium
+dance_performance,jazz,medium
+dance_performance,moonwalk,medium
+dance_performance,salsa,medium
+dance_performance,tango,medium
+dance_performance,waltz,medium
+medieval_fantasy,alchemist,hard
+medieval_fantasy,dungeon,medium
+medieval_fantasy,magic,medium
+medieval_fantasy,potion,medium
+medieval_fantasy,sorcerer,medium
+medieval_fantasy,spell,medium
+sports_equipment,bat,easy
+sports_equipment,dumbbell,easy
+sports_equipment,goal,easy
+sports_equipment,net,easy
+sports_equipment,paddle,easy
+sports_equipment,racket,easy
+sports_equipment,skis,medium
+sports_equipment,tennis ball,easy
+sports_equipment,whistle,easy
+party_celebration,banner,easy
+party_celebration,birthday cake,easy
+party_celebration,confetti,medium
+party_celebration,firework,medium
+party_celebration,gift,easy
+party_celebration,party hat,easy
+party_celebration,pinata,medium
+party_celebration,present,easy
+party_celebration,streamers,medium
+maritime_nautical,anchor,easy
+maritime_nautical,buoy,medium
+maritime_nautical,compass,medium
+maritime_nautical,dock,medium
+maritime_nautical,lighthouse,medium
+maritime_nautical,pier,medium
+maritime_nautical,pirate,medium
+maritime_nautical,sail,medium
+maritime_nautical,sailor,medium
+prehistoric_dinosaurs,brachiosaurus,hard
+prehistoric_dinosaurs,dinosaur,medium
+prehistoric_dinosaurs,pterodactyl,hard
+prehistoric_dinosaurs,raptor,medium
+prehistoric_dinosaurs,stegosaurus,medium
+prehistoric_dinosaurs,t-rex,medium
+prehistoric_dinosaurs,triceratops,medium
+writing_materials,chalk,easy
+writing_materials,crayon,easy
+writing_materials,envelope,easy
+writing_materials,ink,easy
+writing_materials,letter,easy
+writing_materials,marker,easy
+writing_materials,paper,easy
+writing_materials,pen,easy
+writing_materials,stamp,easy
+outdoor_recreation,binoculars,medium
+outdoor_recreation,campfire,easy
+outdoor_recreation,camping,medium
+outdoor_recreation,flashlight,easy
+outdoor_recreation,hiking,medium
+outdoor_recreation,map,easy
+outdoor_recreation,trail,easy
+transportation_infrastructure,airport,medium
+transportation_infrastructure,bus stop,easy
+transportation_infrastructure,crosswalk,easy
+transportation_infrastructure,gas station,medium
+transportation_infrastructure,highway,medium
+transportation_infrastructure,parking lot,easy
+transportation_infrastructure,railroad,medium
+transportation_infrastructure,road,easy
+transportation_infrastructure,sidewalk,easy
+transportation_infrastructure,street light,easy
+transportation_infrastructure,subway,medium
+transportation_infrastructure,traffic light,easy
+transportation_infrastructure,train station,medium
+transportation_infrastructure,tunnel,medium
+communication_devices,antenna,medium
+communication_devices,cell phone,easy
+communication_devices,fax machine,medium
+communication_devices,phone,easy
+communication_devices,walkie talkie,medium
+farm_agriculture,barn,easy
+farm_agriculture,chicken coop,medium
+farm_agriculture,corn field,medium
+farm_agriculture,farm,easy
+farm_agriculture,field,easy
+farm_agriculture,greenhouse,medium
+farm_agriculture,harvest,medium
+farm_agriculture,haystack,medium
+farm_agriculture,mill,medium
+farm_agriculture,silo,medium
+farm_agriculture,tractor,medium
+farm_agriculture,vegetable garden,medium
+farm_agriculture,windmill,medium
+music_performance,amplifier,medium
+music_performance,band,medium
+music_performance,concert,medium
+music_performance,conductor,medium
+music_performance,crowd,medium
+music_performance,disco ball,medium
+music_performance,dj,medium
+music_performance,karaoke,medium
+music_performance,musical note,easy
+music_performance,orchestra,hard
+music_performance,singer,medium
+bathroom_items,dental floss,easy
+bathroom_items,lotion,easy
+bathroom_items,razor,easy
+bathroom_items,toilet paper,easy
+bathroom_items,toothpaste,easy
+sports_venues,arena,medium
+sports_venues,baseball field,medium
+sports_venues,basketball court,medium
+sports_venues,boxing ring,medium
+sports_venues,football field,medium
+sports_venues,golf course,medium
+sports_venues,gym,medium
+sports_venues,hockey rink,medium
+sports_venues,pool,easy
+sports_venues,race track,medium
+sports_venues,skateboard park,medium
+sports_venues,soccer field,medium
+sports_venues,stadium,medium
+sports_venues,tennis court,medium
+art_supplies,canvas,easy
+art_supplies,colored pencil,easy
+art_supplies,easel,medium
+art_supplies,paint palette,medium
+art_supplies,sketch pad,easy
+art_supplies,watercolor,medium
+retail_shopping,cash register,medium
+retail_shopping,clothes rack,medium
+retail_shopping,counter,easy
+retail_shopping,fitting room,medium
+retail_shopping,mall,medium
+retail_shopping,price tag,easy
+retail_shopping,receipt,easy
+retail_shopping,shopping bag,easy
+retail_shopping,shopping cart,easy
+retail_shopping,store,medium
+retail_shopping,vending machine,medium
+retail_shopping,window display,medium
+fantasy_creatures,cerberus,hard
+fantasy_creatures,chimera,hard
+fantasy_creatures,demon,medium
+fantasy_creatures,kraken,hard
+fantasy_creatures,ogre,medium
+fantasy_creatures,troll,medium
+fantasy_creatures,witch,medium
+time_measurement,hourglass,medium
+time_measurement,stopwatch,easy
+time_measurement,sundial,medium
+time_measurement,timer,easy
+magic_circus,fortune teller,medium
+magic_circus,magician,medium
+magic_circus,tightrope walker,medium
+magic_circus,trapeze artist,hard
+power_energy,dam,medium
+power_energy,electricity,medium
+power_energy,generator,medium
+power_energy,power line,medium
+power_energy,solar panel,medium
+power_energy,wind turbine,medium
+criminal_justice,burglar,medium
+criminal_justice,court,medium
+criminal_justice,jail,medium
+criminal_justice,police,medium
+criminal_justice,prison,medium
+criminal_justice,thief,medium
+criminal_justice,witness,medium
+religious_spiritual,angel,medium
+religious_spiritual,buddha,medium
+religious_spiritual,church,medium
+religious_spiritual,cross,easy
+religious_spiritual,heaven,medium
+religious_spiritual,hell,medium
+religious_spiritual,mosque,medium
+religious_spiritual,prayer,medium
+religious_spiritual,temple,medium
+hair_styling,afro,easy
+hair_styling,bald,easy
+hair_styling,braid,medium
+hair_styling,curly,medium
+hair_styling,dreadlocks,medium
+hair_styling,haircut,medium
+hair_styling,mohawk,medium
+hair_styling,mullet,medium
+hair_styling,ponytail,easy
+hair_styling,straight,easy
+dental_medical,braces,easy
+dental_medical,cavity,medium
+dental_medical,filling,medium
+dental_medical,gums,medium
+dental_medical,mouthwash,easy
+dental_medical,retainer,medium
+dental_medical,teeth,easy
+dental_medical,tooth,easy
+dental_medical,toothache,medium
+fire_emergency,alarm,easy
+fire_emergency,emergency,medium
+fire_emergency,fire truck,easy
+fire_emergency,flame,easy
+fire_emergency,hydrant,easy
+fire_emergency,rescue,medium
+fire_emergency,smoke,medium
+office_supplies,binder,easy
+office_supplies,clipboard,easy
+office_supplies,folder,easy
+office_supplies,glue,easy
+office_supplies,hole punch,medium
+office_supplies,paper clip,easy
+office_supplies,rubber band,easy
+office_supplies,stapler,easy
+office_supplies,tape,easy
+body_parts,ankle,easy
+body_parts,arm,easy
+body_parts,back,easy
+body_parts,bone,easy
+body_parts,chest,easy
+body_parts,ear,easy
+body_parts,elbow,easy
+body_parts,eye,easy
+body_parts,face,easy
+body_parts,finger,easy
+body_parts,foot,easy
+body_parts,hair,easy
+body_parts,hand,easy
+body_parts,head,easy
+body_parts,heart,easy
+body_parts,knee,easy
+body_parts,leg,easy
+body_parts,lips,easy
+body_parts,mouth,easy
+body_parts,muscle,medium
+body_parts,neck,easy
+body_parts,nose,easy
+body_parts,shoulder,easy
+body_parts,skin,easy
+body_parts,spine,medium
+body_parts,stomach,easy
+body_parts,thumb,easy
+body_parts,toe,easy
+body_parts,tongue,easy
+body_parts,wrist,easy
+kitchen_cooking,bottle opener,easy
+kitchen_cooking,bowl,easy
+kitchen_cooking,colander,medium
+kitchen_cooking,cookbook,easy
+kitchen_cooking,cutting board,easy
+kitchen_cooking,dish,easy
+kitchen_cooking,fork,easy
+kitchen_cooking,frying pan,easy
+kitchen_cooking,grater,easy
+kitchen_cooking,ladle,easy
+kitchen_cooking,microwave,easy
+kitchen_cooking,mixer,easy
+kitchen_cooking,oven,easy
+kitchen_cooking,plate,easy
+kitchen_cooking,pot,easy
+kitchen_cooking,recipe,medium
+kitchen_cooking,rolling pin,medium
+kitchen_cooking,spatula,easy
+kitchen_cooking,stove,easy
+kitchen_cooking,toaster,easy
+kitchen_cooking,whisk,easy
+sewing_crafts,button,easy
+sewing_crafts,fabric,medium
+sewing_crafts,needle,easy
+sewing_crafts,pattern,medium
+sewing_crafts,pin,easy
+sewing_crafts,sewing machine,medium
+sewing_crafts,tape measure,easy
+sewing_crafts,thread,easy
+sewing_crafts,zipper,easy
+pollution_environment,acid rain,hard
+pollution_environment,deforestation,hard
+pollution_environment,factory,medium
+pollution_environment,garbage,easy
+pollution_environment,oil spill,medium
+pollution_environment,pollution,medium
+pollution_environment,recycling,medium
+pollution_environment,smog,medium
+pollution_environment,toxic waste,medium
+pollution_environment,trash,easy
+weather_climate,atmosphere,medium
+weather_climate,autumn,medium
+weather_climate,breeze,medium
+weather_climate,climate,hard
+weather_climate,cloudy,easy
+weather_climate,cold,easy
+weather_climate,drought,medium
+weather_climate,forecast,medium
+weather_climate,frost,medium
+weather_climate,heatwave,medium
+weather_climate,ice,easy
+weather_climate,mist,medium
+weather_climate,season,medium
+weather_climate,spring,medium
+weather_climate,summer,medium
+weather_climate,sunrise,medium
+weather_climate,sunset,medium
+weather_climate,temperature,medium
+weather_climate,winter,medium
+minerals_materials,amber,medium
+minerals_materials,brass,medium
+minerals_materials,bronze,medium
+minerals_materials,chrome,medium
+minerals_materials,clay,easy
+minerals_materials,coal,easy
+minerals_materials,copper,easy
+minerals_materials,crystal,medium
+minerals_materials,diamond,easy
+minerals_materials,emerald,easy
+minerals_materials,glass,easy
+minerals_materials,granite,medium
+minerals_materials,iron,easy
+minerals_materials,jade,medium
+minerals_materials,marble,medium
+minerals_materials,metal,easy
+minerals_materials,mineral,medium
+minerals_materials,pearl,easy
+minerals_materials,plastic,easy
+minerals_materials,ruby,easy
+minerals_materials,rust,easy
+minerals_materials,sapphire,easy
+minerals_materials,silver,easy
+minerals_materials,steel,easy
+minerals_materials,stone,easy
+minerals_materials,wood,easy
+financial_business,accountant,medium
+financial_business,bankruptcy,hard
+financial_business,budget,medium
+financial_business,business,medium
+financial_business,contract,medium
+financial_business,debt,medium
+financial_business,dividend,hard
+financial_business,euro,easy
+financial_business,investment,medium
+financial_business,loan,medium
+financial_business,profit,medium
+financial_business,salary,medium
+financial_business,stock market,hard
+financial_business,tax,medium
+gaming_accessories,cartridge,medium
+gaming_accessories,headset,easy
+gaming_accessories,switch,easy
+household_furniture,bench,easy
+household_furniture,cabinet,easy
+household_furniture,closet,easy
+household_furniture,crib,easy
+household_furniture,drawer,easy
+household_furniture,futon,medium
+household_furniture,hammock,medium
+household_furniture,nightstand,easy
+household_furniture,ottoman,medium
+household_furniture,recliner,medium
+household_furniture,rocking chair,medium
+household_furniture,stool,easy
+household_furniture,wardrobe,medium
+garden_landscaping,arbor,medium
+garden_landscaping,compost,medium
+garden_landscaping,fertilizer,medium
+garden_landscaping,flowerbed,medium
+garden_landscaping,fountain,medium
+garden_landscaping,garden gnome,medium
+garden_landscaping,gazebo,medium
+garden_landscaping,hedge,medium
+garden_landscaping,lawn,easy
+garden_landscaping,mulch,medium
+garden_landscaping,pergola,hard
+garden_landscaping,pond,easy
+garden_landscaping,sprinkler,easy
+garden_landscaping,trellis,medium
+garden_landscaping,walkway,easy
+garden_landscaping,watering can,easy
+garden_landscaping,wheelbarrow,medium
+universe_cosmos,astronomy,hard
+universe_cosmos,black hole,hard
+universe_cosmos,constellation,medium
+universe_cosmos,eclipse,medium
+universe_cosmos,milky way,medium
+universe_cosmos,nebula,hard
+universe_cosmos,orbit,medium
+universe_cosmos,shooting star,medium
+universe_cosmos,space,medium
+universe_cosmos,supernova,hard
+universe_cosmos,universe,hard
+computer_programming,algorithm,hard
+computer_programming,binary,medium
+computer_programming,bug,easy
+computer_programming,code,medium
+computer_programming,cursor,easy
+computer_programming,database,hard
+computer_programming,desktop,easy
+computer_programming,icon,easy
+computer_programming,pixel,medium
+computer_programming,program,medium
+computer_programming,software,medium
+computer_programming,virus,medium
+aquatic_water,aquarium,medium
+aquatic_water,beach,easy
+aquatic_water,coral,medium
+aquatic_water,dive,medium
+aquatic_water,iceberg,medium
+aquatic_water,lake,easy
+aquatic_water,ocean,easy
+aquatic_water,river,easy
+aquatic_water,seashell,easy
+aquatic_water,seaweed,medium
+aquatic_water,splash,medium
+aquatic_water,swim,easy
+aquatic_water,waterfall,medium
+aquatic_water,wave,easy
+camping_outdoor,bonfire,easy
+camping_outdoor,canteen,medium
+camping_outdoor,mosquito,easy
+camping_outdoor,mountain,medium
+camping_outdoor,nature,medium
+camping_outdoor,sleeping bag,easy
+photography_camera,darkroom,medium
+photography_camera,focus,medium
+photography_camera,lens,medium
+photography_camera,memory card,medium
+photography_camera,photograph,medium
+photography_camera,selfie,easy
+photography_camera,tripod,medium
+photography_camera,zoom,medium
+fast_food,chicken nuggets,easy
+fast_food,cola,easy
+fast_food,hot dog,easy
+fast_food,milkshake,easy
+fast_food,nachos,easy
+fast_food,onion rings,easy
+fast_food,wings,easy
+prehistoric_ancient,arrowhead,medium
+prehistoric_ancient,cave,medium
+prehistoric_ancient,caveman,medium
+prehistoric_ancient,mammoth,medium
+prehistoric_ancient,ruins,medium
+prehistoric_ancient,stone age,hard
+prehistoric_ancient,tomb,medium
+aviation_aircraft,blimp,medium
+aviation_aircraft,glider,medium
+aviation_aircraft,jet,medium
+aviation_aircraft,parachute,medium
+aviation_aircraft,propeller,medium
+aviation_aircraft,runway,medium
+aviation_aircraft,wing,easy
+aviation_aircraft,zeppelin,hard
+desert_environment,camel,medium
+desert_environment,dune,medium
+desert_environment,oasis,medium
+desert_environment,sand,easy
+desert_environment,sandstorm,medium
+winter_activities,ice skating,medium
+winter_activities,igloo,medium
+winter_activities,mittens,easy
+winter_activities,sled,easy
+winter_activities,snowball,easy
+winter_activities,snowflake,easy
+winter_activities,snowman,easy
+urban_city,alley,medium
+urban_city,billboard,medium
+urban_city,city,medium
+urban_city,graffiti,medium
+urban_city,manhole,medium
+urban_city,parking meter,medium
+urban_city,street,easy
+urban_city,traffic,medium
+carnival_games,balloon pop,medium
+carnival_games,bumper cars,medium
+carnival_games,cotton candy,easy
+carnival_games,fun house,medium
+carnival_games,merry-go-round,medium
+carnival_games,ring toss,medium
+carnival_games,roller coaster,medium
+carnival_games,shooting gallery,medium
+carnival_games,swing ride,medium
+carnival_games,ticket booth,medium
+carnival_games,tilt-a-whirl,hard
+medieval_life,blacksmith,medium
+medieval_life,drawbridge,medium
+medieval_life,joust,medium
+medieval_life,king,medium
+medieval_life,peasant,medium
+medieval_life,princess,medium
+medieval_life,queen,medium
+radio_broadcasting,broadcast,medium
+radio_broadcasting,radio tower,medium
+radio_broadcasting,satellite dish,medium
+radio_broadcasting,station,medium
+radio_broadcasting,studio,medium
+radio_broadcasting,transmission,medium
+construction_work,blueprint,medium
+construction_work,brick,easy
+construction_work,cement mixer,medium
+construction_work,dump truck,medium
+construction_work,forklift,medium
+construction_work,hard hat,easy
+construction_work,paint roller,easy
+construction_work,plumber,medium
