@@ -6,7 +6,8 @@ import (
 
 const (
 	// Maximum length of a word
-	MAX_WORD_LENGTH = 24
+	MAX_WORD_LENGTH  = 24
+	MAX_GUESS_LENGTH = 128
 )
 
 func filterInvalidRunes(word string) string {
@@ -68,5 +69,10 @@ func filterDuplicateWords(words []string) []string {
 }
 
 func sanitizeGuess(guess string) string {
-	return strings.TrimSpace(strings.ToLower(guess))
+	trimed := strings.TrimSpace(strings.ToLower(guess))
+	if len(trimed) == 0 || len(trimed) > MAX_GUESS_LENGTH {
+		return ""
+	}
+
+	return trimed
 }
