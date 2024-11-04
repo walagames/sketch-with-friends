@@ -127,7 +127,7 @@ function LeaderboardPlace({
 			<p className="text-xl font-bold text-foreground truncate">{name}</p>
 			<div className="relative text-lg font-medium text-foreground ml-auto">
 				{points > 0 && (
-					<div className="absolute lg:text-base text-sm flex -top-1 lg:-top-1.5 right-20 bg-white border border-zinc-300 rounded-lg shadow-sm lg:px-3 px-2 lg:py-1.5 py-1">
+					<div className="absolute lg:text-base text-sm flex -top-1 lg:-top-1.5 right-20 lg:right-24 bg-white border border-zinc-300 rounded-lg shadow-sm lg:px-3 px-2 lg:py-1.5 py-1">
 						+{points}
 					</div>
 				)}
