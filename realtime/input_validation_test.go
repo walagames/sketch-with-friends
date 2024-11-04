@@ -2,6 +2,7 @@ package main
 
 import (
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -134,6 +135,16 @@ func TestFilterInvalidWords(t *testing.T) {
 			input:    []string{"hello!", "", "  world  ", "test@123", "don't"},
 			expected: []string{"hello", "world", "test", "don't"},
 		},
+		{
+			name:     "words longer than max length",
+			input:    []string{"hello", "world", strings.Repeat("a", MAX_WORD_LENGTH+1)},
+			expected: []string{"hello", "world"},
+		},
+		{
+			name:     "words longer than max length",
+			input:    []string{"hello", "world", strings.Repeat("a", MAX_WORD_LENGTH)},
+			expected: []string{"hello", "world", strings.Repeat("a", MAX_WORD_LENGTH)},
+		},
 	}
 
 	for _, tt := range tests {
@@ -256,4 +267,3 @@ func TestFilterDuplicateWords(t *testing.T) {
 		})
 	}
 }
-

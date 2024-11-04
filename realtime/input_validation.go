@@ -4,6 +4,11 @@ import (
 	"strings"
 )
 
+const (
+	// Maximum length of a word
+	MAX_WORD_LENGTH = 24
+)
+
 func filterInvalidRunes(word string) string {
 	// Convert to lowercase first
 	word = strings.ToLower(word)
@@ -37,6 +42,9 @@ func filterInvalidWords(words []string) []string {
 
 	for _, word := range words {
 		cleaned := filterInvalidRunes(word)
+		if len(cleaned) > MAX_WORD_LENGTH {
+			continue
+		}
 		if cleaned != "" {
 			result = append(result, cleaned)
 		}
