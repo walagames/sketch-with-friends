@@ -297,7 +297,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 	},
 	SubmitGuess: {
 		RoomRoleRequired: RoomRoleAny,
-		GameRoleRequired: GameRoleGuessing,
+		GameRoleRequired: GameRoleAny,
 		PayloadType:      "string",
 		validator: func(r *room) error {
 			if r.game == nil {

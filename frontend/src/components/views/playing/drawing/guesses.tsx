@@ -16,7 +16,6 @@ import { RaisedInput } from "@/components/ui/raised-input";
 export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 	const guesses = useSelector((state: RootState) => state.game.guesses);
 	const players = useSelector((state: RootState) => state.room.players);
-	const playerId = useSelector((state: RootState) => state.client.id);
 	const currentRound = useSelector(
 		(state: RootState) => state.game.currentRound
 	);
@@ -31,18 +30,10 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 		}
 	}, [guesses]);
 
-	const correctGuesses = guesses.filter((guess) => guess.isCorrect);
-	const hasGuessedCorrect = correctGuesses.find(
-		(guess) => guess.playerId === playerId
-	);
-
 	return (
 		<div
 			className={cn(
-				"flex flex-col lg:h-full xl:w-[20rem]  w-full xl:max-h-[660px] min-h-[12rem] px-1.5 lg:px-0 relative z-30",
-				isGuessing
-					? "h-[var(--max-chat-height)]"
-					: "h-[var(--max-chat-height-drawing)]"
+				"flex flex-col lg:h-full xl:w-[20rem] w-full xl:max-h-[660px] min-h-[12rem] px-1.5 lg:px-0 relative z-30 h-[var(--max-chat-height)]"
 			)}
 		>
 			<div className="flex w-full justify-between items-center lg:items-end lg:h-12 xl:mt-1 py-1.5 lg:py-2  px-0.5">
@@ -56,8 +47,7 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 			<ul
 				ref={listRef}
 				className={cn(
-					"flex-1 w-full flex gap-3 lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-5 overflow-y-auto overflow-x-hidden scrollbar-hide",
-					!isGuessing && "lg:mb-4"
+					"flex-1 w-full flex gap-3 lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-5 overflow-y-auto overflow-x-hidden scrollbar-hide"
 				)}
 			>
 				{guesses.map((guess) => (
@@ -68,22 +58,9 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 					/>
 				))}
 			</ul>
-			{isGuessing && (
-				<div className="mt-4 w-full">
-					{hasGuessedCorrect ? (
-						<div className="font-bold w-full text-xl bg-background rounded-lg h-14 px-4 py-3.5 -translate-y-1.5 translate-x-1.5 shadow-accent">
-							<span className="translate-y-0.5 flex items-center justify-center gap-2">
-								Guessed it!{" "}
-								<span className="text-lg">
-									+{hasGuessedCorrect.pointsAwarded} pts
-								</span>
-							</span>
-						</div>
-					) : (
-						<GuessForm />
-					)}
-				</div>
-			)}
+			<div className="mt-4 w-full">
+				<GuessForm isGuessing={isGuessing} />
+			</div>
 		</div>
 	);
 }
@@ -146,9 +123,16 @@ function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
 						)}
 					>
 						{guess.isCorrect ? (
-							<span className="px-3 py-2">guessed the word!</span>
+							<span className="px-3 py-2">
+								{isOwnMessage ? "You guessed it!" : "Guessed it!"}
+							</span>
 						) : (
-							<span className="px-3 py-2 break-all">{guess.guess}</span>
+							<span
+								style={{ overflowWrap: "anywhere" }}
+								className="px-3 py-2 break-words"
+							>
+								{guess.guess}
+							</span>
 						)}
 						{!guess.isCorrect && guess.isClose && (
 							<div className="w-1.5 bg-blue-500 ml-auto" />
@@ -171,7 +155,7 @@ function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
 const FormSchema = z.object({
 	guess: z.string().min(1),
 });
-export function GuessForm() {
+export function GuessForm({ isGuessing }: { isGuessing?: boolean }) {
 	const dispatch = useDispatch();
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
@@ -199,7 +183,7 @@ export function GuessForm() {
 								<div className="flex items-center gap-3 ">
 									<RaisedInput
 										autoComplete="off"
-										placeholder="Guess"
+										placeholder={isGuessing ? "Guess" : "Chat"}
 										{...field}
 									/>
 									{/* <div className="">

@@ -245,12 +245,20 @@ func (g *game) calculatePoints(pointsPerGuess int) int {
 	return int((float64(remainingTime) / float64(totalTime)) * float64(pointsPerGuess))
 }
 
+// Checks if a player has guessed correctly.
+func (g *game) playerHasAlreadyGuessedCorrect(playerID uuid.UUID) bool {
+	return g.correctGuessers[playerID]
+}
+
 // Judges a guess and updates the game state accordingly.
 func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 	var result guess
 
-	// Check if the guess is correct
-	if guessValue == g.currentWord.Value {
+	playerIsDrawing := g.currentDrawer.ID == playerID
+	playerHasAlreadyGuessedCorrect := g.playerHasAlreadyGuessedCorrect(playerID)
+
+	// Check if the guess is correct if the player is not drawing and hasn't guessed correctly yet
+	if guessValue == g.currentWord.Value && !playerHasAlreadyGuessedCorrect && !playerIsDrawing {
 		// Award points to the guesser for getting it right
 		pointsEarned := g.calculatePoints(400)
 		g.room.Players[playerID].Score += pointsEarned
@@ -275,7 +283,10 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 			ID:       uuid.New(),
 			PlayerID: playerID,
 			Guess:    guessValue,
-			IsClose:  g.isGuessClose(guessValue),
+		}
+
+		if !playerIsDrawing && !playerHasAlreadyGuessedCorrect {
+			result.IsClose = g.isGuessClose(guessValue)
 		}
 	}
 
