@@ -16,6 +16,9 @@ const (
 
 	// How long a player can be idle before the room disconnects them
 	PLAYER_TIMEOUT = 15 * time.Minute
+
+	// Maximum length of a player's name
+	MAX_NAME_LENGTH = 16
 )
 
 // We send these to clients to display alerts
@@ -27,6 +30,7 @@ var (
 	ErrRoomIdle          = errors.New("ErrRoomIdle")
 	ErrPlayerIdle        = errors.New("ErrPlayerIdle")
 	ErrRoomEmpty         = errors.New("ErrRoomEmpty")
+	ErrNameTooLong       = errors.New("ErrNameTooLong")
 )
 
 type WordDifficulty string
@@ -187,6 +191,10 @@ func (r *room) register(ctx context.Context, player *player) error {
 		return ErrRoomFull
 	}
 
+	if len(player.Name) > MAX_NAME_LENGTH {
+		return ErrNameTooLong
+	}
+
 	// Start the client's goroutines
 	// Note: This launches 2 separate goroutines:
 	// - one for sending messages to the client
@@ -231,14 +239,14 @@ func (r *room) register(ctx context.Context, player *player) error {
 // and handles necessary game state changes if they disconnect mid-game.
 func (r *room) unregister(player *player) {
 	r.lastInteractionAt = time.Now()
-	
+
 	// If a game is in progress, we need to purge them from the game state
 	// and handle the necessary game state changes. ex. If they were drawing,
 	// we need to manually force the game to the next phase.
 	if r.game != nil {
 		r.game.handlePlayerLeave(player)
-	}	
-	
+	}
+
 	// Tell the other players that a player left
 	// Note: This needs to be done before we remove the player from the room state
 	// otherwise the alert will not display to the other players.

@@ -14,6 +14,7 @@ const ErrorMessages = {
 	ErrConnectionTimeout: "Connection timed out",
 	ErrRoomIdle: "Room closed because it was inactive for too long",
 	ErrPlayerIdle: "You were inactive for too long and were kicked",
+	ErrNameTooLong: "Name is too long",
 };
 
 const socketMiddleware: Middleware = (store) => {
