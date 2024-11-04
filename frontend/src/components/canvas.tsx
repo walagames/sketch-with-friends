@@ -231,7 +231,13 @@ function Canvas({
 			const y = Math.round((e.clientY - rect.top) * CANVAS_SCALE);
 
 			// TODO: fix bad x, y (negative y?)
-			if (x < 0 || y < 0 || x > width * CANVAS_SCALE || y > height * CANVAS_SCALE) return;
+			if (
+				x < 0 ||
+				y < 0 ||
+				x > width * CANVAS_SCALE ||
+				y > height * CANVAS_SCALE
+			)
+				return;
 
 			// dispatch(addBucketFill({ x, y }));
 
@@ -242,15 +248,22 @@ function Canvas({
 		[strokeColor, dispatch]
 	);
 
-	const floodFill = (canvas: HTMLCanvasElement, x: number, y: number, fillColor: string) => {
+	const floodFill = (
+		canvas: HTMLCanvasElement,
+		x: number,
+		y: number,
+		fillColor: string
+	) => {
 		const ctx = canvas.getContext("2d");
 		if (!ctx) return;
-	
+
 		const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
 		const targetColor = getPixelColor(imageData.data, canvas.width, x, y);
-	
-		const worker = new Worker(new URL('../workers/floodfill-worker.ts', import.meta.url));
-	
+
+		const worker = new Worker(
+			new URL("../workers/floodfill-worker.ts", import.meta.url)
+		);
+
 		worker.postMessage({
 			imageData: imageData.data,
 			width: canvas.width,
@@ -260,21 +273,30 @@ function Canvas({
 			targetColor,
 			fillColor,
 		});
-	
+
 		worker.onmessage = function (e) {
 			const newImageData = e.data;
-			ctx.putImageData(new ImageData(newImageData, canvas.width, canvas.height), 0, 0);
+			ctx.putImageData(
+				new ImageData(newImageData, canvas.width, canvas.height),
+				0,
+				0
+			);
 			worker.terminate(); // Terminate the worker after use
 		};
 	};
 
-    const getPixelColor = (data: Uint8ClampedArray, width: number, x: number, y: number) => {
-        const index = (y * width + x) * 4;
-		const r = data[index].toString(16).padStart(2, '0');
-        const g = data[index + 1].toString(16).padStart(2, '0');
-        const b = data[index + 2].toString(16).padStart(2, '0');
-        return `#${r}${g}${b}`; // Hex color
-    };
+	const getPixelColor = (
+		data: Uint8ClampedArray,
+		width: number,
+		x: number,
+		y: number
+	) => {
+		const index = (y * width + x) * 4;
+		const r = data[index].toString(16).padStart(2, "0");
+		const g = data[index + 1].toString(16).padStart(2, "0");
+		const b = data[index + 2].toString(16).padStart(2, "0");
+		return `#${r}${g}${b}`; // Hex color
+	};
 
 	React.useEffect(() => {
 		const canvas = canvasRef.current;
@@ -316,7 +338,6 @@ function Canvas({
 		cursor.style.border = `1px solid white`;
 		cursor.style.boxShadow = `0 0 0 1px grey`;
 	}, [strokeColor, strokeWidth]);
-
 
 	function handleCanvasMouseDown(e: React.MouseEvent<HTMLCanvasElement>) {
 		console.log(tool, e);
@@ -368,6 +389,7 @@ function Canvas({
 		},
 		[dispatch, role, getScaledCoordinates, roundIsActive]
 	);
+
 
 	return (
 		<ContextMenu>
