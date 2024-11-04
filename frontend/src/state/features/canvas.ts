@@ -36,10 +36,18 @@ export const canvasSlice = createSlice({
 		undoStroke: (state) => {
 			state.strokes.pop();
 		},
+		addBucketFill: (state, action: PayloadAction<{ x: number; y: number }>) => {
+			// TODO: Implement bucket fill
+		},
 	},
 });
 
-export const { addStroke, addStrokePoint, clearStrokes, undoStroke } =
-	canvasSlice.actions;
+export const {
+	addStroke,
+	addStrokePoint,
+	addBucketFill,
+	clearStrokes,
+	undoStroke,
+} = canvasSlice.actions;
 
 export default canvasSlice.reducer;

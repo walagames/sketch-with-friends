@@ -128,7 +128,7 @@ export function RoomSettingsForm() {
 										<FormControl>
 											<Slider
 												min={15}
-												max={90}
+												max={9000}
 												step={5}
 												defaultValue={[field.value]}
 												onValueChange={(vals) => {

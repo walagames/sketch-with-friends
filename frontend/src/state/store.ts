@@ -88,6 +88,7 @@ const socketMiddleware: Middleware = (store) => {
 						action.payload = null;
 					}
 					socket?.send(JSON.stringify(action));
+					console.log("Sent to server:", action);
 				}
 				return next(action);
 		}

@@ -10,7 +10,13 @@ import { HexColorPicker } from "react-colorful";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { GameRole } from "@/state/features/game";
-import { addStroke, addStrokePoint, Stroke } from "@/state/features/canvas";
+import {
+	addStroke,
+	addStrokePoint,
+	addBucketFill,
+	Stroke,
+} from "@/state/features/canvas";
+import { CanvasTool } from "@/state/features/client";
 
 // make canvas less pixelated
 const CANVAS_SCALE = 2;
@@ -68,6 +74,10 @@ function Canvas({
 	const lightness = useSelector(
 		(state: RootState) => state.client.canvas.lightness
 	);
+	const strokeWidth = useSelector(
+		(state: RootState) => state.client.canvas.strokeWidth
+	);
+	const tool = useSelector((state: RootState) => state.client.canvas.tool);
 
 	const strokeColor = React.useMemo(() => {
 		const hslToHex = (h: number, s: number, l: number): string => {
@@ -84,10 +94,6 @@ function Canvas({
 		};
 		return hslToHex(hue, 100, lightness);
 	}, [hue, lightness]);
-
-	const strokeWidth = useSelector(
-		(state: RootState) => state.client.canvas.strokeWidth
-	);
 
 	const fillCanvasWithStroke = React.useCallback(
 		(ctx: CanvasRenderingContext2D, stroke: Stroke) => {
@@ -186,6 +192,58 @@ function Canvas({
 		[dispatch]
 	);
 
+	const handleBucketFill = React.useCallback(
+		(e: React.MouseEvent<HTMLCanvasElement>) => {
+			const rect = e.currentTarget.getBoundingClientRect();
+			const x = Math.round((e.clientX - rect.left) * CANVAS_SCALE);
+			const y = Math.round((e.clientY - rect.top) * CANVAS_SCALE);
+
+			// TODO: fix bad x, y (negative y?)
+			if (x < 0 || y < 0 || x > width * CANVAS_SCALE || y > height * CANVAS_SCALE) return;
+
+			// dispatch(addBucketFill({ x, y }));
+
+			if (!canvasRef.current) return;
+			console.log("flood fill", strokeColor);
+			floodFill(canvasRef.current, x, y, strokeColor);
+		},
+		[strokeColor, dispatch]
+	);
+
+	const floodFill = (canvas: HTMLCanvasElement, x: number, y: number, fillColor: string) => {
+		const ctx = canvas.getContext("2d");
+		if (!ctx) return;
+	
+		const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+		const targetColor = getPixelColor(imageData.data, canvas.width, x, y);
+	
+		const worker = new Worker(new URL('../workers/floodfill-worker.ts', import.meta.url));
+	
+		worker.postMessage({
+			imageData: imageData.data,
+			width: canvas.width,
+			height: canvas.height,
+			x,
+			y,
+			targetColor,
+			fillColor,
+		});
+	
+		worker.onmessage = function (e) {
+			const newImageData = e.data;
+			ctx.putImageData(new ImageData(newImageData, canvas.width, canvas.height), 0, 0);
+			worker.terminate(); // Terminate the worker after use
+		};
+	};
+
+    const getPixelColor = (data: Uint8ClampedArray, width: number, x: number, y: number) => {
+        const index = (y * width + x) * 4;
+		const r = data[index].toString(16).padStart(2, '0');
+        const g = data[index + 1].toString(16).padStart(2, '0');
+        const b = data[index + 2].toString(16).padStart(2, '0');
+        return `#${r}${g}${b}`; // Hex color
+    };
+
 	React.useEffect(() => {
 		const canvas = canvasRef.current;
 		const cursor = cursorRef.current;
@@ -217,6 +275,7 @@ function Canvas({
 	React.useEffect(() => {
 		const cursor = cursorRef.current;
 		if (!cursor) return;
+		// if (tool !== CanvasTool.Brush) return;
 
 		const size = strokeWidth * 0.5; // Adjust this multiplier as needed
 		cursor.style.width = `${size}px`;
@@ -225,6 +284,25 @@ function Canvas({
 		cursor.style.border = `1px solid white`;
 		cursor.style.boxShadow = `0 0 0 1px grey`;
 	}, [strokeColor, strokeWidth]);
+
+	function handleCanvasMouseDown(e: React.MouseEvent<HTMLCanvasElement>) {
+		console.log(tool, e);
+		if (e.button === 0 && role === GameRole.Drawing) {
+			if (tool === CanvasTool.Brush) {
+				handleNewStroke(e);
+			} else if (tool === CanvasTool.Bucket) {
+				handleBucketFill(e);
+			}
+		}
+	}
+
+	function handleCanvasMouseMove(e: React.MouseEvent<HTMLCanvasElement>) {
+		if (e.buttons === 1 && role === GameRole.Drawing) {
+			if (tool === CanvasTool.Brush) {
+				handleStrokePoint(e);
+			}
+		}
+	}
 
 	return (
 		<ContextMenu>
@@ -235,16 +313,8 @@ function Canvas({
 					}`}
 					width={width * CANVAS_SCALE}
 					height={height * CANVAS_SCALE}
-					onMouseDown={(e) => {
-						if (e.button === 0 && role === GameRole.Drawing) {
-							handleNewStroke(e);
-						}
-					}}
-					onMouseMove={(e) => {
-						if (e.buttons === 1 && role === GameRole.Drawing) {
-							handleStrokePoint(e);
-						}
-					}}
+					onMouseDown={handleCanvasMouseDown}
+					onMouseMove={handleCanvasMouseMove}
 					ref={canvasRef}
 				/>
 				<div className=" w-[98%] h-full bg-border absolute left-1/2 rounded-xl -translate-x-1/2 -bottom-1.5" />

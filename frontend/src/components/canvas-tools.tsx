@@ -1,4 +1,4 @@
-import { Brush, Undo2, Trash } from "lucide-react";
+import { Brush, PaintBucket, Undo2, Trash } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { Slider } from "./ui/slider";
@@ -27,6 +27,14 @@ export function CanvasTools() {
 					onClick={() => dispatch(changeTool(CanvasTool.Brush))}
 				>
 					<Brush />
+				</RaisedButton>
+				<RaisedButton
+					size="icon"
+					shift={false}
+					variant={tool === CanvasTool.Bucket ? "action" : "default"}
+					onClick={() => dispatch(changeTool(CanvasTool.Bucket))}
+				>
+					<PaintBucket />
 				</RaisedButton>
 				{/* <RaisedButton
 					size="icon"
