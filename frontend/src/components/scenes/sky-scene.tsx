@@ -30,8 +30,15 @@ export function SkyScene({ children }: { children: React.ReactNode }) {
 					src="/doodles/rain-cloud.png"
 				/>
 				<BobbingDoodle
+					hideOnSmallViewports
 					duration={4}
 					style={{ top: "24%", right: "10%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+				<BobbingDoodle
+					className="absolute lg:hidden w-28"
+					duration={4}
+					style={{ bottom: "24%", right: "16%" }}
 					src="/doodles/rain-cloud.png"
 				/>
 			</AnimatePresence>

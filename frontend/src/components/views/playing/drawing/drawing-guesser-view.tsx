@@ -49,7 +49,7 @@ export function DrawingGuesserView() {
 						<BobbingDoodle
 							key="rain-cloud-1"
 							duration={5}
-							className="absolute xl:-top-[18%] xl:-left-[25%] bottom-[10%] left-[10%] w-[8rem] xl:w-[9rem]"
+							className="absolute xl:-top-[18%] xl:-left-[25%] bottom-[12%] left-[10%] w-[8rem] xl:w-[9rem]"
 							src="/doodles/rain-cloud.png"
 						/>
 						<BobbingDoodle

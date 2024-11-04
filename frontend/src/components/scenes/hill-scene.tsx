@@ -9,7 +9,7 @@ export function HillScene({
 	return (
 		<div
 			className={cn(
-				"flex h-full flex-col items-center justify-center w-full gap-8 relative",
+				"flex h-full flex-col items-center justify-center w-full gap-6 lg:gap-8 relative",
 				className
 			)}
 		>

@@ -37,9 +37,11 @@ export function PickingGuesserView() {
 					src="/doodles/rain-cloud.png"
 				/>
 				<BobbingDoodle
+					className="lg:w-36 w-28 absolute"
 					duration={5}
 					style={{ top: "8%", left: "20%" }}
 					src="/doodles/rain-cloud.png"
+					key="rain-cloud-2"
 				/>
 				<BobbingDoodle
 					hideOnSmallViewports
