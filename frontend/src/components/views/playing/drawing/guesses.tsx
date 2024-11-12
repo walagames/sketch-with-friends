@@ -52,7 +52,7 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 			<ul
 				ref={listRef}
 				className={cn(
-					"flex-1 w-full flex gap-3 lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-5 overflow-y-auto overflow-x-hidden scrollbar-hide"
+					"flex-1 w-full flex gap-3 lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-5 pt-10 overflow-y-auto overflow-x-hidden scrollbar-hide"
 				)}
 			>
 				{guesses.map((guess) => (
