@@ -33,14 +33,19 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 	return (
 		<div
 			className={cn(
-				"flex flex-col lg:h-full xl:w-[20rem] w-full xl:max-h-[660px] min-h-[12rem] px-1.5 lg:px-0 relative z-30 h-[var(--max-chat-height)]"
+				"flex flex-col lg:h-full xl:w-[20rem] w-full xl:max-h-[660px] min-h-[12rem] px-1.5 lg:px-0 relative z-30",
+				isGuessing
+					? "h-[var(--max-chat-height)]"
+					: "h-[var(--max-chat-height-drawing)]"
 			)}
 		>
-			<div className="flex w-full justify-between items-center lg:items-end lg:h-12 xl:mt-1 py-1.5 lg:py-2  px-0.5">
-				<div className="flex gap-2 lg:text-xl font-bold items-center ">
+			<div className=" bg-gradient-to-b from-[#aef1fe] to-transparent top-[0.625rem] left-2 right-2  rounded-lg h-24 absolute z-10" />
+
+			<div className="flex w-full justify-between items-center lg:items-end h-16 lg:h-12 xl:mt-1 py-1.5 lg:py-2  px-4 lg:px-0.5 -mb-14 z-10 relative">
+				<div className="flex gap-2 lg:text-xl font-bold items-center relative">
 					Round {currentRound} of {totalRounds}
 				</div>
-				<div className="flex gap-1.5 text-lg lg:text-xl font-bold items-center">
+				<div className="flex gap-1.5 text-lg lg:text-xl font-bold items-center relative">
 					<UsersIcon className="size-5 mb-1" /> {Object.keys(players).length}
 				</div>
 			</div>
