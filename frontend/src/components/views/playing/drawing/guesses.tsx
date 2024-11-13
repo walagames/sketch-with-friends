@@ -39,9 +39,9 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 					: "h-[var(--max-chat-height-drawing)]"
 			)}
 		>
-			<div className=" bg-gradient-to-b from-[#aef1fe] to-transparent top-[0.625rem] left-2 right-2  rounded-lg h-24 absolute z-10" />
+			<div className=" bg-gradient-to-b from-[#aef1fe] to-transparent top-[0.625rem] left-2 right-2  rounded-lg h-24 absolute z-10 lg:hidden" />
 
-			<div className="flex w-full justify-between items-center lg:items-end h-16 lg:h-12 xl:mt-1 py-1.5 lg:py-2  px-4 lg:px-0.5 -mb-14 z-10 relative">
+			<div className="flex w-full justify-between items-center lg:items-end h-16 lg:h-12 xl:mt-1 py-1.5 lg:py-2  px-4 lg:px-0.5 -mb-14 lg:mb-0 z-10 relative">
 				<div className="flex gap-2 lg:text-xl font-bold items-center relative">
 					Round {currentRound} of {totalRounds}
 				</div>
@@ -52,7 +52,7 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 			<ul
 				ref={listRef}
 				className={cn(
-					"flex-1 w-full flex gap-3 lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-5 pt-10 overflow-y-auto overflow-x-hidden scrollbar-hide"
+					"flex-1 w-full flex gap-3 lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-5 pt-10 lg:pt-5 overflow-y-auto overflow-x-hidden scrollbar-hide"
 				)}
 			>
 				{guesses.map((guess) => (
