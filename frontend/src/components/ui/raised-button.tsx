@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { HTMLMotionProps, motion } from "framer-motion";
 
 const buttonVariants = cva(
-	"inline-flex items-center justify-center rounded-lg font-bold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background",
+	"inline-flex items-center justify-center rounded-lg font-bold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:brightness-90 disabled:pointer-events-none ring-offset-background",
 	{
 		variants: {
 			variant: {
@@ -17,7 +17,7 @@ const buttonVariants = cva(
 				sm: "h-9 px-3 rounded-md",
 				lg: "h-11 px-6 rounded-md",
 				xl: "py-1 px-16",
-				icon: "h-10 w-10",
+				icon: "lg:h-11 lg:w-11 h-10 w-10",
 				tall: "h-full w-12",
 				wide: "w-full h-12",
 			},
@@ -42,7 +42,12 @@ interface RaisedButtonProps extends ButtonProps {
 const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 	({ className, variant, size, shift = true, ...props }, ref) => {
 		return (
-			<div className="flex items-center gap-3 bg-secondary-foreground rounded-lg h-full w-full">
+			<div
+				className={cn(
+					"flex items-center gap-3 bg-secondary-foreground rounded-lg",
+					size === "tall" && "flex-1"
+				)}
+			>
 				<motion.button
 					className={cn(buttonVariants({ variant, size, className }))}
 					ref={ref}

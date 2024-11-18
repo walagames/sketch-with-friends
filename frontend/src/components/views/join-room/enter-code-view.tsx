@@ -1,106 +1,105 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { useDispatch } from "react-redux";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { enterRoomCode } from "@/state/features/client";
-import { useEffect } from "react";
-import { StepForwardIcon } from "lucide-react";
 import { clearQueryParams } from "@/lib/params";
 import { HillScene } from "@/components/scenes/hill-scene";
-import {
-	Form,
-	FormControl,
-	FormField,
-	FormItem,
-	FormMessage,
-} from "@/components/ui/form";
-import { RaisedInput } from "@/components/ui/raised-input";
 import { Logo } from "@/components/logo";
-
-const CodeFormSchema = z.object({
-	roomCode: z
-		.string()
-		.length(6, {
-			message: "Room code must be 6 characters long.",
-		})
-		.regex(/^[A-Za-z]+$/, {
-			message: "Room code must contain only letters.",
-		}),
-});
-
-function CodeForm() {
-	const dispatch = useDispatch();
-	const searchParams = new URLSearchParams(location.search);
-	const roomCodeParam = searchParams.get("room");
-
-	const form = useForm<z.infer<typeof CodeFormSchema>>({
-		resolver: zodResolver(CodeFormSchema),
-		defaultValues: {
-			roomCode: roomCodeParam ?? "",
-		},
-	});
-
-	useEffect(() => {
-		form.setValue("roomCode", roomCodeParam ?? "");
-	}, [roomCodeParam, form]);
-
-	function onSubmit(data: z.infer<typeof CodeFormSchema>) {
-		dispatch(enterRoomCode(data.roomCode));
-	}
-
-	return (
-		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-				<FormField
-					control={form.control}
-					name="roomCode"
-					render={({ field }) => (
-						<FormItem>
-							<FormControl>
-								<div className="relative w-full">
-									<RaisedInput placeholder="Room code" {...field} />
-									<div className="absolute -right-14 top-2">
-										<RaisedButton
-											type="submit"
-											shift={false}
-											variant="action"
-											size="icon"
-										>
-											<StepForwardIcon className="w-6 h-6" />
-										</RaisedButton>
-									</div>
-								</div>
-							</FormControl>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-			</form>
-		</Form>
-	);
-}
+import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
+import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
+import { CodeForm } from "./code-form";
+import { AnimatePresence } from "framer-motion";
+import { Doodle } from "@/components/doodle/doodle";
+// import { Doodle } from "@/components/doodle/doodle";
 
 export function EnterCodeView() {
 	const dispatch = useDispatch();
 
 	return (
 		<HillScene>
-			<Logo />
-			<div className="flex flex-col items-center gap-4 max-w-64">
-				<RaisedButton
-					size="xl"
-					variant="action"
-					className="w-full"
-					onClick={() => {
-						clearQueryParams();
-						dispatch(enterRoomCode("new"));
+			<div className="flex flex-col items-center gap-4 max-w-64 relative">
+				<Logo />
+				<div className="flex flex-col items-center gap-4 max-w-64">
+					<RaisedButton
+						size="xl"
+						variant="action"
+						className="w-full"
+						onClick={() => {
+							clearQueryParams();
+							dispatch(enterRoomCode("new"));
+						}}
+					>
+						Create room
+					</RaisedButton>
+					<CodeForm />
+				</div>
+				<Doodle
+					style={{ top: "-57%", left: "-50%", width: "6rem" }}
+					src="/doodles/sparkles.png"
+				/>
+				<Doodle
+					style={{ bottom: "10%", left: "-100%", width: "8rem" }}
+					src="/doodles/ice-cream.png"
+				/>
+				<Doodle
+					style={{ top: "-50%", right: "-55%", width: "6rem" }}
+					src="/doodles/gift.png"
+				/>
+				<Doodle
+					style={{ bottom: "-65%", right: "-65%", width: "7rem" }}
+					src="/doodles/hearts.png"
+				/>
+				<Doodle
+					style={{ bottom: "-65%", left: "-35%", width: "6rem" }}
+					src="/doodles/music.png"
+				/>
+				<Doodle
+					style={{
+						bottom: "-70%",
+						left: "-65%",
+						rotate: "15deg",
+						width: "5rem",
 					}}
-				>
-					Create room
-				</RaisedButton>
-				<CodeForm />
+					src="/doodles/music.png"
+				/>
 			</div>
+
+			<AnimatePresence>
+				<BobbingDoodle
+					key="rain-cloud-1"
+					hideOnSmallViewports
+					duration={4}
+					className="lg:top-[20%] top-[10%] lg:left-[12%] left-[6%] absolute w-32"
+					src="/doodles/rain-cloud.png"
+				/>
+				<BobbingDoodle
+					key="rain-cloud-2"
+					hideOnSmallViewports
+					duration={4}
+					className="lg:hidden bottom-[10%] right-[14%] absolute h-28"
+					src="/doodles/rain-cloud.png"
+				/>
+				<BobbingDoodle
+					key="rain-cloud-3"
+					hideOnSmallViewports
+					duration={5}
+					style={{ top: "8%", left: "20%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+				<BobbingDoodle
+					key="rain-cloud-4"
+					hideOnSmallViewports
+					duration={4.5}
+					style={{ top: "10%", right: "10%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+			</AnimatePresence>
+
+			<AirplaneDoodle
+				layoutId="airplane-enter-code"
+				startAt={{ left: "135%", top: "70%", rotate: 20 }}
+				animateTo={{ left: "75%", top: "45%", rotate: 20 }}
+				leaveTo={{ left: "135%", top: "70%", rotate: 40 }}
+			/>
 		</HillScene>
 	);
 }

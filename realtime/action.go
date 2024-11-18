@@ -120,12 +120,16 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			r.setStage(Playing)
 
 			// Initialize game state
+			for _, p := range r.Players {
+				p.GameRole = GameRoleGuessing
+			}
 			r.game = NewGame(&PickingPhase{}, r)
 			r.game.fillDrawingQueue()
 			r.game.currentPhase.Start(r.game)
 
 			// Inform clients of the stage change
 			r.broadcast(GameRoleAny,
+				message(SetPlayers, r.Players),
 				message(ChangeStage, r.Stage),
 			)
 
@@ -186,12 +190,14 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			if r.Stage != Playing {
 				return fmt.Errorf("game is not in playing stage")
 			}
-			if r.game.currentPhase.Name() != Drawing {
-				return fmt.Errorf("not in drawing phase")
-			}
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
+			// If the game is not in the drawing phase, do nothing
+			if r.game.currentPhase.Name() != Drawing {
+				return nil
+			}
+
 			// Decode the stroke from the payload
 			stroke, err := decodeStroke(a.Payload)
 			if err != nil {
@@ -213,15 +219,20 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		GameRoleRequired: GameRoleDrawing,
 		PayloadType:      []interface{}{},
 		validator: func(r *room) error {
+			if r.game == nil {
+				return fmt.Errorf("game is not initialized")
+			}
 			if r.game.currentDrawer == nil {
 				return fmt.Errorf("no drawer found")
-			}
-			if r.game.currentPhase.Name() != Drawing {
-				return fmt.Errorf("not in drawing phase")
 			}
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
+			// If the game is not in the drawing phase, do nothing
+			if r.game.currentPhase.Name() != Drawing {
+				return nil
+			}
+
 			// Decode the stroke point from the payload
 			point, err := decodeStrokePoint(a.Payload)
 			if err != nil {
@@ -242,6 +253,9 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		RoomRoleRequired: RoomRoleAny,
 		GameRoleRequired: GameRoleDrawing,
 		validator: func(r *room) error {
+			if r.game == nil {
+				return fmt.Errorf("game is not initialized")
+			}
 			if r.game.currentPhase.Name() != Drawing {
 				return fmt.Errorf("not in drawing phase")
 			}
@@ -262,6 +276,9 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		RoomRoleRequired: RoomRoleAny,
 		GameRoleRequired: GameRoleDrawing,
 		validator: func(r *room) error {
+			if r.game == nil {
+				return fmt.Errorf("game is not initialized")
+			}
 			if r.game.currentPhase.Name() != Drawing {
 				return fmt.Errorf("not in drawing phase")
 			}
@@ -280,9 +297,12 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 	},
 	SubmitGuess: {
 		RoomRoleRequired: RoomRoleAny,
-		GameRoleRequired: GameRoleGuessing,
+		GameRoleRequired: GameRoleAny,
 		PayloadType:      "string",
 		validator: func(r *room) error {
+			if r.game == nil {
+				return fmt.Errorf("game is not initialized")
+			}
 			if r.game.currentPhase.Name() != Drawing {
 				return fmt.Errorf("not in guessing phase")
 			}
@@ -345,13 +365,13 @@ func message(actionType ActionType, payload interface{}) *Action {
 }
 
 // Encode a slice of actions into a JSON byte slice
-func encodeActions(actions []*Action) []byte {
+func encodeActions(actions []*Action) ([]byte, error) {
 	jsonBytes, err := json.Marshal(actions)
 	if err != nil {
 		slog.Error("error marshalling events", "error", err)
-		return nil
+		return nil, err
 	}
-	return jsonBytes
+	return jsonBytes, nil
 }
 
 // Decode a JSON byte slice into an action

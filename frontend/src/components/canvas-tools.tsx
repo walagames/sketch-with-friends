@@ -17,7 +17,7 @@ export function CanvasTools() {
 	const dispatch = useDispatch();
 	const tool = useSelector((state: RootState) => state.client.canvas.tool);
 	return (
-		<div className="flex gap-8 w-full items-center py-4 ">
+		<div className="flex lg:gap-8 gap-4 w-full items-center pt-2 lg:py-4 px-3.5 lg:px-0 ">
 			<StrokeWidthSlider />
 			<div className="flex gap-2">
 				<RaisedButton
@@ -26,7 +26,7 @@ export function CanvasTools() {
 					variant={tool === CanvasTool.Brush ? "action" : "default"}
 					onClick={() => dispatch(changeTool(CanvasTool.Brush))}
 				>
-					<Brush />
+					<Brush className="lg:size-6 size-5" />
 				</RaisedButton>
 				{/* <RaisedButton
 					size="icon"
@@ -43,14 +43,14 @@ export function CanvasTools() {
 					size="icon"
 					onClick={() => dispatch(undoStroke())}
 				>
-					<Undo2 />
+					<Undo2 className="lg:size-6 size-5" />
 				</RaisedButton>
 				<RaisedButton
 					shift={false}
 					size="icon"
 					onClick={() => dispatch(clearStrokes())}
 				>
-					<Trash />
+					<Trash className="lg:size-6 size-5" />
 				</RaisedButton>
 			</div>
 		</div>
@@ -81,7 +81,7 @@ function StrokeWidthSlider() {
 				onValueChange={handleStrokeWidthChange}
 				className="w-full"
 			/>
-			<div className="rounded-full border-[6px] border-border w-14 bg-background aspect-square -ml-1 relative z-10" />
+			<div className="rounded-full border-[6px] border-border lg:w-14 w-12 bg-background aspect-square -ml-1 relative z-10" />
 		</div>
 	);
 }

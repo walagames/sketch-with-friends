@@ -7,7 +7,9 @@ import { generateAvatar } from "@/lib/avatar";
 import { CrownIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedNumber } from "@/components/ui/animated-number";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
+import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 
 const springConfig = {
 	type: "spring",
@@ -26,18 +28,47 @@ export function PostDrawingView() {
 		(a, b) => b.score - a.score
 	);
 
+	const isLastPhase = useSelector((state: RootState) => state.game.isLastPhase);
+
 	return (
-		<HillScene className="">
-			<div className="absolute top-10 right-10">
+		<HillScene className="px-4 lg:px-0">
+			<div className="absolute lg:top-10 lg:right-10 top-2 right-2">
 				<Timer endTime={deadline} />
 			</div>
-			<h1 className="text-2xl py-2">
-				The word was: <span className="text-3xl font-bold">{word}</span>
+			<h1 className="text-xl lg:text-2xl lg:py-2">
+				The word was:{" "}
+				<span className="lg:text-3xl text-xl font-bold">{word}</span>
 			</h1>
 			<Podium players={sortedPlayers.slice(0, 3)} />
 			{sortedPlayers.length > 3 && (
 				<Leaderboard players={sortedPlayers.slice(3)} />
 			)}
+			<AnimatePresence>
+				<BobbingDoodle
+					key="rain-cloud-1"
+					className="absolute hidden md:block h-32"
+					duration={5}
+					style={{ top: "8%", left: "20%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+				<BobbingDoodle
+					key="rain-cloud-2"
+					className="absolute hidden md:block h-32"
+					duration={4.5}
+					style={{ top: "10%", right: "10%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+			</AnimatePresence>
+			<AirplaneDoodle
+				skipTransition
+				startAt={{ left: "5%", top: "55%", rotate: 20, opacity: 0 }}
+				animateTo={{ left: "5%", top: "55%", rotate: 20, opacity: 1 }}
+				leaveTo={
+					isLastPhase
+						? { left: "80%", top: "-20%", rotate: -5 }
+						: { left: "145%", top: "65%", rotate: 30 }
+				}
+			/>
 		</HillScene>
 	);
 }
@@ -48,7 +79,7 @@ function Podium({ players }: { players: Player[] }) {
 	const thirdPlace = players[2];
 
 	return (
-		<div className="grid grid-cols-3 gap-10 items-end max-w-xl w-full">
+		<div className="grid grid-cols-3 lg:gap-10 gap-4 items-end max-w-xl w-full">
 			<PodiumPlace player={secondPlace} place={2} />
 			<PodiumPlace player={firstPlace} place={1} />
 			<PodiumPlace player={thirdPlace} place={3} />
@@ -58,7 +89,14 @@ function Podium({ players }: { players: Player[] }) {
 
 function Leaderboard({ players }: { players: Player[] }) {
 	return (
-		<div className="w-full max-w-xl overflow-x-hidden scrollbar-hide max-h-56 bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex flex-col items-center justify-start px-10 py-6 gap-3 overflow-y-auto">
+		<div
+			className={cn(
+				"relative z-50 flex flex-col items-center justify-start overflow-x-hidden overflow-y-auto",
+				"w-full max-w-2xl max-h-80 h-[var(--max-leaderboard-height)] gap-3",
+				"lg:px-10 p-4 lg:py-6 ",
+				"bg-zinc-400/10 border-4 border-border border-dashed rounded-lg scrollbar-hide"
+			)}
+		>
 			{players.map((player, index) => (
 				<LeaderboardPlace key={player.id} player={player} index={index} />
 			))}
@@ -80,18 +118,18 @@ function LeaderboardPlace({
 		useSelector((state: RootState) => state.game.pointsAwarded[player.id]) ?? 0;
 
 	return (
-		<div className="flex gap-6 w-full items-center">
+		<div className="flex lg:gap-6 gap-2 w-full items-center">
 			<p className="text-lg font-bold text-foreground">{index + 4}th</p>
 			<img
 				className="rounded-lg aspect-square relative border-2 w-10"
 				src={avatarSvg}
 			/>
-			<p className="text-xl font-bold text-foreground">{name}</p>
+			<p className="text-xl font-bold text-foreground truncate">{name}</p>
 			<div className="relative text-lg font-medium text-foreground ml-auto">
 				{points > 0 && (
-					<p className="absolute -top-1.5 right-24 bg-white rounded-lg px-3 py-1.5">
+					<div className="absolute lg:text-base text-sm flex -top-1 lg:-top-1.5 right-20 lg:right-24 bg-white border border-zinc-300 rounded-lg shadow-sm lg:px-3 px-2 lg:py-1.5 py-1">
 						+{points}
-					</p>
+					</div>
 				)}
 				<AnimatedNumber value={score} previous={score - points} /> pts
 			</div>
@@ -157,7 +195,10 @@ function PodiumPlace({
 					src={avatarSvg}
 				/>
 			</motion.div>
-			<motion.p layout className="text-xl font-bold text-foreground">
+			<motion.p
+				layout
+				className="text-lg lg:text-xl font-bold text-foreground truncate max-w-full"
+			>
 				{name}
 			</motion.p>
 			<motion.div
@@ -170,7 +211,7 @@ function PodiumPlace({
 				animate={{ opacity: 1, height }}
 				transition={{ delay: delay, ...springConfig }}
 			>
-				<p className="font-medium text-background text-xl">
+				<p className="font-medium text-background text-lg lg:text-xl">
 					<AnimatedNumber delay={450} previous={score - points} value={score} />{" "}
 					pts
 				</p>
@@ -187,7 +228,7 @@ function PodiumPlace({
 					delay: delay,
 					...springConfig,
 				}}
-				className="text-2xl font-bold text-foreground py-2"
+				className="text-lg lg:text-2xl font-bold text-foreground py-2"
 			>
 				{placeText}
 			</motion.p>
@@ -198,12 +239,18 @@ function PodiumPlace({
 function AwardedPointsCard({ points }: { points: number }) {
 	return (
 		<motion.div
-			className="relative mt-2.5 bg-white border border-gray-300 rounded-lg px-3 py-1.5 shadow-lg"
+			className="relative mt-2.5 bg-white border border-zinc-300 rounded-lg px-3 py-1.5 shadow-lg"
 			initial={{ opacity: 0, y: -6 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ delay: 0.7, duration: 0.2, ease: "easeInOut" }}
 		>
-			<div className="absolute top-[-10px] left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[10px] border-b-white" />
+			<div
+				className={cn(
+					"absolute top-[-10px] left-1/2 transform -translate-x-1/2",
+					"w-0 h-0",
+					"border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[10px] border-b-white"
+				)}
+			/>
 			<p className="text-md">+ {points}</p>
 		</motion.div>
 	);

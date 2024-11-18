@@ -4,6 +4,7 @@ export enum GamePhase {
 	Picking = "picking",
 	Drawing = "drawing",
 	PostDrawing = "postDrawing",
+	Unanimous = "unanimous",
 }
 
 export enum GameRole {
@@ -26,7 +27,7 @@ export interface GameState {
 
 const initialState: GameState = {
 	round: 0,
-	phase: GamePhase.Picking,
+	phase: GamePhase.Unanimous,
 	currentPhaseDeadline: new Date().toISOString(),
 	currentRound: 0,
 	wordOptions: [],

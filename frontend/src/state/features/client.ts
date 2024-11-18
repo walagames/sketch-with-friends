@@ -23,6 +23,7 @@ export interface ClientState {
 		tool: string;
 	};
 	enteredRoomCode: string;
+	isJoining: boolean;
 }
 
 const initialState: ClientState = {
@@ -42,6 +43,7 @@ const initialState: ClientState = {
 		tool: CanvasTool.Brush,
 	},
 	enteredRoomCode: "",
+	isJoining: false,
 };
 
 export const clientSlice = createSlice({
@@ -51,7 +53,11 @@ export const clientSlice = createSlice({
 		// Only comes from the server
 		reset: () => initialState,
 		initializeClient: (state, action: PayloadAction<string>) => {
+			state.isJoining = false;
 			state.id = action.payload;
+		},
+		setIsJoining: (state, action: PayloadAction<boolean>) => {
+			state.isJoining = action.payload;
 		},
 		changeHue: (state, action: PayloadAction<number>) => {
 			state.canvas.hue = action.payload;
@@ -78,6 +84,7 @@ export const {
 	changeStrokeWidth,
 	changeTool,
 	enterRoomCode,
+	setIsJoining,
 } = clientSlice.actions;
 
 export default clientSlice.reducer;

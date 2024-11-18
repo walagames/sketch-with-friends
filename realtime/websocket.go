@@ -17,7 +17,7 @@ var upgrader = websocket.Upgrader{
 		origin := r.Header.Get("Origin")
 
 		// Allow local development
-		if origin == "http://localhost:3000" && os.Getenv("ENVIRONMENT") != "PRODUCTION" {
+		if os.Getenv("ENVIRONMENT") != "PRODUCTION" {
 			return true
 		}
 

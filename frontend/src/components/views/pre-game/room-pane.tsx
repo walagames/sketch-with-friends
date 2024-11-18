@@ -3,11 +3,7 @@ import { useDispatch } from "react-redux";
 import { copyInviteLink } from "@/lib/realtime";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { useState } from "react";
-import {
-	LinkIcon,
-	SettingsIcon,
-	UsersIcon,
-} from "lucide-react";
+import { LinkIcon, SettingsIcon, UsersIcon } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { RoomSettingsForm } from "./room-settings-form";
@@ -21,7 +17,7 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 
 	const dispatch = useDispatch();
 	return (
-		<div className="max-w-3xl w-full flex flex-col items-end gap-4">
+		<div className="relative z-10 max-w-3xl w-full flex flex-col items-end gap-4 p-2.5 lg:px-0 h-full lg:h-auto">
 			<div className="flex gap-6 items-center w-full">
 				<div>
 					<RaisedButton
@@ -29,8 +25,10 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 						className="group w-40"
 						onClick={() => copyInviteLink(roomId)}
 					>
-						<span className="group-hover:block hidden">Copy invite link</span>
-						<span className="flex items-center gap-2 group-hover:hidden text-lg">
+						<span className="lg:group-hover:block hidden">
+							Copy invite link
+						</span>
+						<span className="flex items-center gap-2 lg:group-hover:hidden text-lg">
 							<LinkIcon className="w-5 h-5 mb-1" />
 							{roomId}
 						</span>
@@ -60,7 +58,7 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 					</div>
 				)}
 			</div>
-			<div className="w-full aspect-[4/3] bg-zinc-400/10 border-4 border-border border-dashed rounded-lg flex items-start justify-center py-6 px-6">
+			<div className="w-full lg:aspect-[4/3] flex-1 bg-[#aef1fe]/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex items-start justify-center lg:p-6 px-4 pt-2">
 				{showSettings ? (
 					<RoomSettingsForm />
 				) : (
@@ -70,6 +68,9 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 			{isHost && (
 				<div>
 					<RaisedButton
+						data-m:click={
+							Object.keys(players).length > 1 && "action=start_game"
+						}
 						size="xl"
 						variant="action"
 						onClick={() => dispatch({ type: "game/startGame" })}

@@ -11,7 +11,7 @@ import (
 
 const (
 	// Maximum number of rooms that can be created
-	MAX_LOBBIES = 20
+	MAX_ROOMS = 20
 
 	// How often to check for idle rooms
 	CLEANUP_TICK = 1 * time.Minute
@@ -87,7 +87,7 @@ func (rm *roomManager) Register() (Room, error) {
 	rm.mu.Lock()
 	defer rm.mu.Unlock()
 
-	if len(rm.rooms) >= MAX_LOBBIES {
+	if len(rm.rooms) >= MAX_ROOMS {
 		slog.Warn("maximum number of rooms reached, cannot create a new room")
 		return nil, fmt.Errorf("maximum number of rooms reached")
 	}
@@ -136,7 +136,7 @@ func (rm *roomManager) Room(id string) (Room, error) {
 // Generates a unique room ID.
 // If there is a collision, it retries until it finds a unique ID.
 func (rm *roomManager) uniqueRoomID() (string, error) {
-	id, err := randomID(6)
+	id, err := randomID(4)
 	if err != nil {
 		slog.Error("failed to generate a unique room ID", "error", err)
 		return "", err
@@ -152,7 +152,7 @@ func (rm *roomManager) uniqueRoomID() (string, error) {
 
 // Generates a random ID string of a given length.
 func randomID(length int) (string, error) {
-	const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+	const charset = "ABCDEFGHJKLMNPQRSTUVWXYZ"
 	b := make([]byte, length)
 	if _, err := rand.Read(b); err != nil {
 		// This should never happen
