@@ -129,14 +129,7 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 				// Send the action to the room to be processed
 				c.room.action <- action
 			} else {
-				// The client has exceeded their rate limit, so send them a warning
-				// and do nothing with the message.
-				c.send <- []*Action{
-					{
-						Type:    Warning,
-						Payload: "Slow down! You're sending messages too quickly!",
-					},
-				}
+				// The client has exceeded their rate limit, do nothing with the message
 				slog.Debug("dropped event", "playerId", c.player.ID)
 			}
 
@@ -200,7 +193,12 @@ func (c *client) write(ctx context.Context, ready chan<- bool) {
 			}
 
 			// Encode the actions and send them to the client
-			w.Write(encodeActions(actions))
+			jsonBytes, err := encodeActions(actions)
+			if err != nil {
+				slog.Warn("error encoding actions", "playerId", c.player.ID, "error", err)
+				break
+			}
+			w.Write(jsonBytes)
 
 			// If the writer fails to close, cancel the client connection
 			if err := w.Close(); err != nil {

@@ -72,3 +72,21 @@
 	height: 30px;
 	border-radius: 0 0 1px 1px;
 }
+
+.loader {
+	border-radius: 50%;
+	display: inline-block;
+	border-top: 2px solid #fff;
+	border-right: 2px solid transparent;
+	box-sizing: border-box;
+	animation: rotation 0.75s linear infinite;
+}
+
+@keyframes rotation {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}

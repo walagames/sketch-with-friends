@@ -85,6 +85,11 @@ const roomViews = {
 			key: "playing-post-drawing",
 			transition: Direction.LEFT,
 		},
+		[GamePhase.Unanimous]: {
+			Component: () => <></>,
+			key: "unanimous",
+			transition: Direction.LEFT,
+		},
 	},
 } as const;
 
@@ -165,8 +170,8 @@ function App() {
 	}, []);
 
 	return (
-		<main className="flex min-h-screen flex-col items-center justify-between relative">
-			<div className="h-screen w-screen flex flex-col items-center justify-center relative overflow-hidden">
+		<main className="flex min-h-[100dvh] flex-col items-center justify-between relative">
+			<div className="h-[100dvh] w-screen flex flex-col items-center justify-center relative overflow-hidden">
 				<MotionConfig
 					transition={{
 						type: "spring",

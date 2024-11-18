@@ -28,7 +28,7 @@ around the world!
 - 🔒 **Private Rooms:** Create private rooms for you and your friends
 - 🎨 **Custom Words:** Play with your own custom words
 - 💬 **In-Game Chat:** Communicate with other players in real-time
-- 📱 **Mobile Support (coming soon):** Full touch and keyboard support
+- 📱 **Mobile Support:** Full touch and keyboard support
 - 🌍 **Global Matchmaking (coming soon):** Connect with players worldwide
 
 ## Local development

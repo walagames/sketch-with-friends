@@ -17,6 +17,7 @@ import {
 	Stroke,
 } from "@/state/features/canvas";
 import { CanvasTool } from "@/state/features/client";
+import { useWindowSize } from "@/hooks/use-window-size";
 
 // make canvas less pixelated
 const CANVAS_SCALE = 2;
@@ -55,17 +56,21 @@ function getSvgPathFromStroke(stroke: number[][]) {
 }
 
 function Canvas({
+	padding,
 	width,
 	height,
 	role,
 }: {
 	width: number;
 	height: number;
+	padding?: number;
 	role: GameRole;
 }) {
 	const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 	const cursorRef = React.useRef<HTMLDivElement | null>(null);
 	const strokeCountRef = React.useRef(0);
+
+	const [windowWidth, windowHeight] = useWindowSize();
 
 	const dispatch = useDispatch();
 
@@ -78,6 +83,10 @@ function Canvas({
 		(state: RootState) => state.client.canvas.strokeWidth
 	);
 	const tool = useSelector((state: RootState) => state.client.canvas.tool);
+
+	const currentPhaseDeadline = useSelector(
+		(state: RootState) => state.game.currentPhaseDeadline
+	);
 
 	const strokeColor = React.useMemo(() => {
 		const hslToHex = (h: number, s: number, l: number): string => {
@@ -108,6 +117,10 @@ function Canvas({
 		},
 		[]
 	);
+
+	const roundIsActive = React.useMemo(() => {
+		return new Date(currentPhaseDeadline).getTime() > Date.now();
+	}, [currentPhaseDeadline]);
 
 	const clearCanvas = React.useCallback(
 		(ctx: CanvasRenderingContext2D) => {
@@ -163,11 +176,33 @@ function Canvas({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [strokes]);
 
+	// Add scale factor state
+	const [scaleFactor, setScaleFactor] = React.useState(1);
+
+	// Calculate scale factor when window or desired dimensions change
+	React.useEffect(() => {
+		const widthScale = windowWidth / width;
+		const heightScale = windowHeight / height;
+		const newScale = Math.min(widthScale, heightScale, 1); // Never scale up, only down
+		setScaleFactor(newScale);
+	}, [windowWidth, windowHeight, width, height]);
+
+	// Update stroke coordinate calculations
+	const getScaledCoordinates = React.useCallback(
+		(clientX: number, clientY: number, rect: DOMRect) => {
+			const x = ((clientX - rect.left) / scaleFactor) * CANVAS_SCALE;
+			const y = ((clientY - rect.top) / scaleFactor) * CANVAS_SCALE;
+			return [x, y];
+		},
+		[scaleFactor]
+	);
+
+	// Update handlers to use scaled coordinates
 	const handleNewStroke = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
+			if (!roundIsActive) return;
 			const rect = e.currentTarget.getBoundingClientRect();
-			const x = (e.clientX - rect.left) * CANVAS_SCALE;
-			const y = (e.clientY - rect.top) * CANVAS_SCALE;
+			const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
 			dispatch(
 				addStroke({
 					color: strokeColor,
@@ -176,20 +211,17 @@ function Canvas({
 				})
 			);
 		},
-		[strokeColor, strokeWidth]
+		[strokeColor, strokeWidth, getScaledCoordinates, roundIsActive]
 	);
 
 	const handleStrokePoint = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
-			// Only draw when left click is held down
-			if (e.buttons !== 1) return;
-
+			if (e.buttons !== 1 || !roundIsActive) return;
 			const rect = e.currentTarget.getBoundingClientRect();
-			const x = (e.clientX - rect.left) * CANVAS_SCALE;
-			const y = (e.clientY - rect.top) * CANVAS_SCALE;
+			const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
 			dispatch(addStrokePoint([x, y]));
 		},
-		[dispatch]
+		[dispatch, getScaledCoordinates, roundIsActive]
 	);
 
 	const handleBucketFill = React.useCallback(
@@ -285,6 +317,7 @@ function Canvas({
 		cursor.style.boxShadow = `0 0 0 1px grey`;
 	}, [strokeColor, strokeWidth]);
 
+
 	function handleCanvasMouseDown(e: React.MouseEvent<HTMLCanvasElement>) {
 		console.log(tool, e);
 		if (e.button === 0 && role === GameRole.Drawing) {
@@ -303,18 +336,58 @@ function Canvas({
 			}
 		}
 	}
+	// Update touch handlers
+	const handleTouchStart = React.useCallback(
+		(e: React.TouchEvent<HTMLCanvasElement>) => {
+			if (role === GameRole.Drawing && roundIsActive) {
+				e.preventDefault();
+				const rect = e.currentTarget.getBoundingClientRect();
+				const touch = e.touches[0];
+				const [x, y] = getScaledCoordinates(touch.clientX, touch.clientY, rect);
+				dispatch(
+					addStroke({
+						color: strokeColor,
+						width: strokeWidth,
+						points: [[x, y]],
+					})
+				);
+			}
+		},
+		[strokeColor, strokeWidth, role, getScaledCoordinates, roundIsActive]
+	);
+
+	const handleTouchMove = React.useCallback(
+		(e: React.TouchEvent<HTMLCanvasElement>) => {
+			if (role === GameRole.Drawing && roundIsActive) {
+				e.preventDefault();
+				const rect = e.currentTarget.getBoundingClientRect();
+				const touch = e.touches[0];
+				const [x, y] = getScaledCoordinates(touch.clientX, touch.clientY, rect);
+				dispatch(addStrokePoint([x, y]));
+			}
+		},
+		[dispatch, role, getScaledCoordinates, roundIsActive]
+	);
 
 	return (
 		<ContextMenu>
-			<ContextMenuTrigger style={{ width, height }} className="relative">
+			<ContextMenuTrigger
+				style={{
+					width: width * scaleFactor - (padding ?? 0),
+					height: height * scaleFactor - (padding ?? 0),
+				}}
+				className="relative mb-2"
+			>
 				<canvas
 					className={`border-[3px] border-border rounded-lg bg-background w-full h-full relative z-10 ${
 						role === GameRole.Drawing ? "cursor-none" : ""
 					}`}
-					width={width * CANVAS_SCALE}
-					height={height * CANVAS_SCALE}
 					onMouseDown={handleCanvasMouseDown}
 					onMouseMove={handleCanvasMouseMove}
+					width={width * CANVAS_SCALE - (padding ?? 0)}
+					height={height * CANVAS_SCALE - (padding ?? 0)}
+					onTouchStart={handleTouchStart}
+					onTouchMove={handleTouchMove}
 					ref={canvasRef}
 				/>
 				<div className=" w-[98%] h-full bg-border absolute left-1/2 rounded-xl -translate-x-1/2 -bottom-1.5" />
@@ -333,7 +406,7 @@ function Canvas({
 				<HexColorPicker
 					className="custom-pointers"
 					color={strokeColor}
-					// onChange={(color) => dispatch(changeStrokeColor(color))}
+					// onChange={(color) => dispatch(change)}
 				/>
 			</ContextMenuContent>
 		</ContextMenu>

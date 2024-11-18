@@ -7,6 +7,12 @@ html {
 	font-family: "Nokora", sans-serif;
 }
 
+html,
+body {
+	height: 100dvh;
+	overflow: hidden;
+}
+
 @layer base {
 	:root {
 		--background: 0 0% 100%;
@@ -38,8 +44,27 @@ html {
 		--ring: 240 10% 3.9%;
 
 		--hills: 146.8 100% 50%;
+		--background-main: #aef1fe;
 
 		--radius: 0.6rem;
+
+		--aspect-ratio: 0.75;
+		--header-height: 4.25rem;
+		--tools-height: 3.75rem;
+		--max-chat-height: calc(
+			100dvh - calc(100vw * var(--aspect-ratio)) - var(--header-height)
+		);
+		--max-chat-height-drawing: calc(
+			100dvh - calc(100vw * var(--aspect-ratio)) - var(--header-height) -
+				var(--tools-height)
+		);
+
+		--podium-height: 160px;
+		--word-height: 10rem;
+
+		--max-leaderboard-height: calc(
+			100dvh - var(--podium-height) - var(--word-height) - 14rem
+		);
 	}
 
 	.dark {
