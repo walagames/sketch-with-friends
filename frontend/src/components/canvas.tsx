@@ -88,6 +88,10 @@ function Canvas({
 		(state: RootState) => state.game.currentPhaseDeadline
 	);
 
+	const currentPhaseDeadline = useSelector(
+		(state: RootState) => state.game.currentPhaseDeadline
+	);
+
 	const strokeColor = React.useMemo(() => {
 		const hslToHex = (h: number, s: number, l: number): string => {
 			l /= 100;
@@ -389,7 +393,6 @@ function Canvas({
 		},
 		[dispatch, role, getScaledCoordinates, roundIsActive]
 	);
-
 
 	return (
 		<ContextMenu>
