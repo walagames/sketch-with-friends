@@ -148,42 +148,36 @@ export function EnterCodeView() {
 					/>
 				</AnimatePresence>
 			</div>
+
 			<AnimatePresence>
-				<motion.div
-					initial={{ opacity: 0, y: -10 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.4, duration: 0.4 }}
-					className="h-full w-full absolute inset-0"
-				>
-					<BobbingDoodle
-						key="rain-cloud-1"
-						hideOnSmallViewports
-						duration={4}
-						className="lg:top-[20%] top-[10%] lg:left-[12%] left-[6%] absolute w-32"
-						src="/doodles/rain-cloud.png"
-					/>
-					<BobbingDoodle
-						key="rain-cloud-2"
-						hideOnSmallViewports
-						duration={4}
-						className="lg:hidden bottom-[10%] right-[14%] absolute h-28"
-						src="/doodles/rain-cloud.png"
-					/>
-					<BobbingDoodle
-						key="rain-cloud-3"
-						hideOnSmallViewports
-						duration={5}
-						style={{ top: "8%", left: "20%" }}
-						src="/doodles/rain-cloud.png"
-					/>
-					<BobbingDoodle
-						key="rain-cloud-4"
-						hideOnSmallViewports
-						duration={4.5}
-						style={{ top: "10%", right: "10%" }}
-						src="/doodles/rain-cloud.png"
-					/>
-				</motion.div>
+				<BobbingDoodle
+					key="rain-cloud-1"
+					hideOnSmallViewports
+					duration={4}
+					className="lg:top-[20%] top-[10%] lg:left-[12%] left-[6%] absolute w-32"
+					src="/doodles/rain-cloud.png"
+				/>
+				<BobbingDoodle
+					key="rain-cloud-2"
+					hideOnSmallViewports
+					duration={4}
+					className="lg:hidden bottom-[10%] right-[14%] absolute h-28"
+					src="/doodles/rain-cloud.png"
+				/>
+				<BobbingDoodle
+					key="rain-cloud-3"
+					hideOnSmallViewports
+					duration={5}
+					style={{ top: "8%", left: "20%" }}
+					src="/doodles/rain-cloud.png"
+				/>
+				<BobbingDoodle
+					key="rain-cloud-4"
+					hideOnSmallViewports
+					duration={4.5}
+					style={{ top: "10%", right: "10%" }}
+					src="/doodles/rain-cloud.png"
+				/>
 			</AnimatePresence>
 
 			<AirplaneDoodle
