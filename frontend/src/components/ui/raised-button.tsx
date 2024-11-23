@@ -2,6 +2,7 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { HTMLMotionProps, motion } from "framer-motion";
+import useSound from "use-sound";
 
 const buttonVariants = cva(
 	"inline-flex items-center justify-center rounded-lg font-bold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:brightness-90 disabled:pointer-events-none ring-offset-background",
@@ -29,6 +30,44 @@ const buttonVariants = cva(
 	}
 );
 
+const spriteMap = {
+	blip1: [0, 1000],
+	blip2: [2000, 1000],
+	blip3: [4000, 1000],
+	blip4: [6000, 1000],
+	blip5: [8000, 1000],
+	blip6: [10000, 1000],
+	blip7: [12000, 1000],
+	blip8: [14000, 1000],
+	blip9: [16000, 1000],
+	blip10: [18000, 1000],
+	blip11: [20040, 200],
+	blip12: [22000, 1000],
+	blip13: [24000, 1000],
+	blip14: [26000, 1000],
+	blip15: [28000, 1000],
+	blip16: [30000, 1000],
+	blip17: [32000, 1000],
+	blip18: [34000, 1000],
+	blip19: [36050, 110],
+	blip20: [38000, 1000],
+	blip21: [40000, 1000],
+	blip22: [42000, 1000],
+	blip23: [44000, 1000],
+	blip24: [46000, 1000],
+	blip25: [48000, 1000],
+	blip26: [50000, 1000],
+	blip27: [52000, 1000],
+	blip28: [54000, 1000],
+	blip29: [56000, 1000],
+	blip30: [58000, 1000],
+	blip31: [60000, 1000],
+};
+
+const clickSprite = {
+	click: [200, 500]
+}
+
 export interface ButtonProps
 	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
 		VariantProps<typeof buttonVariants> {
@@ -40,7 +79,19 @@ interface RaisedButtonProps extends ButtonProps {
 }
 
 const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
-	({ className, variant, size, shift = true, ...props }, ref) => {
+	({ className, variant, size, shift = true, onClick, ...props }, ref) => {
+		const [play] = useSound("/sounds.mp3", {
+			sprite: spriteMap,
+			volume: 0.05,
+		});
+
+		const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+			// 1, 3, 5, 8, 9, 11, 16, 18, 19, 20, 27, 31
+			play({ id: "blip11" });
+			// Call the original onClick handler if it exists
+			onClick?.(e);
+		};
+
 		return (
 			<div
 				className={cn(
@@ -51,6 +102,7 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 				<motion.button
 					className={cn(buttonVariants({ variant, size, className }))}
 					ref={ref}
+					onClick={handleClick}
 					style={{
 						y: -5,
 						x: 5,
@@ -61,7 +113,12 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 					}}
 					{...(props as HTMLMotionProps<"button">)}
 				>
-					<span className={cn("block py-2 whitespace-nowrap", shift && "translate-y-0.5")}>
+					<span
+						className={cn(
+							"block py-2 whitespace-nowrap",
+							shift && "translate-y-0.5"
+						)}
+					>
 						{props.children}
 					</span>
 				</motion.button>
