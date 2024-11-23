@@ -9,7 +9,7 @@ import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { CodeForm } from "./code-form";
 import { AnimatePresence } from "framer-motion";
 import { Doodle } from "@/components/doodle/doodle";
-// import { Doodle } from "@/components/doodle/doodle";
+import { Footer } from "@/components/footer";
 
 export function EnterCodeView() {
 	const dispatch = useDispatch();
@@ -100,6 +100,7 @@ export function EnterCodeView() {
 				animateTo={{ left: "75%", top: "45%", rotate: 20 }}
 				leaveTo={{ left: "135%", top: "70%", rotate: 40 }}
 			/>
+			<Footer />
 		</HillScene>
 	);
 }
