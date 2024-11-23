@@ -7,7 +7,7 @@ import { Logo } from "@/components/logo";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { CodeForm } from "./code-form";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { Doodle } from "@/components/doodle/doodle";
 import { Footer } from "@/components/footer";
 
