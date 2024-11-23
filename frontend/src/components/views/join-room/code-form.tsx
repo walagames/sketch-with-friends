@@ -57,7 +57,7 @@ export function CodeForm() {
 							<FormControl>
 								<div className="relative w-full">
 									<RaisedInput
-										placeholder="Room code"
+										placeholder="Enter a room code"
 										{...field}
 										onChange={(e) => {
 											field.onChange(e.target.value.toUpperCase());
