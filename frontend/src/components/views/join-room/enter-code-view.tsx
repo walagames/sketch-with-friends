@@ -150,6 +150,12 @@ export function EnterCodeView() {
 			</div>
 
 			<AnimatePresence>
+				<AirplaneDoodle
+					layoutId="airplane-enter-code"
+					startAt={{ left: "50%", top: "45%", rotate: 20 }}
+					animateTo={{ left: "65%", top: "45%", rotate: 20 }}
+					leaveTo={{ left: "135%", top: "70%", rotate: 40 }}
+				/>
 				<BobbingDoodle
 					key="rain-cloud-1"
 					hideOnSmallViewports
@@ -179,13 +185,6 @@ export function EnterCodeView() {
 					src="/doodles/rain-cloud.png"
 				/>
 			</AnimatePresence>
-
-			<AirplaneDoodle
-				layoutId="airplane-enter-code"
-				startAt={{ left: "135%", top: "70%", rotate: 20 }}
-				animateTo={{ left: "75%", top: "45%", rotate: 20 }}
-				leaveTo={{ left: "135%", top: "70%", rotate: 40 }}
-			/>
 
 			<Footer />
 		</HillScene>
