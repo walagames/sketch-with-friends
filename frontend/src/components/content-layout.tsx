@@ -12,7 +12,7 @@ export function ContentLayout({
 	lastUpdated: string;
 }) {
 	return (
-		<div className="max-h-[100dvh] overflow-y-auto ">
+		<div className="max-h-[100dvh] overflow-y-auto lg:px-4 px-2 ">
 			<Header />
 
 			<Doodle
@@ -27,7 +27,7 @@ export function ContentLayout({
 				src="/doodles/rain-cloud.png"
 			/>
 
-			<Card className="max-w-4xl mx-auto my-10 relative z-40">
+			<Card className="max-w-4xl mx-auto lg:my-10 my-4 relative z-40">
 				<CardContent className="p-6">
 					<div className="prose prose-slate max-w-none">
 						<h1 className="text-3xl font-bold mb-2">{title}</h1>
