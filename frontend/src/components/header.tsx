@@ -12,7 +12,7 @@ import { Menu } from "lucide-react";
 
 export function Header() {
 	return (
-		<header className="flex p-4 sticky top-0 left-0 right-0 justify-between items-center bg-[#aef1fe] z-50">
+		<header className="flex p-4 sticky top-0 left-0 right-0 justify-between items-center bg-[#aef1fe] z-50 -mx-2">
 			<Logo className="w-28" />
 
 			{/* Desktop Menu */}
