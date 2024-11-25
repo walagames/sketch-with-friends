@@ -160,7 +160,7 @@ export function EnterCodeView() {
 					key="rain-cloud-1"
 					hideOnSmallViewports
 					duration={4}
-					className="lg:top-[20%] top-[10%] lg:left-[12%] left-[6%] absolute w-32"
+					className="lg:top-[20%] top-[6%] lg:left-[12%] left-[6%] absolute w-32"
 					src="/doodles/rain-cloud.png"
 				/>
 				<BobbingDoodle
