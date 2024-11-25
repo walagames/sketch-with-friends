@@ -71,7 +71,7 @@ export function EnterCodeView() {
 						}}
 						animate={{
 							bottom: "16%",
-							left: "-120%",
+							left: "-110%",
 							scale: 1,
 							opacity: 1,
 							rotate: 0,
@@ -108,7 +108,7 @@ export function EnterCodeView() {
 							scale: 0,
 							
 							opacity: 0,
-							rotate: 120,
+							rotate: 90,
 						}}
 						animate={{
 							bottom: "-65%",

@@ -3,7 +3,9 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { HTMLMotionProps, motion } from "framer-motion";
 import useSound from "use-sound";
-
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
+import { useEffect } from "react";
 const buttonVariants = cva(
 	"inline-flex items-center justify-center rounded-lg font-bold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:brightness-90 disabled:pointer-events-none ring-offset-background",
 	{
@@ -64,9 +66,9 @@ const buttonVariants = cva(
 // 	blip31: [60000, 1000],
 // };
 
-const clickSprite = {
-	click: [25, 500] as [number, number]
-};
+// const clickSprite = {
+// 	click: [35, 500] as [number, number],
+// };
 
 export interface ButtonProps
 	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -84,14 +86,19 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 		// 	sprite: spriteMap,
 		// 	volume: 0.01,
 		// });
-		const [play] = useSound("/click-pop.mp3", {
-			volume: 0.05,
-			sprite: clickSprite,
+		const volume = useSelector((state: RootState) => state.preferences.volume);
+		const [play, exposedData] = useSound("/click-pop.mp3", {
+			volume,
+			// sprite: clickSprite,
 		});
+
+		useEffect(() => {
+			if (exposedData.sound) exposedData.sound._volume = volume;
+		}, [volume]);
 
 		const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
 			// 1, 3, 5, 8, 9, 11, 16, 18, 19, 20, 27, 31
-			play({ id: "click" });
+			play();
 			// Call the original onClick handler if it exists
 			onClick?.(e);
 		};

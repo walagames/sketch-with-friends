@@ -1,10 +1,13 @@
-import { configureStore, Middleware } from "@reduxjs/toolkit";
+import { combineReducers, configureStore, Middleware } from "@reduxjs/toolkit";
 import canvasReducer from "./features/canvas";
 import roomReducer from "./features/room";
 import gameReducer from "./features/game";
 import clientReducer from "./features/client";
+import preferencesReducer from "./features/preferences";
 import { clearQueryParams } from "@/lib/params";
 import { toast } from "sonner";
+import localStorage from "redux-persist/es/storage";
+import { persistReducer, persistStore } from "redux-persist";
 
 // Used to display toast notifications from the server
 const ErrorMessages = {
@@ -95,17 +98,31 @@ const socketMiddleware: Middleware = (store) => {
 	};
 };
 
-export const store = configureStore({
-	devTools: false,
-	reducer: {
+const persistConfig = {
+	key: "root",
+	storage: localStorage,
+	whitelist: ["preferences"], // only preferences will be persisted
+};
+
+const persistedReducer = persistReducer(
+	persistConfig,
+	combineReducers({
 		canvas: canvasReducer,
 		room: roomReducer,
 		game: gameReducer,
 		client: clientReducer,
-	},
+		preferences: preferencesReducer,
+	})
+);
+
+export const store = configureStore({
+	devTools: false,
+	reducer: persistedReducer,
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({ serializableCheck: false }).concat(socketMiddleware),
 });
+
+export const persistor = persistStore(store);
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
 export type RootState = ReturnType<typeof store.getState>;
