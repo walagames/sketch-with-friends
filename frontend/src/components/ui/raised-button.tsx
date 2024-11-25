@@ -65,7 +65,7 @@ const buttonVariants = cva(
 // };
 
 const clickSprite = {
-	click: [25, 500],
+	click: [25, 500] as [number, number]
 };
 
 export interface ButtonProps
