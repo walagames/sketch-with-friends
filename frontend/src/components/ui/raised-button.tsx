@@ -65,8 +65,8 @@ const spriteMap = {
 };
 
 const clickSprite = {
-	click: [200, 500]
-}
+	click: [100, 500],
+};
 
 export interface ButtonProps
 	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -80,14 +80,18 @@ interface RaisedButtonProps extends ButtonProps {
 
 const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 	({ className, variant, size, shift = true, onClick, ...props }, ref) => {
-		const [play] = useSound("/sounds.mp3", {
-			sprite: spriteMap,
+		// const [play] = useSound("/sounds.mp3", {
+		// 	sprite: spriteMap,
+		// 	volume: 0.01,
+		// });
+		const [play] = useSound("/click-pop.mp3", {
 			volume: 0.05,
+			// sprite: clickSprite,
 		});
 
 		const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
 			// 1, 3, 5, 8, 9, 11, 16, 18, 19, 20, 27, 31
-			play({ id: "blip11" });
+			play();
 			// Call the original onClick handler if it exists
 			onClick?.(e);
 		};
