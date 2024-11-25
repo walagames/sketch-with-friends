@@ -41,7 +41,8 @@ export function Footer() {
 						variant="link"
 						className="text-muted-foreground gap-1 px-0"
 					>
-						<img src="/walagames.png" className="h-6 inline-block" /> walagames
+						<img loading="eager" src="/walagames.png" className="h-6 w-6 inline-block" />
+						walagames
 					</Button>
 				</a>
 			</div>
