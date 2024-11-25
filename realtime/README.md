@@ -25,6 +25,23 @@ Run the application:
 ```bash
 go run *.go
 ```
+
+### Running Tests
+Run all tests:
+```bash
+go test ./...
+```
+
+Run tests with verbose output:
+```bash
+go test -v ./...
+```
+
+Run a specific test:
+```bash
+go test -run TestFilterInvalidRunes
+```
+
 ### Air
 Instead of running `go run *.go` every time you make a change, you can use `air` to automatically restart the server when files change.
 

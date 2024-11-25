@@ -7,12 +7,12 @@
 
 <p align="center">
   <a href="https://sketchwithfriends.com"><img src="https://img.shields.io/badge/Demo-Website-6637EE" alt="Demo"></a>
+  <a href="https://github.com/walagames/sketch-with-friends/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-yellow.svg"></a>
   <a href="https://github.com/walagames/sketch-with-friends/stargazers"><img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/walagames/sketch-with-friends"></a>
-</p>
 
 ## Overview
 
-Sketch with Friends is a real-time, multiplayer, browser-based drawing game.
+Sketch with Friends is a real-time, multiplayer, web-based drawing game.
 Players take turns drawing and guessing words with their friends or people from
 around the world!
 
@@ -31,10 +31,9 @@ around the world!
 - 📱 **Mobile Support:** Full touch and keyboard support
 - 🌍 **Global Matchmaking (coming soon):** Connect with players worldwide
 
-## Local development
-
-- [Frontend](frontend/README.md)
-- [Backend](realtime/README.md)
+## Development Setup
+- [Frontend Development Guide](frontend/README.md)
+- [Backend Server Setup](realtime/README.md)
 
 ## Contributing
 
