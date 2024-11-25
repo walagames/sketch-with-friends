@@ -64,9 +64,9 @@ const buttonVariants = cva(
 // 	blip31: [60000, 1000],
 // };
 
-// const clickSprite = {
-// 	click: [100, 500],
-// };
+const clickSprite = {
+	click: [25, 500],
+};
 
 export interface ButtonProps
 	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -86,12 +86,12 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 		// });
 		const [play] = useSound("/click-pop.mp3", {
 			volume: 0.05,
-			// sprite: clickSprite,
+			sprite: clickSprite,
 		});
 
 		const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
 			// 1, 3, 5, 8, 9, 11, 16, 18, 19, 20, 27, 31
-			play();
+			play({ id: "click" });
 			// Call the original onClick handler if it exists
 			onClick?.(e);
 		};
