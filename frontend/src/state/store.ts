@@ -87,7 +87,11 @@ const socketMiddleware: Middleware = (store) => {
 				//
 				// Actions that are dispatched from the websocket middleware are marked with
 				// fromServer: true, so we don't re-send them to the server.
-				if (!action.type.startsWith("client") && !action.fromServer) {
+				if (
+					!action.type.startsWith("client") &&
+					!action.type.startsWith("preferences") &&
+					!action.fromServer
+				) {
 					if (!action.payload) {
 						action.payload = null;
 					}
