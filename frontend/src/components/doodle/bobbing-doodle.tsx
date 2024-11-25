@@ -18,7 +18,7 @@ export const BobbingDoodle = forwardRef<
 				"absolute w-36"
 			)}
 			ref={ref}
-			animate={{ y: [0, 15, 0] }}
+			animate={{ y: [0, 15, 0], opacity: 1 }}
 			transition={{
 				repeat: Infinity,
 				repeatType: "loop",
