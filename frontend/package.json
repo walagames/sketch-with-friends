@@ -20,9 +20,10 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-redux": "^9.1.2",
+    "react-router": "^7.0.1",
     "react-router-dom": "^6.27.0",
-    "use-sound": "^4.0.3",
-    "react-router": "^7.0.1"
+    "redux-persist": "^6.0.0",
+    "use-sound": "^4.0.3"
   },
   "devDependencies": {
     "@dicebear/collection": "^9.2.1",
