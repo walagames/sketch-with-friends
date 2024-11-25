@@ -4,19 +4,8 @@ import { Separator } from "./ui/separator";
 
 export function Footer() {
 	return (
-		<footer className="absolute bottom-0 left-0 right-0 p-3 flex justify-between items-center">
-			<a
-				href="https://walagames.com"
-				target="_blank"
-				className="hidden sm:block"
-			>
-				<img
-					alt="Wala Games Logo"
-					src="/walagames.webp"
-					className="h-12 grayscale"
-				/>
-			</a>
-			<div className="flex w-full sm:w-auto justify-center sm:absolute sm:left-1/2 sm:-translate-x-1/2 h-auto items-center my-4 flex-wrap gap-y-2 lg:h-3">
+		<footer className="absolute bottom-5 left-0 right-0 p-3 flex justify-between items-center">
+			<div className="flex w-full justify-center h-auto items-center flex-wrap gap-y-2 lg:h-3">
 				<Link to="/how-to-play">
 					<Button size="sm" variant="link" className="text-muted-foreground">
 						How to play
@@ -40,6 +29,21 @@ export function Footer() {
 						Terms of Service
 					</Button>
 				</Link>
+				<Separator orientation="vertical" className="hidden sm:block" />
+				<a
+					href="https://walagames.com"
+					target="_blank"
+					className="flex items-center text-muted-foreground gap-1 text-sm px-3"
+				>
+					Developed by{" "}
+					<Button
+						size="sm"
+						variant="link"
+						className="text-muted-foreground gap-1 px-0"
+					>
+						<img src="/walagames.png" className="h-6 inline-block" /> walagames
+					</Button>
+				</a>
 			</div>
 		</footer>
 	);
