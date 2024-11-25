@@ -24,6 +24,7 @@ export const AirplaneDoodle = forwardRef<
 			animateTo?: DoodlePosition;
 			leaveTo?: DoodlePosition;
 			skipTransition?: boolean;
+			delay?: number;
 			// layoutId?: string;
 		}
 >(({ skipTransition = false, ...props }, ref) => {
@@ -35,7 +36,9 @@ export const AirplaneDoodle = forwardRef<
 			ref={ref}
 			animate={props.animateTo}
 			exit={{ ...props.leaveTo, transition: planeSpring }}
-			transition={skipTransition ? InstantConfig : planeSpring}
+			transition={
+				skipTransition ? InstantConfig : { ...planeSpring, delay: props.delay }
+			}
 			initial={props.startAt}
 			{...props}
 		/>

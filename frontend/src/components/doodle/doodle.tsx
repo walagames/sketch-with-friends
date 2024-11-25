@@ -4,7 +4,10 @@ import { cn } from "@/lib/utils";
 export const Doodle = forwardRef<
 	HTMLImageElement,
 	MotionProps &
-		React.ImgHTMLAttributes<HTMLImageElement> & { duration?: number }
+		React.ImgHTMLAttributes<HTMLImageElement> & {
+			duration?: number;
+			delay?: number;
+		}
 >((props, ref) => {
 	return (
 		<motion.img
@@ -14,6 +17,7 @@ export const Doodle = forwardRef<
 				type: "spring",
 				restSpeed: 0.001,
 				restDelta: 0.001,
+				delay: props.delay,
 			}}
 			{...props}
 		/>
