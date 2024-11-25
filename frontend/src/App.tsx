@@ -91,6 +91,18 @@ const roomViews = {
 			transition: Direction.LEFT,
 		},
 	},
+	[RoomStage.Unanimous]: {
+		[RoomRole.Host]: {
+			Component: () => <></>,
+			key: "unanimous-host",
+			transition: Direction.LEFT,
+		},
+		[RoomRole.Player]: {
+			Component: () => <></>,
+			key: "unanimous-player",
+			transition: Direction.LEFT,
+		},
+	},
 } as const;
 
 function roomView({

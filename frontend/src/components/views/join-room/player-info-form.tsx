@@ -111,7 +111,7 @@ export function PlayerInfoForm() {
 	}
 
 	return (
-		<div className="max-w-56 w-full flex flex-col gap-5 items-center">
+		<div className="max-w-56 w-full flex flex-col gap-5 items-center relative z-50">
 			<div className="flex justify-center items-center gap-2">
 				<div className="w-40 aspect-square shadow-accent rounded-lg ml-2">
 					<img className="rounded-lg" src={avatarSvg} />

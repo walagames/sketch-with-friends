@@ -5,6 +5,7 @@ import { toast } from "sonner";
 export enum RoomStage {
 	PreGame = "preGame",
 	Playing = "playing",
+	Unanimous = "unanimous",
 }
 
 export type Player = {
@@ -74,7 +75,7 @@ const initialState: RoomState = {
 		gameMode: GameMode.Classic,
 	},
 	players: {},
-	stage: RoomStage.PreGame,
+	stage: RoomStage.Unanimous,
 };
 
 export const roomSlice = createSlice({
@@ -121,6 +122,5 @@ export const roomSlice = createSlice({
 
 export const { changeStage, setPlayers, playerLeft, changeRoomSettings } =
 	roomSlice.actions;
-
 
 export default roomSlice.reducer;
