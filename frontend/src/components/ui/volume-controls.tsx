@@ -11,7 +11,11 @@ export function VolumeControls() {
 	const volume = useSelector((state: RootState) => state.preferences.volume);
 
 	const VolumeIcon =
-		volume === null ? VolumeXIcon : volume <= 0.5 ? Volume1Icon : Volume2Icon;
+		volume === null || volume === 0
+			? VolumeXIcon
+			: volume <= 0.5
+			? Volume1Icon
+			: Volume2Icon;
 
 	return (
 		<div className="absolute top-4 left-4 z-50">
