@@ -33,7 +33,7 @@ export function DrawingDrawerView() {
 										{selectedWord}
 									</span>
 								</div>
-								<Timer endTime={deadline} />
+								<Timer endTime={deadline} playSound />
 							</div>
 							<Canvas
 								padding={10}

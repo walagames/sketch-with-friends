@@ -35,7 +35,7 @@ export function DrawingGuesserView() {
 								</span>
 								is drawing: <WordWithLetterBlanks word={selectedWord} />
 							</div>
-							<Timer endTime={deadline} />
+							<Timer endTime={deadline} playSound />
 						</div>
 						<Canvas
 							padding={10}

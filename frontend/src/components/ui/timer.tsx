@@ -4,11 +4,31 @@ import {
 	useMotionValue,
 	motion,
 	AnimationPlaybackControls,
+	useMotionValueEvent,
 } from "framer-motion";
-import { useEffect } from "react";
-export function Timer({ endTime }: { endTime: string }) {
+import { useEffect, useState } from "react";
+import useSound from "use-sound";
+export function Timer({
+	endTime,
+	playSound = false,
+}: {
+	endTime: string;
+	playSound?: boolean;
+}) {
 	const count = useMotionValue(0);
 	const time = useTransform(count, (v) => Math.ceil(v));
+	const [isPlaying, setIsPlaying] = useState(false);
+	// const isAfterFive = useTransform(count, (v) => v <= 5);
+	const [play] = useSound("/clock-ticking.mp3", {
+		volume: 0.1,
+	});
+
+	useMotionValueEvent(time, "change", (latest) => {
+		if (latest === 5 && playSound && !isPlaying) {
+			play();
+			setIsPlaying(true);
+		}
+	});
 
 	useEffect(() => {
 		let controls: AnimationPlaybackControls;
