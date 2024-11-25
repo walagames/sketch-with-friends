@@ -1,3 +1,4 @@
+import { RootState } from "@/state/store";
 import {
 	useTransform,
 	animate,
@@ -7,6 +8,7 @@ import {
 	useMotionValueEvent,
 } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import useSound from "use-sound";
 export function Timer({
 	endTime,
@@ -18,9 +20,10 @@ export function Timer({
 	const count = useMotionValue(0);
 	const time = useTransform(count, (v) => Math.ceil(v));
 	const [isPlaying, setIsPlaying] = useState(false);
+	const volume = useSelector((state: RootState) => state.preferences.volume);
 	// const isAfterFive = useTransform(count, (v) => v <= 5);
 	const [play] = useSound("/clock-ticking.mp3", {
-		volume: 0.1,
+		volume,
 	});
 
 	useMotionValueEvent(time, "change", (latest) => {
