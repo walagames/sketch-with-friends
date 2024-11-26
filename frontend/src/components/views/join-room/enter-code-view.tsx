@@ -10,9 +10,88 @@ import { CodeForm } from "./code-form";
 import { AnimatePresence } from "framer-motion";
 import { Doodle } from "@/components/doodle/doodle";
 import { Footer } from "@/components/footer";
+import { useMemo } from "react";
+
+interface DoodleItem {
+	src: string;
+	width: string;
+}
+
+interface DoodleSlot {
+	initial: {
+		top?: string;
+		bottom?: string;
+		left?: string;
+		right?: string;
+		rotate: number;
+	};
+	animate: {
+		top?: string;
+		bottom?: string;
+		left?: string;
+		right?: string;
+		rotate: number;
+	};
+	delay: number;
+}
 
 export function EnterCodeView() {
 	const dispatch = useDispatch();
+
+	const doodleSlots: DoodleSlot[] = useMemo(
+		() => [
+			{
+				initial: { top: "0", left: "0", rotate: 60 },
+				animate: { top: "-57%", left: "-57%", rotate: 0 },
+				delay: 0.1,
+			},
+			{
+				initial: { bottom: "0", left: "0", rotate: -110 },
+				animate: { bottom: "16%", left: "-110%", rotate: 0 },
+				delay: 0.15,
+			},
+			{
+				initial: { top: "0", right: "0", rotate: 90 },
+				animate: { top: "-50%", right: "-55%", rotate: 0 },
+				delay: 0.05,
+			},
+			{
+				initial: { bottom: "0", right: "0", rotate: 90 },
+				animate: { bottom: "-65%", right: "-65%", rotate: 0 },
+				delay: 0.25,
+			},
+			{
+				initial: { bottom: "0", left: "0", rotate: 120 },
+				animate: { bottom: "-65%", left: "-35%", rotate: 0 },
+				delay: 0.2,
+			},
+			{
+				initial: { bottom: "0", left: "0", rotate: -90 },
+				animate: { bottom: "-70%", left: "-65%", rotate: 15 },
+				delay: 0.2,
+			},
+		],
+		[]
+	);
+
+	const doodles = useMemo(() => {
+		const items: DoodleItem[] = [
+			{ src: "/doodles/sparkles.png", width: "6rem" },
+			{ src: "/doodles/ice-cream.png", width: "9rem" },
+			{ src: "/doodles/gift.png", width: "6rem" },
+			{ src: "/doodles/hearts.png", width: "7rem" },
+			{ src: "/doodles/music.png", width: "6rem" },
+		].sort(() => Math.random() - 0.5);
+
+		const musicIndex = items.findIndex(
+			(item) => item.src === "/doodles/music.png"
+		);
+		const musicItem = items.splice(musicIndex, 1)[0];
+		items.push(musicItem);
+		items.push({ ...musicItem, width: "5rem" }); // Add music item twice since we have 6 slots
+
+		return items;
+	}, []);
 
 	return (
 		<HillScene>
@@ -38,128 +117,24 @@ export function EnterCodeView() {
 					<CodeForm />
 				</div>
 				<AnimatePresence>
-					<Doodle
-						delay={0.1}
-						key="sparkles-doodle"
-						initial={{
-							width: "6rem",
-							scale: 0,
-							top: 0,
-							left: 0,
-							opacity: 0,
-							rotate: 60,
-						}}
-						animate={{
-							top: "-57%",
-							left: "-57%",
-							scale: 1,
-							opacity: 1,
-							rotate: 0,
-						}}
-						src="/doodles/sparkles.png"
-					/>
-					<Doodle
-						delay={0.15}
-						key="ice-cream-doodle"
-						initial={{
-							width: "9rem",
-							bottom: 0,
-							left: 0,
-							scale: 0,
-							opacity: 0,
-							rotate: -110,
-						}}
-						animate={{
-							bottom: "16%",
-							left: "-110%",
-							scale: 1,
-							opacity: 1,
-							rotate: 0,
-						}}
-						src="/doodles/ice-cream.png"
-					/>
-					<Doodle
-						delay={0.05}
-						key="gift-doodle"
-						initial={{
-							top: 0,
-							right: 0,
-							width: "6rem",
-							scale: 0,
-							opacity: 0,
-							rotate: 90,
-						}}
-						animate={{
-							top: "-50%",
-							right: "-55%",
-							scale: 1,
-							opacity: 1,
-							rotate: 0,
-						}}
-						src="/doodles/gift.png"
-					/>
-					<Doodle
-						delay={0.25}
-						key="hearts-doodle"
-						initial={{
-							bottom: 0,
-							right: 0,
-							width: "7rem",
-							scale: 0,
-							
-							opacity: 0,
-							rotate: 90,
-						}}
-						animate={{
-							bottom: "-65%",
-							right: "-65%",
-							scale: 1,
-							opacity: 1,
-							rotate: 0,
-						}}
-						src="/doodles/hearts.png"
-					/>
-					<Doodle
-						delay={0.2}
-						key="music-doodle-1"
-						initial={{
-							bottom: 0,
-							left: 0,
-							width: "6rem",
-							
-							scale: 0,
-							opacity: 0,
-							rotate: 120,
-						}}
-						animate={{
-							bottom: "-65%",
-							left: "-35%",
-							scale: 1,
-							opacity: 1,
-							rotate: 0,
-						}}
-						src="/doodles/music.png"
-					/>
-					<Doodle
-						delay={0.2}
-						key="music-doodle-2"
-						initial={{
-							bottom: 0,
-							left: 0,
-							width: "5rem",
-							scale: 0,
-							opacity: 0,
-							rotate: -90,
-						}}
-						animate={{
-							bottom: "-70%",
-							left: "-65%",
-							rotate: 15,
-							scale: 1,
-							opacity: 1,
-						}}
-						src="/doodles/music.png"
-					/>
+					{doodleSlots.map((slot, index) => (
+						<Doodle
+							key={`doodle-${index}`}
+							delay={slot.delay}
+							initial={{
+								width: doodles[index].width,
+								scale: 0,
+								opacity: 0,
+								...slot.initial,
+							}}
+							animate={{
+								scale: 1,
+								opacity: 1,
+								...slot.animate,
+							}}
+							src={doodles[index].src}
+						/>
+					))}
 				</AnimatePresence>
 			</div>
 
@@ -178,13 +153,6 @@ export function EnterCodeView() {
 					className="lg:top-[20%] top-[6%] lg:left-[12%] left-[6%] absolute w-32"
 					src="/doodles/rain-cloud.png"
 				/>
-				{/* <BobbingDoodle
-					key="rain-cloud-2"
-					hideOnSmallViewports
-					duration={4}
-					className="hidden sm:block bottom-[10%] right-[14%] absolute h-28"
-					src="/doodles/rain-cloud.png"
-				/> */}
 				<BobbingDoodle
 					key="rain-cloud-3"
 					hideOnSmallViewports

@@ -11,12 +11,10 @@ export const Doodle = forwardRef<
 >((props, ref) => {
 	return (
 		<motion.img
-			className={cn("absolute w-36 hidden lg:block", props.className)}
+			className={cn("absolute hidden lg:block", props.className)}
 			ref={ref}
 			transition={{
 				type: "spring",
-				// restSpeed: 0.01,
-				// restDelta: 0.01,
 				delay: props.delay,
 			}}
 			{...props}
