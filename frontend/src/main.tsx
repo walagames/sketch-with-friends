@@ -13,16 +13,21 @@ import { PersistGate } from "redux-persist/integration/react";
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
 		<Provider store={store}>
-			<PersistGate loading={null} persistor={persistor}>
-				<BrowserRouter>
-					<Routes>
-						<Route path="/" element={<App />} />
-						<Route path="/terms-of-service" element={<TermsOfService />} />
-						<Route path="/privacy-policy" element={<PrivacyPolicy />} />
-						<Route path="/how-to-play" element={<HowToPlay />} />
-					</Routes>
-				</BrowserRouter>
-			</PersistGate>
+			<BrowserRouter>
+				<Routes>
+					<Route
+						path="/"
+						element={
+							<PersistGate loading={null} persistor={persistor}>
+								<App />
+							</PersistGate>
+						}
+					/>
+					<Route path="/terms-of-service" element={<TermsOfService />} />
+					<Route path="/privacy-policy" element={<PrivacyPolicy />} />
+					<Route path="/how-to-play" element={<HowToPlay />} />
+				</Routes>
+			</BrowserRouter>
 		</Provider>
 	</StrictMode>
 );
