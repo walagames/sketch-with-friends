@@ -19,17 +19,17 @@ interface DoodleItem {
 
 interface DoodleSlot {
 	initial: {
-		top?: string;
-		bottom?: string;
-		left?: string;
-		right?: string;
+		top?: number;
+		bottom?: number;
+		left?: number;
+		right?: number;
 		rotate: number;
 	};
 	animate: {
-		top?: string;
-		bottom?: string;
-		left?: string;
-		right?: string;
+		top?: number;
+		bottom?: number;
+		left?: number;
+		right?: number;
 		rotate: number;
 	};
 	delay: number;
@@ -41,33 +41,33 @@ export function EnterCodeView() {
 	const doodleSlots: DoodleSlot[] = useMemo(
 		() => [
 			{
-				initial: { top: "0", left: "0", rotate: 60 },
-				animate: { top: "-57%", left: "-57%", rotate: 0 },
+				initial: { top: 0, left: 0, rotate: 60 },
+				animate: { top: -175, left: -150, rotate: 0 },
 				delay: 0.1,
 			},
 			{
-				initial: { bottom: "0", left: "0", rotate: -110 },
-				animate: { bottom: "16%", left: "-110%", rotate: 0 },
+				initial: { bottom: 0, left: 0, rotate: -110 },
+				animate: { bottom: 75, left: -250, rotate: 0 },
 				delay: 0.15,
 			},
 			{
-				initial: { top: "0", right: "0", rotate: 90 },
-				animate: { top: "-50%", right: "-55%", rotate: 0 },
+				initial: { top: 0, right: 0, rotate: 90 },
+				animate: { top: -150, right: -150, rotate: 0 },
 				delay: 0.05,
 			},
 			{
-				initial: { bottom: "0", right: "0", rotate: 90 },
-				animate: { bottom: "-65%", right: "-65%", rotate: 0 },
+				initial: { bottom: 0, right: 0, rotate: 90 },
+				animate: { bottom: -175, right: -175, rotate: 0 },
 				delay: 0.25,
 			},
 			{
-				initial: { bottom: "0", left: "0", rotate: 120 },
-				animate: { bottom: "-65%", left: "-35%", rotate: 0 },
+				initial: { bottom: 0, left: 0, rotate: 120 },
+				animate: { bottom: -175, left: -100, rotate: 0 },
 				delay: 0.2,
 			},
 			{
-				initial: { bottom: "0", left: "0", rotate: -90 },
-				animate: { bottom: "-70%", left: "-65%", rotate: 15 },
+				initial: { bottom: 0, left: 0, rotate: -90 },
+				animate: { bottom: -175, left: -175, rotate: 15 },
 				delay: 0.2,
 			},
 		],

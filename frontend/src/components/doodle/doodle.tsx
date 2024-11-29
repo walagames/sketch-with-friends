@@ -16,6 +16,8 @@ export const Doodle = forwardRef<
 			transition={{
 				type: "spring",
 				delay: props.delay,
+				restDelta: 0.0001,
+				restSpeed: 0.0001,
 			}}
 			{...props}
 		/>
