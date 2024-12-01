@@ -21,11 +21,14 @@ export function VolumeControls() {
 		<div className="absolute top-4 left-4 z-50">
 			<Popover>
 				<PopoverTrigger asChild>
-					<RaisedButton variant="action" size="icon">
-						<VolumeIcon className="size-6" />
+					<RaisedButton variant="action" size="icon" shift>
+						<VolumeIcon className="size-6 -translate-y-0.5" />
 					</RaisedButton>
 				</PopoverTrigger>
-				<PopoverContent side="left" className="w-80 px-3 py-3">
+				<PopoverContent
+					side="left"
+					className="w-80 p-3 border-none rounded-full"
+				>
 					<div className="flex items-center gap-2">
 						<VolumeXIcon
 							className="size-5 cursor-pointer hover:opacity-70"
