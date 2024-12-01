@@ -18,6 +18,7 @@ interface DoodleItem {
 }
 
 interface DoodleSlot {
+	id: string;
 	initial: {
 		top?: number;
 		bottom?: number;
@@ -41,34 +42,40 @@ export function EnterCodeView() {
 	const doodleSlots: DoodleSlot[] = useMemo(
 		() => [
 			{
-				initial: { top: 0, left: 0, rotate: 60 },
-				animate: { top: -175, left: -150, rotate: 0 },
+				id: "top-right",
+				initial: { top: 0, right: 0, rotate: 90 },
+				animate: { top: -150, right: -175, rotate: 0 },
 				delay: 0.1,
 			},
 			{
+				id: "top-left",
+				initial: { top: 0, left: 0, rotate: 60 },
+				animate: { top: -175, left: -175, rotate: 0 },
+				delay: 0.2,
+			},
+			{
+				id: "middle-left",
 				initial: { bottom: 0, left: 0, rotate: -110 },
-				animate: { bottom: 75, left: -250, rotate: 0 },
-				delay: 0.15,
+				animate: { bottom: 65, left: -275, rotate: 0 },
+				delay: 0.275,
 			},
 			{
-				initial: { top: 0, right: 0, rotate: 90 },
-				animate: { top: -150, right: -150, rotate: 0 },
-				delay: 0.05,
-			},
-			{
+				id: "bottom-right",
 				initial: { bottom: 0, right: 0, rotate: 90 },
 				animate: { bottom: -175, right: -175, rotate: 0 },
-				delay: 0.25,
+				delay: 0.4,
 			},
 			{
+				id: "bottom-left-1",
 				initial: { bottom: 0, left: 0, rotate: 120 },
 				animate: { bottom: -175, left: -100, rotate: 0 },
-				delay: 0.2,
+				delay: 0.325,
 			},
 			{
+				id: "bottom-left-2",
 				initial: { bottom: 0, left: 0, rotate: -90 },
 				animate: { bottom: -175, left: -175, rotate: 15 },
-				delay: 0.2,
+				delay: 0.325,
 			},
 		],
 		[]
@@ -80,15 +87,21 @@ export function EnterCodeView() {
 			{ src: "/doodles/ice-cream.png", width: "9rem" },
 			{ src: "/doodles/gift.png", width: "6rem" },
 			{ src: "/doodles/hearts.png", width: "7rem" },
-			{ src: "/doodles/music.png", width: "6rem" },
-		].sort(() => Math.random() - 0.5);
+			{ src: "/doodles/happy-cup.png", width: "6rem" },
+			{ src: "/doodles/flag.png", width: "6rem" },
+		]
+			.sort(() => Math.random() - 0.5)
+			.slice(0, 5);
 
-		const musicIndex = items.findIndex(
-			(item) => item.src === "/doodles/music.png"
+		items.splice(
+			4,
+			0,
+			{
+				src: "/doodles/music.png",
+				width: "6rem",
+			},
+			{ src: "/doodles/music.png", width: "5rem" }
 		);
-		const musicItem = items.splice(musicIndex, 1)[0];
-		items.push(musicItem);
-		items.push({ ...musicItem, width: "5rem" }); // Add music item twice since we have 6 slots
 
 		return items;
 	}, []);
@@ -119,18 +132,18 @@ export function EnterCodeView() {
 				<AnimatePresence>
 					{doodleSlots.map((slot, index) => (
 						<Doodle
-							key={`doodle-${index}`}
+							key={slot.id}
 							delay={slot.delay}
 							initial={{
 								width: doodles[index].width,
 								scale: 0,
 								opacity: 0,
-								...slot.initial,
+								...slot.animate,
 							}}
 							animate={{
 								scale: 1,
 								opacity: 1,
-								...slot.animate,
+								// ...slot.animate,
 							}}
 							src={doodles[index].src}
 						/>
@@ -140,10 +153,10 @@ export function EnterCodeView() {
 
 			<AnimatePresence>
 				<AirplaneDoodle
-					delay={0}
+					// delay={.4}
 					layoutId="airplane-enter-code"
 					startAt={{ left: "50%", top: "45%", rotate: 20, opacity: 0 }}
-					animateTo={{ left: "65%", top: "45%", rotate: 20, opacity: 1 }}
+					animateTo={{ left: "66%", top: "45%", rotate: 20, opacity: 1 }}
 					leaveTo={{ left: "135%", top: "70%", rotate: 40, opacity: 0 }}
 				/>
 				<BobbingDoodle
