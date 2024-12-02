@@ -18,7 +18,7 @@ export function VolumeControls() {
 			: Volume2Icon;
 
 	return (
-		<div className="absolute top-4 left-4 z-50">
+		<div>
 			<Popover>
 				<PopoverTrigger asChild>
 					<RaisedButton variant="action" size="icon" shift>

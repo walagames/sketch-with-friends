@@ -22,7 +22,6 @@ import {
 	PostDrawingView,
 } from "@/components/views";
 import { useEffect, useState } from "react";
-import { VolumeControls } from "./components/ui/volume-controls";
 
 type ViewComponent = {
 	Component: React.ComponentType;
@@ -185,7 +184,6 @@ function App() {
 	return (
 		<main className="flex min-h-[100dvh] flex-col items-center justify-between relative">
 			<div className="h-[100dvh] w-screen flex flex-col items-center justify-center relative overflow-hidden">
-				<VolumeControls />
 				<MotionConfig
 					transition={{
 						type: "spring",

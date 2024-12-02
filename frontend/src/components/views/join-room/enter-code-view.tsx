@@ -9,9 +9,7 @@ import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { CodeForm } from "./code-form";
 import { AnimatePresence } from "framer-motion";
 import { Doodle } from "@/components/doodle/doodle";
-import { Footer } from "@/components/footer";
 import { useMemo } from "react";
-
 interface DoodleItem {
 	src: string;
 	width: string;
@@ -107,7 +105,7 @@ export function EnterCodeView() {
 	}, []);
 
 	return (
-		<HillScene>
+		<HillScene className="h-screen">
 			<AnimatePresence>
 				<div className="flex flex-col items-center gap-4 max-w-64 relative z-50">
 					<Logo />
@@ -124,9 +122,9 @@ export function EnterCodeView() {
 							Create room
 						</RaisedButton>
 						<div className="flex items-center gap-2 w-full px-1 -translate-y-0.5">
-							<div className="h-0.5 bg-primary/50 flex-1 rounded-full" />
+							<div className="h-0.5 bg-foreground/20 flex-1 rounded-full" />
 							<p className="text-sm text-muted-foreground font-semibold">or</p>
-							<div className="h-0.5 bg-primary/50 flex-1 rounded-full" />
+							<div className="h-0.5 bg-foreground/20 flex-1 rounded-full" />
 						</div>
 						<CodeForm />
 					</div>
@@ -183,8 +181,6 @@ export function EnterCodeView() {
 					src="/doodles/rain-cloud.png"
 				/>
 			</AnimatePresence>
-
-			<Footer />
 		</HillScene>
 	);
 }
