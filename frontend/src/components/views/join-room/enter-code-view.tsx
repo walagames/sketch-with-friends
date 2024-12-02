@@ -108,52 +108,54 @@ export function EnterCodeView() {
 
 	return (
 		<HillScene>
-			<div className="flex flex-col items-center gap-4 max-w-64 relative z-50">
-				<Logo />
-				<div className="flex flex-col items-center gap-2 max-w-64 py-2">
-					<RaisedButton
-						size="xl"
-						variant="action"
-						className="w-full"
-						onClick={() => {
-							clearQueryParams();
-							dispatch(enterRoomCode("new"));
-						}}
-					>
-						Create room
-					</RaisedButton>
-					<div className="flex items-center gap-2 w-full px-1 -translate-y-0.5">
-						<div className="h-0.5 bg-primary/50 flex-1 rounded-full" />
-						<p className="text-sm text-muted-foreground font-semibold">or</p>
-						<div className="h-0.5 bg-primary/50 flex-1 rounded-full" />
+			<AnimatePresence>
+				<div className="flex flex-col items-center gap-4 max-w-64 relative z-50">
+					<Logo />
+					<div className="flex flex-col items-center gap-2 max-w-64 py-2">
+						<RaisedButton
+							size="xl"
+							variant="action"
+							className="w-full"
+							onClick={() => {
+								clearQueryParams();
+								dispatch(enterRoomCode("new"));
+							}}
+						>
+							Create room
+						</RaisedButton>
+						<div className="flex items-center gap-2 w-full px-1 -translate-y-0.5">
+							<div className="h-0.5 bg-primary/50 flex-1 rounded-full" />
+							<p className="text-sm text-muted-foreground font-semibold">or</p>
+							<div className="h-0.5 bg-primary/50 flex-1 rounded-full" />
+						</div>
+						<CodeForm />
 					</div>
-					<CodeForm />
-				</div>
-				<AnimatePresence>
+
 					{doodleSlots.map((slot, index) => (
 						<Doodle
+							// style={{
+							// 	willChange: "scale, opacity",
+							// }}
 							key={slot.id}
 							delay={slot.delay}
 							initial={{
 								width: doodles[index].width,
-								scale: 0,
-								opacity: 0,
-								...slot.animate,
-							}}
-							animate={{
 								scale: 1,
 								opacity: 1,
-								// ...slot.animate,
+								...slot.animate,
 							}}
+							// animate={{
+							// 	scale: 1,
+							// 	opacity: 1,
+							// 	// ...slot.animate,
+							// }}
 							src={doodles[index].src}
 						/>
 					))}
-				</AnimatePresence>
-			</div>
+				</div>
 
-			<AnimatePresence>
 				<AirplaneDoodle
-					// delay={.4}
+					// delay={.3}
 					layoutId="airplane-enter-code"
 					startAt={{ left: "50%", top: "45%", rotate: 20, opacity: 0 }}
 					animateTo={{ left: "66%", top: "45%", rotate: 20, opacity: 1 }}
