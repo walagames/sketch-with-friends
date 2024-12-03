@@ -82,15 +82,15 @@ export function RoomSettingsForm() {
 	}, 300);
 
 	return (
-		<div className=" w-full flex flex-col lg:gap-4 gap-1">
-			<h1 className="lg:text-3xl text-2xl font-bold">Room settings</h1>
+		<div className="w-full flex flex-col lg:gap-4 gap-1 max-h-[calc(100vh-200px)] overflow-y-auto px-1.5">
+			<h1 className="lg:text-3xl text-2xl font-bold z-10">Room settings</h1>
 			<Form {...form}>
 				<form
 					onChange={handleChange}
 					className="flex flex-col w-full gap-4 justify-between"
 				>
-					<div className="flex lg:gap-8 gap-4 w-full">
-						<div className="flex flex-col gap-4 w-full order-2">
+					<div className="flex lg:flex-row flex-col lg:gap-8 gap-4 w-full">
+						<div className="flex flex-col gap-4 w-full lg:order-2">
 							<FormField
 								control={form.control}
 								name="playerLimit"
