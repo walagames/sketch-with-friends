@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { RoomSettingsForm } from "./room-settings-form";
 import { ModalMenu } from "@/components/ui/modal-menu";
-export function RoomPane({ isHost }: { isHost: boolean }) {
+export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 	const players = useSelector((state: RootState) => state.room.players);
 	const roomId = useSelector((state: RootState) => state.room.id);
 
