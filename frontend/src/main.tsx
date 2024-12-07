@@ -4,7 +4,7 @@ import App from "./App";
 import "./index.css";
 import { Provider } from "react-redux";
 import { persistor, store } from "./state/store";
-import { BrowserRouter, Outlet, Route, Routes } from "react-router";
+import { BrowserRouter, Route, Routes } from "react-router";
 import { TermsOfService } from "./pages/terms-of-service";
 import { PrivacyPolicy } from "./pages/privacy-policy";
 import { HowToPlay } from "./pages/how-to-play";
@@ -16,30 +16,30 @@ createRoot(document.getElementById("root")!).render(
 		<Provider store={store}>
 			<BrowserRouter>
 				<Routes>
-					<Route path="/" element={<MainLayout />}>
-						<Route
-							index
-							element={
-								<PersistGate loading={null} persistor={persistor}>
+					<Route
+						path="/"
+						element={
+							<PersistGate loading={null} persistor={persistor}>
+								<Layout>
 									<App />
-								</PersistGate>
-							}
-						/>
-						<Route path="terms-of-service" element={<TermsOfService />} />
-						<Route path="privacy-policy" element={<PrivacyPolicy />} />
-						<Route path="how-to-play" element={<HowToPlay />} />
-					</Route>
+								</Layout>
+							</PersistGate>
+						}
+					/>
+					<Route path="terms-of-service" element={<TermsOfService />} />
+					<Route path="privacy-policy" element={<PrivacyPolicy />} />
+					<Route path="how-to-play" element={<HowToPlay />} />
 				</Routes>
 			</BrowserRouter>
 		</Provider>
 	</StrictMode>
 );
 
-function MainLayout() {
+function Layout({ children }: { children: React.ReactNode }) {
 	return (
 		<div className="flex flex-col h-[100dvh] w-screen">
 			<UIHeader />
-			<Outlet />
+			{children}
 		</div>
 	);
 }

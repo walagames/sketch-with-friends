@@ -40,7 +40,7 @@ export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 					{Object.keys(players).length}/{settings.playerLimit}
 				</span>
 				{isHost && (
-					<div className="ml-auto">
+					<div className="ml-auto flex items-center gap-2.5">
 						<RaisedButton
 							size="icon"
 							onClick={() => setShowSettings(!showSettings)}
@@ -51,11 +51,11 @@ export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 								<SettingsIcon className="size-5 -translate-y-0.5" />
 							)}
 						</RaisedButton>
+						<div className="lg:hidden">
+							<ModalMenu />
+						</div>
 					</div>
 				)}
-				<div className="lg:hidden">
-					<ModalMenu />
-				</div>
 			</div>
 			<div className="w-full lg:aspect-[4/3] flex-1 bg-[#aef1fe]/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex items-start justify-center lg:p-6 px-4 pt-2">
 				{showSettings ? (
