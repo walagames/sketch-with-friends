@@ -9,9 +9,14 @@ import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { ModalMenu } from "@/components/ui/modal-menu";
+import { Timer } from "@/components/ui/timer";
 export function DrawingDrawerView() {
 	const selectedWord = useSelector(
 		(state: RootState) => state.game.selectedWord
+	);
+
+	const deadline = useSelector(
+		(state: RootState) => state.game.currentPhaseDeadline
 	);
 
 	return (
@@ -31,6 +36,7 @@ export function DrawingDrawerView() {
 									</span>
 								</div>
 								<div className="lg:hidden">
+									<Timer endTime={deadline} />
 									<ModalMenu />
 								</div>
 							</div>

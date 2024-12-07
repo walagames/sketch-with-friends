@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
+import { ModalMenu } from "@/components/ui/modal-menu";
+import { Timer } from "@/components/ui/timer";
 
 export function DrawingGuesserView() {
 	const players = useSelector((state: RootState) => state.room.players);
@@ -17,6 +19,10 @@ export function DrawingGuesserView() {
 
 	const selectedWord = useSelector(
 		(state: RootState) => state.game.selectedWord
+	);
+
+	const deadline = useSelector(
+		(state: RootState) => state.game.currentPhaseDeadline
 	);
 
 	return (
@@ -30,6 +36,10 @@ export function DrawingGuesserView() {
 									{drawingPlayer?.name}
 								</span>
 								is drawing: <WordWithLetterBlanks word={selectedWord} />
+							</div>
+							<div className="lg:hidden">
+								<Timer endTime={deadline} />
+								<ModalMenu />
 							</div>
 						</div>
 						<Canvas

@@ -33,7 +33,7 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 	return (
 		<div
 			className={cn(
-				"flex flex-col lg:h-full xl:w-[20rem] w-full xl:max-h-[660px] min-h-[12rem] px-1.5 lg:px-0 relative z-30",
+				"flex flex-col lg:h-full xl:w-[20rem] w-full min-h-[12rem] px-1.5 lg:px-0 relative z-30",
 				isGuessing
 					? "h-[var(--max-chat-height)]"
 					: "h-[var(--max-chat-height-drawing)]"
@@ -52,7 +52,7 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 			<ul
 				ref={listRef}
 				className={cn(
-					"flex-1 w-full flex gap-3 lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-5 pt-10 lg:pt-5 overflow-y-auto overflow-x-hidden scrollbar-hide"
+					"w-full h-[600px] -translate-y-1 flex gap-3 lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-5 pt-10 lg:pt-5 overflow-y-auto overflow-x-hidden scrollbar-hide"
 				)}
 			>
 				{guesses.map((guess) => (
