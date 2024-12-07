@@ -35,7 +35,7 @@ export function DrawingGuesserView() {
 								<div className="lg:hidden">
 									<Timer endTime={deadline} />
 								</div>
-								<span className="pt-1.5 lg:pt-0">
+								<span className="pt-1.5 lg:pt-0 flex items-center gap-1">
 									<span className="truncate font-bold block pr-1 pl-1 lg:pl-0">
 										{drawingPlayer?.name}
 									</span>

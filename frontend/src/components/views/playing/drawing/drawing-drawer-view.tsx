@@ -33,7 +33,7 @@ export function DrawingDrawerView() {
 									<div className="lg:hidden pr-1">
 										<Timer endTime={deadline} />
 									</div>
-									<span className="pt-1.5 lg:pt-0">
+									<span className="pt-1.5 lg:pt-0 flex items-center gap-1">
 										You're drawing:{" "}
 										<span className="text-lg lg:text-2xl font-bold">
 											{selectedWord}
