@@ -35,7 +35,7 @@ export function DrawingDrawerView() {
 										{selectedWord}
 									</span>
 								</div>
-								<div className="lg:hidden">
+								<div className="lg:hidden flex items-center gap-1">
 									<Timer endTime={deadline} />
 									<ModalMenu />
 								</div>

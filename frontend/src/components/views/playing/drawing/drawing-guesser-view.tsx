@@ -37,7 +37,7 @@ export function DrawingGuesserView() {
 								</span>
 								is drawing: <WordWithLetterBlanks word={selectedWord} />
 							</div>
-							<div className="lg:hidden">
+							<div className="lg:hidden flex items-center gap-1">
 								<Timer endTime={deadline} />
 								<ModalMenu />
 							</div>
