@@ -39,18 +39,9 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 					<UsersIcon className="w-5 h-5 mb-1" />
 					{Object.keys(players).length}/{settings.playerLimit}
 				</span>
-				{/* <span className="font-bold text-xl flex items-center gap-2">
-					<Tally5Icon className="w-5 h-5 mb-1" />
-					{settings.totalRounds}
-				</span>
-				<span className="font-bold text-xl flex items-center gap-1.5">
-					<ClockIcon className="w-5 h-5 mb-1" />
-					{settings.drawingTimeAllowed}s
-				</span> */}
 				{isHost && (
 					<div className="ml-auto">
 						<RaisedButton
-							variant="action"
 							size="icon"
 							onClick={() => setShowSettings(!showSettings)}
 						>

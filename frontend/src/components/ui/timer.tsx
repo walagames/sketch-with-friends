@@ -1,37 +1,14 @@
-import { RootState } from "@/state/store";
 import {
 	useTransform,
 	animate,
 	useMotionValue,
-	motion,
 	AnimationPlaybackControls,
-	useMotionValueEvent,
+	motion,
 } from "framer-motion";
-import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import useSound from "use-sound";
-export function Timer({
-	endTime,
-	playSound = false,
-}: {
-	endTime: string;
-	playSound?: boolean;
-}) {
+import { useEffect } from "react";
+export function Timer({ endTime }: { endTime: string }) {
 	const count = useMotionValue(0);
 	const time = useTransform(count, (v) => Math.ceil(v));
-	const [isPlaying, setIsPlaying] = useState(false);
-	const volume = useSelector((state: RootState) => state.preferences.volume);
-	// const isAfterFive = useTransform(count, (v) => v <= 5);
-	const [play] = useSound("/clock-ticking.mp3", {
-		volume,
-	});
-
-	useMotionValueEvent(time, "change", (latest) => {
-		if (latest === 5 && playSound && !isPlaying) {
-			play();
-			setIsPlaying(true);
-		}
-	});
 
 	useEffect(() => {
 		let controls: AnimationPlaybackControls;
@@ -66,7 +43,7 @@ export function Timer({
 	return (
 		<motion.div
 			layout
-			className="text-xl font-bold bg-background w-9 h-9 flex items-center justify-center leading-none shadow-accent-sm rounded-lg"
+			className="text-xl font-bold bg-background w-11 h-11 flex items-center justify-center leading-none shadow-accent-sm rounded-lg"
 		>
 			<motion.span layout className="mt-1 px-2">
 				{time}

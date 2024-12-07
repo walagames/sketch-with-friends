@@ -2,7 +2,7 @@ import { useDispatch } from "react-redux";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { enterRoomCode } from "@/state/features/client";
 import { clearQueryParams } from "@/lib/params";
-import { HillScene } from "@/components/scenes/hill-scene";
+import { SkyScene } from "@/components/scenes/sky-scene";
 import { Logo } from "@/components/logo";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
@@ -105,7 +105,7 @@ export function EnterCodeView() {
 	}, []);
 
 	return (
-		<HillScene className="h-screen">
+		<SkyScene className="h-screen">
 			<AnimatePresence>
 				<div className="flex flex-col items-center gap-4 max-w-64 relative z-50">
 					<Logo />
@@ -181,6 +181,6 @@ export function EnterCodeView() {
 					src="/doodles/rain-cloud.png"
 				/>
 			</AnimatePresence>
-		</HillScene>
+		</SkyScene>
 	);
 }
