@@ -25,7 +25,7 @@ export function DrawingGuesserView() {
 				<div className="flex w-full h-full lg:justify-center justify-between items-center lg:gap-4 flex-col lg:flex-row relative">
 					<div className="flex flex-col items-center justify-center max-w-[800px] w-screen lg:w-auto">
 						<div className="flex justify-between w-full items-center lg:items-end py-2 px-2">
-							<div className="lg:text-2xl whitespace-nowrap flex-wrap flex items-end w-[calc(100%-3rem)] lg:w-auto gap-2">
+							<div className="lg:text-2xl whitespace-nowrap flex-wrap flex items-end w-[calc(100%-3rem)] lg:w-auto gap-1">
 								<span className="truncate font-bold block pr-1">
 									{drawingPlayer?.name}
 								</span>
