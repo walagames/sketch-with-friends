@@ -1,4 +1,4 @@
-import { Volume2Icon, VolumeXIcon, Volume1Icon } from "lucide-react";
+import { Volume2Icon, VolumeXIcon } from "lucide-react";
 import { RaisedButton } from "./raised-button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Slider } from "./slider";
@@ -10,28 +10,21 @@ export function VolumeControls() {
 	const dispatch = useDispatch();
 	const volume = useSelector((state: RootState) => state.preferences.volume);
 
-	const VolumeIcon =
-		volume === null || volume === 0
-			? VolumeXIcon
-			: volume <= 0.5
-			? Volume1Icon
-			: Volume2Icon;
-
 	return (
 		<div>
 			<Popover>
 				<PopoverTrigger asChild>
-					<RaisedButton variant="action" size="icon" shift>
-						<VolumeIcon className="size-6 -translate-y-0.5" />
+					<RaisedButton className="text-xl" variant="default" size="wide" shift>
+						Volume
 					</RaisedButton>
 				</PopoverTrigger>
 				<PopoverContent
-					side="left"
-					className="w-80 p-3 border-none rounded-full"
+					side="bottom"
+					className="w-80 p-3  rounded-full bg-primary"
 				>
 					<div className="flex items-center gap-2">
 						<VolumeXIcon
-							className="size-5 cursor-pointer hover:opacity-70"
+							className="size-5 cursor-pointer hover:opacity-70 text-background"
 							onClick={() => dispatch(changeVolume(0))}
 						/>
 						<Slider
@@ -43,7 +36,7 @@ export function VolumeControls() {
 							className="flex-1"
 						/>
 						<Volume2Icon
-							className="size-5 cursor-pointer hover:opacity-70"
+							className="size-5 cursor-pointer hover:opacity-70 text-background"
 							onClick={() => dispatch(changeVolume(1))}
 						/>
 					</div>

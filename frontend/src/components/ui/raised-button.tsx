@@ -7,11 +7,11 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { useEffect } from "react";
 const buttonVariants = cva(
-	"inline-flex items-center justify-center rounded-lg font-bold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:brightness-90 disabled:pointer-events-none ring-offset-background",
+	"inline-flex items-center duration-150 justify-center rounded-lg font-bold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:brightness-90 disabled:pointer-events-none ring-offset-background",
 	{
 		variants: {
 			variant: {
-				default: "bg-background text-foreground",
+				default: "bg-background text-foreground hover:bg-primary hover:text-background",
 				icon: "bg-transparent hover:bg-accent hover:text-accent-foreground",
 				action: "bg-primary text-background text-xl",
 			},
@@ -33,44 +33,6 @@ const buttonVariants = cva(
 	}
 );
 
-// const spriteMap = {
-// 	blip1: [0, 1000],
-// 	blip2: [2000, 1000],
-// 	blip3: [4000, 1000],
-// 	blip4: [6000, 1000],
-// 	blip5: [8000, 1000],
-// 	blip6: [10000, 1000],
-// 	blip7: [12000, 1000],
-// 	blip8: [14000, 1000],
-// 	blip9: [16000, 1000],
-// 	blip10: [18000, 1000],
-// 	blip11: [20040, 200],
-// 	blip12: [22000, 1000],
-// 	blip13: [24000, 1000],
-// 	blip14: [26000, 1000],
-// 	blip15: [28000, 1000],
-// 	blip16: [30000, 1000],
-// 	blip17: [32000, 1000],
-// 	blip18: [34000, 1000],
-// 	blip19: [36050, 110],
-// 	blip20: [38000, 1000],
-// 	blip21: [40000, 1000],
-// 	blip22: [42000, 1000],
-// 	blip23: [44000, 1000],
-// 	blip24: [46000, 1000],
-// 	blip25: [48000, 1000],
-// 	blip26: [50000, 1000],
-// 	blip27: [52000, 1000],
-// 	blip28: [54000, 1000],
-// 	blip29: [56000, 1000],
-// 	blip30: [58000, 1000],
-// 	blip31: [60000, 1000],
-// };
-
-// const clickSprite = {
-// 	click: [35, 500] as [number, number],
-// };
-
 export interface ButtonProps
 	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
 		VariantProps<typeof buttonVariants> {
@@ -83,14 +45,9 @@ interface RaisedButtonProps extends ButtonProps {
 
 const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 	({ className, variant, size, shift = true, onClick, ...props }, ref) => {
-		// const [play] = useSound("/sounds.mp3", {
-		// 	sprite: spriteMap,
-		// 	volume: 0.01,
-		// });
 		const volume = useSelector((state: RootState) => state.preferences.volume);
 		const [play, exposedData] = useSound("/click-pop.mp3", {
 			volume,
-			// sprite: clickSprite,
 		});
 
 		useEffect(() => {
@@ -98,9 +55,7 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 		}, [volume]);
 
 		const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-			// 1, 3, 5, 8, 9, 11, 16, 18, 19, 20, 27, 31
 			play();
-			// Call the original onClick handler if it exists
 			onClick?.(e);
 		};
 

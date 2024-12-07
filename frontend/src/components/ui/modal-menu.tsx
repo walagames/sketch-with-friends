@@ -3,13 +3,14 @@ import { Link } from "react-router";
 import {
 	Dialog,
 	DialogContent,
-	DialogDescription,
 	DialogTitle,
 	DialogHeader,
 	DialogTrigger,
 } from "./dialog";
 import { RaisedButton } from "./raised-button";
 import React from "react";
+import { VolumeControls } from "./volume-controls";
+import { Logo } from "../logo";
 
 export function ModalMenu() {
 	const [open, setOpen] = React.useState(false);
@@ -25,10 +26,9 @@ export function ModalMenu() {
 			</DialogTrigger>
 			<DialogContent className="sm:max-w-md border-4 border-secondary-foreground bg-[#aef1fe]">
 				<DialogHeader>
-					<DialogTitle>Menu</DialogTitle>
-					<DialogDescription>
-						Select an option below to continue.
-					</DialogDescription>
+					<DialogTitle>
+						<Logo className="w-44 py-1 mx-auto" />
+					</DialogTitle>
 				</DialogHeader>
 				<div className="flex flex-col gap-4">
 					<Link to="/" onClick={handleClick}>
@@ -36,6 +36,8 @@ export function ModalMenu() {
 							Home
 						</RaisedButton>
 					</Link>
+
+					<VolumeControls />
 
 					<Link to="/how-to-play" onClick={handleClick}>
 						<RaisedButton size="wide" className="text-xl">

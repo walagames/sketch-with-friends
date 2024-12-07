@@ -1,11 +1,28 @@
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
 import { ModalMenu } from "./ui/modal-menu";
-import { VolumeControls } from "./ui/volume-controls";
+import { RoomStage } from "@/state/features/room";
+import { GamePhase } from "@/state/features/game";
+import { cn } from "@/lib/utils";
+
+const hideHeader = (stage: RoomStage, phase: GamePhase) => {
+	return phase === GamePhase.Drawing || stage === RoomStage.PreGame;
+};
 
 export function UIHeader() {
+	const stage = useSelector((state: RootState) => state.room.stage);
+	const phase = useSelector((state: RootState) => state.game.phase);
+
 	return (
-		<header className="flex absolute top-5 w-full px-6 justify-between items-center z-50">
-			<VolumeControls />
-			<ModalMenu />
+		<header
+			className={cn(
+				"absolute top-5 w-full px-6 justify-between items-center z-50",
+				hideHeader(stage, phase) ? "hidden sm:flex" : "flex"
+			)}
+		>
+			<div className="ml-auto">
+				<ModalMenu />
+			</div>
 		</header>
 	);
 }
