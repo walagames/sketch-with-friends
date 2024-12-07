@@ -23,14 +23,13 @@ export function UIHeader() {
 	return (
 		<header
 			className={cn(
-				"absolute top-5 w-full px-6 justify-between items-center z-50",
-				hideHeader(stage, phase) ? "hidden sm:flex" : "flex"
+				"absolute top-5 w-full px-6 items-center z-50",
+				hideHeader(stage, phase) ? "hidden sm:flex" : "flex",
+				showTimer ? "justify-between" : "justify-end"
 			)}
 		>
 			{showTimer && <Timer endTime={deadline} />}
-			<div className="ml-auto">
-				<ModalMenu />
-			</div>
+			<ModalMenu />
 		</header>
 	);
 }
