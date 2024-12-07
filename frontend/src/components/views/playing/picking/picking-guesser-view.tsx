@@ -20,7 +20,7 @@ export function PickingGuesserView() {
 		<SkyScene>
 			<img src={avatarSvg} className="w-20 h-20 rounded-lg shadow-accent" />
 			<h1 className="text-2xl lg:text-3xl font-bold px-8 lg:px-0 text-center">
-				{pickingPlayer.name} is picking a word
+				{pickingPlayer.name} is picking a word to sketch
 			</h1>
 			<AnimatePresence>
 				<BobbingDoodle

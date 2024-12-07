@@ -15,7 +15,7 @@ export function PickingDrawerView() {
 	return (
 		<SkyScene>
 			<div className="flex flex-col items-center justify-center my-auto gap-12">
-				<h1 className="text-3xl font-bold">Pick a word</h1>
+				<h1 className="text-3xl font-bold">Pick a word to sketch</h1>
 				<div className="flex items-center justify-center lg:gap-8 gap-4 px-4 flex-wrap">
 					{wordOptions.map((word) => (
 						<RaisedButton
