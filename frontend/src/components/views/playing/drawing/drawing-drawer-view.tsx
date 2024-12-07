@@ -29,13 +29,16 @@ export function DrawingDrawerView() {
 						</div>
 						<div className="flex flex-col items-center justify-center max-w-[800px] w-screen lg:w-auto">
 							<div className="flex justify-between w-full items-center lg:items-end py-2 px-2">
-								<div className="lg:text-2xl flex items-end gap-2">
+								<div className="lg:text-2xl flex items-end gap-1">
+									<div className="lg:hidden">
+										<Timer endTime={deadline} />
+									</div>
 									You're drawing:{" "}
 									<span className="text-lg lg:text-2xl font-bold">
 										{selectedWord}
 									</span>
 								</div>
-								<div className="lg:hidden flex items-center gap-1">
+								<div className="lg:hidden">
 									<Timer endTime={deadline} />
 									<ModalMenu />
 								</div>

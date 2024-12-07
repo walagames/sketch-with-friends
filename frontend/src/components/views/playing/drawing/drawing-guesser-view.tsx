@@ -32,13 +32,15 @@ export function DrawingGuesserView() {
 					<div className="flex flex-col items-center justify-center max-w-[800px] w-screen lg:w-auto">
 						<div className="flex justify-between w-full items-center lg:items-end py-2 px-2">
 							<div className="lg:text-2xl whitespace-nowrap flex-wrap flex items-end w-[calc(100%-3rem)] lg:w-auto gap-1">
+								<div className="lg:hidden">
+									<Timer endTime={deadline} />
+								</div>
 								<span className="truncate font-bold block pr-1">
 									{drawingPlayer?.name}
 								</span>
 								is drawing: <WordWithLetterBlanks word={selectedWord} />
 							</div>
-							<div className="lg:hidden flex items-center gap-1">
-								<Timer endTime={deadline} />
+							<div className="lg:hidden">
 								<ModalMenu />
 							</div>
 						</div>
