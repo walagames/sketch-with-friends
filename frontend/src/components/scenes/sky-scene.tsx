@@ -14,10 +14,10 @@ export function SkyScene({
 			)}
 		>
 			{children}
-			{/* <Hills /> */}
+			<Hills />
 			{/* duplicate hills so that they still appear on sides when spring overshoots */}
-			{/* <Hills className="absolute bottom-0 left-full w-full " /> */}
-			{/* <Hills className="absolute bottom-0 right-full w-full " /> */}
+			<Hills className="absolute bottom-0 left-full w-full " />
+			<Hills className="absolute bottom-0 right-full w-full " />
 		</div>
 	);
 }
