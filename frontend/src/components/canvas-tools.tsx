@@ -10,7 +10,7 @@ import {
 	changeLightness,
 } from "@/state/features/client";
 
-import { undoStroke, clearStrokes } from "@/state/features/canvas";
+import { undoElement, clearElements } from "@/state/features/canvas";
 import { RaisedButton } from "./ui/raised-button";
 
 export function CanvasTools() {
@@ -49,14 +49,14 @@ export function CanvasTools() {
 				<RaisedButton
 					shift={false}
 					size="icon"
-					onClick={() => dispatch(undoStroke())}
+					onClick={() => dispatch(undoElement())}
 				>
 					<Undo2 className="lg:size-6 size-5" />
 				</RaisedButton>
 				<RaisedButton
 					shift={false}
 					size="icon"
-					onClick={() => dispatch(clearStrokes())}
+					onClick={() => dispatch(clearElements())}
 				>
 					<Trash className="lg:size-6 size-5" />
 				</RaisedButton>

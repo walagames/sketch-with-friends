@@ -25,11 +25,12 @@ const (
 	InitializeClient ActionType = "client/initializeClient"
 
 	// Canvas actions
-	AddStroke      ActionType = "canvas/addStroke"
-	AddStrokePoint ActionType = "canvas/addStrokePoint"
-	ClearStrokes   ActionType = "canvas/clearStrokes"
-	UndoStroke     ActionType = "canvas/undoStroke"
-	SetStrokes     ActionType = "canvas/setStrokes"
+	AddElement         ActionType = "canvas/addElement"
+	UpdateElement      ActionType = "canvas/updateElement"
+	UndoElement        ActionType = "canvas/undoElement"
+	ClearElements      ActionType = "canvas/clearElements"
+	SetElements        ActionType = "canvas/setElements"
+	UpdateStrokePoints ActionType = "canvas/updateStrokePoints"
 
 	// Game actions
 	SetWord       ActionType = "game/setWord"
@@ -179,7 +180,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			return nil
 		},
 	},
-	AddStroke: {
+	AddElement: {
 		RoomRoleRequired: RoomRoleAny,
 		GameRoleRequired: GameRoleDrawing,
 		PayloadType:      map[string]interface{}{},
@@ -198,26 +199,26 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 				return nil
 			}
 
-			// Decode the stroke from the payload
-			stroke, err := decodeStroke(a.Payload)
+			// Decode the element from the payload
+			element, err := decodeCanvasElement(a.Payload)
 			if err != nil {
 				return fmt.Errorf("failed to decode stroke: %w", err)
 			}
 
-			// Add the stroke to the game state
-			r.game.strokes = append(r.game.strokes, stroke)
+			// Add the element to the game state
+			r.game.elements = append(r.game.elements, element)
 
-			// Re-broadcast the stroke to the rest of the players
+			// Re-broadcast the element to the rest of the players
 			r.broadcast(GameRoleGuessing,
-				message(AddStroke, a.Payload),
+				message(AddElement, a.Payload),
 			)
 			return nil
 		},
 	},
-	AddStrokePoint: {
+	UpdateElement: {
 		RoomRoleRequired: RoomRoleAny,
 		GameRoleRequired: GameRoleDrawing,
-		PayloadType:      []interface{}{},
+		PayloadType:      map[string]interface{}{},
 		validator: func(r *room) error {
 			if r.game == nil {
 				return fmt.Errorf("game is not initialized")
@@ -233,23 +234,23 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 				return nil
 			}
 
-			// Decode the stroke point from the payload
-			point, err := decodeStrokePoint(a.Payload)
+			// Decode the element from the payload
+			element, err := decodeCanvasElement(a.Payload)
 			if err != nil {
-				return fmt.Errorf("failed to decode stroke point: %w", err)
+				return fmt.Errorf("failed to decode element: %w", err)
 			}
 
-			// Add the stroke point to the most recent stroke
-			r.game.strokes = appendStrokePoint(r.game.strokes, point)
+			// Add the element to the game state
+			r.game.elements = updateElement(r.game.elements, element)
 
-			// Re-broadcast the stroke point to the rest of the players
+			// Re-broadcast the element to the rest of the players
 			r.broadcast(GameRoleGuessing,
-				message(AddStrokePoint, a.Payload),
+				message(UpdateElement, a.Payload),
 			)
 			return nil
 		},
 	},
-	ClearStrokes: {
+	ClearElements: {
 		RoomRoleRequired: RoomRoleAny,
 		GameRoleRequired: GameRoleDrawing,
 		validator: func(r *room) error {
@@ -262,17 +263,17 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
-			// Clear the strokes from the game state
-			r.game.strokes = make([]Stroke, 0)
+			// Clear the elements from the game state
+			r.game.elements = make([]CanvasElement, 0)
 
-			// Tell the other players to clear their strokes
+			// Tell the other players to clear their elements
 			r.broadcast(GameRoleGuessing,
-				message(ClearStrokes, nil),
+				message(ClearElements, nil),
 			)
 			return nil
 		},
 	},
-	UndoStroke: {
+	UndoElement: {
 		RoomRoleRequired: RoomRoleAny,
 		GameRoleRequired: GameRoleDrawing,
 		validator: func(r *room) error {
@@ -285,12 +286,48 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
-			// Remove the most recent stroke from the game state
-			r.game.strokes = removeLastStroke(r.game.strokes)
+			// Remove the most recent element from the game state
+			r.game.elements = undoElement(r.game.elements)
 
 			// Tell the other players to undo their last stroke
 			r.broadcast(GameRoleGuessing,
-				message(UndoStroke, nil),
+				message(UndoElement, nil),
+			)
+			return nil
+		},
+	},
+	UpdateStrokePoints: {
+		RoomRoleRequired: RoomRoleAny,
+		GameRoleRequired: GameRoleDrawing,
+		PayloadType:      map[string]interface{}{},
+		validator: func(r *room) error {
+			if r.game == nil {
+				return fmt.Errorf("game is not initialized")
+			}
+			if r.Stage != Playing {
+				return fmt.Errorf("game is not in playing stage")
+			}
+			return nil
+		},
+		execute: func(r *room, a *Action) error {
+			slog.Debug("UpdateStrokePoints action", "action", a)
+			// If the game is not in the drawing phase, do nothing
+			if r.game.currentPhase.Name() != Drawing {
+				return nil
+			}
+	
+			// Decode the stroke update from the payload
+			update, err := decodePayload[StrokeUpdate](a.Payload)
+			if err != nil {
+				return fmt.Errorf("failed to decode stroke update: %w", err)
+			}
+	
+			// Update the stroke points in the game state
+			r.game.elements = updateStrokePoints(r.game.elements, update)
+	
+			// Re-broadcast the stroke update to the rest of the players
+			r.broadcast(GameRoleGuessing,
+				message(UpdateStrokePoints, a.Payload),
 			)
 			return nil
 		},
