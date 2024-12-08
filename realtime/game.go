@@ -63,7 +63,7 @@ type game struct {
 	customWords     []DrawingWord
 	currentWord     *DrawingWord
 	hintedWord      string
-	strokes         []Stroke
+	elements        []CanvasElement
 	guesses         []guess
 	correctGuessers map[uuid.UUID]bool
 	pointsAwarded   map[uuid.UUID]int
@@ -87,7 +87,7 @@ func NewGame(initialPhase Phase, r *room) *game {
 		drawingQueue:      make([]uuid.UUID, 0),
 		wordOptions:       make([]DrawingWord, 0),
 		customWords:       customWords,
-		strokes:           make([]Stroke, 0),
+		elements:          make([]CanvasElement, 0),
 		currentDrawer:     nil,
 		currentWord:       nil,
 		hintedWord:        "",
@@ -692,7 +692,7 @@ func (phase PostDrawingPhase) Start(g *game) {
 
 func (phase PostDrawingPhase) End(g *game) {
 	// Clear state for the next round
-	g.strokes = emptyStrokeSlice()
+	g.elements = emptyElementSlice()
 	g.pointsAwarded = make(map[uuid.UUID]int)
 	g.hintedWord = ""
 	g.currentWord = nil
@@ -706,7 +706,7 @@ func (phase PostDrawingPhase) End(g *game) {
 
 	// Inform players of the state changes
 	g.room.broadcast(GameRoleAny,
-		message(ClearStrokes, nil),
+		message(ClearElements, nil),
 		message(SelectWord, ""),
 		message(SetPlayers, g.room.Players),
 	)

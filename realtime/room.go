@@ -122,7 +122,7 @@ func NewRoom(id string) Room {
 		lastInteractionAt: time.Now(),
 		Settings: RoomSettings{
 			PlayerLimit:        6,
-			DrawingTimeAllowed: 60,
+			DrawingTimeAllowed: 9000,
 			TotalRounds:        3,
 			WordDifficulty:     WordDifficultyRandom,
 			GameMode:           GameModeClassic,
@@ -223,7 +223,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 				Phase:    r.game.currentPhase.Name(),
 				Deadline: r.game.currentPhaseDeadline,
 			}),
-			message(SetStrokes, r.game.strokes),
+			message(SetElements, r.game.elements),
 			message(SelectWord, r.game.hintedWord),
 			message(SetRound, r.game.currentRound),
 			message(SetGuesses, r.game.guesses),
