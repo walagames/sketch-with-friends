@@ -4,38 +4,47 @@ import Canvas from "@/components/canvas";
 import { GameRole } from "@/state/features/game";
 import { getPickingPlayer } from "@/lib/player";
 import { Guesses } from "./guesses";
-import { Timer } from "@/components/ui/timer";
-import { HillScene } from "@/components/scenes/hill-scene";
+import { SkyScene } from "@/components/scenes/sky-scene";
 import { cn } from "@/lib/utils";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
+import { ModalMenu } from "@/components/ui/modal-menu";
+import { Timer } from "@/components/ui/timer";
 
 export function DrawingGuesserView() {
 	const players = useSelector((state: RootState) => state.room.players);
 
 	const drawingPlayer = getPickingPlayer(players);
 
-	const deadline = useSelector(
-		(state: RootState) => state.game.currentPhaseDeadline
-	);
 	const selectedWord = useSelector(
 		(state: RootState) => state.game.selectedWord
 	);
 
+	const deadline = useSelector(
+		(state: RootState) => state.game.currentPhaseDeadline
+	);
+
 	return (
-		<HillScene>
+		<SkyScene>
 			<div className="mx-auto mb-auto lg:my-auto flex flex-col gap-2 items-center relative z-50">
 				<div className="flex w-full h-full lg:justify-center justify-between items-center lg:gap-4 flex-col lg:flex-row relative">
 					<div className="flex flex-col items-center justify-center max-w-[800px] w-screen lg:w-auto">
 						<div className="flex justify-between w-full items-center lg:items-end py-2 px-2">
-							<div className="lg:text-2xl whitespace-nowrap flex-wrap flex items-end w-[calc(100%-3rem)] lg:w-auto">
-								<span className="truncate font-bold block pr-1">
-									{drawingPlayer?.name}
+							<div className="lg:text-2xl whitespace-nowrap flex-wrap flex lg:items-end items-center w-[calc(100%-3rem)] lg:w-auto gap-1">
+								<div className="lg:hidden">
+									<Timer endTime={deadline} />
+								</div>
+								<span className="pt-1.5 lg:pt-0 flex items-center gap-1">
+									<span className="truncate font-bold block pr-1 pl-1 lg:pl-0">
+										{drawingPlayer?.name}
+									</span>
+									is drawing: <WordWithLetterBlanks word={selectedWord} />
 								</span>
-								is drawing: <WordWithLetterBlanks word={selectedWord} />
 							</div>
-							<Timer endTime={deadline} />
+							<div className="lg:hidden">
+								<ModalMenu />
+							</div>
 						</div>
 						<Canvas
 							padding={10}
@@ -68,7 +77,7 @@ export function DrawingGuesserView() {
 				animateTo={{ left: "85%", top: "55%", rotate: 30, opacity: 1 }}
 				leaveTo={{ left: "105%", top: "55%", rotate: 20 }}
 			/>
-		</HillScene>
+		</SkyScene>
 	);
 }
 

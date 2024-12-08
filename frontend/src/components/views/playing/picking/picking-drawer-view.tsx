@@ -2,27 +2,20 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/state/store";
 import { selectWord } from "@/state/features/game";
 import { RaisedButton } from "@/components/ui/raised-button";
-import { Timer } from "@/components/ui/timer";
-import { HillScene } from "@/components/scenes/hill-scene";
+import { SkyScene } from "@/components/scenes/sky-scene";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 export function PickingDrawerView() {
 	const dispatch = useDispatch();
-	const deadline = useSelector(
-		(state: RootState) => state.game.currentPhaseDeadline
-	);
 	const wordOptions = useSelector((state: RootState) => state.game.wordOptions);
 	const isFirstPhase = useSelector(
 		(state: RootState) => state.game.isFirstPhase
 	);
 	return (
-		<HillScene>
-			<div className="absolute lg:top-10 lg:right-10 top-4 right-4">
-				<Timer endTime={deadline} />
-			</div>
+		<SkyScene>
 			<div className="flex flex-col items-center justify-center my-auto gap-12">
-				<h1 className="text-3xl font-bold">Pick a word</h1>
+				<h1 className="text-3xl font-bold">Pick a word to sketch</h1>
 				<div className="flex items-center justify-center lg:gap-8 gap-4 px-4 flex-wrap">
 					{wordOptions.map((word) => (
 						<RaisedButton
@@ -69,6 +62,6 @@ export function PickingDrawerView() {
 				animateTo={{ left: "45%", top: "65%", rotate: 30, opacity: 1 }}
 				leaveTo={{ left: "185%", top: "55%", rotate: 30 }}
 			/>
-		</HillScene>
+		</SkyScene>
 	);
 }

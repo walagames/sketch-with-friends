@@ -122,6 +122,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			// Initialize game state
 			for _, p := range r.Players {
 				p.GameRole = GameRoleGuessing
+				p.Score = 0
 			}
 			r.game = NewGame(&PickingPhase{}, r)
 			r.game.fillDrawingQueue()
