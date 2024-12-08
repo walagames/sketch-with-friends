@@ -13,7 +13,6 @@ declare global {
 export enum SoundEffect {
 	CLICK = "click",
 	CORRECT = "correct",
-	ERROR = "error",
 	CLOCK_TICK = "clock-tick",
 	PLAYER_JOIN = "player-join",
 	PLAYER_LEAVE = "player-leave",
@@ -40,16 +39,15 @@ type SoundConfig = {
 };
 
 const SOUND_PATHS: Record<SoundEffect, SoundConfig> = {
-	[SoundEffect.CLICK]: { path: "/click-pop.mp3", volume: 0.6 },
-	[SoundEffect.CORRECT]: { path: "/correct-2.mp3", volume: 1 },
-	[SoundEffect.CLOCK_TICK]: { path: "/clock-blip.mp3", volume: 1 },
-	[SoundEffect.ERROR]: { path: "/error.mp3", volume: 1 },
-	[SoundEffect.PLAYER_JOIN]: { path: "/player-join.mp3", volume: 1 },
-	[SoundEffect.PLAYER_LEAVE]: { path: "/player-leave.mp3", volume: 1 },
-	[SoundEffect.ROUND_END]: { path: "/round-end.mp3", volume: 1 },
-	[SoundEffect.SCENE_CHANGE]: { path: "/whoosh-2.mp3", volume: 0.25 },
-	[SoundEffect.PLAYER_WIN]: { path: "/player-win.mp3", volume: 1 },
-	[SoundEffect.PLAYER_LOSE]: { path: "/player-lose.mp3", volume: 1 },
+	[SoundEffect.CLICK]: { path: "/sounds/click-pop.mp3", volume: 0.6 },
+	[SoundEffect.CORRECT]: { path: "/sounds/correct.mp3", volume: 1 },
+	[SoundEffect.CLOCK_TICK]: { path: "/sounds/clock-tick.mp3", volume: 1 },
+	[SoundEffect.PLAYER_JOIN]: { path: "/sounds/player-join.mp3", volume: 1 },
+	[SoundEffect.PLAYER_LEAVE]: { path: "/sounds/player-leave.mp3", volume: 1 },
+	[SoundEffect.ROUND_END]: { path: "/sounds/round-end.mp3", volume: 1 },
+	[SoundEffect.SCENE_CHANGE]: { path: "/sounds/whoosh.mp3", volume: 0.25 },
+	[SoundEffect.PLAYER_WIN]: { path: "/sounds/player-win.mp3", volume: 1 },
+	[SoundEffect.PLAYER_LOSE]: { path: "/sounds/player-lose.mp3", volume: 1 },
 };
 
 export function SoundProvider({ children }: { children: React.ReactNode }) {
