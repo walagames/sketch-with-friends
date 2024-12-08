@@ -10,27 +10,30 @@ import { PrivacyPolicy } from "./pages/privacy-policy";
 import { HowToPlay } from "./pages/how-to-play";
 import { PersistGate } from "redux-persist/integration/react";
 import { UIHeader } from "./components/header";
+import { SoundProvider } from './providers/sound-provider';
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
 		<Provider store={store}>
-			<BrowserRouter>
-				<Routes>
-					<Route
-						path="/"
-						element={
-							<PersistGate loading={null} persistor={persistor}>
-								<Layout>
-									<App />
-								</Layout>
-							</PersistGate>
-						}
-					/>
-					<Route path="terms-of-service" element={<TermsOfService />} />
-					<Route path="privacy-policy" element={<PrivacyPolicy />} />
-					<Route path="how-to-play" element={<HowToPlay />} />
-				</Routes>
-			</BrowserRouter>
+			<SoundProvider>
+				<BrowserRouter>
+					<Routes>
+						<Route
+							path="/"
+							element={
+								<PersistGate loading={null} persistor={persistor}>
+									<Layout>
+										<App />
+									</Layout>
+								</PersistGate>
+							}
+						/>
+						<Route path="terms-of-service" element={<TermsOfService />} />
+						<Route path="privacy-policy" element={<PrivacyPolicy />} />
+						<Route path="how-to-play" element={<HowToPlay />} />
+					</Routes>
+				</BrowserRouter>
+			</SoundProvider>
 		</Provider>
 	</StrictMode>
 );

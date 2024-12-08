@@ -2,16 +2,15 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { HTMLMotionProps, motion } from "framer-motion";
-import useSound from "use-sound";
-import { useSelector } from "react-redux";
-import { RootState } from "@/state/store";
-import { useEffect } from "react";
+import { useSound, SoundEffect } from "@/providers/sound-provider";
+
 const buttonVariants = cva(
 	"inline-flex items-center duration-150 justify-center rounded-lg font-bold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:brightness-90 disabled:pointer-events-none ring-offset-background",
 	{
 		variants: {
 			variant: {
-				default: "bg-background text-foreground hover:bg-primary hover:text-background",
+				default:
+					"bg-background text-foreground hover:bg-primary hover:text-background",
 				icon: "bg-transparent hover:bg-accent hover:text-accent-foreground",
 				action: "bg-primary text-background text-xl",
 			},
@@ -45,17 +44,10 @@ interface RaisedButtonProps extends ButtonProps {
 
 const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 	({ className, variant, size, shift = true, onClick, ...props }, ref) => {
-		const volume = useSelector((state: RootState) => state.preferences.volume);
-		const [play, exposedData] = useSound("/click-pop.mp3", {
-			volume,
-		});
-
-		useEffect(() => {
-			if (exposedData.sound) exposedData.sound._volume = volume;
-		}, [volume]);
+		const playSound = useSound();
 
 		const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-			play();
+			playSound(SoundEffect.CLICK);
 			onClick?.(e);
 		};
 
