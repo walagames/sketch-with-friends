@@ -20,7 +20,7 @@ export interface ClientState {
 		hue: number;
 		lightness: number;
 		strokeWidth: number;
-		tool: string;
+		tool: CanvasTool;
 	};
 	enteredRoomCode: string;
 	isJoining: boolean;
