@@ -22,6 +22,9 @@ export interface FillElement extends CanvasElement {
 	type: 'fill';
 	point: [number, number];
 	color: string;
+	pixels: Uint8Array;
+	width: number;
+	height: number;
 };
 
 export interface StrokeUpdate {
@@ -51,12 +54,18 @@ export const addStroke = (
 
 export const addFill = (
     point: [number, number],
-    color: string
+    color: string,
+    pixels: Uint8Array,
+    width: number,
+    height: number,
 ): FillElement => ({
     id: generateUniqueId(),
     type: 'fill',
     point,
     color,
+    pixels,
+	width,
+	height,
 });
 
 export const canvasSlice = createSlice({

@@ -21,7 +21,7 @@ const (
 	pingPeriod = (pongWait * 9) / 10
 
 	// Maximum message size allowed from client.
-	maxMessageSize = 512
+	maxMessageSize = 1024 * 1024 // idk it needs more tho
 )
 
 // client represents a connection between the server and a client.

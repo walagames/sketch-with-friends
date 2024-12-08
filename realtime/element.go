@@ -25,6 +25,9 @@ type FillElement struct {
 	Type   ElementType `json:"type"`
 	Point  []float64   `json:"point"`
 	Color  string      `json:"color"` // hex color
+	Pixels []uint8     `json:"pixels"`
+	Width  int         `json:"width"`
+	Height int         `json:"height"`
 }
 
 type StrokeUpdate struct {

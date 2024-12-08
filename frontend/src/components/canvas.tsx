@@ -1,5 +1,6 @@
 import * as React from "react";
 import { getStroke } from "perfect-freehand";
+import pako from 'pako';
 
 import {
 	ContextMenu,
@@ -115,6 +116,7 @@ function Canvas({
 
 	const renderStroke = React.useCallback(
 		(ctx: CanvasRenderingContext2D, stroke: StrokeElement) => {
+			console.log("Rendering stroke:", stroke);
 			const myStroke = getStroke(stroke.points, {
 				...strokeOptions,
 				size: stroke.width,
@@ -129,12 +131,39 @@ function Canvas({
 
 	const renderFill = React.useCallback(
 		(ctx: CanvasRenderingContext2D, fill: FillElement) => {
-			const maskCtx = maskCanvasRef.current?.getContext("2d");
-			if (!ctx || !maskCtx) return;
+			console.log("Rendering fill:", fill);
+			const canvas = canvasRef.current;
+			if (!canvas) return;
 
-			bucketFill(fill.point, toolColor, ctx, maskCtx);
-		}, 
-		[toolColor]
+			const width = canvas.width;
+			const height = canvas.height;
+
+			const decompressedPixels = pako.inflate(fill.pixels);
+			const fillWidth = fill.width;
+			const fillHeight = fill.height;
+			const [fillX, fillY] = fill.point;
+
+			// Create a blank ImageData object for the full canvas
+			const fullCanvasImageData = ctx.createImageData(width, height);
+
+			// Copy the decompressed pixels into the correct position within the full canvas ImageData
+			for (let row = 0; row < fillHeight; row++) {
+				for (let col = 0; col < fillWidth; col++) {
+					const fillIndex = (row * fillWidth + col) * 4;
+					const canvasIndex = ((fillY + row) * width + (fillX + col)) * 4;
+
+					fullCanvasImageData.data[canvasIndex] = decompressedPixels[fillIndex];       // R
+					fullCanvasImageData.data[canvasIndex + 1] = decompressedPixels[fillIndex + 1]; // G
+					fullCanvasImageData.data[canvasIndex + 2] = decompressedPixels[fillIndex + 2]; // B
+					fullCanvasImageData.data[canvasIndex + 3] = decompressedPixels[fillIndex + 3]; // A
+				}
+			}
+
+			// Render the full canvas ImageData
+			console.log("putting fill image data", fullCanvasImageData);
+			ctx.putImageData(fullCanvasImageData, 0, 0);
+		},
+		[]
 	);
 	
 	const clearCanvas = React.useCallback(
@@ -155,23 +184,18 @@ function Canvas({
 		}
 	}, []);
 
-	const [masksProcessed, setMasksProcessed] = React.useState(false);
+	// const [masksProcessed, setMasksProcessed] = React.useState(false);
 
 	const renderAllElements = React.useCallback(() => {
-		const context = canvasRef.current?.getContext("2d");
+		const context = canvasRef.current?.getContext("2d", { willReadFrequently: true });
 		if (context) {
 			clearCanvas(context);
-			setMasksProcessed(false); // Reset mask processing state
+			// setMasksProcessed(false); // Reset mask processing state
 			elements.forEach(element => {
-				if (element.type === 'fill' && !masksProcessed) {
-					// Process masks before rendering the first fill
-					processMasks();
-					// setMasksProcessed(true);
-				}
 				renderElement(context, element);
 			});
 		}
-	}, [renderElement, elements, processMasks, masksProcessed]);
+	}, [renderElement, elements]);
 
 	const renderMostRecentElement = React.useCallback(() => {
 		const context = canvasRef.current?.getContext("2d");
@@ -194,7 +218,6 @@ function Canvas({
 		if (isWindowInitialized && canvasRef.current) {
 			const context = canvasRef.current.getContext("2d");
 			if (context) {
-				console.log("renderAllElements from useEffect1");
 				renderAllElements();
 			}
 		}
@@ -219,11 +242,9 @@ function Canvas({
 			(lastElement as StrokeElement).points.length > 0;
 
 		if (elementCountRef.current > newElementCount || elements.length === 0) {
-			console.log("renderAllElements from useEffect2");
 			// Undo stroke or clear canvas
 			renderAllElements();
 		} else if (elements.length > 0 && (isWindowInitialized || hasPointsChanged || isStrokeCompletion)) {
-			console.log("renderMostRecentElement from useEffect2");
 			renderMostRecentElement();
 
 			// Update the points reference
@@ -266,8 +287,8 @@ function Canvas({
 		const maskCanvas = maskCanvasRef.current;
 		if (!canvas || !maskCanvas) return;
 	  
-		const context = canvas.getContext("2d");
-		const maskCtx = maskCanvas.getContext("2d");
+		const context = canvas.getContext("2d", { willReadFrequently: true });
+		const maskCtx = maskCanvas.getContext("2d", { willReadFrequently: true });
 		if (!context || !maskCtx) return;
 	  
 		createImageBitmap(canvas)
@@ -424,8 +445,17 @@ function Canvas({
 			const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
 			const [x, y] = getScaledCoordinates(clientX, clientY, rect);
 
-			const newFill = addFill([x, y], toolColor);
-			dispatch(addElement(newFill));
+			const context = canvasRef.current?.getContext("2d");
+			const maskContext = maskCanvasRef.current?.getContext("2d");
+			if (!context || !maskContext) return;
+			
+			bucketFill([x, y], toolColor, context, maskContext, (pixelData) => {
+				if (pixelData) {
+					console.log("elements", elements);
+					const newFill = addFill([pixelData.x, pixelData.y], toolColor, pixelData.data, pixelData.width, pixelData.height);
+					// dispatch(addElement(newFill));
+				}
+			});
 		},
 		[toolColor, getScaledCoordinates, dispatch]
 	);
@@ -579,116 +609,167 @@ function Canvas({
 		}
 	}, []);
 
-	const bucketFill = React.useCallback((point: [number, number], colour: string, context: CanvasRenderingContext2D | null, sourceContext: CanvasRenderingContext2D) => {
-		console.log("bucketFill", point, colour);
-		let contextForData = context;
-		let [x, y] = point;
-		x = Math.floor(x);
-		y = Math.floor(y);
+	// should just calculate the changed points and send them back
+	// currently filling pixels which should really be done in renderFill (looks like it should but doesn't ...)
+	const bucketFill = React.useCallback(
+		(
+			point: [number, number],
+			colour: string,
+			context: CanvasRenderingContext2D | null,
+			sourceContext: CanvasRenderingContext2D,
+			onPixelsFilled: (pixelData: { data: Uint8Array, x: number, y: number, width: number, height: number } | null) => void
+		): void => {
+			console.log("bucketFill", point, colour);
+			let [x, y] = point;
+			x = Math.floor(x);
+			y = Math.floor(y);
 
-		const maskInfo = maskInfoRef.current;
-		if (maskInfo) {
-			const firstIdx = getColorIndexForCoord(x, y, maskInfo.node.width);
-			const alphaValue = maskInfo.data.data[firstIdx + 3];
+			const maskInfo = maskInfoRef.current;
+			if (maskInfo) {
+				const firstIdx = getColorIndexForCoord(x, y, maskInfo.node.width);
+				const alphaValue = maskInfo.data.data[firstIdx + 3];
 
-			if (alphaValue > 0) {
-				const pixelMaskInfo = maskInfo.pixelMaskInfo[alphaValue - 1];
-				let maskDataUrl = pixelMaskInfo.dataUrl;
+				if (alphaValue > 0) {
+					const pixelMaskInfo = maskInfo.pixelMaskInfo[alphaValue - 1];
+					let maskDataUrl = pixelMaskInfo.dataUrl;
 
-				const { canvas: pixelMaskCanvasNode, context: pixelMaskContext } =
-					makeCanvas({
-						height: pixelMaskInfo.height,
-						width: pixelMaskInfo.width,
-					});
+					const { canvas: pixelMaskCanvasNode, context: pixelMaskContext } =
+						makeCanvas({
+							height: pixelMaskInfo.height,
+							width: pixelMaskInfo.width,
+						});
 
-				function performDraw() {
-					// draw non transparent pixels onto the main canvas
-					if (pixelMaskContext) {
-						pixelMaskContext.globalCompositeOperation = "source-in";
+					function performDraw() {
+						if (pixelMaskContext) {
+							pixelMaskContext.globalCompositeOperation = "source-in";
+							pixelMaskContext.fillStyle = toolColor;
+							pixelMaskContext.fillRect(
+								0,
+								0,
+								pixelMaskInfo.width,
+								pixelMaskInfo.height
+							);
+							context?.drawImage(
+								pixelMaskCanvasNode,
+								pixelMaskInfo.x,
+								pixelMaskInfo.y
+							);
+						}
+					}
 
-						pixelMaskContext.fillStyle = toolColor;
-
-						pixelMaskContext.fillRect(
-							0,
-							0,
+					if (!maskDataUrl) {
+						const pixelMaskImageData = new ImageData(
 							pixelMaskInfo.width,
 							pixelMaskInfo.height
 						);
-
-						context?.drawImage(
-							pixelMaskCanvasNode,
-							pixelMaskInfo.x,
-							pixelMaskInfo.y
+						pixelMaskImageData.data.set(
+							new Uint8ClampedArray(pixelMaskInfo.pixels)
 						);
+						pixelMaskContext?.putImageData(pixelMaskImageData, 0, 0);
+						performDraw();
+					} else {
+						const img = new Image();
+						img.onload = () => {
+							pixelMaskContext?.drawImage(img, 0, 0);
+							performDraw();
+						};
+						img.src = maskDataUrl;
 					}
 				}
-
-				if (!maskDataUrl) {
-					const pixelMaskImageData = new ImageData(
-						pixelMaskInfo.width,
-						pixelMaskInfo.height
-					);
-
-					pixelMaskImageData.data.set(
-						new Uint8ClampedArray(pixelMaskInfo.pixels)
-					);
-					pixelMaskContext?.putImageData(pixelMaskImageData, 0, 0);
-
-					performDraw();
-				} else {
-					// OffscreenCanvas is available, so we have a dataUri to set as the
-					// src of a simple Image.  This is 10x faster than calling
-					// putImageData on the Canvas context.
-					console.log("using dataUri");
-					const img = new Image();
-					img.onload = () => {
-						pixelMaskContext?.drawImage(img, 0, 0);
-						performDraw();
-					};
-					img.src = maskDataUrl;
-				}
-
-				return;
 			}
-		}
 
-		const dimensions = {
-			height: canvasRef.current?.height ?? 0,
-			width: canvasRef.current?.width ?? 0,
-		};
+			const dimensions = {
+				height: canvasRef.current?.height ?? 0,
+				width: canvasRef.current?.width ?? 0,
+			};
 
-		// You have to get these image data objects new every time, because
-		// passing through their data buffers to a Worker causes the buffers
-		// to be fully read then drained and unusable again.
-		const currentImageData = contextForData?.getImageData(
-			0,
-			0,
-			dimensions.width,
-			dimensions.height
-		);
+			const currentImageData = context?.getImageData(
+				0,
+				0,
+				dimensions.width,
+				dimensions.height
+			);
 
-		const sourceImageData = sourceContext.getImageData(
-			0,
-			0,
-			dimensions.width,
-			dimensions.height
-		);
+			const sourceImageData = sourceContext.getImageData(
+				0,
+				0,
+				dimensions.width,
+				dimensions.height
+			);
 
-		// Delegate the work of filling the image to the web worker.
-		// This puts it on another thread so large fills don't block the UI thread.
-		workerRef.current?.postMessage(
-			{
-				action: "fill",
-				dimensions,
-				sourceImageData: sourceImageData.data.buffer,
-				currentImageData: currentImageData?.data.buffer,
-				x,
-				y,
-				colour,
-			},
-			[currentImageData?.data.buffer].filter(Boolean) as Transferable[]
-		);
-	}, []);
+			workerRef.current?.postMessage(
+				{
+					action: "fill",
+					dimensions,
+					sourceImageData: sourceImageData.data.buffer,
+					currentImageData: currentImageData?.data.buffer,
+					x,
+					y,
+					colour,
+				},
+				[currentImageData?.data.buffer].filter(Boolean) as Transferable[]
+			);
+
+			// Handle the worker's response
+			workerRef.current?.addEventListener("message", (e) => {
+				const { data } = e;
+				if (data.response === "fill" && context) {
+					const boundingBox = calculateBoundingBox(new Uint8ClampedArray(data.pixels), dimensions.width, dimensions.height);
+					
+					// Use the bounding box to get delta data
+					const deltaData = getDeltaData(context, [
+						{ x: boundingBox.x, y: boundingBox.y, width: boundingBox.width, height: boundingBox.height },
+					]);
+
+					const pixelData = compressDeltaData(deltaData);
+
+					if (pixelData.length === 1) {
+						console.log("pixel fill return");
+						onPixelsFilled(pixelData[0]);
+					} else {
+						console.warn("Unexpected number of pixel data", pixelData);
+					}
+				}
+			}, { once: true }); // Ensure the event listener is only triggered once
+		},
+		[]
+	);
+
+	function getDeltaData(
+		context: CanvasRenderingContext2D,
+		changes: { x: number; y: number; width: number; height: number }[]
+	) {
+		const deltaData = changes.map((change) => {
+			const imageData = context.getImageData(
+				change.x,
+				change.y,
+				change.width,
+				change.height
+			);
+			return {
+				x: change.x,
+				y: change.y,
+				width: change.width,
+				height: change.height,
+				data: imageData.data,
+			};
+		});
+		return deltaData;
+	}
+
+	function compressDeltaData(deltaData: any) {
+		return deltaData.map((change: any) => {
+			if (!change || !change.data) {
+				console.warn("Skipping undefined or null change data");
+				return null; // or handle it in a way that makes sense for your application
+			}
+			const compressedData = pako.deflate(change.data);
+			return {
+				...change,
+				data: compressedData,
+			};
+		}).filter(Boolean); // Remove any null entries from the result
+	}
 
 	function makeCanvas(size: { width: number; height: number }) {
 		const tempCanvas = document.createElement("canvas");
@@ -704,6 +785,37 @@ function Canvas({
 	// https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Pixel_manipulation_with_canvas
 	function getColorIndexForCoord(x: number, y: number, width: number) {
 		return y * (width * 4) + x * 4;
+	}
+
+	function calculateBoundingBox(pixels: Uint8ClampedArray, width: number, height: number): { x: number, y: number, width: number, height: number } {
+		let minX = width, minY = height, maxX = 0, maxY = 0;
+		let hasChanged = false;
+
+		for (let y = 0; y < height; y++) {
+			for (let x = 0; x < width; x++) {
+				const index = (y * width + x) * 4; // Calculate the index for the RGBA values
+				const alpha = pixels[index + 3]; // Check the alpha value to see if the pixel is changed
+
+				if (alpha !== 0) { // Assuming non-zero alpha indicates a change
+					hasChanged = true;
+					if (x < minX) minX = x;
+					if (y < minY) minY = y;
+					if (x > maxX) maxX = x;
+					if (y > maxY) maxY = y;
+				}
+			}
+		}
+
+		if (!hasChanged) {
+			return { x: 0, y: 0, width: 0, height: 0 }; // No change detected
+		}
+
+		return {
+			x: minX,
+			y: minY,
+			width: maxX - minX + 1,
+			height: maxY - minY + 1
+		};
 	}
 
 	return (
