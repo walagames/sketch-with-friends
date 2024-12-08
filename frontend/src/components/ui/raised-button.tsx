@@ -2,13 +2,15 @@ import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { HTMLMotionProps, motion } from "framer-motion";
+import { useSound, SoundEffect } from "@/providers/sound-provider";
 
 const buttonVariants = cva(
-	"inline-flex items-center justify-center rounded-lg font-bold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:brightness-90 disabled:pointer-events-none ring-offset-background",
+	"inline-flex items-center duration-150 justify-center rounded-lg font-bold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:brightness-90 disabled:pointer-events-none ring-offset-background",
 	{
 		variants: {
 			variant: {
-				default: "bg-background text-foreground",
+				default:
+					"bg-background text-foreground hover:bg-primary hover:text-background",
 				icon: "bg-transparent hover:bg-accent hover:text-accent-foreground",
 				action: "bg-primary text-background text-xl",
 			},
@@ -17,7 +19,8 @@ const buttonVariants = cva(
 				sm: "h-9 px-3 rounded-md",
 				lg: "h-11 px-6 rounded-md",
 				xl: "py-1 px-16",
-				icon: "lg:h-11 lg:w-11 h-10 w-10",
+				icon: "h-11 w-11",
+				iconSm: "h-9 w-9",
 				tall: "h-full w-12",
 				wide: "w-full h-12",
 			},
@@ -40,7 +43,14 @@ interface RaisedButtonProps extends ButtonProps {
 }
 
 const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
-	({ className, variant, size, shift = true, ...props }, ref) => {
+	({ className, variant, size, shift = true, onClick, ...props }, ref) => {
+		const playSound = useSound();
+
+		const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+			playSound(SoundEffect.CLICK);
+			onClick?.(e);
+		};
+
 		return (
 			<div
 				className={cn(
@@ -51,6 +61,7 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 				<motion.button
 					className={cn(buttonVariants({ variant, size, className }))}
 					ref={ref}
+					onClick={handleClick}
 					style={{
 						y: -5,
 						x: 5,
@@ -61,7 +72,12 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 					}}
 					{...(props as HTMLMotionProps<"button">)}
 				>
-					<span className={cn("block py-2 whitespace-nowrap", shift && "translate-y-0.5")}>
+					<span
+						className={cn(
+							"block py-2 whitespace-nowrap",
+							shift && "translate-y-0.5"
+						)}
+					>
 						{props.children}
 					</span>
 				</motion.button>

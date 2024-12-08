@@ -7,7 +7,8 @@ import { LinkIcon, SettingsIcon, UsersIcon } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { RoomSettingsForm } from "./room-settings-form";
-export function RoomPane({ isHost }: { isHost: boolean }) {
+import { ModalMenu } from "@/components/ui/modal-menu";
+export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 	const players = useSelector((state: RootState) => state.room.players);
 	const roomId = useSelector((state: RootState) => state.room.id);
 
@@ -18,7 +19,7 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 	const dispatch = useDispatch();
 	return (
 		<div className="relative z-10 max-w-3xl w-full flex flex-col items-end gap-4 p-2.5 lg:px-0 h-full lg:h-auto">
-			<div className="flex gap-6 items-center w-full">
+			<div className="flex gap-3 items-center w-full">
 				<div>
 					<RaisedButton
 						size="lg"
@@ -38,23 +39,21 @@ export function RoomPane({ isHost }: { isHost: boolean }) {
 					<UsersIcon className="w-5 h-5 mb-1" />
 					{Object.keys(players).length}/{settings.playerLimit}
 				</span>
-				{/* <span className="font-bold text-xl flex items-center gap-2">
-					<Tally5Icon className="w-5 h-5 mb-1" />
-					{settings.totalRounds}
-				</span>
-				<span className="font-bold text-xl flex items-center gap-1.5">
-					<ClockIcon className="w-5 h-5 mb-1" />
-					{settings.drawingTimeAllowed}s
-				</span> */}
 				{isHost && (
-					<div className="ml-auto">
+					<div className="ml-auto flex items-center gap-2.5">
 						<RaisedButton
-							variant="action"
 							size="icon"
 							onClick={() => setShowSettings(!showSettings)}
 						>
-							{showSettings ? <UsersIcon /> : <SettingsIcon />}
+							{showSettings ? (
+								<UsersIcon className="size-5 -translate-y-0.5" />
+							) : (
+								<SettingsIcon className="size-5 -translate-y-0.5" />
+							)}
 						</RaisedButton>
+						<div className="lg:hidden">
+							<ModalMenu />
+						</div>
 					</div>
 				)}
 			</div>

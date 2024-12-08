@@ -1,10 +1,10 @@
 import { RoomPane } from "./room-pane";
-import { SkyScene } from "@/components/scenes/sky-scene";
+import { RoomScene } from "@/components/scenes/room-scene";
 
 export function PreGamePlayerView() {
 	return (
-		<SkyScene>
-			<RoomPane isHost={false} />
-		</SkyScene>
+		<RoomScene>
+			<RoomPane />
+		</RoomScene>
 	);
 }

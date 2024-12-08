@@ -1,4 +1,4 @@
-import { HillScene } from "@/components/scenes/hill-scene";
+import { SkyScene } from "@/components/scenes/sky-scene";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { PlayerInfoForm } from "./player-info-form";
@@ -18,7 +18,7 @@ export function EnterPlayerInfoView() {
 		}
 	};
 	return (
-		<HillScene>
+		<SkyScene>
 			<PlayerInfoForm />
 			<AnimatePresence>
 				<BobbingDoodle
@@ -41,6 +41,6 @@ export function EnterPlayerInfoView() {
 				leaveTo={exitPosition()}
 				// skipTransition
 			/>
-		</HillScene>
+		</SkyScene>
 	);
 }

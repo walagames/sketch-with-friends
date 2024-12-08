@@ -1,7 +1,6 @@
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
-import { Timer } from "@/components/ui/timer";
-import { HillScene } from "@/components/scenes/hill-scene";
+import { SkyScene } from "@/components/scenes/sky-scene";
 import { Player } from "@/state/features/room";
 import { generateAvatar } from "@/lib/avatar";
 import { CrownIcon } from "lucide-react";
@@ -17,10 +16,6 @@ const springConfig = {
 	damping: 14,
 };
 export function PostDrawingView() {
-	const deadline = useSelector(
-		(state: RootState) => state.game.currentPhaseDeadline
-	);
-
 	const word = useSelector((state: RootState) => state.game.selectedWord);
 
 	const players = useSelector((state: RootState) => state.room.players);
@@ -31,10 +26,7 @@ export function PostDrawingView() {
 	const isLastPhase = useSelector((state: RootState) => state.game.isLastPhase);
 
 	return (
-		<HillScene className="px-4 lg:px-0">
-			<div className="absolute lg:top-10 lg:right-10 top-2 right-2">
-				<Timer endTime={deadline} />
-			</div>
+		<SkyScene className="px-4 lg:px-0">
 			<h1 className="text-xl lg:text-2xl lg:py-2">
 				The word was:{" "}
 				<span className="lg:text-3xl text-xl font-bold">{word}</span>
@@ -69,7 +61,7 @@ export function PostDrawingView() {
 						: { left: "145%", top: "65%", rotate: 30 }
 				}
 			/>
-		</HillScene>
+		</SkyScene>
 	);
 }
 

@@ -188,7 +188,7 @@ function App() {
 					transition={{
 						type: "spring",
 						stiffness: 350,
-						damping: 34,
+						damping: 45,
 						mass: 1,
 						restDelta: 0.01,
 					}}

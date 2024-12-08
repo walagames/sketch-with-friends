@@ -108,6 +108,7 @@ export const roomSlice = createSlice({
 			state.players = action.payload;
 		},
 		playerJoined: (state, action: PayloadAction<Player>) => {
+			toast.info(`${action.payload.name} has joined the room`);
 			state.players[action.payload.id] = action.payload;
 		},
 		playerLeft: (state, action: PayloadAction<string>) => {
