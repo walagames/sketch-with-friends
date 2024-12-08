@@ -24,8 +24,8 @@ export function UIHeader() {
 		<header
 			className={cn(
 				"absolute top-5 w-full px-6 items-center z-50",
-				hideHeader(stage, phase) ? "hidden sm:flex" : "flex",
-				showTimer ? "justify-between" : "justify-end"
+				showTimer ? "justify-between" : "justify-end",
+				hideHeader(stage, phase) ? "lg:flex hidden" : "flex"
 			)}
 		>
 			{showTimer && <Timer endTime={deadline} />}

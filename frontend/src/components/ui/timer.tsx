@@ -43,11 +43,9 @@ export function Timer({ endTime }: { endTime: string }) {
 	return (
 		<motion.div
 			layout
-			layoutId="timer"
-			transition={{ duration: 0.1 }}
 			className="text-xl font-bold bg-background w-11 h-11 flex items-center justify-center leading-none shadow-accent-sm rounded-lg"
 		>
-			<motion.span className="mt-1 px-2">
+			<motion.span layout className="mt-1 px-2">
 				{time}
 			</motion.span>
 		</motion.div>
