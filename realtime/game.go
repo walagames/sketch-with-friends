@@ -667,7 +667,7 @@ func (phase PostDrawingPhase) Start(g *game) {
 	// players to see the correct word and scoreboard for longer.
 	isLastPhase := g.currentRound >= g.room.Settings.TotalRounds && len(g.drawingQueue) == 0
 	if isLastPhase {
-		phaseDuration = time.Second * 10
+		phaseDuration = time.Second * 15
 	}
 
 	// Set the deadline to 1 second before the phase ends to allow
