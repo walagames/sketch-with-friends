@@ -10,11 +10,7 @@ const keys = [
 	["z", "x", "c", "v", "b", "n", "m"],
 ];
 
-export function VirtualKeyboardComponent({
-	className,
-}: {
-	className?: string;
-}) {
+export function VirtualKeyboard({ className }: { className?: string }) {
 	const [isUpperCase, setIsUpperCase] = useState(false);
 	const [showKeyboard, setShowKeyboard] = useState(false);
 	const [input, setInput] = useState("");

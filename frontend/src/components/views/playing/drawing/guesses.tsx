@@ -12,7 +12,7 @@ import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
 import { useDispatch, useSelector } from "react-redux";
 import { UsersIcon } from "lucide-react";
 import { RaisedInput } from "@/components/ui/raised-input";
-import { VirtualKeyboardComponent } from "@/components/virtual-keyboard";
+import { VirtualKeyboard } from "@/components/virtual-keyboard";
 
 export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 	const guesses = useSelector((state: RootState) => state.game.guesses);
@@ -53,7 +53,8 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 			<ul
 				ref={listRef}
 				className={cn(
-					"flex-1 w-full flex gap-3 lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-5 pt-10 lg:pt-5 overflow-y-auto overflow-x-hidden scrollbar-hide"
+					"flex-1 w-full flex gap-3 lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-5 pt-10 lg:pt-5 overflow-y-auto overflow-x-hidden scrollbar-hide",
+					"contain-strict"
 				)}
 			>
 				{guesses.map((guess) => (
@@ -64,11 +65,11 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 					/>
 				))}
 			</ul>
-			<div className="mt-4 w-full hidden sm:block">
+			<div className="mt-4 w-full hidden sm:block h-16">
 				<GuessForm isGuessing={isGuessing} />
 			</div>
 			<div className="mt-1 w-full sm:hidden -mb-4">
-				<VirtualKeyboardComponent className="w-full" />
+				<VirtualKeyboard className="w-full" />
 			</div>
 		</div>
 	);
@@ -124,11 +125,11 @@ function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
 				<div className="w-full relative">
 					<div
 						className={cn(
-							"bg-background border-2 relative z-10 font-semibold flex overflow-hidden w-full",
+							"bg-background border-2 relative z-10 font-semibold flex overflow-hidden w-full max-w-full",
 							isOwnMessage
 								? "rounded-lg rounded-br-none"
 								: "rounded-lg rounded-tl-none",
-							guess.isCorrect && "bg-[#40FF00]"
+								guess.isCorrect && "bg-[#40FF00]"
 						)}
 					>
 						{guess.isCorrect ? (
@@ -137,8 +138,7 @@ function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
 							</span>
 						) : (
 							<span
-								style={{ overflowWrap: "anywhere" }}
-								className="px-3 py-2 break-words"
+								className="px-3 py-2 break-words overflow-wrap-anywhere w-full"
 							>
 								{guess.guess}
 							</span>
@@ -195,11 +195,6 @@ export function GuessForm({ isGuessing }: { isGuessing?: boolean }) {
 										placeholder={isGuessing ? "Guess" : "Chat"}
 										{...field}
 									/>
-									{/* <div className="">
-										<RaisedButton shift={false} variant="action" size="icon">
-											<SendIcon className="lg:size-6 size-5" />
-										</RaisedButton>
-									</div> */}
 								</div>
 							</FormControl>
 						</FormItem>
