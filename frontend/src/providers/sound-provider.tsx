@@ -168,7 +168,6 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 	// Play scene change sound when phase changes
 	useEffect(() => {
 		if (prevPhaseRef.current !== gamePhase) {
-			// Always play scene change sound immediately
 			playSound(SoundEffect.SCENE_CHANGE);
 		}
 
