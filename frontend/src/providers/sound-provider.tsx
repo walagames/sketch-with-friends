@@ -67,8 +67,6 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 	const isInitializedRef = useRef(false);
 	const gamePhase = useSelector((state: RootState) => state.game.phase);
 	const prevPhaseRef = useRef(gamePhase);
-	const roomStage = useSelector((state: RootState) => state.room.stage);
-	const prevRoomStageRef = useRef(roomStage);
 
 	useEffect(() => {
 		// Initialize AudioContext
@@ -120,7 +118,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 		if (phase === GamePhase.Drawing && deadline) {
 			const now = Date.now();
 			const timeUntilDeadline = new Date(deadline).getTime() - now;
-			const timeUntilWarning = timeUntilDeadline - 5000; // 5 seconds before deadline
+			const timeUntilWarning = timeUntilDeadline - 9000; // 9 seconds before deadline
 
 			// Only set timers if deadline is in the future and we haven't passed the warning point
 			if (timeUntilDeadline > 0 && timeUntilWarning > 0) {
@@ -167,19 +165,15 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 		prevPlayersRef.current = players;
 	}, [players]);
 
-	// Play scene change sound when phase or room stage changes
+	// Play scene change sound when phase changes
 	useEffect(() => {
-		if (
-			prevPhaseRef.current !== gamePhase ||
-			prevRoomStageRef.current !== roomStage
-		) {
+		if (prevPhaseRef.current !== gamePhase) {
 			// Always play scene change sound immediately
 			playSound(SoundEffect.SCENE_CHANGE);
 		}
 
 		prevPhaseRef.current = gamePhase;
-		prevRoomStageRef.current = roomStage;
-	}, [gamePhase, roomStage]);
+	}, [gamePhase]);
 
 	const playSound = (sound: SoundEffect) => {
 		if (!audioContextRef.current || !soundBuffersRef.current[sound]) return;
