@@ -105,7 +105,7 @@ export function EnterCodeView() {
 	}, []);
 
 	return (
-		<SkyScene className="h-screen">
+		<SkyScene className="h-[100dvh]">
 			<AnimatePresence>
 				<div className="flex flex-col items-center gap-4 max-w-64 relative z-50">
 					<Logo />

@@ -12,6 +12,7 @@ import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
 import { useDispatch, useSelector } from "react-redux";
 import { UsersIcon } from "lucide-react";
 import { RaisedInput } from "@/components/ui/raised-input";
+import { VirtualKeyboardComponent } from "@/components/virtual-keyboard";
 
 export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 	const guesses = useSelector((state: RootState) => state.game.guesses);
@@ -33,7 +34,7 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 	return (
 		<div
 			className={cn(
-				"flex flex-col lg:h-full xl:w-[20rem] w-full xl:max-h-[660px] min-h-[12rem] px-1.5 lg:px-0 relative z-30",
+				"flex flex-col lg:h-full xl:w-[20rem] w-full xl:max-h-[660px] min-h-[12rem] px-0.5 lg:px-0 relative z-30",
 				isGuessing
 					? "h-[var(--max-chat-height)]"
 					: "h-[var(--max-chat-height-drawing)]"
@@ -63,8 +64,11 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 					/>
 				))}
 			</ul>
-			<div className="mt-4 w-full">
+			<div className="mt-4 w-full hidden sm:block">
 				<GuessForm isGuessing={isGuessing} />
+			</div>
+			<div className="mt-1 w-full sm:hidden -mb-4">
+				<VirtualKeyboardComponent className="w-full" />
 			</div>
 		</div>
 	);

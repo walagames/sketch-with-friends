@@ -1,58 +1,77 @@
-import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { RaisedButton } from "./ui/raised-button";
-import { RaisedInput } from "./ui/raised-input";
 import { cn } from "@/lib/utils";
-import { fileURLToPath } from "url";
+import { useDispatch } from "react-redux";
+import { ArrowBigUpIcon, DeleteIcon, SendIcon } from "lucide-react";
 
 const keys = [
 	["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
 	["a", "s", "d", "f", "g", "h", "j", "k", "l"],
-	["z", "x", "c", "v", "b", "n", "m", "."],
+	["z", "x", "c", "v", "b", "n", "m"],
 ];
 
 export function VirtualKeyboardComponent({
-	setInput,
 	className,
-	placeholder,
-	field,
-	value: initialValue,
-	onSubmit,
 }: {
-	setInput: (value: string | ((prev: string) => string)) => void;
 	className?: string;
-	placeholder?: string;
-	field: any;
-	value: string;
-	onSubmit: () => void;
 }) {
 	const [isUpperCase, setIsUpperCase] = useState(false);
 	const [showKeyboard, setShowKeyboard] = useState(false);
-	const [isFocused, setIsFocused] = useState(false);
+	const [input, setInput] = useState("");
+	const inputBufferRef = useRef(input);
 	const fakeInputRef = useRef<HTMLDivElement>(null);
 	const keyboardRef = useRef<HTMLDivElement>(null);
 
-	const handleKeyPress = (key: string) => {
-		const newKey = isUpperCase ? key.toUpperCase() : key;
-		setInput((prev) => prev + newKey);
-	};
+	const dispatch = useDispatch();
 
-	const handleBackspace = () => {
-		setInput((prev) => prev.slice(0, -1));
-	};
+	useEffect(() => {
+		inputBufferRef.current = input;
+	}, [input]);
 
-	const handleSpace = () => {
-		setInput((prev) => prev + " ");
-	};
+	const handleKeyPress = useCallback(
+		(key: string) => {
+			const newKey = isUpperCase ? key.toUpperCase() : key;
+			// Update the ref immediately
+			inputBufferRef.current += newKey;
+			// Then schedule the state update
+			requestAnimationFrame(() => {
+				setInput(inputBufferRef.current);
+			});
+		},
+		[isUpperCase]
+	);
+
+	const handleBackspace = useCallback(() => {
+		inputBufferRef.current = inputBufferRef.current.slice(0, -1);
+		requestAnimationFrame(() => {
+			setInput(inputBufferRef.current);
+		});
+	}, []);
+
+	const handleSpace = useCallback(() => {
+		inputBufferRef.current += " ";
+		requestAnimationFrame(() => {
+			setInput(inputBufferRef.current);
+		});
+	}, []);
 
 	const toggleCase = () => {
 		setIsUpperCase((prev) => !prev);
 	};
 
-	const scrollToEnd = () => {
+	const handleSubmit = useCallback(() => {
+		const trimmedGuess = inputBufferRef.current.trim();
+		if (trimmedGuess) {
+			dispatch({ type: "game/submitGuess", payload: trimmedGuess });
+			inputBufferRef.current = "";
+			setInput("");
+		}
+	}, [dispatch]);
+
+	const handleShowKeyboard = () => {
+		setShowKeyboard(true);
 		if (fakeInputRef.current) {
-			fakeInputRef.current.scrollLeft = fakeInputRef.current.scrollWidth;
+			fakeInputRef.current.focus();
 		}
 	};
 
@@ -74,115 +93,184 @@ export function VirtualKeyboardComponent({
 		};
 	}, []);
 
-	useEffect(() => {
-		if (isFocused && fakeInputRef.current) {
-			fakeInputRef.current.scrollLeft = fakeInputRef.current.scrollWidth;
-		}
-	}, [initialValue, isFocused]);
-
 	return (
-		<div className={cn("flex-1 bg-white rounded-lg shadow-accent", className)}>
-			<div className="relative w-full">
-				<div className="relative w-full ">
-					<div
-						ref={fakeInputRef}
-						role="textbox"
-						tabIndex={0}
-						onClick={() => {
-							setShowKeyboard(true);
-							setIsFocused(true);
-						}}
-						onBlur={() => setIsFocused(false)}
-						className={cn(
-							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring w-[calc(100vw-2rem)] overflow-hidden",
-							"border border-input bg-background px-3 py-2 rounded-md",
-							"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-							{
-								"after:content-['|'] after:ml-[1px] after:animate-blink": isFocused,
-							}
-						)}
-						style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-						aria-label="Virtual keyboard input"
-					>
-						{initialValue || (
-							<span className="text-foreground-muted">
-								{placeholder || "Tap to start typing..."}
-							</span>
-						)}
-					</div>
-				</div>
-			</div>
+		<div className={cn("flex-1 bg-white rounded-lg", className)}>
+			<FakeInput
+				value={input}
+				showKeyboard={showKeyboard}
+				handleShowKeyboard={handleShowKeyboard}
+				fakeInputRef={fakeInputRef}
+				isOpen={showKeyboard}
+			/>
 			{showKeyboard && (
-				<div ref={keyboardRef} className="grid gap-1.5 p-2 py-4  w-full">
-					{keys.map((row, rowIndex) => (
-						<div key={rowIndex} className="flex justify-center gap-1">
-							{rowIndex === 2 && (
-								<RaisedButton
-									onClick={toggleCase}
-									className="w-10 h-10 text-sm font-semibold virtual-keyboard-button touch-none"
-									size="sm"
-									variant="action"
-									aria-pressed={isUpperCase}
-									aria-label={
-										isUpperCase ? "Switch to lowercase" : "Switch to uppercase"
-									}
-								>
-									⇧
-								</RaisedButton>
-							)}
-							{row.map((key) => (
-								<RaisedButton
-									key={key}
-									onMouseDown={(e) => {
-										e.preventDefault();
-										handleKeyPress(key);
-									}}
-									className="w-[1.95rem] h-10 text-sm font-semibold virtual-keyboard-button touch-none"
-									size="sm"
-									variant="action"
-								>
-									{isUpperCase ? key.toUpperCase() : key}
-								</RaisedButton>
-							))}
-						</div>
-					))}
-					<div className="flex justify-center gap-1.5 mt-1">
+				<div ref={keyboardRef} className="flex flex-col w-full gap-1.5">
+					<div className="flex flex-col gap-1.5">
+						{keys.map((row, rowIndex) => (
+							<div
+								style={{
+									display: "grid",
+									gridAutoFlow: "column",
+									gridAutoColumns: "1fr",
+								}}
+								className="gap-1.5 px-1.5"
+								key={rowIndex}
+							>
+								{rowIndex === 2 && (
+									<RaisedButton
+										offset="small"
+										variant="action"
+										size="wide"
+										onTouchStart={toggleCase}
+										className="font-semibold select-none"
+										aria-pressed={isUpperCase}
+										aria-label={
+											isUpperCase
+												? "Switch to lowercase"
+												: "Switch to uppercase"
+										}
+									>
+										<ArrowBigUpIcon className="size-6" />
+									</RaisedButton>
+								)}
+								{row.map((key) => (
+									<RaisedButton
+										offset="small"
+										variant="action"
+										size="wide"
+										key={key}
+										onPointerDown={(e) => {
+											if (e.pointerType === "touch") {
+												// Prevent any touch delays
+												e.preventDefault();
+												e.stopPropagation();
+											}
+											handleKeyPress(key);
+										}}
+										rounded="md"
+										className="font-semibold select-none"
+									>
+										{isUpperCase ? key.toUpperCase() : key}
+									</RaisedButton>
+								))}
+								{rowIndex === 2 && (
+									<RaisedButton
+										shift
+										offset="small"
+										variant="action"
+										size="wide"
+										onPointerDown={(e) => {
+											e.preventDefault();
+											handleBackspace();
+										}}
+										className="font-semibold select-none flex items-center justify-center"
+										aria-label="Backspace"
+									>
+										<DeleteIcon className="size-5" />
+									</RaisedButton>
+								)}
+							</div>
+						))}
+					</div>
+					<div className="flex gap-1.5 px-1.5">
 						<RaisedButton
-							size="wide"
-							onMouseDown={(e) => {
-								e.preventDefault();
-								handleSpace();
-							}}
+							offset="small"
 							variant="action"
-							className="h-10 text-sm font-semibold virtual-keyboard-button touch-none"
+							size="wide"
+							onTouchStart={() => handleKeyPress(".")}
+							className="font-semibold select-none w-10 flex items-center justify-center"
+						>
+							.
+						</RaisedButton>
+						<RaisedButton
+							offset="small"
+							variant="action"
+							size="wide"
+							onTouchStart={() => handleKeyPress("-")}
+							className="font-semibold select-none w-10 flex items-center justify-center"
+						>
+							-
+						</RaisedButton>
+						<RaisedButton
+							offset="small"
+							variant="action"
+							size="tall"
+							onTouchStart={handleSpace}
+							className="font-semibold select-none flex-1"
 						>
 							Space
 						</RaisedButton>
 						<RaisedButton
-							onMouseDown={(e) => {
-								e.preventDefault();
-								handleBackspace();
-							}}
+							offset="small"
 							variant="action"
-							className="w-10 h-10 text-sm font-semibold virtual-keyboard-button touch-none"
-							aria-label="Backspace"
-						>
-							⌫
-						</RaisedButton>
-						<RaisedButton
-							onMouseDown={(e) => {
-								e.preventDefault();
-								onSubmit();
-							}}
-							variant="action"
-							className="w-10 h-10 text-sm font-semibold virtual-keyboard-button touch-none"
+							size="wide"
+							onTouchStart={handleSubmit}
+							className="font-semibold select-none w-14 flex items-center justify-center"
 							aria-label="Submit"
 						>
-							↵
+							<SendIcon className="lg:size-6 size-5" />
 						</RaisedButton>
 					</div>
 				</div>
 			)}
+		</div>
+	);
+}
+
+function FakeInput({
+	value,
+	showKeyboard,
+	handleShowKeyboard,
+	fakeInputRef,
+	isOpen,
+}: {
+	value: string;
+	showKeyboard: boolean;
+	handleShowKeyboard: () => void;
+	fakeInputRef: React.RefObject<HTMLDivElement>;
+	isOpen: boolean;
+}) {
+	useEffect(() => {
+		if (fakeInputRef.current) {
+			fakeInputRef.current.scrollLeft = fakeInputRef.current.scrollWidth;
+		}
+	}, [value]);
+
+	return (
+		<div className="relative w-full">
+			<div className="relative w-full ">
+				<div
+					ref={fakeInputRef}
+					role="textbox"
+					tabIndex={0}
+					onClick={handleShowKeyboard}
+					className={cn(
+						"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring w-[calc(100vw-0.25rem)] overflow-hidden h-9",
+						"border border-input bg-background px-3 py-2 rounded-md",
+						"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+						"relative whitespace-pre",
+						"overflow-x-auto",
+						{
+							"after:content-[''] after:absolute after:h-5 after:w-[2px] after:bg-foreground after:animate-caret after:ml-[1px]":
+								showKeyboard && !value,
+							"after:content-[''] after:absolute after:h-5 after:w-[2px] after:bg-foreground after:animate-caret after:ml-[1px] after:translate-x-[calc(100%-2px)]":
+								showKeyboard && value,
+						}
+					)}
+					style={{
+						scrollbarWidth: "none",
+						msOverflowStyle: "none",
+					}}
+					aria-label="Virtual keyboard input"
+				>
+					{value ? (
+						value.replace(/ /g, "\u00A0")
+					) : (
+						<span className="text-foreground-muted">
+							{isOpen ? "" : "Tap to start typing..."}
+						</span>
+					)}
+				</div>
+			</div>
 		</div>
 	);
 }
