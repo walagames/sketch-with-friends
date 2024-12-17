@@ -9,8 +9,7 @@ import { cn } from "@/lib/utils";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
-import { ModalMenu } from "@/components/ui/modal-menu";
-import { Timer } from "@/components/ui/timer";
+import { RoundInfo } from "../round-info";
 
 export function DrawingGuesserView() {
 	const players = useSelector((state: RootState) => state.room.players);
@@ -21,30 +20,19 @@ export function DrawingGuesserView() {
 		(state: RootState) => state.game.selectedWord
 	);
 
-	const deadline = useSelector(
-		(state: RootState) => state.game.currentPhaseDeadline
-	);
-
 	return (
 		<SkyScene>
 			<div className="mx-auto mb-auto lg:my-auto flex flex-col gap-2 items-center relative z-50">
 				<div className="flex w-full h-full lg:justify-center justify-between items-center lg:gap-4 flex-col lg:flex-row relative">
-					<div className="flex flex-col items-center justify-center max-w-[800px] w-screen lg:w-auto">
-						<div className="flex justify-between w-full items-center lg:items-end py-2 px-2">
-							<div className="lg:text-2xl whitespace-nowrap flex-wrap flex lg:items-end items-center w-[calc(100%-3rem)] lg:w-auto gap-1">
-								<div className="lg:hidden">
-									<Timer endTime={deadline} />
-								</div>
-								<span className="pt-1.5 lg:pt-0 flex items-center gap-1">
-									<span className="truncate font-bold block pr-1 pl-1 lg:pl-0">
-										{drawingPlayer?.name}
-									</span>
-									is drawing: <WordWithLetterBlanks word={selectedWord} />
+					<div className="flex flex-col items-center justify-center max-w-[800px] w-screen lg:w-auto pb-1">
+						<div className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-7rem)] lg:w-full h-16 justify-center translate-y-1">
+							<RoundInfo />
+							<span className=" flex items-center gap-1 lg:text-2xl">
+								{drawingPlayer?.name} is drawing:{" "}
+								<span className="text-lg lg:text-2xl font-bold">
+									<WordWithLetterBlanks word={selectedWord} />
 								</span>
-							</div>
-							<div className="lg:hidden">
-								<ModalMenu />
-							</div>
+							</span>
 						</div>
 						<Canvas
 							padding={10}

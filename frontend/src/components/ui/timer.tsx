@@ -43,7 +43,7 @@ export function Timer({ endTime }: { endTime: string }) {
 	return (
 		<motion.div
 			layout
-			className="text-xl font-bold bg-background w-11 h-11 flex items-center justify-center leading-none shadow-accent-sm rounded-lg"
+			className="text-xl font-bold bg-background w-10 lg:w-11 h-10 lg:h-11 flex items-center justify-center leading-none shadow-accent-sm rounded-lg"
 		>
 			<motion.span layout className="mt-1 px-2">
 				{time}

@@ -10,19 +10,20 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
 import { useDispatch, useSelector } from "react-redux";
-import { UsersIcon } from "lucide-react";
 import { RaisedInput } from "@/components/ui/raised-input";
 import { VirtualKeyboard } from "@/components/virtual-keyboard";
-
+import { UsersIcon } from "lucide-react";
 export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 	const guesses = useSelector((state: RootState) => state.game.guesses);
 	const players = useSelector((state: RootState) => state.room.players);
+
 	const currentRound = useSelector(
 		(state: RootState) => state.game.currentRound
 	);
 	const totalRounds = useSelector(
 		(state: RootState) => state.room.settings.totalRounds
 	);
+
 	const listRef = useRef<HTMLUListElement>(null);
 
 	useEffect(() => {
@@ -40,20 +41,20 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 					: "h-[var(--max-chat-height-drawing)]"
 			)}
 		>
-			<div className=" bg-gradient-to-b from-[#aef1fe] to-transparent top-[0.625rem] left-2 right-2  rounded-lg h-24 absolute z-10 lg:hidden" />
+			<div className=" bg-gradient-to-b from-[#aef1fe] to-transparent top-[0.625rem] left-2 right-2  rounded-lg h-14 absolute z-10 lg:hidden" />
 
-			<div className="flex w-full justify-between items-center lg:items-end h-16 lg:h-12 xl:mt-1 py-1.5 lg:py-2  px-4 lg:px-0.5 -mb-14 lg:mb-0 z-10 relative">
-				<div className="flex gap-2 lg:text-xl font-bold items-center relative">
+			<div className="w-full justify-between items-center lg:items-end h-16 lg:h-12 xl:mt-1 flex py-1.5 lg:py-2  px-4 lg:px-0.5 -mb-14 lg:mb-0 z-10 relative">
+				<div className="gap-2 lg:text-xl font-bold items-center relative hidden lg:flex">
 					Round {currentRound} of {totalRounds}
 				</div>
-				<div className="flex gap-1.5 text-lg lg:text-xl font-bold items-center relative">
+				<div className="flex gap-1.5 text-lg lg:text-xl font-bold items-center relative ml-auto">
 					<UsersIcon className="size-5 mb-1" /> {Object.keys(players).length}
 				</div>
 			</div>
 			<ul
 				ref={listRef}
 				className={cn(
-					"flex-1 w-full flex gap-3 lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-5 pt-10 lg:pt-5 overflow-y-auto overflow-x-hidden scrollbar-hide",
+					"flex-1 mx-1 flex gap-3 break-all lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-3 lg:p-5 lg:pt-5 overflow-y-auto overflow-x-hidden scrollbar-hide",
 					"contain-strict"
 				)}
 			>
@@ -129,7 +130,7 @@ function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
 							isOwnMessage
 								? "rounded-lg rounded-br-none"
 								: "rounded-lg rounded-tl-none",
-								guess.isCorrect && "bg-[#40FF00]"
+							guess.isCorrect && "bg-[#40FF00]"
 						)}
 					>
 						{guess.isCorrect ? (
@@ -137,9 +138,7 @@ function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
 								{isOwnMessage ? "You guessed it!" : "Guessed it!"}
 							</span>
 						) : (
-							<span
-								className="px-3 py-2 break-words overflow-wrap-anywhere w-full"
-							>
+							<span className="px-3 py-2 break-words overflow-wrap-anywhere w-full">
 								{guess.guess}
 							</span>
 						)}

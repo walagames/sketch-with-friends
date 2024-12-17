@@ -8,41 +8,29 @@ import { SkyScene } from "@/components/scenes/sky-scene";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
-import { ModalMenu } from "@/components/ui/modal-menu";
-import { Timer } from "@/components/ui/timer";
+import { RoundInfo } from "../round-info";
 export function DrawingDrawerView() {
 	const selectedWord = useSelector(
 		(state: RootState) => state.game.selectedWord
-	);
-
-	const deadline = useSelector(
-		(state: RootState) => state.game.currentPhaseDeadline
 	);
 
 	return (
 		<SkyScene>
 			<div className="mx-auto mb-auto xl:my-auto flex flex-col lg:gap-2 gap-1  relative z-50">
 				<div className="flex w-full h-full xl:items-start items-center justify-center lg:gap-4 flex-col xl:flex-row relative">
-					<div className="flex items-center justify-center gap-6">
+					<div className="flex items-center justify-center gap-6 pb-1">
 						<div className="py-20 mt-auto hidden lg:block">
 							<ColorSliders />
 						</div>
 						<div className="flex flex-col items-center justify-center max-w-[800px] w-screen lg:w-auto">
-							<div className="flex justify-between w-full items-center lg:items-end py-2 px-2">
-								<div className="lg:text-2xl flex lg:items-end items-center gap-1">
-									<div className="lg:hidden pr-1">
-										<Timer endTime={deadline} />
-									</div>
-									<span className="pt-1.5 lg:pt-0 flex items-center gap-1">
-										You're drawing:{" "}
-										<span className="text-lg lg:text-2xl font-bold">
-											{selectedWord}
-										</span>
+							<div className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-7rem)] lg:w-full h-16 justify-center translate-y-1">
+								<RoundInfo />
+								<span className=" flex items-center gap-1 lg:text-2xl">
+									You're drawing:{" "}
+									<span className="text-lg lg:text-2xl font-bold">
+										{selectedWord}
 									</span>
-								</div>
-								<div className="lg:hidden">
-									<ModalMenu />
-								</div>
+								</span>
 							</div>
 							<Canvas
 								padding={10}
