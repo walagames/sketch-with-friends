@@ -9,6 +9,7 @@ import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { RoundInfo } from "../round-info";
+import { motion } from "framer-motion";
 export function DrawingDrawerView() {
 	const selectedWord = useSelector(
 		(state: RootState) => state.game.selectedWord
@@ -23,7 +24,12 @@ export function DrawingDrawerView() {
 							<ColorSliders />
 						</div>
 						<div className="flex flex-col items-center justify-center max-w-[800px] w-screen lg:w-auto">
-							<div className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-7rem)] lg:w-full h-16 justify-center translate-y-1">
+							<motion.div
+								initial={{ opacity: 0, y: -10 }}
+								animate={{ opacity: 1, y: 4 }}
+								transition={{ delay: 0.55 }}
+								className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-7rem)] lg:w-full h-16 justify-center"
+							>
 								<RoundInfo />
 								<span className=" flex items-center gap-1 lg:text-2xl">
 									You're drawing:{" "}
@@ -31,7 +37,7 @@ export function DrawingDrawerView() {
 										{selectedWord}
 									</span>
 								</span>
-							</div>
+							</motion.div>
 							<Canvas
 								padding={10}
 								width={800}

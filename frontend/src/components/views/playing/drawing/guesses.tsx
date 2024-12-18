@@ -54,7 +54,7 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 			<ul
 				ref={listRef}
 				className={cn(
-					"flex-1 mx-1 flex gap-3 break-all lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-3 lg:p-5 lg:pt-5 overflow-y-auto overflow-x-hidden scrollbar-hide",
+					"flex-1 mx-1 flex gap-3 break-all lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-sm border-border border-dashed rounded-lg flex-col items-start justify-start p-5 pt-6 lg:pt-1 overflow-y-auto overflow-x-hidden scrollbar-hide",
 					"contain-strict"
 				)}
 			>

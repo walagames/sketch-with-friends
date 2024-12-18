@@ -7,7 +7,7 @@ import { Guesses } from "./guesses";
 import { SkyScene } from "@/components/scenes/sky-scene";
 import { cn } from "@/lib/utils";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { RoundInfo } from "../round-info";
 
@@ -25,7 +25,12 @@ export function DrawingGuesserView() {
 			<div className="mx-auto mb-auto lg:my-auto flex flex-col gap-2 items-center relative z-50">
 				<div className="flex w-full h-full lg:justify-center justify-between items-center lg:gap-4 flex-col lg:flex-row relative">
 					<div className="flex flex-col items-center justify-center max-w-[800px] w-screen lg:w-auto ">
-						<div className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-7rem)] lg:w-full h-16 justify-center translate-y-1">
+						<motion.div
+							initial={{ opacity: 0, y: -10 }}
+							animate={{ opacity: 1, y: 4 }}
+							transition={{ delay: 0.55 }}
+							className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-7rem)] lg:w-full h-16 justify-center"
+						>
 							<RoundInfo />
 							<span className=" flex items-center gap-1 lg:text-2xl">
 								{drawingPlayer?.name} is drawing:{" "}
@@ -33,7 +38,7 @@ export function DrawingGuesserView() {
 									<WordWithLetterBlanks word={selectedWord} />
 								</span>
 							</span>
-						</div>
+						</motion.div>
 						<Canvas
 							padding={10}
 							width={800}
