@@ -5,29 +5,39 @@ import { HTMLMotionProps, motion } from "framer-motion";
 import { useSound, SoundEffect } from "@/providers/sound-provider";
 
 const buttonVariants = cva(
-	"inline-flex items-center duration-150 justify-center rounded-lg font-bold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:brightness-90 disabled:pointer-events-none ring-offset-background",
+	"inline-flex items-center duration-150 justify-center font-bold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:brightness-90 disabled:pointer-events-none ring-offset-background",
 	{
 		variants: {
 			variant: {
 				default:
 					"bg-background text-foreground hover:bg-primary hover:text-background",
 				icon: "bg-transparent hover:bg-accent hover:text-accent-foreground",
-				action: "bg-primary text-background text-xl",
+				action: "bg-primary text-background text-xl active:bg-primary-muted",
 			},
 			size: {
 				default: "h-10 py-4 px-4",
-				sm: "h-9 px-3 rounded-md",
-				lg: "h-11 px-6 rounded-md",
+				sm: "h-9 px-3",
+				lg: "h-11 px-6",
 				xl: "py-1 px-16",
-				icon: "h-11 w-11",
+				icon: "h-10 lg:h-11 w-10 lg:w-11",
 				iconSm: "h-9 w-9",
 				tall: "h-full w-12",
 				wide: "w-full h-12",
+			},
+			rounded: {
+				default: "rounded-lg",
+				none: "rounded-none",
+				sm: "rounded-sm",
+				md: "rounded-md",
+				lg: "rounded-lg",
+				xl: "rounded-xl",
+				full: "rounded-full",
 			},
 		},
 		defaultVariants: {
 			variant: "default",
 			size: "default",
+			rounded: "lg",
 		},
 	}
 );
@@ -40,10 +50,24 @@ export interface ButtonProps
 
 interface RaisedButtonProps extends ButtonProps {
 	shift?: boolean;
+	offset?: "default" | "small";
+	rounded?: "none" | "sm" | "md" | "lg" | "xl" | "full";
 }
 
 const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
-	({ className, variant, size, shift = true, onClick, ...props }, ref) => {
+	(
+		{
+			className,
+			variant,
+			size,
+			shift = true,
+			onClick,
+			offset,
+			rounded = "lg",
+			...props
+		},
+		ref
+	) => {
 		const playSound = useSound();
 
 		const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -51,20 +75,28 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 			onClick?.(e);
 		};
 
+		const offsets = {
+			default: { x: 5, y: -5 },
+			small: { x: 3, y: -3 },
+		};
+
+		const offsetValues = offsets[offset || "default"];
+
 		return (
 			<div
 				className={cn(
-					"flex items-center gap-3 bg-secondary-foreground rounded-lg",
+					"flex items-center gap-3 bg-secondary-foreground",
+					`rounded-${rounded}`,
 					size === "tall" && "flex-1"
 				)}
 			>
 				<motion.button
-					className={cn(buttonVariants({ variant, size, className }))}
+					className={cn(buttonVariants({ variant, size, rounded, className }))}
 					ref={ref}
 					onClick={handleClick}
 					style={{
-						y: -5,
-						x: 5,
+						y: offsetValues?.y,
+						x: offsetValues?.x,
 					}}
 					whileTap={{
 						y: 0,

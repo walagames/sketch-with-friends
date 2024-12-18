@@ -15,9 +15,6 @@ export function SkyScene({
 		>
 			{children}
 			<Hills />
-			{/* duplicate hills so that they still appear on sides when spring overshoots */}
-			<Hills className="absolute bottom-0 left-full w-full " />
-			<Hills className="absolute bottom-0 right-full w-full " />
 		</div>
 	);
 }
@@ -26,7 +23,7 @@ export function Hills({ className }: { className?: string }) {
 	return (
 		<div className={cn("", className)}>
 			<svg
-				className="absolute lg:-bottom-18 2xl:-bottom-36 xl:-bottom-24 md:-bottom-12 bottom-0 left-0 w-full bg-[#aef1fe]"
+				className="absolute lg:-bottom-18 2xl:-bottom-36 xl:-bottom-24 md:-bottom-12 bottom-0 left-0 w-full bg-[#aef1fe] translate-y-[3px] lg:translate-y-0"
 				viewBox="0 0 1163 173"
 				fill="none"
 				xmlns="http://www.w3.org/2000/svg"
@@ -39,7 +36,7 @@ export function Hills({ className }: { className?: string }) {
 				/>
 			</svg>
 			<svg
-				className="absolute lg:-bottom-18 2xl:-bottom-36 xl:-bottom-24 md:-bottom-12 lg:-translate-y-[15px] bottom-0 left-0 w-full"
+				className="absolute lg:-bottom-18 2xl:-bottom-36 xl:-bottom-24 md:-bottom-12 lg:-translate-y-[13px] bottom-0 left-0 w-full"
 				viewBox="0 0 1221 173"
 				fill="none"
 				xmlns="http://www.w3.org/2000/svg"

@@ -2,17 +2,15 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { ModalMenu } from "./ui/modal-menu";
 import { RoomStage } from "@/state/features/room";
-import { GamePhase } from "@/state/features/game";
 import { cn } from "@/lib/utils";
 import { Timer } from "./ui/timer";
 
-const hideHeader = (stage: RoomStage, phase: GamePhase) => {
-	return phase === GamePhase.Drawing || stage === RoomStage.PreGame;
+const hideHeader = (stage: RoomStage) => {
+	return stage === RoomStage.PreGame;
 };
 
 export function UIHeader() {
 	const stage = useSelector((state: RootState) => state.room.stage);
-	const phase = useSelector((state: RootState) => state.game.phase);
 
 	const deadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
@@ -23,9 +21,9 @@ export function UIHeader() {
 	return (
 		<header
 			className={cn(
-				"absolute top-5 w-full px-6 items-center z-50",
+				"absolute lg:top-5 top-2 w-full lg:px-6 px-2 items-center z-50",
 				showTimer ? "justify-between" : "justify-end",
-				hideHeader(stage, phase) ? "lg:flex hidden" : "flex"
+				hideHeader(stage) ? "lg:flex hidden" : "flex"
 			)}
 		>
 			{showTimer && <Timer endTime={deadline} />}
