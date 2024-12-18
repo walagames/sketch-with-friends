@@ -51,7 +51,7 @@ body {
 
 		--aspect-ratio: 0.75;
 		--header-height: 5rem;
-		--tools-height: 2.5rem;
+		--tools-height: 3rem;
 		--max-chat-height: calc(
 			100dvh - calc(100vw * var(--aspect-ratio)) - var(--header-height)
 		);
