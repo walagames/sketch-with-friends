@@ -17,12 +17,11 @@ import {
 	PreGamePlayerView,
 	PickingDrawerView,
 	PickingGuesserView,
-	DrawingDrawerView,
-	DrawingGuesserView,
 	PostDrawingView,
+	DrawingView,
 } from "@/components/views";
 import { useEffect, useState } from "react";
-
+import { containerSpring } from "@/config/spring";
 type ViewComponent = {
 	Component: React.ComponentType;
 	key: string;
@@ -70,13 +69,13 @@ const roomViews = {
 		},
 		[GamePhase.Drawing]: {
 			[GameRole.Drawing]: {
-				Component: DrawingDrawerView,
-				key: "playing-drawing-drawer",
+				Component: DrawingView,
+				key: "playing-drawing",
 				transition: Direction.LEFT,
 			},
 			[GameRole.Guessing]: {
-				Component: DrawingGuesserView,
-				key: "playing-drawing-guesser",
+				Component: DrawingView,
+				key: "playing-drawing",
 				transition: Direction.LEFT,
 			},
 		},
@@ -184,15 +183,7 @@ function App() {
 	return (
 		<main className="flex min-h-[100dvh] flex-col items-center justify-between relative">
 			<div className="h-[100dvh] w-screen flex flex-col items-center justify-center relative overflow-hidden">
-				<MotionConfig
-					transition={{
-						type: "spring",
-						stiffness: 350,
-						damping: 45,
-						mass: 1,
-						restDelta: 0.01,
-					}}
-				>
+				<MotionConfig transition={containerSpring}>
 					<AnimatePresenceWithDirection
 						key={mountId}
 						initial={false}
