@@ -1,8 +1,8 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { BobbingDoodle } from "./doodle/bobbing-doodle";
-import { ModalMenu } from "./ui/modal-menu";
-import { Logo } from "./logo";
+import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
+import { ModalMenu } from "@/components/ui/modal-menu";
+import { Logo } from "@/components/logo";
 export function ContentLayout({
 	children,
 	title,

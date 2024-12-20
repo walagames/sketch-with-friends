@@ -9,6 +9,6 @@ export function getGameRole(playerId: string, players: Record<string, Player>) {
 	return players[playerId]?.gameRole ?? GameRole.Guessing;
 }
 
-export function getPickingPlayer(players: Record<string, Player>) {
+export function getDrawingPlayer(players: Record<string, Player>) {
 	return Object.values(players).find((p) => p.gameRole === GameRole.Drawing);
 }

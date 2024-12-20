@@ -21,7 +21,7 @@ export function UIHeader() {
 	return (
 		<header
 			className={cn(
-				"absolute lg:top-5 top-2 w-full lg:px-6 px-2 items-center z-50",
+				"absolute lg:top-5 top-1 w-full lg:px-6 px-2 items-center z-50",
 				showTimer ? "justify-between" : "justify-end",
 				hideHeader(stage) ? "lg:flex hidden" : "flex"
 			)}

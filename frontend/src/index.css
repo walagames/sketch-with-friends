@@ -50,7 +50,7 @@ body {
 		--radius: 0.6rem;
 
 		--aspect-ratio: 0.75;
-		--header-height: 5rem;
+		--header-height: 4.5rem;
 		--tools-height: 3rem;
 		--max-chat-height: calc(
 			100dvh - calc(100vw * var(--aspect-ratio)) - var(--header-height)

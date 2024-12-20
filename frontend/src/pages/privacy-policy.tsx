@@ -1,4 +1,4 @@
-import { ContentLayout } from "@/components/content-layout";
+import { ContentLayout } from "@/layouts/content-layout";
 
 export function PrivacyPolicy() {
 	return (
