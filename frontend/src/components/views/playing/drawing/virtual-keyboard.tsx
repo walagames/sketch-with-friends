@@ -89,7 +89,7 @@ function KeyboardButton({
 	return (
 		<button
 			className={cn(
-				"font-semibold select-none bg-white border-2 border-foreground/10 active:border-foreground rounded-lg h-10 flex items-center justify-center text-2xl active:bg-zinc-300 active:scale-[102%] transition-all duration-100",
+				"font-semibold select-none bg-white border-2 border-foreground/10 active:border-foreground rounded-lg h-11 flex items-center justify-center text-2xl active:bg-zinc-300 active:scale-[102%] transition-all duration-100",
 				className
 			)}
 			onPointerDown={(e) => {
@@ -193,7 +193,7 @@ export const VirtualKeyboard = forwardRef<
 		<div
 			ref={ref}
 			className={cn(
-				"flex-1  backdrop-blur-sm rounded-lg flex flex-col",
+				"flex-1 backdrop-blur-sm rounded-lg flex flex-col",
 				className
 			)}
 		>

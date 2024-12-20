@@ -7,6 +7,7 @@ import { Timer } from "./ui/timer";
 import { containerSpring } from "@/config/spring";
 import { motion } from "framer-motion";
 import { AnimatePresence } from "framer-motion";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export function UIHeader() {
 	const stage = useSelector((state: RootState) => state.room.stage);
@@ -17,27 +18,32 @@ export function UIHeader() {
 
 	const showTimer = stage === RoomStage.Playing;
 
+	const isLargeScreen = useMediaQuery("(min-width: 1024px)");
+
+	const renderHeader = stage !== RoomStage.PreGame || isLargeScreen;
+
 	return (
 		<AnimatePresence initial={false}>
-			<header
-				className={cn(
-					"absolute lg:top-5 top-1.5 w-full lg:px-6 px-2 items-center z-50 flex",
-					showTimer ? "justify-between" : "justify-end"
-				)}
-			>
-				{showTimer && (
-					<motion.div
-						initial={{ opacity: 0, y: -10 }}
-						animate={{ opacity: 1, y: -1 }}
-						transition={{ ...containerSpring, delay: 0 }}
-						exit={{ opacity: 0, y: -10 }}
-						className="flex items-center gap-2"
-					>
-						<Timer endTime={deadline} />
-					</motion.div>
-				)}
-				<ModalMenu />
-			</header>
+			{renderHeader && (
+				<motion.header
+					initial={{ opacity: 0, y: -10 }}
+					animate={{
+						opacity: 1,
+						y: -1,
+					}}
+					transition={{ ...containerSpring, delay: 0.05 }}
+					exit={{ opacity: 0, y: -10 }}
+					className={cn(
+						"absolute lg:top-5 top-1.5 w-full lg:px-6 px-2 items-center z-50 flex",
+						showTimer ? "justify-between" : "justify-end"
+					)}
+				>
+					{showTimer && <Timer endTime={deadline} />}
+					<div className="translate-y-0.5">
+						<ModalMenu />
+					</div>
+				</motion.header>
+			)}
 		</AnimatePresence>
 	);
 }

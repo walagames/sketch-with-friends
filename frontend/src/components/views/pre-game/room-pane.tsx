@@ -7,6 +7,7 @@ import { LinkIcon, SettingsIcon, UsersIcon } from "lucide-react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { RoomSettingsForm } from "./room-settings-form";
+import { ModalMenu } from "@/components/ui/modal-menu";
 export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 	const players = useSelector((state: RootState) => state.room.players);
 	const roomId = useSelector((state: RootState) => state.room.id);
@@ -17,7 +18,7 @@ export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 
 	const dispatch = useDispatch();
 	return (
-		<div className="relative z-10 max-w-3xl w-full flex flex-col items-end gap-4 px-2.5 py-1.5 lg:px-0 h-full lg:h-auto">
+		<div className="relative z-10 max-w-3xl w-full flex flex-col items-end gap-4 p-2.5 lg:px-0 h-full lg:h-auto">
 			<div className="flex gap-3 items-center w-full">
 				<div>
 					<RaisedButton
@@ -38,7 +39,7 @@ export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 					<UsersIcon className="w-5 h-5 mb-1" />
 					{Object.keys(players).length}/{settings.playerLimit}
 				</span>
-				<div className="ml-auto flex items-center gap-2.5 mr-12 lg:mr-0">
+				<div className="ml-auto flex items-center gap-2.5">
 					{isHost && (
 						<RaisedButton
 							size="icon"
@@ -51,6 +52,9 @@ export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 							)}
 						</RaisedButton>
 					)}
+					<div className="lg:hidden">
+						<ModalMenu />
+					</div>
 				</div>
 			</div>
 			<div className="w-full lg:aspect-[4/3] flex-1 bg-[#aef1fe]/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex items-start justify-center lg:p-6 px-4 pt-2">

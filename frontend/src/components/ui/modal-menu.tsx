@@ -20,7 +20,7 @@ export function ModalMenu() {
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
 			<DialogTrigger asChild>
-				<RaisedButton offset="small" size="icon" variant="action">
+				<RaisedButton rounded="lg" offset="small" size="icon" variant="action">
 					<Menu className="size-5 -translate-y-0.5" />
 				</RaisedButton>
 			</DialogTrigger>
