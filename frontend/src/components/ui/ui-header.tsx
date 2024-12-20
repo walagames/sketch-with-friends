@@ -1,9 +1,9 @@
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
-import { ModalMenu } from "./ui/modal-menu";
+import { ModalMenu } from "./modal-menu";
 import { RoomStage } from "@/state/features/room";
 import { cn } from "@/lib/utils";
-import { Timer } from "./ui/timer";
+import { Timer } from "./timer";
 import { containerSpring } from "@/config/spring";
 import { motion } from "framer-motion";
 import { AnimatePresence } from "framer-motion";

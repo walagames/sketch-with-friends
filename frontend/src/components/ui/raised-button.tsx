@@ -13,6 +13,7 @@ const buttonVariants = cva(
 					"bg-background text-foreground hover:bg-primary hover:text-background",
 				icon: "bg-transparent hover:bg-accent hover:text-accent-foreground",
 				action: "bg-primary text-background text-xl active:bg-primary-muted",
+				card: "bg-background text-foreground",
 			},
 			size: {
 				default: "h-10 py-4 px-4",
@@ -23,6 +24,7 @@ const buttonVariants = cva(
 				iconSm: "h-9 w-9",
 				tall: "h-full w-12",
 				wide: "w-full h-12",
+				card: "h-14 px-0 py-0",
 			},
 			rounded: {
 				default: "rounded-lg",
@@ -87,7 +89,7 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 				className={cn(
 					"flex items-center gap-3 bg-secondary-foreground",
 					`rounded-${rounded}`,
-					size === "tall" && "flex-1"
+					(size === "tall" || size === "card") && "flex-1"
 				)}
 			>
 				<motion.button
