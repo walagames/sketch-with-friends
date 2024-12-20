@@ -37,7 +37,7 @@ export function DrawingGuesserView() {
 								</div>
 								<span className="pt-1.5 lg:pt-0 flex items-center gap-1">
 									<span className="truncate font-bold block pr-1 pl-1 lg:pl-0">
-										{drawingPlayer?.name}
+										{drawingPlayer?.profile.name}
 									</span>
 									is drawing: <WordWithLetterBlanks word={selectedWord} />
 								</span>

@@ -191,7 +191,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 		return ErrRoomFull
 	}
 
-	if len(player.Name) > MAX_NAME_LENGTH {
+	if len(player.Profile.Name) > MAX_NAME_LENGTH {
 		return ErrNameTooLong
 	}
 

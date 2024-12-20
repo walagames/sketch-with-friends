@@ -1,7 +1,28 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { generateAvatar } from "@/lib/avatar";
-import { Player, RoomRole } from "@/state/features/room";
-import { forwardRef } from "react";
+import { Player, RoomRole, changePlayerProfile } from "@/state/features/room";
+import { forwardRef, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/state/store";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuLabel,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { PlayerInfoForm } from "@/components/views/join-room/player-info-form";
+import { RaisedButton } from "@/components/ui/raised-button";
+import { PlayerProfile } from "@/state/features/room";
+
 const CrownIcon = (props: React.SVGProps<SVGSVGElement>) => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
@@ -35,8 +56,54 @@ const variants = {
 
 const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 	({ player }, ref) => {
-		const { roomRole, avatarSeed } = player;
-		const avatarSvg = generateAvatar(avatarSeed);
+		const dispatch = useDispatch();
+		const { roomRole } = player;
+		const isCurrentPlayer = useSelector((state: RootState) => state.client.id === player.id);
+		const [isEditPlayerOptionsOpen, setIsEditPlayerOptionsOpen] = useState(false);
+		const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+		const handleEditPlayerOptions = () => {
+			setIsDropdownOpen(false);
+			setIsEditPlayerOptionsOpen(true);
+		};
+
+		const CardContent = () => (
+			<motion.div
+				layout
+				variants={variants}
+				initial="initial"
+				animate="animate"
+				exit="exit"
+				transition={{
+					type: "spring",
+					stiffness: 500,
+					damping: 50,
+					mass: 1,
+				}}
+				className="flex items-center gap-3 bg-background shadow-accent rounded-lg mt-2 lg:w-64 w-[calc(100%-3rem)] ml-auto min-h-0 h-14"
+			>
+				<img
+					className="rounded-l-lg h-full aspect-square relative"
+					src={generateAvatar(player.profile.avatarSeed)}
+				/>
+				<p className="text-xl leading-0 font-bold truncate px-4 translate-y-0.5">
+					{player.profile.name}
+				</p>
+			</motion.div>
+		);
+
+		const handleSubmit = (profile: PlayerProfile) => {
+			setIsEditPlayerOptionsOpen(false);
+			dispatch(
+				changePlayerProfile({
+					id: player.id,
+					name: profile.name,
+					avatarSeed: profile.avatarSeed,
+					avatarColor: profile.avatarColor,
+				}),
+			);
+		};
+
 		return (
 			<div className="flex items-center gap-4 ml-auto w-full lg:w-auto px-1" ref={ref}>
 				{roomRole === RoomRole.Host && (
@@ -44,28 +111,57 @@ const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 						<CrownIcon className="w-8 h-8 text-yellow-400" />
 					</div>
 				)}
-				<motion.div
-					layout
-					variants={variants}
-					initial="initial"
-					animate="animate"
-					exit="exit"
-					transition={{
-						type: "spring",
-						stiffness: 500,
-						damping: 50,
-						mass: 1,
+
+				{isCurrentPlayer ? (
+					<DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+						<DropdownMenuTrigger>
+							<CardContent />
+						</DropdownMenuTrigger>
+						<DropdownMenuContent>
+							<DropdownMenuLabel>Player Options</DropdownMenuLabel>
+							<DropdownMenuSeparator />
+							<DropdownMenuGroup>
+								<DropdownMenuItem onSelect={handleEditPlayerOptions}>
+									Edit Name & Avatar
+								</DropdownMenuItem>
+							</DropdownMenuGroup>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				) : (
+					<CardContent />
+				)}
+
+				<Dialog
+					open={isEditPlayerOptionsOpen}
+					onOpenChange={(open) => {
+						setIsEditPlayerOptionsOpen(open);
+						if (!open) setIsDropdownOpen(false);
 					}}
-					className="flex items-center gap-3 bg-background shadow-accent rounded-lg mt-2 lg:w-64 w-[calc(100%-3rem)] ml-auto min-h-0 h-14"
 				>
-					<img
-						className="rounded-l-lg h-full aspect-square relative"
-						src={avatarSvg}
-					/>
-					<p className="text-xl leading-0 font-bold truncate px-4 translate-y-0.5">
-						{player.name}
-					</p>
-				</motion.div>
+					<DialogContent className="max-w-sm mx-auto" aria-describedby="edit-player-description">
+						<DialogHeader>
+							<DialogTitle>Edit Player Options</DialogTitle>
+						</DialogHeader>
+						<div className="mt-6 flex flex-col items-center">
+							<PlayerInfoForm
+								handleSubmit={handleSubmit}
+								defaultValues={{
+									name: player.profile.name,
+									avatarSeed: player.profile.avatarSeed,
+									avatarColor: player.profile.avatarColor,
+								}}
+								bottomButton={
+									<RaisedButton
+										shift={false}
+										variant="action"
+									>
+										Submit
+									</RaisedButton>
+								}
+							/>
+						</div>
+					</DialogContent>
+				</Dialog>
 			</div>
 		);
 	}

@@ -32,19 +32,23 @@ type playerOptions struct {
 	avatarColor string
 }
 
+type playerProfile struct {
+	Name        string `json:"name"`
+	AvatarSeed  string `json:"avatarSeed"`
+	AvatarColor string `json:"avatarColor"`
+}
+
 // player represents an individual participant in the game.
 //
 // Players are created when a user joins a room and are maintained throughout
 // the game session. The player struct is central to many game operations,
 // including scoring, role assignment, and message routing.
 type player struct {
-	ID                uuid.UUID `json:"id"`
-	Name              string    `json:"name"`
-	RoomRole          RoomRole  `json:"roomRole"`
-	GameRole          GameRole  `json:"gameRole"`
-	AvatarSeed        string    `json:"avatarSeed"`
-	AvatarColor       string    `json:"avatarColor"`
-	Score             int       `json:"score"`
+	ID                uuid.UUID     `json:"id"`
+	Profile           playerProfile `json:"profile"`
+	RoomRole          RoomRole      `json:"roomRole"`
+	GameRole          GameRole      `json:"gameRole"`
+	Score             int           `json:"score"`
 	lastInteractionAt time.Time
 	client            *client
 	limiter           *rate.Limiter
@@ -52,10 +56,12 @@ type player struct {
 
 func NewPlayer(opts *playerOptions) *player {
 	return &player{
-		ID:                uuid.New(),
-		Name:              opts.name,
-		AvatarSeed:        opts.avatarSeed,
-		AvatarColor:       opts.avatarColor,
+		ID: uuid.New(),
+		Profile: playerProfile{
+			Name:        opts.name,
+			AvatarSeed:  opts.avatarSeed,
+			AvatarColor: opts.avatarColor,
+		},
 		RoomRole:          opts.roomRole,
 		Score:             0,
 		GameRole:          GameRoleGuessing,

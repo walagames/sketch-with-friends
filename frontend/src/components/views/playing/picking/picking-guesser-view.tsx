@@ -14,13 +14,13 @@ export function PickingGuesserView() {
 		(state: RootState) => state.game.isFirstPhase
 	);
 	if (!pickingPlayer) return null;
-	const avatarSvg = generateAvatar(pickingPlayer.avatarSeed);
+	const avatarSvg = generateAvatar(pickingPlayer.profile.avatarSeed);
 
 	return (
 		<SkyScene>
 			<img src={avatarSvg} className="w-20 h-20 rounded-lg shadow-accent" />
 			<h1 className="text-2xl lg:text-3xl font-bold px-8 lg:px-0 text-center">
-				{pickingPlayer.name} is picking a word to sketch
+				{pickingPlayer.profile.name} is picking a word to sketch
 			</h1>
 			<AnimatePresence>
 				<BobbingDoodle

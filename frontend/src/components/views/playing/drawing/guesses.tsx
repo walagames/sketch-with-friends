@@ -71,7 +71,7 @@ export function Guesses({ isGuessing }: { isGuessing?: boolean }) {
 }
 
 function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
-	const { avatarSeed, name } = player;
+	const { avatarSeed, name } = player.profile;
 	const avatarSvg = generateAvatar(avatarSeed);
 	const playerId = useSelector((state: RootState) => state.client.id);
 	const isOwnMessage = playerId === guess.playerId;
@@ -86,7 +86,7 @@ function GuessCard({ guess, player }: { guess: Guess; player: Player }) {
 			)}
 		>
 			<img
-				alt={player.name + " profile picture"}
+				alt={player.profile.name + " profile picture"}
 				className={cn(
 					"h-8 aspect-square relative border-2 shrink-0",
 					isOwnMessage ? "rounded-lg" : "rounded-lg"

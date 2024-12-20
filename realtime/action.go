@@ -45,13 +45,14 @@ const (
 	PointsAwarded ActionType = "game/pointsAwarded"
 
 	// Room actions
-	InitializeRoom     ActionType = "room/initializeRoom"
-	ChangeRoomSettings ActionType = "room/changeRoomSettings"
-	SetPlayers         ActionType = "room/setPlayers"
-	PlayerJoined       ActionType = "room/playerJoined"
-	PlayerLeft         ActionType = "room/playerLeft"
-	HostChanged        ActionType = "room/hostChanged"
-	ChangeStage        ActionType = "room/changeStage"
+	InitializeRoom      ActionType = "room/initializeRoom"
+	ChangeRoomSettings  ActionType = "room/changeRoomSettings"
+	SetPlayers          ActionType = "room/setPlayers"
+	PlayerJoined        ActionType = "room/playerJoined"
+	PlayerLeft          ActionType = "room/playerLeft"
+	HostChanged         ActionType = "room/hostChanged"
+	ChangeStage         ActionType = "room/changeStage"
+	ChangePlayerProfile ActionType = "room/changePlayerProfile"
 )
 
 // Action are used to communicate between the client and server.
@@ -350,6 +351,32 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			// Inform clients of the room settings change
 			r.broadcast(GameRoleAny,
 				message(ChangeRoomSettings, r.Settings),
+			)
+			return nil
+		},
+	},
+	ChangePlayerProfile: {
+		RoomRoleRequired: RoomRoleAny, // Any player can change their own info
+		GameRoleRequired: GameRoleAny,
+		PayloadType:      map[string]interface{}{},
+		validator: func(r *room) error {
+			// No special validation needed - players can change their info anytime
+			return nil
+		},
+		execute: func(r *room, a *Action) error {
+			// First decode the map into a playerProfile struct
+			profile, err := decodePayload[playerProfile](a.Payload)
+			if err != nil {
+				return fmt.Errorf("invalid player profile payload: %w", err)
+			}
+
+			a.Player.Profile.Name = profile.Name
+			a.Player.Profile.AvatarSeed = profile.AvatarSeed
+			a.Player.Profile.AvatarColor = profile.AvatarColor
+
+			// Broadcast the change to all players
+			r.broadcast(GameRoleAny,
+				message(SetPlayers, r.Players),
 			)
 			return nil
 		},

@@ -103,7 +103,7 @@ function LeaderboardPlace({
 	player: Player;
 	index: number;
 }) {
-	const { name, score, avatarSeed } = player;
+	const { score, profile: { name, avatarSeed } } = player;
 	const avatarSvg = generateAvatar(avatarSeed);
 
 	const points =
@@ -143,7 +143,7 @@ function PodiumPlace({
 
 	if (!player) return null;
 
-	const { name, score, avatarSeed } = player;
+	const { score, profile: { name, avatarSeed } } = player;
 	const avatarSvg = generateAvatar(avatarSeed);
 
 	const podiumColor = {
