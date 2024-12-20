@@ -39,8 +39,8 @@ export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 					<UsersIcon className="w-5 h-5 mb-1" />
 					{Object.keys(players).length}/{settings.playerLimit}
 				</span>
-				{isHost && (
-					<div className="ml-auto flex items-center gap-2.5">
+				<div className="ml-auto flex items-center gap-2.5">
+					{isHost && (
 						<RaisedButton
 							size="icon"
 							onClick={() => setShowSettings(!showSettings)}
@@ -51,11 +51,11 @@ export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 								<SettingsIcon className="size-5 -translate-y-0.5" />
 							)}
 						</RaisedButton>
-						<div className="lg:hidden">
-							<ModalMenu />
-						</div>
+					)}
+					<div className="lg:hidden">
+						<ModalMenu />
 					</div>
-				)}
+				</div>
 			</div>
 			<div className="w-full lg:aspect-[4/3] flex-1 bg-[#aef1fe]/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex items-start justify-center lg:p-6 px-4 pt-2">
 				{showSettings ? (
@@ -67,9 +67,6 @@ export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 			{isHost && (
 				<div>
 					<RaisedButton
-						data-m:click={
-							Object.keys(players).length > 1 && "action=start_game"
-						}
 						size="xl"
 						variant="action"
 						onClick={() => dispatch({ type: "game/startGame" })}

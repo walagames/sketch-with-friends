@@ -1,7 +1,7 @@
 import { Brush, Undo2, Trash } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
-import { Slider } from "./ui/slider";
+import { Slider } from "../../../ui/slider";
 import {
 	changeStrokeWidth,
 	changeTool,
@@ -11,13 +11,27 @@ import {
 } from "@/state/features/client";
 
 import { undoStroke, clearStrokes } from "@/state/features/canvas";
-import { RaisedButton } from "./ui/raised-button";
+import { RaisedButton } from "../../../ui/raised-button";
+import { getGameRole } from "@/lib/player";
+import { GameRole } from "@/state/features/game";
+import { cn } from "@/lib/utils";
 
 export function CanvasTools() {
 	const dispatch = useDispatch();
 	const tool = useSelector((state: RootState) => state.client.canvas.tool);
+	const players = useSelector((state: RootState) => state.room.players);
+	const playerId = useSelector((state: RootState) => state.client.id);
+	const role = getGameRole(playerId, players);
+
+	const isDrawing = role === GameRole.Drawing;
+
 	return (
-		<div className="flex lg:gap-8 gap-4 w-full items-center pt-2 lg:py-4 px-3.5 lg:px-0 ">
+		<div
+			className={cn(
+				"lg:gap-8 gap-4 w-full items-center pt-2 lg:py-4 px-3.5 lg:px-0 ",
+				isDrawing ? "flex" : "hidden"
+			)}
+		>
 			<StrokeWidthSlider />
 			<div className="flex gap-2">
 				<RaisedButton
@@ -93,6 +107,12 @@ export function ColorSliders() {
 		(state: RootState) => state.client.canvas.lightness
 	);
 
+	const players = useSelector((state: RootState) => state.room.players);
+	const playerId = useSelector((state: RootState) => state.client.id);
+	const role = getGameRole(playerId, players);
+
+	const isDrawing = role === GameRole.Drawing;
+
 	const handleHueChange = (value: number[]) => {
 		dispatch(changeHue(value[0]));
 	};
@@ -132,7 +152,12 @@ export function ColorSliders() {
 	};
 
 	return (
-		<div className="flex gap-6 w-full max-w-sm">
+		<div
+			className={cn(
+				"gap-6 w-full max-w-sm py-20 mt-auto",
+				isDrawing ? "lg:flex hidden" : "hidden"
+			)}
+		>
 			<div className="flex items-center  relative h-96">
 				<Slider
 					orientation="vertical"
