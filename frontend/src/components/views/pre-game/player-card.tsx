@@ -24,6 +24,7 @@ import { PlayerInfoForm } from "@/components/views/join-room/player-info-form";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { PlayerProfile } from "@/state/features/room";
 import { containerSpring } from "@/config/spring";
+import { SoundEffect, useSound } from "@/providers/sound-provider";
 
 function CardContent({ player }: { player: Player }) {
 	return (
@@ -45,15 +46,12 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 	({ player }, ref) => {
 		const dispatch = useDispatch();
 		const { roomRole } = player;
-		const isCurrentPlayer = useSelector(
-			(state: RootState) => state.client.id === player.id
-		);
+		const playerId = useSelector((state: RootState) => state.client.id);
+		const isCurrentPlayer = playerId === player.id;
 		const [isEditPlayerOptionsOpen, setIsEditPlayerOptionsOpen] =
 			useState(false);
 
-		const handleEditPlayerOptions = () => {
-			setIsEditPlayerOptionsOpen(true);
-		};
+		const playSound = useSound();
 
 		const handleSubmit = (profile: PlayerProfile) => {
 			setIsEditPlayerOptionsOpen(false);
@@ -96,7 +94,12 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 								</DropdownMenuLabel>
 								<DropdownMenuSeparator />
 								<DropdownMenuGroup>
-									<DropdownMenuItem onSelect={handleEditPlayerOptions}>
+									<DropdownMenuItem
+										onSelect={() => {
+											playSound(SoundEffect.CLICK);
+											setIsEditPlayerOptionsOpen(true);
+										}}
+									>
 										Edit profile
 									</DropdownMenuItem>
 								</DropdownMenuGroup>
@@ -108,7 +111,7 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 				</motion.div>
 
 				<EditPlayerInfoModal
-					key={player.id}
+					key={player.id + "edit-modal"}
 					isOpen={isEditPlayerOptionsOpen}
 					setIsOpen={setIsEditPlayerOptionsOpen}
 					player={player}
@@ -130,19 +133,11 @@ function EditPlayerInfoModal({
 	player: Player;
 	handleSubmit: (profile: PlayerProfile) => void;
 }) {
-	const handleClose = () => {
-		setIsOpen(false);
-	};
-
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
 			<DialogContent
 				className="sm:max-w-sm border-4 border-secondary-foreground bg-background-secondary"
 				aria-describedby="edit-player-description"
-				onInteractOutside={(e) => {
-					e.preventDefault();
-					handleClose();
-				}}
 			>
 				<DialogHeader>
 					<DialogTitle>Edit profile</DialogTitle>
