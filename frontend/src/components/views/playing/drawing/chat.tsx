@@ -151,7 +151,7 @@ export function Chat() {
 }
 
 function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
-	const { avatarSeed, name } = player;
+	const { avatarSeed, name } = player.profile;
 	const avatarSvg = generateAvatar(avatarSeed);
 	const playerId = useSelector((state: RootState) => state.client.id);
 	const isOwnMessage = playerId === guess.playerId;
