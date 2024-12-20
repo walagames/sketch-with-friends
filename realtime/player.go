@@ -74,7 +74,7 @@ func (p *player) Send(actions ...*Action) {
 // We use this to prevent spamming and server abuse by applying
 // different limits to drawing and guessing.
 //
-// Drawing players send many more messages to add strokes to drawings,
+// Drawing players send many more messages to add elements (strokes, fills) to drawings,
 // so we need to account for that.
 func (p *player) UpdateLimiter() {
 	if p.GameRole == GameRoleDrawing {

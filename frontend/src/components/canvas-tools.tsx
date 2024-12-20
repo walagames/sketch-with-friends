@@ -1,4 +1,4 @@
-import { Brush, Undo2, Trash } from "lucide-react";
+import { Brush, PaintBucket, Undo2, Trash } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { Slider } from "./ui/slider";
@@ -10,7 +10,7 @@ import {
 	changeLightness,
 } from "@/state/features/client";
 
-import { undoStroke, clearStrokes } from "@/state/features/canvas";
+import { undoElement, clearElements } from "@/state/features/canvas";
 import { RaisedButton } from "./ui/raised-button";
 
 export function CanvasTools() {
@@ -28,6 +28,14 @@ export function CanvasTools() {
 				>
 					<Brush className="lg:size-6 size-5" />
 				</RaisedButton>
+				<RaisedButton
+					size="icon"
+					shift={false}
+					variant={tool === CanvasTool.Bucket ? "action" : "default"}
+					onClick={() => dispatch(changeTool(CanvasTool.Bucket))}
+				>
+					<PaintBucket />
+				</RaisedButton>
 				{/* <RaisedButton
 					size="icon"
 					shift={false}
@@ -41,14 +49,14 @@ export function CanvasTools() {
 				<RaisedButton
 					shift={false}
 					size="icon"
-					onClick={() => dispatch(undoStroke())}
+					onClick={() => dispatch(undoElement())}
 				>
 					<Undo2 className="lg:size-6 size-5" />
 				</RaisedButton>
 				<RaisedButton
 					shift={false}
 					size="icon"
-					onClick={() => dispatch(clearStrokes())}
+					onClick={() => dispatch(clearElements())}
 				>
 					<Trash className="lg:size-6 size-5" />
 				</RaisedButton>
