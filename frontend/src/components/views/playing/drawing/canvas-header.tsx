@@ -10,7 +10,7 @@ export function CanvasHeader() {
 	const isLargeScreen = useMediaQuery("(min-width: 1024px)"); // matches lg: breakpoint
 
 	const delay = useMemo(() => {
-		return isLargeScreen ? 0 : 0.35;
+		return isLargeScreen ? 0.1 : 0.35;
 	}, [isLargeScreen]);
 
 	return (
@@ -66,8 +66,8 @@ function WordWithLetterBlanks({ word }: { word: string }) {
 				hidden: {},
 				visible: {
 					transition: {
-						delayChildren: 0.25,
-						staggerChildren: 0.025,
+						delayChildren: 0.15,
+						staggerChildren: 0.05,
 					},
 				},
 			}}
