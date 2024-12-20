@@ -29,9 +29,11 @@ function VirtualInput({
 	fakeInputRef: React.RefObject<HTMLDivElement>;
 	isOpen: boolean;
 }) {
+	const inputRef = useRef<HTMLDivElement>(null);
+
 	useEffect(() => {
-		if (fakeInputRef.current) {
-			fakeInputRef.current.scrollLeft = fakeInputRef.current.scrollWidth;
+		if (inputRef.current) {
+			inputRef.current.scrollLeft = inputRef.current.scrollWidth;
 		}
 	}, [value]);
 
@@ -42,42 +44,42 @@ function VirtualInput({
 				role="textbox"
 				tabIndex={0}
 				onClick={toggleKeyboard}
-				className={cn(
-					"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring overflow-hidden h-11 flex-1",
-					"shadow-accent-md bg-background px-3 py-2 rounded-lg",
-					"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-					"relative whitespace-pre",
-					"overflow-x-auto",
-					""
-				)}
-				style={{
-					scrollbarWidth: "none",
-					msOverflowStyle: "none",
-				}}
-				aria-label="Virtual keyboard input"
+				className="relative flex-1 min-w-0 h-11"
 			>
 				<div
-					className={cn("translate-y-1", {
-						"after:content-[''] after:absolute after:h-5 after:w-[2px] after:bg-foreground after:animate-caret after:ml-[1px]":
-							showKeyboard && !value,
-						"after:content-[''] after:absolute after:h-5 after:w-[2px] after:bg-foreground after:animate-caret after:ml-[1px] after:translate-x-[calc(100%-2px)]":
-							showKeyboard && value,
-					})}
-				>
-					{isOpen ? (
-						<span className="text-foreground-muted font-semibold">
-							{value.replace(/ /g, "\u00A0")}
-						</span>
-					) : (
-						<motion.span
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ ...containerSpring, delay: 0.1 }}
-							className="text-foreground-muted font-semibold"
-						>
-							Tap to start typing...
-						</motion.span>
+					className={cn(
+						"absolute inset-0",
+						"shadow-accent-md bg-background px-3 py-2 rounded-lg",
+						"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+						"flex items-center overflow-hidden"
 					)}
+				>
+					<div
+						ref={inputRef}
+						className="flex-1 min-w-0 overflow-x-auto"
+						style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+					>
+						{isOpen ? (
+							<div className="flex items-center whitespace-nowrap text-lg">
+								<span className="text-foreground-muted font-semibold">
+									{value.replace(/ /g, "\u00A0")}
+								</span>
+								<span
+									key={value}
+									className="h-6 w-0.5 bg-foreground block animate-caret-blink delay-300 -translate-y-[2px] flex-shrink-0 ml-px"
+								/>
+							</div>
+						) : (
+							<motion.span
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								transition={{ ...containerSpring, delay: 0.1 }}
+								className="text-foreground-muted font-semibold"
+							>
+								Tap to start typing...
+							</motion.span>
+						)}
+					</div>
 				</div>
 			</div>
 		</AnimatePresence>
@@ -204,11 +206,11 @@ export const VirtualKeyboard = forwardRef<
 		<div
 			ref={ref}
 			className={cn(
-				"flex-1 backdrop-blur-sm rounded-lg flex flex-col",
+				"flex-1 backdrop-blur-sm rounded-lg flex flex-col max-w-full",
 				className
 			)}
 		>
-			<div className="flex mb-2 w-[calc(100%-0.75rem)] mx-auto  gap-1">
+			<div className="flex mb-2 w-[calc(100%-0.75rem)] mx-auto gap-1 min-w-0">
 				<VirtualInput
 					value={input}
 					showKeyboard={showKeyboard}
@@ -216,7 +218,7 @@ export const VirtualKeyboard = forwardRef<
 					fakeInputRef={fakeInputRef}
 					isOpen={showKeyboard}
 				/>
-				<div className="translate-y-1">
+				<div className="translate-y-1 flex-shrink-0">
 					<RaisedButton
 						offset="md"
 						variant="action"
