@@ -8,7 +8,8 @@ import {
 	SendIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { containerSpringFast } from "@/config/spring";
+import { containerSpring, containerSpringFast } from "@/config/spring";
+import { RaisedButton } from "@/components/ui/raised-button";
 const keys = [
 	["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
 	["a", "s", "d", "f", "g", "h", "j", "k", "l"],
@@ -35,41 +36,51 @@ function VirtualInput({
 	}, [value]);
 
 	return (
-		<div
-			ref={fakeInputRef}
-			role="textbox"
-			tabIndex={0}
-			onClick={toggleKeyboard}
-			className={cn(
-				"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring w-[calc(100vw-0.25rem)] overflow-hidden h-11 mb-1",
-				"border-2 border-foreground bg-background px-3 py-2 rounded-lg",
-				"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-				"relative whitespace-pre",
-				"overflow-x-auto",
-				"",
-				{
-					"after:content-[''] after:absolute after:h-5 after:w-[2px] after:bg-foreground after:animate-caret after:ml-[1px]":
-						showKeyboard && !value,
-					"after:content-[''] after:absolute after:h-5 after:w-[2px] after:bg-foreground after:animate-caret after:ml-[1px] after:translate-x-[calc(100%-2px)]":
-						showKeyboard && value,
-				}
-			)}
-			style={{
-				scrollbarWidth: "none",
-				msOverflowStyle: "none",
-			}}
-			aria-label="Virtual keyboard input"
-		>
-			{value ? (
-				<span className="text-foreground-muted font-semibold">
-					{value.replace(/ /g, "\u00A0")}
-				</span>
-			) : (
-				<span className="text-foreground-muted font-semibold">
-					{isOpen ? "" : "Tap to start typing..."}
-				</span>
-			)}
-		</div>
+		<AnimatePresence>
+			<div
+				ref={fakeInputRef}
+				role="textbox"
+				tabIndex={0}
+				onClick={toggleKeyboard}
+				className={cn(
+					"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring overflow-hidden h-11 flex-1",
+					"shadow-accent-md bg-background px-3 py-2 rounded-lg",
+					"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+					"relative whitespace-pre",
+					"overflow-x-auto",
+					""
+				)}
+				style={{
+					scrollbarWidth: "none",
+					msOverflowStyle: "none",
+				}}
+				aria-label="Virtual keyboard input"
+			>
+				<div
+					className={cn("translate-y-1", {
+						"after:content-[''] after:absolute after:h-5 after:w-[2px] after:bg-foreground after:animate-caret after:ml-[1px]":
+							showKeyboard && !value,
+						"after:content-[''] after:absolute after:h-5 after:w-[2px] after:bg-foreground after:animate-caret after:ml-[1px] after:translate-x-[calc(100%-2px)]":
+							showKeyboard && value,
+					})}
+				>
+					{isOpen ? (
+						<span className="text-foreground-muted font-semibold">
+							{value.replace(/ /g, "\u00A0")}
+						</span>
+					) : (
+						<motion.span
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ ...containerSpring, delay: 0.1 }}
+							className="text-foreground-muted font-semibold"
+						>
+							Tap to start typing...
+						</motion.span>
+					)}
+				</div>
+			</div>
+		</AnimatePresence>
 	);
 }
 
@@ -197,13 +208,27 @@ export const VirtualKeyboard = forwardRef<
 				className
 			)}
 		>
-			<VirtualInput
-				value={input}
-				showKeyboard={showKeyboard}
-				toggleKeyboard={toggleKeyboard}
-				fakeInputRef={fakeInputRef}
-				isOpen={showKeyboard}
-			/>
+			<div className="flex mb-2 w-[calc(100%-0.75rem)] mx-auto  gap-1">
+				<VirtualInput
+					value={input}
+					showKeyboard={showKeyboard}
+					toggleKeyboard={toggleKeyboard}
+					fakeInputRef={fakeInputRef}
+					isOpen={showKeyboard}
+				/>
+				<div className="translate-y-1">
+					<RaisedButton
+						offset="md"
+						variant="action"
+						size="iconMd"
+						onClick={handleSubmit}
+						className=""
+						aria-label="Submit"
+					>
+						<SendIcon className="size-5" />
+					</RaisedButton>
+				</div>
+			</div>
 			<AnimatePresence>
 				{showKeyboard && (
 					<motion.div
@@ -263,12 +288,6 @@ export const VirtualKeyboard = forwardRef<
 						</div>
 						<div className="flex gap-0.5 px-0.5">
 							<KeyboardButton
-								onPress={() => handleKeyPress(".")}
-								className="w-10"
-							>
-								.
-							</KeyboardButton>
-							<KeyboardButton
 								onPress={() => handleKeyPress("-")}
 								className="w-10"
 							>
@@ -278,11 +297,10 @@ export const VirtualKeyboard = forwardRef<
 								Space
 							</KeyboardButton>
 							<KeyboardButton
-								onPress={handleSubmit}
-								className="w-14"
-								ariaLabel="Submit"
+								onPress={() => handleKeyPress(".")}
+								className="w-10"
 							>
-								<SendIcon className="lg:size-6 size-5" />
+								.
 							</KeyboardButton>
 						</div>
 					</motion.div>
