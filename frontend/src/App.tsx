@@ -70,12 +70,12 @@ const roomViews = {
 		[GamePhase.Drawing]: {
 			[GameRole.Drawing]: {
 				Component: DrawingView,
-				key: "playing-drawing",
+				key: "playing-drawing-drawer",
 				transition: Direction.LEFT,
 			},
 			[GameRole.Guessing]: {
 				Component: DrawingView,
-				key: "playing-drawing",
+				key: "playing-drawing-guesser",
 				transition: Direction.LEFT,
 			},
 		},
@@ -124,7 +124,7 @@ function roomView({
 		}
 
 		const view = phaseView[gameRole];
-		return isFirstPhase ? { ...view, transition: Direction.DOWN } : view;
+		return isFirstPhase ? { ...view, transition: Direction.DOWN_FADE } : view;
 	}
 
 	return roomViews[roomStage][roomRole];

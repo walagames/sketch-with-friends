@@ -131,9 +131,6 @@ export function EnterCodeView() {
 
 					{doodleSlots.map((slot, index) => (
 						<Doodle
-							// style={{
-							// 	willChange: "scale, opacity",
-							// }}
 							key={slot.id}
 							delay={slot.delay}
 							initial={{
@@ -142,18 +139,12 @@ export function EnterCodeView() {
 								opacity: 1,
 								...slot.animate,
 							}}
-							// animate={{
-							// 	scale: 1,
-							// 	opacity: 1,
-							// 	// ...slot.animate,
-							// }}
 							src={doodles[index].src}
 						/>
 					))}
 				</div>
 
 				<AirplaneDoodle
-					// delay={.3}
 					layoutId="airplane-enter-code"
 					startAt={{ left: "50%", top: "45%", rotate: 20, opacity: 0 }}
 					animateTo={{ left: "66%", top: "45%", rotate: 20, opacity: 1 }}

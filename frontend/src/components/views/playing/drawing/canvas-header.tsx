@@ -3,12 +3,21 @@ import { RootState } from "@/state/store";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { containerSpring } from "@/config/spring";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { useMemo } from "react";
+
 export function CanvasHeader() {
+	const isLargeScreen = useMediaQuery("(min-width: 1024px)"); // matches lg: breakpoint
+
+	const delay = useMemo(() => {
+		return isLargeScreen ? 0 : 0.35;
+	}, [isLargeScreen]);
+
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: -10 }}
 			animate={{ opacity: 1, y: 4 }}
-			transition={{ ...containerSpring, delay: 0.2 }}
+			transition={{ ...containerSpring, delay }}
 			className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-7rem)] lg:w-full h-16 justify-center"
 		>
 			<RoundInfo />

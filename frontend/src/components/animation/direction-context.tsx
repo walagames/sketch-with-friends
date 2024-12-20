@@ -3,7 +3,9 @@ import { AnimatePresence, AnimatePresenceProps } from "framer-motion";
 
 export enum Direction {
 	UP,
+	UP_FADE,
 	DOWN,
+	DOWN_FADE,
 	LEFT,
 	RIGHT,
 }

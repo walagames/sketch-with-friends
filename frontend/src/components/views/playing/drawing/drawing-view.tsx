@@ -10,7 +10,7 @@ import { CanvasHeader } from "./canvas-header";
 export function DrawingView() {
 	return (
 		<SkyScene>
-			<div className="mx-auto mb-auto xl:my-auto flex flex-col lg:gap-2 gap-1 relative z-50">
+			<div className="mx-auto mb-auto lg:my-auto flex flex-col gap-2 items-center relative z-50">
 				<div className="flex w-full h-full xl:items-start items-center justify-center lg:gap-4 flex-col xl:flex-row relative">
 					<div className="flex items-center justify-center gap-6 pb-1">
 						<ColorSliders />

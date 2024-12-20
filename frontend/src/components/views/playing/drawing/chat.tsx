@@ -18,13 +18,13 @@ export function Chat() {
 	const guesses = useSelector((state: RootState) => state.game.guesses);
 	const players = useSelector((state: RootState) => state.room.players);
 	const playerId = useSelector((state: RootState) => state.client.id);
+
 	const currentRound = useSelector(
 		(state: RootState) => state.game.currentRound
 	);
 	const totalRounds = useSelector(
 		(state: RootState) => state.room.settings.totalRounds
 	);
-
 	const role = getGameRole(playerId, players);
 	const isGuessing = role === GameRole.Guessing;
 
