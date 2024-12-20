@@ -84,7 +84,7 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 					className="w-[calc(100%-3rem)] ml-auto lg:w-auto"
 				>
 					{isCurrentPlayer ? (
-						<DropdownMenu>
+						<DropdownMenu modal={false}>
 							<DropdownMenuTrigger className="w-full">
 								<CardContent player={player} />
 							</DropdownMenuTrigger>
@@ -134,7 +134,7 @@ function EditPlayerInfoModal({
 	handleSubmit: (profile: PlayerProfile) => void;
 }) {
 	return (
-		<Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
+		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogContent
 				className="sm:max-w-sm border-4 border-secondary-foreground bg-background-secondary"
 				aria-describedby="edit-player-description"
