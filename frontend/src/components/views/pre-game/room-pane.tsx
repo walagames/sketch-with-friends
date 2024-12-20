@@ -62,7 +62,7 @@ export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 				{showSettings ? (
 					<RoomSettingsForm />
 				) : (
-					<ul className="gap-2 grid lg:grid-cols-2 w-full lg:w-auto py-2">
+					<ul className="gap-3 grid lg:grid-cols-2 w-full lg:w-auto py-2">
 						<AnimatePresence initial={false} mode="popLayout">
 							{Object.values(players)
 								.sort((a, b) => b.score - a.score)
