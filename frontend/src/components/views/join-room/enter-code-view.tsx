@@ -105,7 +105,7 @@ export function EnterCodeView() {
 	}, []);
 
 	return (
-		<SkyScene className="h-screen">
+		<SkyScene className="h-[100dvh]">
 			<AnimatePresence>
 				<div className="flex flex-col items-center gap-4 max-w-64 relative z-50">
 					<Logo />
@@ -131,9 +131,6 @@ export function EnterCodeView() {
 
 					{doodleSlots.map((slot, index) => (
 						<Doodle
-							// style={{
-							// 	willChange: "scale, opacity",
-							// }}
 							key={slot.id}
 							delay={slot.delay}
 							initial={{
@@ -142,18 +139,12 @@ export function EnterCodeView() {
 								opacity: 1,
 								...slot.animate,
 							}}
-							// animate={{
-							// 	scale: 1,
-							// 	opacity: 1,
-							// 	// ...slot.animate,
-							// }}
 							src={doodles[index].src}
 						/>
 					))}
 				</div>
 
 				<AirplaneDoodle
-					// delay={.3}
 					layoutId="airplane-enter-code"
 					startAt={{ left: "50%", top: "45%", rotate: 20, opacity: 0 }}
 					animateTo={{ left: "66%", top: "45%", rotate: 20, opacity: 1 }}

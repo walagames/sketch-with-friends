@@ -1,17 +1,11 @@
 import * as React from "react";
 import { getStroke } from "perfect-freehand";
-
-import {
-	ContextMenu,
-	ContextMenuTrigger,
-	ContextMenuContent,
-} from "./ui/context-menu";
-import { HexColorPicker } from "react-colorful";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { GameRole } from "@/state/features/game";
 import { addStroke, addStrokePoint, Stroke } from "@/state/features/canvas";
 import { useWindowSize } from "@/hooks/use-window-size";
+import { getGameRole } from "@/lib/player";
 
 // make canvas less pixelated
 const CANVAS_SCALE = 2;
@@ -53,12 +47,10 @@ function Canvas({
 	padding,
 	width,
 	height,
-	role,
 }: {
 	width: number;
 	height: number;
 	padding?: number;
-	role: GameRole;
 }) {
 	const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
 	const cursorRef = React.useRef<HTMLDivElement | null>(null);
@@ -73,6 +65,10 @@ function Canvas({
 	const lightness = useSelector(
 		(state: RootState) => state.client.canvas.lightness
 	);
+
+	const players = useSelector((state: RootState) => state.room.players);
+	const playerId = useSelector((state: RootState) => state.client.id);
+	const role = getGameRole(playerId, players);
 
 	const currentPhaseDeadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
@@ -292,54 +288,45 @@ function Canvas({
 	);
 
 	return (
-		<ContextMenu>
-			<ContextMenuTrigger
-				style={{
-					width: width * scaleFactor - (padding ?? 0),
-					height: height * scaleFactor - (padding ?? 0),
+		<div
+			style={{
+				width: width * scaleFactor - (padding ?? 0),
+				height: height * scaleFactor - (padding ?? 0),
+			}}
+			className="relative mb-2"
+		>
+			<canvas
+				className={`border-[3px] border-border rounded-lg bg-background w-full h-full relative z-10 ${
+					role === GameRole.Drawing ? "cursor-none" : ""
+				}`}
+				width={width * CANVAS_SCALE - (padding ?? 0)}
+				height={height * CANVAS_SCALE - (padding ?? 0)}
+				onMouseDown={(e) => {
+					if (e.button === 0 && role === GameRole.Drawing) {
+						handleNewStroke(e);
+					}
 				}}
-				className="relative mb-2"
-			>
-				<canvas
-					className={`border-[3px] border-border rounded-lg bg-background w-full h-full relative z-10 ${
-						role === GameRole.Drawing ? "cursor-none" : ""
-					}`}
-					width={width * CANVAS_SCALE - (padding ?? 0)}
-					height={height * CANVAS_SCALE - (padding ?? 0)}
-					onMouseDown={(e) => {
-						if (e.button === 0 && role === GameRole.Drawing) {
-							handleNewStroke(e);
-						}
+				onMouseMove={(e) => {
+					if (e.buttons === 1 && role === GameRole.Drawing) {
+						handleStrokePoint(e);
+					}
+				}}
+				onTouchStart={handleTouchStart}
+				onTouchMove={handleTouchMove}
+				ref={canvasRef}
+			/>
+			<div className=" w-[98%] h-full bg-border absolute left-1/2 rounded-xl -translate-x-1/2 -bottom-1.5" />
+			{role === GameRole.Drawing && (
+				<div
+					ref={cursorRef}
+					className="absolute rounded-full pointer-events-none z-50"
+					style={{
+						display: "none",
+						transform: "translate(-50%, -50%)",
 					}}
-					onMouseMove={(e) => {
-						if (e.buttons === 1 && role === GameRole.Drawing) {
-							handleStrokePoint(e);
-						}
-					}}
-					onTouchStart={handleTouchStart}
-					onTouchMove={handleTouchMove}
-					ref={canvasRef}
 				/>
-				<div className=" w-[98%] h-full bg-border absolute left-1/2 rounded-xl -translate-x-1/2 -bottom-1.5" />
-				{role === GameRole.Drawing && (
-					<div
-						ref={cursorRef}
-						className="absolute rounded-full pointer-events-none z-50"
-						style={{
-							display: "none",
-							transform: "translate(-50%, -50%)",
-						}}
-					/>
-				)}
-			</ContextMenuTrigger>
-			<ContextMenuContent className="overflow-visible p-0 bg-transparent rounded-[2px] border-[6px] border-white shadow-lg">
-				<HexColorPicker
-					className="custom-pointers"
-					color={strokeColor}
-					// onChange={(color) => dispatch(change)}
-				/>
-			</ContextMenuContent>
-		</ContextMenu>
+			)}
+		</div>
 	);
 }
 

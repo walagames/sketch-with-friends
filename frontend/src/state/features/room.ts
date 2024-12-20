@@ -1,6 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { GameRole } from "./game";
-import { toast } from "sonner";
 
 export enum RoomStage {
 	PreGame = "preGame",
@@ -112,11 +111,11 @@ export const roomSlice = createSlice({
 			state.players = action.payload;
 		},
 		playerJoined: (state, action: PayloadAction<Player>) => {
-			toast.info(`${action.payload.profile.name} has joined the room`);
+			// toast.info(`${action.payload.name} has joined the room`);
 			state.players[action.payload.id] = action.payload;
 		},
 		playerLeft: (state, action: PayloadAction<string>) => {
-			toast.info(`${state.players[action.payload].profile.name} has left the room`);
+			// toast.info(`${state.players[action.payload].profile.name} has left the room`);
 			delete state.players[action.payload];
 		},
 		changeRoomSettings: (state, action: PayloadAction<RoomSettings>) => {

@@ -1,7 +1,7 @@
 import { generateAvatar } from "@/lib/avatar";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
-import { getPickingPlayer } from "@/lib/player";
+import { getDrawingPlayer } from "@/lib/player";
 import { SkyScene } from "@/components/scenes/sky-scene";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
@@ -9,7 +9,7 @@ import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 
 export function PickingGuesserView() {
 	const players = useSelector((state: RootState) => state.room.players);
-	const pickingPlayer = getPickingPlayer(players);
+	const drawingPlayer = getDrawingPlayer(players);
 	const isFirstPhase = useSelector(
 		(state: RootState) => state.game.isFirstPhase
 	);
