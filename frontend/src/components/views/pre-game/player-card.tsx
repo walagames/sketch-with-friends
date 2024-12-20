@@ -24,6 +24,7 @@ import { PlayerInfoForm } from "@/components/views/join-room/player-info-form";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { PlayerProfile } from "@/state/features/room";
 import { containerSpring } from "@/config/spring";
+import { SoundEffect, useSound } from "@/providers/sound-provider";
 
 function CardContent({ player }: { player: Player }) {
 	return (
@@ -45,15 +46,12 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 	({ player }, ref) => {
 		const dispatch = useDispatch();
 		const { roomRole } = player;
-		const isCurrentPlayer = useSelector(
-			(state: RootState) => state.client.id === player.id
-		);
+		const playerId = useSelector((state: RootState) => state.client.id);
+		const isCurrentPlayer = playerId === player.id;
 		const [isEditPlayerOptionsOpen, setIsEditPlayerOptionsOpen] =
 			useState(false);
 
-		const handleEditPlayerOptions = () => {
-			setIsEditPlayerOptionsOpen(true);
-		};
+		const playSound = useSound();
 
 		const handleSubmit = (profile: PlayerProfile) => {
 			setIsEditPlayerOptionsOpen(false);
@@ -86,7 +84,7 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 					className="w-[calc(100%-3rem)] ml-auto lg:w-auto"
 				>
 					{isCurrentPlayer ? (
-						<DropdownMenu>
+						<DropdownMenu modal={false}>
 							<DropdownMenuTrigger className="w-full">
 								<CardContent player={player} />
 							</DropdownMenuTrigger>
@@ -96,7 +94,12 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 								</DropdownMenuLabel>
 								<DropdownMenuSeparator />
 								<DropdownMenuGroup>
-									<DropdownMenuItem onSelect={handleEditPlayerOptions}>
+									<DropdownMenuItem
+										onSelect={() => {
+											playSound(SoundEffect.CLICK);
+											setIsEditPlayerOptionsOpen(true);
+										}}
+									>
 										Edit profile
 									</DropdownMenuItem>
 								</DropdownMenuGroup>
@@ -108,6 +111,7 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 				</motion.div>
 
 				<EditPlayerInfoModal
+					key={player.id + "edit-modal"}
 					isOpen={isEditPlayerOptionsOpen}
 					setIsOpen={setIsEditPlayerOptionsOpen}
 					player={player}
