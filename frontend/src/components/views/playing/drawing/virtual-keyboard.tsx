@@ -102,7 +102,7 @@ function KeyboardButton({
 		<button
 			aria-label={ariaLabel}
 			aria-pressed={ariaPressed}
-			className={cn("h-11 px-[1px] group", className)}
+			className={cn("h-11 px-[1px] text-2xl group", className)}
 			onPointerDown={(e) => {
 				if (e.pointerType === "touch") {
 					e.preventDefault();
@@ -113,7 +113,7 @@ function KeyboardButton({
 		>
 			<div
 				className={cn(
-					"font-semibold select-none bg-white border-2 h-full border-foreground/10 group-active:border-foreground rounded-lg flex items-center justify-center text-2xl group-active:bg-zinc-300 group-active:scale-[102%] transition-all duration-100"
+					"font-semibold select-none bg-white border-2 h-full border-foreground/10 group-active:border-foreground rounded-lg flex items-center justify-center group-active:bg-zinc-300 group-active:scale-[102%] transition-all duration-100"
 				)}
 			>
 				{children}
@@ -297,7 +297,7 @@ export const VirtualKeyboard = forwardRef<
 							>
 								-
 							</KeyboardButton>
-							<KeyboardButton onPress={handleSpace} className="flex-1">
+							<KeyboardButton onPress={handleSpace} className="flex-1 text-lg">
 								Space
 							</KeyboardButton>
 							<KeyboardButton
