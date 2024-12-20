@@ -111,21 +111,22 @@ export const roomSlice = createSlice({
 			state.players = action.payload;
 		},
 		playerJoined: (state, action: PayloadAction<Player>) => {
-			// toast.info(`${action.payload.name} has joined the room`);
 			state.players[action.payload.id] = action.payload;
 		},
 		playerLeft: (state, action: PayloadAction<string>) => {
-			// toast.info(`${state.players[action.payload].profile.name} has left the room`);
 			delete state.players[action.payload];
 		},
 		changeRoomSettings: (state, action: PayloadAction<RoomSettings>) => {
 			state.settings = action.payload;
 		},
-		changePlayerProfile: (state, action: PayloadAction<PlayerProfile & { id: string }>) => {
+		changePlayerProfile: (
+			state,
+			action: PayloadAction<PlayerProfile & { id: string }>
+		) => {
 			state.players[action.payload.id].profile = {
 				name: action.payload.name,
 				avatarSeed: action.payload.avatarSeed,
-				avatarColor: action.payload.avatarColor
+				avatarColor: action.payload.avatarColor,
 			};
 		},
 	},
