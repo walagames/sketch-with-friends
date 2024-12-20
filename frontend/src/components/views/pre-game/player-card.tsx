@@ -108,6 +108,7 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 				</motion.div>
 
 				<EditPlayerInfoModal
+					key={player.id}
 					isOpen={isEditPlayerOptionsOpen}
 					setIsOpen={setIsEditPlayerOptionsOpen}
 					player={player}
@@ -129,11 +130,19 @@ function EditPlayerInfoModal({
 	player: Player;
 	handleSubmit: (profile: PlayerProfile) => void;
 }) {
+	const handleClose = () => {
+		setIsOpen(false);
+	};
+
 	return (
-		<Dialog open={isOpen} onOpenChange={setIsOpen}>
+		<Dialog open={isOpen} onOpenChange={setIsOpen} modal={true}>
 			<DialogContent
 				className="sm:max-w-sm border-4 border-secondary-foreground bg-background-secondary"
 				aria-describedby="edit-player-description"
+				onInteractOutside={(e) => {
+					e.preventDefault();
+					handleClose();
+				}}
 			>
 				<DialogHeader>
 					<DialogTitle>Edit profile</DialogTitle>
