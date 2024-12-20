@@ -18,7 +18,6 @@ const keys = [
 
 function VirtualInput({
 	value,
-	showKeyboard,
 	toggleKeyboard,
 	fakeInputRef,
 	isOpen,
@@ -101,10 +100,9 @@ function KeyboardButton({
 }) {
 	return (
 		<button
-			className={cn(
-				"font-semibold select-none bg-white border-2 border-foreground/10 active:border-foreground rounded-lg h-11 flex items-center justify-center text-2xl active:bg-zinc-300 active:scale-[102%] transition-all duration-100",
-				className
-			)}
+			aria-label={ariaLabel}
+			aria-pressed={ariaPressed}
+			className={cn("h-11 px-[1px] group", className)}
 			onPointerDown={(e) => {
 				if (e.pointerType === "touch") {
 					e.preventDefault();
@@ -112,10 +110,14 @@ function KeyboardButton({
 				}
 				onPress(e);
 			}}
-			aria-label={ariaLabel}
-			aria-pressed={ariaPressed}
 		>
-			{children}
+			<div
+				className={cn(
+					"font-semibold select-none bg-white border-2 h-full border-foreground/10 group-active:border-foreground rounded-lg flex items-center justify-center text-2xl group-active:bg-zinc-300 group-active:scale-[102%] transition-all duration-100"
+				)}
+			>
+				{children}
+			</div>
 		</button>
 	);
 }
@@ -249,7 +251,7 @@ export const VirtualKeyboard = forwardRef<
 										gridAutoFlow: "column",
 										gridAutoColumns: "1fr",
 									}}
-									className="gap-0.5 px-0.5"
+									className="px-0.5"
 									key={rowIndex}
 								>
 									{rowIndex === 2 && (
@@ -288,7 +290,7 @@ export const VirtualKeyboard = forwardRef<
 								</div>
 							))}
 						</div>
-						<div className="flex gap-0.5 px-0.5">
+						<div className="flex px-0.5">
 							<KeyboardButton
 								onPress={() => handleKeyPress("-")}
 								className="w-10"
