@@ -76,6 +76,8 @@ export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 			{isHost && (
 				<div>
 					<RaisedButton
+						id="start-game-button"
+						data-umami-event="Start game"
 						size="xl"
 						variant="action"
 						onClick={() => dispatch({ type: "game/startGame" })}
