@@ -370,6 +370,21 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 				return fmt.Errorf("invalid player profile payload: %w", err)
 			}
 
+			// Validate the profile inputs
+			if profile.Name == "" {
+				return fmt.Errorf("name cannot be empty")
+			}
+			if profile.AvatarSeed == "" {
+				return fmt.Errorf("avatar seed cannot be empty")
+			}
+			if profile.AvatarColor == "" {
+				return fmt.Errorf("avatar color cannot be empty")
+			}
+			if len(profile.Name) > MAX_NAME_LENGTH {
+				return fmt.Errorf("name cannot be longer than %d characters", MAX_NAME_LENGTH)
+			}
+
+			// Update the player's profile
 			a.Player.Profile.Name = profile.Name
 			a.Player.Profile.AvatarSeed = profile.AvatarSeed
 			a.Player.Profile.AvatarColor = profile.AvatarColor
