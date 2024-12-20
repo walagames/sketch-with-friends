@@ -169,16 +169,6 @@ func TestSanitizeGuess(t *testing.T) {
 			expected: "hello",
 		},
 		{
-			name:     "uppercase converted to lowercase",
-			input:    "WORLD",
-			expected: "world",
-		},
-		{
-			name:     "mixed case converted to lowercase",
-			input:    "HeLLo",
-			expected: "hello",
-		},
-		{
 			name:     "leading spaces removed",
 			input:    "  test",
 			expected: "test",

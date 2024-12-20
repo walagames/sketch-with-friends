@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -258,7 +259,7 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 	playerHasAlreadyGuessedCorrect := g.playerHasAlreadyGuessedCorrect(playerID)
 
 	// Check if the guess is correct if the player is not drawing and hasn't guessed correctly yet
-	if guessValue == g.currentWord.Value && !playerHasAlreadyGuessedCorrect && !playerIsDrawing {
+	if strings.EqualFold(guessValue, g.currentWord.Value) && !playerHasAlreadyGuessedCorrect && !playerIsDrawing {
 		// Award points to the guesser for getting it right
 		pointsEarned := g.calculatePoints(400)
 		g.room.Players[playerID].Score += pointsEarned
@@ -286,7 +287,7 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 		}
 
 		if !playerIsDrawing && !playerHasAlreadyGuessedCorrect {
-			result.IsClose = g.isGuessClose(guessValue)
+			result.IsClose = g.isGuessClose(strings.ToLower(guessValue))
 		}
 	}
 
