@@ -1,4 +1,4 @@
-import { PlayerCards } from "./player-cards";
+import { PlayerCard } from "./player-card";
 import { useDispatch } from "react-redux";
 import { copyInviteLink } from "@/lib/realtime";
 import { RaisedButton } from "@/components/ui/raised-button";
@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { RoomSettingsForm } from "./room-settings-form";
 import { ModalMenu } from "@/components/ui/modal-menu";
+import { AnimatePresence } from "framer-motion";
 export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 	const players = useSelector((state: RootState) => state.room.players);
 	const roomId = useSelector((state: RootState) => state.room.id);
@@ -57,11 +58,19 @@ export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 					</div>
 				</div>
 			</div>
-			<div className="w-full lg:aspect-[4/3] flex-1 bg-[#aef1fe]/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex items-start justify-center lg:p-6 px-4 pt-2">
+			<div className="w-full lg:aspect-[4/3] flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex items-start justify-center lg:p-6 px-4 pt-2">
 				{showSettings ? (
 					<RoomSettingsForm />
 				) : (
-					<PlayerCards players={Object.values(players)} />
+					<ul className="gap-2 grid lg:grid-cols-2 w-full lg:w-auto py-2">
+						<AnimatePresence initial={false} mode="popLayout">
+							{Object.values(players)
+								.sort((a, b) => b.score - a.score)
+								.map((player) => (
+									<PlayerCard key={player.id} player={player} />
+								))}
+						</AnimatePresence>
+					</ul>
 				)}
 			</div>
 			{isHost && (

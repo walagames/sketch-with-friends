@@ -16,6 +16,7 @@ body {
 @layer base {
 	:root {
 		--background: 0 0% 100%;
+		--background-secondary: 190 98% 84%;
 		--foreground: 240 10% 3.9%;
 
 		--card: 0 0% 100%;
@@ -45,7 +46,6 @@ body {
 		--ring: 240 10% 3.9%;
 
 		--hills: 146.8 100% 50%;
-		--background-main: #aef1fe;
 
 		--radius: 0.6rem;
 
@@ -119,5 +119,5 @@ body {
 }
 
 body {
-	background-color: #aef1fe;
+	background-color: hsl(var(--background-secondary));
 }

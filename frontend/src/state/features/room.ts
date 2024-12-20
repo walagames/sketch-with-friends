@@ -9,12 +9,16 @@ export enum RoomStage {
 
 export type Player = {
 	id: string;
-	name: string;
+	profile: PlayerProfile;
 	roomRole: RoomRole;
 	gameRole: GameRole;
+	score: number;
+};
+
+export type PlayerProfile = {
+	name: string;
 	avatarSeed: string;
 	avatarColor: string;
-	score: number;
 };
 
 export enum RoomRole {
@@ -107,20 +111,33 @@ export const roomSlice = createSlice({
 			state.players = action.payload;
 		},
 		playerJoined: (state, action: PayloadAction<Player>) => {
-			// toast.info(`${action.payload.name} has joined the room`);
 			state.players[action.payload.id] = action.payload;
 		},
 		playerLeft: (state, action: PayloadAction<string>) => {
-			// toast.info(`${state.players[action.payload].name} has left the room`);
 			delete state.players[action.payload];
 		},
 		changeRoomSettings: (state, action: PayloadAction<RoomSettings>) => {
 			state.settings = action.payload;
 		},
+		changePlayerProfile: (
+			state,
+			action: PayloadAction<PlayerProfile & { id: string }>
+		) => {
+			state.players[action.payload.id].profile = {
+				name: action.payload.name,
+				avatarSeed: action.payload.avatarSeed,
+				avatarColor: action.payload.avatarColor,
+			};
+		},
 	},
 });
 
-export const { changeStage, setPlayers, playerLeft, changeRoomSettings } =
-	roomSlice.actions;
+export const {
+	changeStage,
+	setPlayers,
+	playerLeft,
+	changeRoomSettings,
+	changePlayerProfile,
+} = roomSlice.actions;
 
 export default roomSlice.reducer;

@@ -3,7 +3,7 @@ import { RaisedButton } from "@/components/ui/raised-button";
 import { enterRoomCode } from "@/state/features/client";
 import { clearQueryParams } from "@/lib/params";
 import { SkyScene } from "@/components/scenes/sky-scene";
-import { Logo } from "@/components/logo";
+import { Logo } from "@/components/ui/logo";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { CodeForm } from "./code-form";

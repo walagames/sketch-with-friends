@@ -47,7 +47,7 @@ export function DrawingStatus() {
 
 	return (
 		<span className="flex items-center gap-1 lg:text-2xl">
-			{drawingPlayer?.name} is drawing:{" "}
+			{drawingPlayer?.profile.name} is drawing:{" "}
 			<span className="text-lg lg:text-2xl font-bold">
 				<WordWithLetterBlanks word={selectedWord} />
 			</span>

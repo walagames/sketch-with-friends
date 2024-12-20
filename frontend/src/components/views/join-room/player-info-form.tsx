@@ -2,7 +2,6 @@ import { generateAvatar } from "@/lib/avatar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { RootState } from "@/state/store";
 import {
 	Form,
 	FormControl,
@@ -11,14 +10,12 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { useEffect, useState } from "react";
-import { DicesIcon, StepBackIcon, StepForwardIcon } from "lucide-react";
-import { getRealtimeHref } from "@/lib/realtime";
-import { useDispatch, useSelector } from "react-redux";
+import { DicesIcon } from "lucide-react";
 import { RaisedButton } from "@/components/ui/raised-button";
-import { enterRoomCode, setIsJoining } from "@/state/features/client";
+import { PlayerProfile } from "@/state/features/room";
 import { RaisedInput } from "@/components/ui/raised-input";
 
-const colors = [
+export const colors = [
 	"e02929",
 	"e08529",
 	"e0da29",
@@ -34,7 +31,7 @@ function randomAvatarSeed() {
 		.join("");
 }
 
-const JoinRoomFormSchema = z.object({
+export const JoinRoomFormSchema = z.object({
 	username: z
 		.string()
 		.min(2, {
@@ -45,30 +42,29 @@ const JoinRoomFormSchema = z.object({
 		}),
 });
 
-export function PlayerInfoForm() {
-	const [avatarSeed, setAvatarSeed] = useState(randomAvatarSeed());
+interface PlayerInfoFormProps {
+	children?: React.ReactNode;
+	leftButton?: React.ReactNode;
+	rightButton?: React.ReactNode;
+	bottomButton?: React.ReactNode;
+	handleSubmit: (profile: PlayerProfile) => void;
+	defaultValues?: PlayerProfile;
+}
+
+export function PlayerInfoForm({
+	leftButton,
+	rightButton,
+	bottomButton,
+	handleSubmit,
+	defaultValues,
+}: PlayerInfoFormProps) {
+	const [avatarSeed, setAvatarSeed] = useState(defaultValues?.avatarSeed ?? randomAvatarSeed());
 	const [avatarSvg, setAvatarSvg] = useState("");
-	// const [colorIndex, setColorIndex] = useState(0);
-
-	const enteredRoomCode = useSelector(
-		(state: RootState) => state.client.enteredRoomCode
-	);
-
-	const isJoining = useSelector((state: RootState) => state.client.isJoining);
-
-	// const cycleColor = () => {
-	// 	setColorIndex((prevColorIndex) => {
-	// 		const nextIndex = (prevColorIndex + 1) % colors.length;
-	// 		return nextIndex;
-	// 	});
-	// };
-
-	const dispatch = useDispatch();
 
 	const form = useForm<z.infer<typeof JoinRoomFormSchema>>({
 		resolver: zodResolver(JoinRoomFormSchema),
 		defaultValues: {
-			username: "",
+			username: defaultValues?.name ?? "",
 		},
 	});
 
@@ -76,38 +72,13 @@ export function PlayerInfoForm() {
 		setAvatarSvg(generateAvatar(avatarSeed));
 	}, [avatarSeed]);
 
-	function onSubmit(data: z.infer<typeof JoinRoomFormSchema>) {
+	const onSubmit = (data: z.infer<typeof JoinRoomFormSchema>) => {
 		const { username } = data;
-
-		dispatch(setIsJoining(true));
-
-		if (enteredRoomCode && enteredRoomCode !== "new") {
-			dispatch({
-				type: "socket/connect",
-				payload:
-					getRealtimeHref() +
-					"/join/" +
-					enteredRoomCode +
-					"?username=" +
-					username +
-					"&avatarSeed=" +
-					avatarSeed +
-					"&avatarColor=" +
-					colors[0],
-			});
-		} else {
-			dispatch({
-				type: "socket/connect",
-				payload:
-					getRealtimeHref() +
-					"/host?username=" +
-					username +
-					"&avatarSeed=" +
-					avatarSeed +
-					"&avatarColor=" +
-					colors[0],
-			});
-		}
+		handleSubmit({
+			name: username,
+			avatarSeed: avatarSeed,
+			avatarColor: colors[0],
+		});
 	}
 
 	return (
@@ -141,34 +112,24 @@ export function PlayerInfoForm() {
 											placeholder="Name"
 											{...field}
 										/>
-										<div className="absolute -right-[3.25rem] lg:-right-[3.5rem] lg:top-1.5 top-0.5">
-											<RaisedButton
-												disabled={isJoining}
-												shift={false}
-												variant="action"
-												size="icon"
-											>
-												{isJoining ? (
-													<span className="loader h-5 w-5 mt-1.5" />
-												) : (
-													<StepForwardIcon className="w-6 h-6" />
-												)}
-											</RaisedButton>
-										</div>
-										<div className="absolute -left-[3.25rem] lg:-left-[3.5rem] lg:top-2 top-1.5">
-											<RaisedButton
-												onClick={() => dispatch(enterRoomCode(""))}
-												type="button"
-												shift={false}
-												variant="action"
-												size="icon"
-											>
-												<StepBackIcon className="w-6 h-6" />
-											</RaisedButton>
-										</div>
+										{rightButton && (
+											<div className="absolute -right-[3.25rem] lg:-right-[3.5rem] lg:top-1.5 top-0.5">
+												{rightButton}
+											</div>
+										)}
+										{leftButton && (
+											<div className="absolute -left-[3.25rem] lg:-left-[3.5rem] lg:top-2 top-1.5">
+												{leftButton}
+											</div>
+										)}
 									</div>
 								</FormControl>
 								<FormMessage />
+								{bottomButton && (
+									<div className="flex justify-end pt-2">
+										{bottomButton}
+									</div>
+								)}
 							</FormItem>
 						)}
 					/>

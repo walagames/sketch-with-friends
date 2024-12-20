@@ -90,14 +90,14 @@ export function Chat() {
 				<div className="flex gap-1.5 text-lg lg:text-xl font-bold items-center relative ml-auto z-20">
 					<UsersIcon className="size-5 mb-1" /> {Object.keys(players).length}
 				</div>
-				<div className="bg-gradient-to-b from-[#aef1fe] to-transparent top-[0.625rem] left-2 right-2  rounded-lg h-14 absolute z-10 lg:hidden" />
+				<div className="bg-gradient-to-b from-background-secondary to-transparent top-[0.625rem] left-2 right-2  rounded-lg h-14 absolute z-10 lg:hidden" />
 			</div>
 			<div className="relative flex-1 overflow-hidden">
 				<div className="h-14 w-full absolute lg:hidden z-50 top-0 flex overflow-hidden items-start">
 					<div className="flex gap-1.5 text-xl font-bold items-center relative ml-auto z-20 px-4 py-2">
 						<UsersIcon className="size-5 mb-1" /> {Object.keys(players).length}
 					</div>
-					<div className="bg-gradient-to-b from-[#aef1fe] to-transparent rounded-lg h-14 absolute top-0.5 left-2 right-2" />
+					<div className="bg-gradient-to-b from-background-secondary to-transparent rounded-lg h-14 absolute top-0.5 left-2 right-2" />
 				</div>
 				<AnimatePresence>
 					{showNewMessages && (
@@ -127,7 +127,7 @@ export function Chat() {
 					ref={listRef}
 					onScroll={handleScroll}
 					className={cn(
-						"h-full mx-1 flex gap-3 break-all lg:border-4 border-[3px] bg-[#aef1fe]/50 backdrop-blur-[4px] border-border border-dashed rounded-lg flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide p-4",
+						"h-full mx-1 flex gap-3 break-all lg:border-4 border-[3px] bg-background-secondary/50 backdrop-blur-[4px] border-border border-dashed rounded-lg flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide p-4",
 						"contain-strict"
 					)}
 				>
@@ -151,7 +151,7 @@ export function Chat() {
 }
 
 function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
-	const { avatarSeed, name } = player;
+	const { avatarSeed, name } = player.profile;
 	const avatarSvg = generateAvatar(avatarSeed);
 	const playerId = useSelector((state: RootState) => state.client.id);
 	const isOwnMessage = playerId === guess.playerId;
@@ -166,7 +166,7 @@ function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
 			)}
 		>
 			<img
-				alt={player.name + " profile picture"}
+				alt={player.profile.name + " profile picture"}
 				className={cn(
 					"h-8 aspect-square relative border-2 shrink-0",
 					isOwnMessage ? "rounded-lg" : "rounded-lg"

@@ -1,8 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { generateAvatar } from "@/lib/avatar";
-import { Player, RoomRole } from "@/state/features/room";
-import { forwardRef } from "react";
-const CrownIcon = (props: React.SVGProps<SVGSVGElement>) => (
+export const CrownIcon = (props: React.SVGProps<SVGSVGElement>) => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
 		viewBox="0 0 24 24"
@@ -26,61 +22,3 @@ const CrownIcon = (props: React.SVGProps<SVGSVGElement>) => (
 		/>
 	</svg>
 );
-
-const variants = {
-	initial: { opacity: 0, scale: 0.95 },
-	animate: { opacity: 1, scale: 1 },
-	exit: { opacity: 0, scale: 0.95 },
-};
-
-const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
-	({ player }, ref) => {
-		const { roomRole, avatarSeed } = player;
-		const avatarSvg = generateAvatar(avatarSeed);
-		return (
-			<div className="flex items-center gap-4 ml-auto w-full lg:w-auto px-1" ref={ref}>
-				{roomRole === RoomRole.Host && (
-					<div className="translate-y-2">
-						<CrownIcon className="w-8 h-8 text-yellow-400" />
-					</div>
-				)}
-				<motion.div
-					layout
-					variants={variants}
-					initial="initial"
-					animate="animate"
-					exit="exit"
-					transition={{
-						type: "spring",
-						stiffness: 500,
-						damping: 50,
-						mass: 1,
-					}}
-					className="flex items-center gap-3 bg-background shadow-accent rounded-lg mt-2 lg:w-64 w-[calc(100%-3rem)] ml-auto min-h-0 h-14"
-				>
-					<img
-						className="rounded-l-lg h-full aspect-square relative"
-						src={avatarSvg}
-					/>
-					<p className="text-xl leading-0 font-bold truncate px-4 translate-y-0.5">
-						{player.name}
-					</p>
-				</motion.div>
-			</div>
-		);
-	}
-);
-
-export function PlayerCards({ players }: { players: Player[] }) {
-	return (
-		<ul className="gap-2 grid lg:grid-cols-2 w-full lg:w-auto">
-			<AnimatePresence initial={false} mode="popLayout">
-				{players
-					.sort((a, b) => b.score - a.score)
-					.map((player) => (
-						<PlayerCard key={player.id} player={player} />
-					))}
-			</AnimatePresence>
-		</ul>
-	);
-}

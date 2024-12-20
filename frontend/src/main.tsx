@@ -9,8 +9,8 @@ import { TermsOfService } from "./pages/terms-of-service";
 import { PrivacyPolicy } from "./pages/privacy-policy";
 import { HowToPlay } from "./pages/how-to-play";
 import { PersistGate } from "redux-persist/integration/react";
-import { UIHeader } from "./components/ui-header";
-import { SoundProvider } from './providers/sound-provider';
+import { UIHeader } from "./components/ui/ui-header";
+import { SoundProvider } from "./providers/sound-provider";
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>

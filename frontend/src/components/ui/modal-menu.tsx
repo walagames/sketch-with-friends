@@ -10,7 +10,7 @@ import {
 import { RaisedButton } from "./raised-button";
 import React from "react";
 import { VolumeControls } from "./volume-controls";
-import { Logo } from "../logo";
+import { Logo } from "./logo";
 
 export function ModalMenu() {
 	const [open, setOpen] = React.useState(false);
@@ -24,7 +24,7 @@ export function ModalMenu() {
 					<Menu className="size-5 -translate-y-0.5" />
 				</RaisedButton>
 			</DialogTrigger>
-			<DialogContent className="sm:max-w-md border-4 border-secondary-foreground bg-[#aef1fe]">
+			<DialogContent className="sm:max-w-md border-4 border-secondary-foreground bg-background-secondary">
 				<DialogHeader>
 					<DialogTitle>
 						<Logo className="w-44 py-1 mx-auto" />

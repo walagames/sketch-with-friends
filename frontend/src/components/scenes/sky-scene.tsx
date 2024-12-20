@@ -26,7 +26,7 @@ export function Hills({ className }: { className?: string }) {
 	return (
 		<div className={cn("", className)}>
 			<svg
-				className="absolute lg:-bottom-18 2xl:-bottom-36 xl:-bottom-24 md:-bottom-12 -bottom-2 left-0 w-full bg-[#aef1fe]"
+				className="absolute lg:-bottom-18 2xl:-bottom-36 xl:-bottom-24 md:-bottom-12 -bottom-2 left-0 w-full bg-background-secondary"
 				viewBox="0 0 1163 173"
 				fill="none"
 				xmlns="http://www.w3.org/2000/svg"
