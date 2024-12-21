@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { ModalMenu } from "@/components/ui/modal-menu";
 import { Logo } from "@/components/ui/logo";
+import { Link } from "react-router";
 export function ContentLayout({
 	children,
 	title,
@@ -15,7 +16,9 @@ export function ContentLayout({
 	return (
 		<div className="max-h-[100dvh] overflow-y-auto">
 			<div className="sticky z-50 top-0 py-4 w-full flex justify-between items-center  px-4 bg-background-secondary">
-				<Logo className="w-36" />
+				<Link to="/">
+					<Logo className="w-36" />
+				</Link>
 				<ModalMenu />
 			</div>
 			<BobbingDoodle
