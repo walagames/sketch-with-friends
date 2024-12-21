@@ -223,7 +223,7 @@ function Canvas({
 	// Update the handlers
 	const handleNewStroke = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
-			if (!roundIsActive || e.button !== 0) return;
+			if (!roundIsActive || e.button !== 0 || role !== GameRole.Drawing) return;
 
 			isDrawing.current = true;
 			lastPointRef.current = null; // Reset last point on new stroke
@@ -245,7 +245,13 @@ function Canvas({
 	// Update handleStrokePoint to allow points slightly outside bounds
 	const handleStrokePoint = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
-			if (!isDrawing.current || e.buttons !== 1 || !roundIsActive) return;
+			if (
+				!isDrawing.current ||
+				e.buttons !== 1 ||
+				!roundIsActive ||
+				role !== GameRole.Drawing
+			)
+				return;
 
 			const rect = e.currentTarget.getBoundingClientRect();
 			const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
