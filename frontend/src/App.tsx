@@ -180,6 +180,13 @@ function App() {
 		};
 	}, []);
 
+	// Hack to work around animation bug when leaving a room
+	useEffect(() => {
+		if (!roomId) {
+			setMountId(Date.now());
+		}
+	}, [roomId]);
+
 	return (
 		<main className="flex min-h-[100dvh] flex-col items-center justify-between relative">
 			<div className="h-[100dvh] w-screen flex flex-col items-center justify-center relative overflow-hidden">

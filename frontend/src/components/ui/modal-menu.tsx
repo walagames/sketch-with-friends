@@ -11,11 +11,22 @@ import { RaisedButton } from "./raised-button";
 import React from "react";
 import { VolumeControls } from "./volume-controls";
 import { Logo } from "./logo";
-
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
+import { useDispatch } from "react-redux";
 export function ModalMenu() {
 	const [open, setOpen] = React.useState(false);
 
 	const handleClick = () => setOpen(false);
+
+	const roomId = useSelector((state: RootState) => state.room.id);
+
+	const dispatch = useDispatch();
+
+	const handleLeaveRoom = () => {
+		dispatch({ type: "socket/disconnect" });
+		setOpen(false);
+	};
 
 	return (
 		<Dialog open={open} onOpenChange={setOpen}>
@@ -62,6 +73,16 @@ export function ModalMenu() {
 							Contact
 						</RaisedButton>
 					</a>
+
+					{roomId && (
+						<RaisedButton
+							size="wide"
+							className="text-xl"
+							onClick={handleLeaveRoom}
+						>
+							Leave room
+						</RaisedButton>
+					)}
 				</div>
 			</DialogContent>
 		</Dialog>

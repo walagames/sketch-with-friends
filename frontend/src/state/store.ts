@@ -43,7 +43,10 @@ const socketMiddleware: Middleware = (store) => {
 				socket.onclose = (e) => {
 					const errorMessage =
 						ErrorMessages[e.reason as keyof typeof ErrorMessages];
-					toast.error(errorMessage || "Unknown error occurred");
+						
+					if (e.reason) {
+						toast.error(errorMessage || "Unknown error occurred");
+					}
 
 					// Clear the code from the url if the room does not exist
 					if (e.reason === "ErrRoomNotFound") {
@@ -75,6 +78,7 @@ const socketMiddleware: Middleware = (store) => {
 			case "socket/disconnect":
 				if (socket !== null) {
 					socket.close();
+					clearStateAfterDelay();
 				}
 				socket = null;
 
