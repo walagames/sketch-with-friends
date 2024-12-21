@@ -40,7 +40,7 @@ const initialState: ClientState = {
 	},
 	canvas: {
 		hue: 0,
-		lightness: 50,
+		lightness: 0,
 		color: "#000000",
 		strokeWidth: 25,
 		tool: CanvasTool.Brush,
