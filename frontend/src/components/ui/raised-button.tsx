@@ -11,6 +11,8 @@ const buttonVariants = cva(
 			variant: {
 				default:
 					"bg-background text-foreground hover:bg-primary hover:text-background",
+				basic:
+					"bg-background text-foreground hover:bg-zinc-200 hover:text-foreground",
 				icon: "bg-transparent hover:bg-accent hover:text-accent-foreground",
 				action: "bg-primary text-background text-xl active:bg-primary-muted",
 				card: "bg-background text-foreground",

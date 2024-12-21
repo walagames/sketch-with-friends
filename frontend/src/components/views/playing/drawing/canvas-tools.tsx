@@ -1,13 +1,16 @@
-import { Brush, Undo2, Trash } from "lucide-react";
+import { Brush, Undo2, Trash, SwatchBook } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { Slider } from "../../../ui/slider";
+import { HexColorPicker } from "react-colorful";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
 	changeStrokeWidth,
 	changeTool,
 	CanvasTool,
 	changeHue,
 	changeLightness,
+	changeColor,
 } from "@/state/features/client";
 
 import { undoStroke, clearStrokes } from "@/state/features/canvas";
@@ -24,6 +27,10 @@ export function CanvasTools() {
 	const role = getGameRole(playerId, players);
 
 	const isDrawing = role === GameRole.Drawing;
+
+	const currentColor = useSelector(
+		(state: RootState) => state.client.canvas.color
+	);
 
 	return (
 		<div
@@ -42,14 +49,22 @@ export function CanvasTools() {
 				>
 					<Brush className="lg:size-6 size-5" />
 				</RaisedButton>
-				{/* <RaisedButton
-					size="icon"
-					shift={false}
-					variant={tool === CanvasTool.Eraser ? "action" : "default"}
-					onClick={() => dispatch(changeTool(CanvasTool.Eraser))}
-				>
-					<EraserIcon />
-				</RaisedButton> */}
+				<Dialog>
+					<DialogTrigger asChild>
+						<RaisedButton size="icon" variant="default" shift={false}>
+							<div className="h-11 w-11 rounded-lg flex items-center justify-center">
+								<SwatchBook className="size-6" />
+							</div>
+						</RaisedButton>
+					</DialogTrigger>
+					<DialogContent className="sm:max-w-md">
+						<HexColorPicker
+							className="custom-pointers"
+							color={currentColor}
+							onChange={(color) => dispatch(changeColor(color))}
+						/>
+					</DialogContent>
+				</Dialog>
 			</div>
 			<div className="flex gap-2">
 				<RaisedButton
@@ -72,7 +87,6 @@ export function CanvasTools() {
 }
 
 function StrokeWidthSlider() {
-	const dispatch = useDispatch();
 	const strokeWidth = useSelector(
 		(state: RootState) => state.client.canvas.strokeWidth
 	);
@@ -81,22 +95,38 @@ function StrokeWidthSlider() {
 		dispatch(changeStrokeWidth(value[0]));
 	};
 
+	const dispatch = useDispatch();
+
+	const currentColor = useSelector(
+		(state: RootState) => state.client.canvas.color
+	);
+
 	return (
-		<div className="flex items-center w-full relative max-w-sm">
-			<div className="rounded-full border-[4px] border-border w-7 bg-background aspect-square -mr-1 relative z-10" />
-			<Slider
-				trackStyles={{
-					borderRadius: "0px",
-				}}
-				min={6}
-				max={60}
-				step={1}
-				value={[strokeWidth]}
-				onValueChange={handleStrokeWidthChange}
-				className="w-full"
-			/>
-			<div className="rounded-full border-[6px] border-border lg:w-14 w-12 bg-background aspect-square -ml-1 relative z-10" />
-		</div>
+		<Dialog>
+			<div className="flex items-center w-full relative max-w-sm">
+				<div className="rounded-full border-[4px] border-border w-7 bg-background aspect-square -mr-1 relative z-10" />
+				<Slider
+					trackStyles={{
+						borderRadius: "0px",
+					}}
+					min={6}
+					max={60}
+					step={1}
+					value={[strokeWidth]}
+					onValueChange={handleStrokeWidthChange}
+					className="w-full"
+				/>
+				<div className="rounded-full border-[6px] border-border lg:w-14 w-12 bg-background aspect-square -ml-1 relative z-10" />
+
+				<DialogContent className="sm:max-w-md">
+					<HexColorPicker
+						className="custom-pointers"
+						color={currentColor}
+						onChange={(color) => dispatch(changeColor(color))}
+					/>
+				</DialogContent>
+			</div>
+		</Dialog>
 	);
 }
 
@@ -154,7 +184,7 @@ export function ColorSliders() {
 	return (
 		<div
 			className={cn(
-				"gap-6 w-full max-w-sm py-20 mt-auto",
+				"gap-6 w-full max-w-sm mt-auto py-24",
 				isDrawing ? "lg:flex hidden" : "hidden"
 			)}
 		>
@@ -183,7 +213,7 @@ export function ColorSliders() {
 				<Slider
 					trackStyles={{
 						background:
-							"linear-gradient(to top, #ff0000, #ffff00, #00ff00, #00ffff, #0000ff, #ff00ff, #ff0000)",
+							"linear-gradient(to top, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080, #ff0000)",
 					}}
 					thumbStyles={{
 						backgroundColor: hslToRgb(hue, 100, 50),

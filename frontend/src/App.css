@@ -29,7 +29,7 @@
 	box-shadow: -0.3rem 0.3rem 0px #333333;
 }
 
-.custom-pointers .react-colorful__saturation-pointer {
+/* .custom-pointers .react-colorful__saturation-pointer {
 	width: 20px;
 	height: 20px;
 	border-radius: 2px;
@@ -71,7 +71,7 @@
 .custom-pointers .react-colorful__hue {
 	height: 30px;
 	border-radius: 0 0 1px 1px;
-}
+} */
 
 .loader {
 	border-radius: 50%;

@@ -61,9 +61,8 @@ function Canvas({
 	const dispatch = useDispatch();
 
 	const strokes = useSelector((state: RootState) => state.canvas.strokes);
-	const hue = useSelector((state: RootState) => state.client.canvas.hue);
-	const lightness = useSelector(
-		(state: RootState) => state.client.canvas.lightness
+	const strokeColor = useSelector(
+		(state: RootState) => state.client.canvas.color
 	);
 
 	const players = useSelector((state: RootState) => state.room.players);
@@ -73,22 +72,6 @@ function Canvas({
 	const currentPhaseDeadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
 	);
-
-	const strokeColor = React.useMemo(() => {
-		const hslToHex = (h: number, s: number, l: number): string => {
-			l /= 100;
-			const a = (s * Math.min(l, 1 - l)) / 100;
-			const f = (n: number) => {
-				const k = (n + h / 30) % 12;
-				const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-				return Math.round(255 * color)
-					.toString(16)
-					.padStart(2, "0");
-			};
-			return `#${f(0)}${f(8)}${f(4)}`;
-		};
-		return hslToHex(hue, 100, lightness);
-	}, [hue, lightness]);
 
 	const strokeWidth = useSelector(
 		(state: RootState) => state.client.canvas.strokeWidth
