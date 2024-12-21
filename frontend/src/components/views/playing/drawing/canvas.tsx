@@ -1,5 +1,4 @@
 import * as React from "react";
-// import { getStroke } from "perfect-freehand";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { GameRole } from "@/state/features/game";
@@ -8,41 +7,7 @@ import { useWindowSize } from "@/hooks/use-window-size";
 import { getGameRole } from "@/lib/player";
 import { addRecentlyUsedColor } from "@/state/features/client";
 
-// make canvas less pixelated
 const CANVAS_SCALE = 2;
-
-// // perfect-freehand options
-// const strokeOptions = {
-// 	size: 3,
-// 	smoothing: 0.32,
-// 	thinning: 0.32,
-// 	streamline: 0.99,
-// 	easing: (t: number) => t,
-// 	start: {
-// 		taper: 0,
-// 		cap: true,
-// 	},
-// 	end: {
-// 		taper: 0,
-// 		cap: true,
-// 	},
-// };
-// Constructs svg path from stroke
-// function getSvgPathFromStroke(stroke: number[][]) {
-// 	if (!stroke.length) return "";
-
-// 	const d = stroke.reduce(
-// 		(acc, [x0, y0], i, arr) => {
-// 			const [x1, y1] = arr[(i + 1) % arr.length];
-// 			acc.push(x0, y0, (x0 + x1) / 2, (y0 + y1) / 2);
-// 			return acc;
-// 		},
-// 		["M", ...stroke[0], "Q"]
-// 	);
-
-// 	d.push("Z");
-// 	return d.join(" ");
-// }
 
 function Canvas({
 	padding,
@@ -78,7 +43,6 @@ function Canvas({
 		(state: RootState) => state.client.canvas.strokeWidth
 	);
 
-	// Update fillCanvasWithStroke to clip to canvas bounds
 	const fillCanvasWithStroke = React.useCallback(
 		(ctx: CanvasRenderingContext2D, stroke: Stroke) => {
 			if (stroke.points.length === 0) return;
@@ -180,47 +144,39 @@ function Canvas({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [strokes]);
 
-	// Add scale factor state
 	const [scaleFactor, setScaleFactor] = React.useState(1);
 
-	// Calculate scale factor when window or desired dimensions change
 	React.useEffect(() => {
 		const widthScale = windowWidth / width;
 		const heightScale = windowHeight / height;
-		const newScale = Math.min(widthScale, heightScale, 1); // Never scale up, only down
+		const newScale = Math.min(widthScale, heightScale, 1);
 		setScaleFactor(newScale);
 	}, [windowWidth, windowHeight, width, height]);
 
-	// Update coordinate calculations
+	// Update cordinate calculations
 	const getScaledCoordinates = (
 		clientX: number,
 		clientY: number,
 		rect: DOMRect
 	) => {
-		// Get the actual rendered size of the canvas
 		const canvasElement = canvasRef.current;
 		if (!canvasElement) return [0, 0];
 
-		// Calculate the ratio between the canvas's display size and its drawing buffer size
 		const displayToBufferRatioX =
 			(width * CANVAS_SCALE) / canvasElement.offsetWidth;
 		const displayToBufferRatioY =
 			(height * CANVAS_SCALE) / canvasElement.offsetHeight;
 
-		// Calculate coordinates relative to the canvas element
 		const x = (clientX - rect.left) * displayToBufferRatioX;
 		const y = (clientY - rect.top) * displayToBufferRatioY;
 
 		return [x, y];
 	};
 
-	// Add an isDrawing ref to track stroke state
 	const isDrawing = React.useRef(false);
 
-	// Add a lastPoint ref to track where we left off
 	const lastPointRef = React.useRef<[number, number] | null>(null);
 
-	// Update the handlers
 	const handleNewStroke = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
 			if (!roundIsActive || e.button !== 0 || role !== GameRole.Drawing) return;
@@ -242,7 +198,6 @@ function Canvas({
 		[roundIsActive, dispatch, strokeColor, strokeWidth]
 	);
 
-	// Update handleStrokePoint to allow points slightly outside bounds
 	const handleStrokePoint = React.useCallback(
 		(e: React.MouseEvent<HTMLCanvasElement>) => {
 			if (
@@ -262,7 +217,6 @@ function Canvas({
 		[roundIsActive, dispatch]
 	);
 
-	// Update touch handler similarly
 	const handleTouchMove = React.useCallback(
 		(e: React.TouchEvent<HTMLCanvasElement>) => {
 			if (role === GameRole.Drawing && roundIsActive) {
@@ -302,10 +256,9 @@ function Canvas({
 			if (role === GameRole.Drawing) {
 				const cursor = cursorRef.current;
 				if (cursor) {
-					// Add tiny offset to fine-tune position
 					cursor.style.display = "block";
-					cursor.style.left = `${e.clientX + 2.5}px`; // Tiny offset right
-					cursor.style.top = `${e.clientY + 2.5}px`; // Tiny offset down
+					cursor.style.left = `${e.clientX + 2.5}px`;
+					cursor.style.top = `${e.clientY + 2.5}px`;
 					cursor.style.width = `${(strokeWidth * scaleFactor) / 2}px`;
 					cursor.style.height = `${(strokeWidth * scaleFactor) / 2}px`;
 					cursor.style.backgroundColor = `${strokeColor}33`;
@@ -352,7 +305,6 @@ function Canvas({
 				}}
 				onMouseLeave={(e) => {
 					handleMouseLeave();
-					// Add one final point as we leave
 					if (isDrawing.current) {
 						const rect = e.currentTarget.getBoundingClientRect();
 						const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
@@ -361,7 +313,6 @@ function Canvas({
 					}
 				}}
 				onMouseEnter={(e) => {
-					// If still holding mouse button, start a new stroke
 					if (e.buttons === 1 && role === GameRole.Drawing && roundIsActive) {
 						const rect = e.currentTarget.getBoundingClientRect();
 						const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
