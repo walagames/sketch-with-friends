@@ -183,10 +183,15 @@ func (g *game) handlePlayerLeave(player *player) {
 		// Players may have already started guessing, so we need to clear the guesses and
 		// cancel the hint routine.
 		if g.currentPhase.Name() == Drawing {
-			g.cancelHintRoutine()
-			g.room.timer.Stop()
 			g.currentPhase.Next(g)
 		}
+
+		return
+	}
+
+	// Skip to the next phase if everyone has guessed correctly already
+	if len(g.correctGuessers) >= len(g.room.Players)-2 {
+		g.currentPhase.Next(g)
 	}
 }
 
