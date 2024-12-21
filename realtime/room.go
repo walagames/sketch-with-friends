@@ -122,7 +122,7 @@ func NewRoom(id string) Room {
 		lastInteractionAt: time.Now(),
 		Settings: RoomSettings{
 			PlayerLimit:        6,
-			DrawingTimeAllowed: 60000,
+			DrawingTimeAllowed: 60,
 			TotalRounds:        3,
 			WordDifficulty:     WordDifficultyRandom,
 			GameMode:           GameModeClassic,
