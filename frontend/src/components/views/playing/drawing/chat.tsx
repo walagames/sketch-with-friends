@@ -14,6 +14,7 @@ import { RaisedInput } from "@/components/ui/raised-input";
 import { VirtualKeyboard } from "./virtual-keyboard";
 import { UsersIcon } from "lucide-react";
 import { getGameRole } from "@/lib/player";
+import { useMediaQuery } from "@/hooks/use-media-query";
 export function Chat() {
 	const guesses = useSelector((state: RootState) => state.game.guesses);
 	const players = useSelector((state: RootState) => state.room.players);
@@ -27,6 +28,8 @@ export function Chat() {
 	);
 	const role = getGameRole(playerId, players);
 	const isGuessing = role === GameRole.Guessing;
+
+	const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 
 	const [showNewMessages, setShowNewMessages] = useState(false);
 	const [unreadCount, setUnreadCount] = useState(0);
@@ -43,10 +46,21 @@ export function Chat() {
 				listRef.current.scrollHeight - listRef.current.offsetHeight - 300;
 
 			if (isOwnMessage || isScrolledToBottom) {
-				listRef.current.scrollTo({
-					top: listRef.current.scrollHeight,
-					behavior: "smooth",
-				});
+				// on mobile we need to wait for the keyboard to close before scrolling
+				// otherwise it makes the scroll jump and it looks bad
+				if (isOwnMessage && !isLargeScreen) {
+					setTimeout(() => {
+						listRef.current?.scrollTo({
+							top: listRef.current.scrollHeight,
+							behavior: "smooth",
+						});
+					}, 175);
+				} else {
+					listRef.current?.scrollTo({
+						top: listRef.current.scrollHeight,
+						behavior: "smooth",
+					});
+				}
 				setUnreadCount(0);
 			} else {
 				setShowNewMessages(true);
@@ -77,7 +91,7 @@ export function Chat() {
 	return (
 		<div
 			className={cn(
-				"flex flex-col lg:h-full xl:w-[20rem] w-full xl:max-h-[660px] min-h-[12rem] px-0.5 lg:px-0 relative z-30 gap-2",
+				"flex flex-col lg:h-full xl:w-[20rem] w-full xl:max-h-[660px] min-h-[12rem] px-0.5 lg:px-0 relative z-30 gap-1.5",
 				isGuessing
 					? "h-[var(--max-chat-height)]"
 					: "h-[var(--max-chat-height-drawing)]"
@@ -123,11 +137,11 @@ export function Chat() {
 						</motion.div>
 					)}
 				</AnimatePresence>
-				<ul
+				<motion.ul
 					ref={listRef}
 					onScroll={handleScroll}
 					className={cn(
-						"h-full mx-1 flex gap-3 break-all lg:border-4 border-[3px] bg-background-secondary/50 backdrop-blur-[4px] border-border border-dashed rounded-lg flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide p-4",
+						"h-full mx-1 flex gap-3 break-all lg:border-4 border-[3px] bg-background-secondary/50 backdrop-blur-[4px] border-border border-dashed rounded-lg flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide p-4 pt-8 lg:pt-4",
 						"contain-strict"
 					)}
 				>
@@ -138,7 +152,7 @@ export function Chat() {
 							player={players[guess.playerId]}
 						/>
 					))}
-				</ul>
+				</motion.ul>
 			</div>
 			<div className="mt-2 w-full hidden sm:block h-16">
 				<ChatForm isGuessing={isGuessing} />

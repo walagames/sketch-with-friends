@@ -11,6 +11,8 @@ const buttonVariants = cva(
 			variant: {
 				default:
 					"bg-background text-foreground hover:bg-primary hover:text-background",
+				basic:
+					"bg-background text-foreground hover:bg-zinc-200 hover:text-foreground",
 				icon: "bg-transparent hover:bg-accent hover:text-accent-foreground",
 				action: "bg-primary text-background text-xl active:bg-primary-muted",
 				card: "bg-background text-foreground",
@@ -22,6 +24,7 @@ const buttonVariants = cva(
 				xl: "py-1 px-16",
 				icon: "h-10 lg:h-11 w-10 lg:w-11",
 				iconSm: "h-9 w-9",
+				iconMd: "h-11 w-11",
 				tall: "h-full w-12",
 				wide: "w-full h-12",
 				card: "h-14 px-0 py-0",
@@ -52,7 +55,7 @@ export interface ButtonProps
 
 interface RaisedButtonProps extends ButtonProps {
 	shift?: boolean;
-	offset?: "default" | "small";
+	offset?: "default" | "small" | "md";
 	rounded?: "none" | "sm" | "md" | "lg" | "xl" | "full";
 }
 
@@ -80,6 +83,7 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 		const offsets = {
 			default: { x: 5, y: -5 },
 			small: { x: 3, y: -3 },
+			md: { x: 4, y: -4 },
 		};
 
 		const offsetValues = offsets[offset || "default"];

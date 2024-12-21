@@ -34,14 +34,16 @@ export function UIHeader() {
 					transition={{ ...containerSpring, delay: 0.05 }}
 					exit={{ opacity: 0, y: -10 }}
 					className={cn(
-						"absolute lg:top-5 top-1.5 w-full lg:px-6 px-2 items-center z-50 flex",
+						"absolute lg:top-5 top-2 w-full lg:px-6 px-2.5 items-start z-50 flex",
 						showTimer ? "justify-between" : "justify-end"
 					)}
 				>
-					{showTimer && <Timer endTime={deadline} />}
-					<div className="translate-y-0.5">
-						<ModalMenu />
-					</div>
+					{showTimer && (
+						<div className="-translate-y-1">
+							<Timer endTime={deadline} />
+						</div>
+					)}
+					<ModalMenu />
 				</motion.header>
 			)}
 		</AnimatePresence>

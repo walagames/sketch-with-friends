@@ -10,7 +10,7 @@ export function CanvasHeader() {
 	const isLargeScreen = useMediaQuery("(min-width: 1024px)"); // matches lg: breakpoint
 
 	const delay = useMemo(() => {
-		return isLargeScreen ? 0 : 0.35;
+		return isLargeScreen ? 0.1 : 0.35;
 	}, [isLargeScreen]);
 
 	return (
@@ -45,12 +45,18 @@ export function DrawingStatus() {
 		);
 	}
 
+	const containsLetterBlanks = selectedWord.includes("*");
+
 	return (
 		<span className="flex items-center gap-1 lg:text-2xl">
 			{drawingPlayer?.profile.name} is drawing:{" "}
-			<span className="text-lg lg:text-2xl font-bold">
-				<WordWithLetterBlanks word={selectedWord} />
-			</span>
+			{containsLetterBlanks ? (
+				<span className="text-lg lg:text-2xl font-bold">
+					<WordWithLetterBlanks word={selectedWord} />
+				</span>
+			) : (
+				<span className="text-lg lg:text-2xl font-bold">{selectedWord}</span>
+			)}
 		</span>
 	);
 }
@@ -66,8 +72,8 @@ function WordWithLetterBlanks({ word }: { word: string }) {
 				hidden: {},
 				visible: {
 					transition: {
-						delayChildren: 0.25,
-						staggerChildren: 0.025,
+						delayChildren: 0.15,
+						staggerChildren: 0.05,
 					},
 				},
 			}}

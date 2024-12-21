@@ -144,12 +144,6 @@ export function EnterCodeView() {
 					))}
 				</div>
 
-				<AirplaneDoodle
-					layoutId="airplane-enter-code"
-					startAt={{ left: "50%", top: "45%", rotate: 20, opacity: 0 }}
-					animateTo={{ left: "66%", top: "45%", rotate: 20, opacity: 1 }}
-					leaveTo={{ left: "135%", top: "70%", rotate: 40, opacity: 0 }}
-				/>
 				<BobbingDoodle
 					key="rain-cloud-1"
 					hideOnSmallViewports
@@ -172,6 +166,13 @@ export function EnterCodeView() {
 					src="/doodles/rain-cloud.png"
 				/>
 			</AnimatePresence>
+			<AirplaneDoodle
+				layoutId="airplane-enter-code"
+				startAt={{ left: "125%", top: "60%", rotate: 35, opacity: 1 }}
+				animateTo={{ left: "66%", top: "45%", rotate: 20, opacity: 1 }}
+				leaveTo={{ left: "125%", top: "60%", rotate: 35, opacity: 1 }}
+				// skipTransition
+			/>
 		</SkyScene>
 	);
 }

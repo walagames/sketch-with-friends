@@ -15,7 +15,7 @@ export function Timer({ endTime }: { endTime: string }) {
 
 		function initializeTimer() {
 			const duration = (new Date(endTime).getTime() - Date.now()) / 1000;
-			count.set(duration);
+			count.set(Math.max(duration, 0));
 			controls = animate(count, 0, {
 				duration: duration,
 				ease: "linear",
@@ -43,7 +43,7 @@ export function Timer({ endTime }: { endTime: string }) {
 	return (
 		<motion.div
 			layout
-			className="text-xl font-bold bg-background w-10 h-10 flex items-center justify-center leading-none shadow-accent-sm rounded-lg"
+			className="text-xl font-bold bg-background w-10 h-10 flex items-center justify-center leading-none shadow-accent-md rounded-lg"
 		>
 			<motion.span layout className="mt-1 px-2">
 				{time}
