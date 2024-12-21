@@ -259,16 +259,26 @@ function Canvas({
 	// Update touch handler similarly
 	const handleTouchMove = React.useCallback(
 		(e: React.TouchEvent<HTMLCanvasElement>) => {
-			if (role === GameRole.Drawing && roundIsActive) {
-				e.preventDefault();
-				const rect = e.currentTarget.getBoundingClientRect();
-				const touch = e.touches[0];
-				const [x, y] = getScaledCoordinates(touch.clientX, touch.clientY, rect);
+			if (role === GameRole.Drawing) {
+				const cursor = cursorRef.current;
+				if (cursor) {
+					// Get the first touch point
+					const touch = e.touches[0];
 
-				dispatch(addStrokePoint([x, y]));
+					cursor.style.display = "block";
+					cursor.style.left = `${touch.clientX + 2.5}px`;
+					cursor.style.top = `${touch.clientY + 2.5}px`;
+					cursor.style.width = `${(strokeWidth * scaleFactor) / 2}px`;
+					cursor.style.height = `${(strokeWidth * scaleFactor) / 2}px`;
+					cursor.style.backgroundColor = `${strokeColor}33`;
+					cursor.style.border = "1px solid white";
+					cursor.style.boxShadow = "0 0 0 1px grey";
+					cursor.style.transform = "translate(-50%, -50%)";
+					cursor.style.position = "fixed";
+				}
 			}
 		},
-		[role, roundIsActive, dispatch]
+		[role, strokeWidth, strokeColor, scaleFactor]
 	);
 
 	const handleTouchStart = React.useCallback(
