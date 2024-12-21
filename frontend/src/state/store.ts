@@ -28,6 +28,7 @@ const socketMiddleware: Middleware = (store) => {
 			store.dispatch({ type: "room/reset", fromServer: true });
 			store.dispatch({ type: "game/reset", fromServer: true });
 			store.dispatch({ type: "client/reset", fromServer: true });
+			store.dispatch({ type: "canvas/reset", fromServer: true });
 		}, 100);
 	}
 

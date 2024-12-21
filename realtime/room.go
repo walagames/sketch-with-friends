@@ -122,7 +122,7 @@ func NewRoom(id string) Room {
 		lastInteractionAt: time.Now(),
 		Settings: RoomSettings{
 			PlayerLimit:        6,
-			DrawingTimeAllowed: 60,
+			DrawingTimeAllowed: 60000,
 			TotalRounds:        3,
 			WordDifficulty:     WordDifficultyRandom,
 			GameMode:           GameModeClassic,
@@ -300,6 +300,7 @@ func (r *room) unregister(player *player) {
 		// Tell the remaining player that the game has ended
 		r.broadcast(GameRoleAny,
 			message(ChangeStage, r.Stage),
+			message(ClearStrokes, nil),
 			message(Error, "Not enough players to continue game"),
 		)
 	}
