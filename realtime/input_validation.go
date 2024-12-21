@@ -69,7 +69,7 @@ func filterDuplicateWords(words []string) []string {
 }
 
 func sanitizeGuess(guess string) string {
-	trimed := strings.TrimSpace(strings.ToLower(guess))
+	trimed := strings.TrimSpace(guess)
 	if len(trimed) == 0 || len(trimed) > MAX_GUESS_LENGTH {
 		return ""
 	}

@@ -18,6 +18,7 @@ export const canvasSlice = createSlice({
 	name: "canvas",
 	initialState,
 	reducers: {
+		reset: () => initialState,
 		setStrokes: (state, action: PayloadAction<Stroke[]>) => {
 			state.strokes = action.payload;
 		},

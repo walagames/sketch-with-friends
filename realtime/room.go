@@ -300,6 +300,7 @@ func (r *room) unregister(player *player) {
 		// Tell the remaining player that the game has ended
 		r.broadcast(GameRoleAny,
 			message(ChangeStage, r.Stage),
+			message(ClearStrokes, nil),
 			message(Error, "Not enough players to continue game"),
 		)
 	}
