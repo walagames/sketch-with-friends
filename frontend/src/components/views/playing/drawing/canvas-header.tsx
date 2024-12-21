@@ -45,12 +45,18 @@ export function DrawingStatus() {
 		);
 	}
 
+	const containsLetterBlanks = selectedWord.includes("*");
+
 	return (
 		<span className="flex items-center gap-1 lg:text-2xl">
 			{drawingPlayer?.profile.name} is drawing:{" "}
-			<span className="text-lg lg:text-2xl font-bold">
-				<WordWithLetterBlanks word={selectedWord} />
-			</span>
+			{containsLetterBlanks ? (
+				<span className="text-lg lg:text-2xl font-bold">
+					<WordWithLetterBlanks word={selectedWord} />
+				</span>
+			) : (
+				<span className="text-lg lg:text-2xl font-bold">{selectedWord}</span>
+			)}
 		</span>
 	);
 }
