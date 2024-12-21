@@ -42,14 +42,21 @@ export function ModalMenu() {
 					</DialogTitle>
 				</DialogHeader>
 				<div className="flex flex-col gap-4">
+					{roomId && (
+						<RaisedButton
+							size="wide"
+							className="text-xl"
+							onClick={handleLeaveRoom}
+						>
+							Leave room
+						</RaisedButton>
+					)}
+					<VolumeControls />
 					<Link to="/" onClick={handleClick}>
 						<RaisedButton size="wide" className="text-xl">
 							Home
 						</RaisedButton>
 					</Link>
-
-					<VolumeControls />
-
 					<Link to="/how-to-play" onClick={handleClick}>
 						<RaisedButton size="wide" className="text-xl">
 							How to Play
@@ -73,16 +80,6 @@ export function ModalMenu() {
 							Contact
 						</RaisedButton>
 					</a>
-
-					{roomId && (
-						<RaisedButton
-							size="wide"
-							className="text-xl"
-							onClick={handleLeaveRoom}
-						>
-							Leave room
-						</RaisedButton>
-					)}
 				</div>
 			</DialogContent>
 		</Dialog>

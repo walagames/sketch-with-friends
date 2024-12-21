@@ -6,6 +6,7 @@ import { GameRole } from "@/state/features/game";
 import { addStroke, addStrokePoint, Stroke } from "@/state/features/canvas";
 import { useWindowSize } from "@/hooks/use-window-size";
 import { getGameRole } from "@/lib/player";
+import { addRecentlyUsedColor } from "@/state/features/client";
 
 // make canvas less pixelated
 const CANVAS_SCALE = 2;
@@ -183,6 +184,7 @@ function Canvas({
 					points: [[x, y]],
 				})
 			);
+			dispatch(addRecentlyUsedColor(strokeColor));
 		},
 		[strokeColor, strokeWidth, getScaledCoordinates, roundIsActive]
 	);
@@ -252,6 +254,7 @@ function Canvas({
 						points: [[x, y]],
 					})
 				);
+				dispatch(addRecentlyUsedColor(strokeColor));
 			}
 		},
 		[strokeColor, strokeWidth, role, getScaledCoordinates, roundIsActive]

@@ -22,6 +22,7 @@ export interface ClientState {
 		strokeWidth: number;
 		tool: string;
 		color: string;
+		recentlyUsedColors: string[];
 	};
 	enteredRoomCode: string;
 	isJoining: boolean;
@@ -43,6 +44,7 @@ const initialState: ClientState = {
 		color: "#000000",
 		strokeWidth: 25,
 		tool: CanvasTool.Brush,
+		recentlyUsedColors: [],
 	},
 	enteredRoomCode: "",
 	isJoining: false,
@@ -109,6 +111,20 @@ export const clientSlice = createSlice({
 			state.canvas.hue = hue;
 			state.canvas.lightness = Math.round(lightness);
 		},
+		addRecentlyUsedColor: (state, action: PayloadAction<string>) => {
+			const color = action.payload;
+			// Remove the color if it already exists
+			state.canvas.recentlyUsedColors = state.canvas.recentlyUsedColors.filter(
+				(c) => c !== color
+			);
+			// Add the color to the front
+			state.canvas.recentlyUsedColors.unshift(color);
+			// Keep only the last 6 colors
+			state.canvas.recentlyUsedColors = state.canvas.recentlyUsedColors.slice(
+				0,
+				6
+			);
+		},
 	},
 });
 
@@ -120,6 +136,7 @@ export const {
 	enterRoomCode,
 	setIsJoining,
 	changeColor,
+	addRecentlyUsedColor,
 } = clientSlice.actions;
 
 export default clientSlice.reducer;
