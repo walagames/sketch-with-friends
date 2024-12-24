@@ -1,4 +1,4 @@
-import { Brush, Undo2, Trash, SwatchBook } from "lucide-react";
+import { Brush, Undo2, Trash } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { Slider } from "../../../ui/slider";
@@ -71,6 +71,61 @@ const swatches = [
 	"#a0522d", // light brown
 	"#63300d", // dark brown
 ];
+
+function PalleteIcon({
+	className,
+	style,
+}: {
+	className?: string;
+	style?: React.CSSProperties;
+}) {
+	return (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="24"
+			height="24"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			className={cn("", className)}
+			style={style}
+		>
+			<circle
+				cx="13.5"
+				cy="6.5"
+				r=".5"
+				fill="currentColor"
+				className="text-green-500"
+			/>
+			<circle
+				cx="17.5"
+				cy="10.5"
+				r=".5"
+				fill="currentColor"
+				className="text-blue-500"
+			/>
+			<circle
+				cx="8.5"
+				cy="7.5"
+				r=".5"
+				fill="currentColor"
+				className="text-orange-500"
+			/>
+			<circle
+				cx="6.5"
+				cy="12.5"
+				r=".5"
+				fill="currentColor"
+				className="text-red-500"
+			/>
+			<path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+		</svg>
+	);
+}
+
 export function CanvasTools() {
 	const dispatch = useDispatch();
 	const players = useSelector((state: RootState) => state.room.players);
@@ -113,18 +168,13 @@ export function CanvasTools() {
 							shift={false}
 						>
 							<div className="h-11 w-11 rounded-lg flex items-center justify-center">
-								<SwatchBook
-									style={{
-										color: currentColor,
-									}}
-									className="size-5 lg:size-6"
-								/>
+								<PalleteIcon className="size-5 lg:size-7" />
 							</div>
 						</RaisedButton>
 					</DialogTrigger>
 					<DialogContent className="sm:max-w-md bg-background-secondary">
 						<DialogTitle>
-							<p className="text-lg font-semibold">Color options</p>
+							<p className="text-lg font-semibold">Color palette</p>
 						</DialogTitle>
 						<div className="flex flex-col gap-8">
 							<div className="flex gap-6">
