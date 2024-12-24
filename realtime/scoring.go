@@ -37,10 +37,10 @@ func CalculateScore(maxGuessers, correctGuesses int, timeRemaining float64, word
 		drawerShareMultiplier = 0.25
 	case WordDifficultyMedium:
 		wordDifficultyMultiplier = 1.5
-		drawerShareMultiplier = 0.35
+		drawerShareMultiplier = 0.50
 	case WordDifficultyHard:
 		wordDifficultyMultiplier = 2.0
-		drawerShareMultiplier = 0.5
+		drawerShareMultiplier = 0.75
 	}
 
 	basePoints := int(BASE_POINTS_PER_PLAYER * float64(maxGuessers) * wordDifficultyMultiplier)
