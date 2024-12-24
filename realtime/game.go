@@ -16,7 +16,7 @@ import (
 
 var (
 	// Duration allowed for players to pick a word
-	PickingPhaseDuration = time.Second * 5000
+	PickingPhaseDuration = time.Second * 15
 
 	// Duration after drawing for score updates and displaying the word
 	PostDrawingPhaseDuration = time.Second * 5

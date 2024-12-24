@@ -70,7 +70,7 @@ const initialState: RoomState = {
 	id: "",
 	settings: {
 		playerLimit: 6,
-		drawingTimeAllowed: 60,
+		drawingTimeAllowed: 90,
 		totalRounds: 4,
 		wordDifficulty: WordDifficulty.Easy,
 		wordBank: WordBank.Mixed,
