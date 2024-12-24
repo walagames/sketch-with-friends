@@ -205,7 +205,10 @@ function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
 							isOwnMessage && "order-2 ml-auto"
 						)}
 					>
-						{name}
+						{name}{" "}
+						{isOwnMessage && (
+							<span className="text-xs text-foreground/50 px-0.5">(You)</span>
+						)}
 					</p>
 					{!!guess.pointsAwarded && (
 						<p className="text-sm shrink-0">+{guess.pointsAwarded} pts</p>
@@ -218,7 +221,7 @@ function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
 							isOwnMessage
 								? "rounded-lg rounded-br-none"
 								: "rounded-lg rounded-tl-none",
-							guess.isCorrect && "bg-[#40FF00]"
+							guess.isCorrect && isOwnMessage && "bg-[#40FF00]"
 						)}
 					>
 						{guess.isCorrect ? (
@@ -230,8 +233,13 @@ function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
 								{guess.guess}
 							</span>
 						)}
-						{!guess.isCorrect && guess.isClose && (
-							<div className="w-1.5 bg-blue-500 ml-auto" />
+						{((guess.isCorrect && !isOwnMessage) || guess.isClose) && (
+							<div
+								className={cn(
+									"w-1.5 bg-blue-500 ml-auto",
+									guess.isCorrect && !isOwnMessage && "bg-green-500"
+								)}
+							/>
 						)}
 					</div>
 					<div

@@ -9,7 +9,6 @@ import { AnimatedNumber } from "@/components/ui/animated-number";
 import { AnimatePresence, motion } from "framer-motion";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
-
 const springConfig = {
 	type: "spring",
 	stiffness: 100,
@@ -103,8 +102,13 @@ function LeaderboardPlace({
 	player: Player;
 	index: number;
 }) {
-	const { score, profile: { name, avatarSeed } } = player;
+	const {
+		score,
+		profile: { name, avatarSeed },
+	} = player;
 	const avatarSvg = generateAvatar(avatarSeed);
+	const currentPlayerId = useSelector((state: RootState) => state.client.id);
+	const isCurrentPlayer = currentPlayerId === player.id;
 
 	const points =
 		useSelector((state: RootState) => state.game.pointsAwarded[player.id]) ?? 0;
@@ -116,7 +120,12 @@ function LeaderboardPlace({
 				className="rounded-lg aspect-square relative border-2 w-10"
 				src={avatarSvg}
 			/>
-			<p className="text-xl font-bold text-foreground truncate">{name}</p>
+			<p className="text-xl font-bold text-foreground truncate">
+				{name}{" "}
+				{isCurrentPlayer && (
+					<span className="text-xs text-foreground/50 px-0.5">(You)</span>
+				)}
+			</p>
 			<div className="relative text-lg font-medium text-foreground ml-auto">
 				{points > 0 && (
 					<div className="absolute lg:text-base text-sm flex -top-1 lg:-top-1.5 right-20 lg:right-24 bg-white border border-zinc-300 rounded-lg shadow-sm lg:px-3 px-2 lg:py-1.5 py-1">
@@ -140,10 +149,16 @@ function PodiumPlace({
 		useSelector(
 			(state: RootState) => state.game.pointsAwarded[player?.id || ""]
 		) ?? 0;
+	const currentPlayerId = useSelector((state: RootState) => state.client.id);
 
 	if (!player) return null;
 
-	const { score, profile: { name, avatarSeed } } = player;
+	const {
+		score,
+		profile: { name, avatarSeed },
+		id,
+	} = player;
+	const isCurrentPlayer = currentPlayerId === id;
 	const avatarSvg = generateAvatar(avatarSeed);
 
 	const podiumColor = {
@@ -189,9 +204,12 @@ function PodiumPlace({
 			</motion.div>
 			<motion.p
 				layout
-				className="text-lg lg:text-xl font-bold text-foreground truncate max-w-full"
+				className="text-lg lg:text-xl font-bold text-foreground max-w-full"
 			>
-				{name}
+				<span className="truncate">{name}</span>
+				<span className="text-sm text-foreground/50 px-1">
+					{isCurrentPlayer && "(You)"}
+				</span>
 			</motion.p>
 			<motion.div
 				className={cn(
