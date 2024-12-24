@@ -236,21 +236,6 @@ func (g *game) clearGuesses() {
 	g.correctGuessers = make(map[uuid.UUID]bool)
 }
 
-// Calculates the point award for guessing a word correctly.
-// Points are calculated based on the percentage of time remaining.
-// We use this to calculate points for both the guesser and the drawer.
-func (g *game) calculatePoints(pointsPerGuess int) int {
-	remainingTime := time.Until(g.currentPhaseDeadline)
-	totalTime := time.Duration(g.room.Settings.DrawingTimeAllowed) * time.Second
-
-	if remainingTime <= 0 {
-		return 0
-	}
-
-	// Calculate points based on remaining time, max 500 points
-	return int((float64(remainingTime) / float64(totalTime)) * float64(pointsPerGuess))
-}
-
 // Checks if a player has guessed correctly.
 func (g *game) playerHasAlreadyGuessedCorrect(playerID uuid.UUID) bool {
 	return g.correctGuessers[playerID]
@@ -265,21 +250,26 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 
 	// Check if the guess is correct if the player is not drawing and hasn't guessed correctly yet
 	if strings.EqualFold(guessValue, g.currentWord.Value) && !playerHasAlreadyGuessedCorrect && !playerIsDrawing {
-		// Award points to the guesser for getting it right
-		pointsEarned := g.calculatePoints(400)
-		g.room.Players[playerID].Score += pointsEarned
-		g.pointsAwarded[playerID] = pointsEarned
+		remainingTime := time.Until(g.currentPhaseDeadline)
+		totalTime := time.Duration(g.room.Settings.DrawingTimeAllowed) * time.Second
+
+		timeShare := float64(remainingTime) / float64(totalTime)
+
+		guesserPoints, drawerPoints := CalculateScore(len(g.room.Players)-1, len(g.correctGuessers), timeShare)
+
+		g.room.Players[playerID].Score += guesserPoints
+		g.pointsAwarded[playerID] = guesserPoints
+
 		// Award points to the drawer for making a good drawing
-		drawerPoints := g.calculatePoints(100)
 		g.currentDrawer.Score += drawerPoints
-		g.pointsAwarded[g.currentDrawer.ID] = drawerPoints
+		g.pointsAwarded[g.currentDrawer.ID] += drawerPoints
 
 		result = guess{
 			ID:            uuid.New(),
 			PlayerID:      playerID,
 			Guess:         "", // Dont leak the correct word to the other players
 			IsCorrect:     true,
-			PointsAwarded: pointsEarned,
+			PointsAwarded: guesserPoints,
 		}
 
 		g.correctGuessers[playerID] = true
@@ -304,6 +294,7 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 	if len(g.correctGuessers) >= len(g.room.Players)-1 {
 		g.currentPhase.Next(g)
 	}
+
 }
 
 // Loads the word bank from the CSV file.
