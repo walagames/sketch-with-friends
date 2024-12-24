@@ -3,7 +3,7 @@ package main
 import "math"
 
 const (
-	BASE_POINTS_PER_PLAYER = 100
+	BASE_POINTS_PER_PLAYER = 100.0
 	DECAY_RATE             = 1.25
 )
 
@@ -16,7 +16,7 @@ const (
 // Returns:
 // - guesserScore: points awarded to the current guesser
 // - drawerScore: points awarded to the drawer for this guess
-func CalculateScore(maxGuessers, correctGuesses int, timeRemaining float64) (guesserScore, drawerScore int) {
+func CalculateScore(maxGuessers, correctGuesses int, timeRemaining float64, wordDifficulty WordDifficulty) (guesserScore, drawerScore int) {
 	// Validate inputs
 	if timeRemaining < 0 {
 		timeRemaining = 0
@@ -28,7 +28,17 @@ func CalculateScore(maxGuessers, correctGuesses int, timeRemaining float64) (gue
 		return 0, 0
 	}
 
-	basePoints := BASE_POINTS_PER_PLAYER * maxGuessers
+	wordDifficultyMultiplier := 1.0
+	switch wordDifficulty {
+	case WordDifficultyEasy:
+		wordDifficultyMultiplier = 1.0
+	case WordDifficultyMedium:
+		wordDifficultyMultiplier = 1.5
+	case WordDifficultyHard:
+		wordDifficultyMultiplier = 2.0
+	}
+
+	basePoints := int(BASE_POINTS_PER_PLAYER * float64(maxGuessers) * wordDifficultyMultiplier)
 
 	// Calculate time decay (e^(-2x) where x is the time elapsed)
 	// Using -2 as decay rate - can be adjusted for faster/slower decay

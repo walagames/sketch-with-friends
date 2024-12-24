@@ -15,7 +15,7 @@ import (
 
 var (
 	// Duration allowed for players to pick a word
-	PickingPhaseDuration = time.Second * 15
+	PickingPhaseDuration = time.Second * 5000
 
 	// Duration after drawing for score updates and displaying the word
 	PostDrawingPhaseDuration = time.Second * 5
@@ -23,9 +23,9 @@ var (
 
 // DrawingWord represents a word that the drawer can choose from.
 type DrawingWord struct {
-	Category   string
-	Value      string
-	Difficulty WordDifficulty
+	Category   string         `json:"-"`
+	Value      string         `json:"value"`
+	Difficulty WordDifficulty `json:"difficulty"`
 }
 
 var wordBank []DrawingWord
@@ -255,7 +255,7 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 
 		timeShare := float64(remainingTime) / float64(totalTime)
 
-		guesserPoints, drawerPoints := CalculateScore(len(g.room.Players)-1, len(g.correctGuessers), timeShare)
+		guesserPoints, drawerPoints := CalculateScore(len(g.room.Players)-1, len(g.correctGuessers), timeShare, g.currentWord.Difficulty)
 
 		g.room.Players[playerID].Score += guesserPoints
 		g.pointsAwarded[playerID] = guesserPoints
@@ -331,7 +331,7 @@ func loadWordBank() {
 }
 
 // Returns unique, random words from the word bank based on the specified difficulty.
-func (g *game) randomWordOptions(n int) ([]DrawingWord, []string) {
+func (g *game) randomWordOptions(n int) []DrawingWord {
 	filteredWords := wordBank
 
 	// If the word bank is custom only, we use the custom words if there are any
@@ -376,13 +376,7 @@ func (g *game) randomWordOptions(n int) ([]DrawingWord, []string) {
 		words = append(words, word)
 	}
 
-	// Extract just the values so we can send them to the drawer
-	values := make([]string, 0, len(words))
-	for _, word := range words {
-		values = append(values, word.Value)
-	}
-
-	return words, values
+	return words
 }
 
 // Applies a new hint to the hinted word.
@@ -524,9 +518,8 @@ func (phase PickingPhase) Start(g *game) {
 	g.currentDrawer.UpdateLimiter()
 
 	// Send the drawer their word options
-	words, values := g.randomWordOptions(3)
-	g.wordOptions = words
-	g.currentDrawer.Send(message(WordOptions, values))
+	g.wordOptions = g.randomWordOptions(3)
+	g.currentDrawer.Send(message(WordOptions, g.wordOptions))
 
 	// Set the deadline to 1 second before the phase ends to allow
 	// some buffer for the countdown timer to display.

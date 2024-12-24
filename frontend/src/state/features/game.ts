@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { WordDifficulty } from "./room";
 
 export enum GamePhase {
 	Picking = "picking",
@@ -12,12 +13,17 @@ export enum GameRole {
 	Guessing = "guessing",
 }
 
+export type DrawingWord = {
+	value: string;
+	difficulty: WordDifficulty;
+};
+
 export interface GameState {
 	round: number;
 	phase: GamePhase;
 	currentPhaseDeadline: string;
 	currentRound: number;
-	wordOptions: string[];
+	wordOptions: DrawingWord[];
 	guesses: Guess[];
 	selectedWord: string;
 	isLastPhase: boolean;
@@ -72,7 +78,7 @@ export const gameSlice = createSlice({
 			state.isLastPhase = action.payload.isLastPhase;
 			state.isFirstPhase = action.payload.isFirstPhase;
 		},
-		wordOptions: (state, action: PayloadAction<string[]>) => {
+		wordOptions: (state, action: PayloadAction<DrawingWord[]>) => {
 			state.wordOptions = action.payload;
 		},
 		selectWord: (state, action: PayloadAction<string>) => {
