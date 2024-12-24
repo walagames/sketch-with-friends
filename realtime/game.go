@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"math/rand"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
@@ -129,10 +130,25 @@ func (g *game) removePlayerFromDrawingQueue(playerID uuid.UUID) {
 }
 
 // Initializes the drawing queue with all players.
-// Keep in mind that since players is defined using a map,
-// the order of the players will not necessarily be the same each time.
+// The queue is sorted by score, so the first player in the queue
+// is the player with the highest score.
 func (g *game) fillDrawingQueue() {
+	// Clear existing queue
+	g.drawingQueue = make([]uuid.UUID, 0)
+
+	// Convert map to slice
+	players := make([]*player, 0, len(g.room.Players))
 	for _, p := range g.room.Players {
+		players = append(players, p)
+	}
+
+	// Sort players by score
+	slices.SortFunc(players, func(a, b *player) int {
+		return int(b.Score - a.Score)
+	})
+
+	// Add sorted players to queue
+	for _, p := range players {
 		g.enqueueDrawingPlayer(p)
 	}
 }
