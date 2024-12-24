@@ -128,7 +128,7 @@ export function RoomSettingsForm() {
 										<FormControl>
 											<Slider
 												min={15}
-												max={90}
+												max={240}
 												step={5}
 												defaultValue={[field.value]}
 												onValueChange={(vals) => {
@@ -278,9 +278,9 @@ export function RoomSettingsForm() {
 							<FormItem>
 								<FormLabel>Custom Words</FormLabel>
 								<FormControl>
-									<Textarea 
-										rows={5} 
-										{...field} 
+									<Textarea
+										rows={5}
+										{...field}
 										spellCheck={false}
 										onFocus={() => setIsEditing(true)}
 										onBlur={() => setIsEditing(false)}

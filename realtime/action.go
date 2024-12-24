@@ -100,6 +100,57 @@ func (def *ActionDefinition) ValidateAction(room *room, a *Action) error {
 	return def.validator(room)
 }
 
+// Room settings validation constants
+const (
+	MIN_PLAYERS      = 2
+	MAX_PLAYERS      = 10
+	MIN_DRAWING_TIME = 15  // seconds
+	MAX_DRAWING_TIME = 240 // seconds
+	MIN_ROUNDS       = 1
+	MAX_ROUNDS       = 10
+)
+
+// validateRoomSettings checks if room settings are within allowed bounds
+func validateRoomSettings(settings *RoomSettings) error {
+	if settings.PlayerLimit < MIN_PLAYERS || settings.PlayerLimit > MAX_PLAYERS {
+		return fmt.Errorf("player limit must be between %d and %d", MIN_PLAYERS, MAX_PLAYERS)
+	}
+
+	if settings.DrawingTimeAllowed < MIN_DRAWING_TIME || settings.DrawingTimeAllowed > MAX_DRAWING_TIME {
+		return fmt.Errorf("drawing time must be between %d and %d seconds", MIN_DRAWING_TIME, MAX_DRAWING_TIME)
+	}
+
+	if settings.TotalRounds < MIN_ROUNDS || settings.TotalRounds > MAX_ROUNDS {
+		return fmt.Errorf("total rounds must be between %d and %d", MIN_ROUNDS, MAX_ROUNDS)
+	}
+
+	// Validate word difficulty
+	switch settings.WordDifficulty {
+	case WordDifficultyEasy, WordDifficultyMedium, WordDifficultyHard, WordDifficultyRandom, WordDifficultyCustom:
+		// Valid values
+	default:
+		return fmt.Errorf("invalid word difficulty: %s", settings.WordDifficulty)
+	}
+
+	// Validate word bank
+	switch settings.WordBank {
+	case WordBankDefault, WordBankCustom, WordBankMixed:
+		// Valid values
+	default:
+		return fmt.Errorf("invalid word bank: %s", settings.WordBank)
+	}
+
+	// Validate game mode
+	switch settings.GameMode {
+	case GameModeClassic, GameModeNoHints:
+		// Valid values
+	default:
+		return fmt.Errorf("invalid game mode: %s", settings.GameMode)
+	}
+
+	return nil
+}
+
 var ActionDefinitions = map[ActionType]ActionDefinition{
 	StartGame: {
 		RoomRoleRequired: RoomRoleHost,
@@ -327,26 +378,25 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		GameRoleRequired: GameRoleAny,
 		PayloadType:      map[string]interface{}{},
 		validator: func(r *room) error {
-			// TODO: validate settings inputs
 			if r.Stage != PreGame {
 				return fmt.Errorf("can only change room settings in pre game stage")
 			}
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
-			// ! need a better way to do this
-			r.Settings.DrawingTimeAllowed = int(a.Payload.(map[string]interface{})["drawingTimeAllowed"].(float64))
-			r.Settings.PlayerLimit = int(a.Payload.(map[string]interface{})["playerLimit"].(float64))
-			r.Settings.TotalRounds = int(a.Payload.(map[string]interface{})["totalRounds"].(float64))
-			r.Settings.WordDifficulty = WordDifficulty(a.Payload.(map[string]interface{})["wordDifficulty"].(string))
-			r.Settings.WordBank = WordBank(a.Payload.(map[string]interface{})["wordBank"].(string))
-			r.Settings.GameMode = GameMode(a.Payload.(map[string]interface{})["gameMode"].(string))
-			rawCustomWords := a.Payload.(map[string]interface{})["customWords"].([]interface{})
-			customWords := make([]string, len(rawCustomWords))
-			for i, word := range rawCustomWords {
-				customWords[i] = word.(string)
+			settings, err := decodePayload[RoomSettings](a.Payload)
+			if err != nil {
+				return fmt.Errorf("failed to decode room settings: %w", err)
 			}
-			r.Settings.CustomWords = filterDuplicateWords(filterInvalidWords(customWords))
+
+			// Validate the settings before applying them
+			if err := validateRoomSettings(&settings); err != nil {
+				return fmt.Errorf("invalid room settings: %w", err)
+			}
+
+			// Update room settings
+			r.Settings = settings
+			r.Settings.CustomWords = filterDuplicateWords(filterInvalidWords(settings.CustomWords))
 
 			// Inform clients of the room settings change
 			r.broadcast(GameRoleAny,
