@@ -29,13 +29,18 @@ func CalculateScore(maxGuessers, correctGuesses int, timeRemaining float64, word
 	}
 
 	wordDifficultyMultiplier := 1.0
+	drawerShareMultiplier := 0.25
+	// adjust multipliers based on word difficulty
 	switch wordDifficulty {
 	case WordDifficultyEasy:
 		wordDifficultyMultiplier = 1.0
+		drawerShareMultiplier = 0.25
 	case WordDifficultyMedium:
 		wordDifficultyMultiplier = 1.5
+		drawerShareMultiplier = 0.35
 	case WordDifficultyHard:
 		wordDifficultyMultiplier = 2.0
+		drawerShareMultiplier = 0.5
 	}
 
 	basePoints := int(BASE_POINTS_PER_PLAYER * float64(maxGuessers) * wordDifficultyMultiplier)
@@ -52,7 +57,7 @@ func CalculateScore(maxGuessers, correctGuesses int, timeRemaining float64, word
 	guesserPoints := float64(basePoints) * timeMultiplier * positionMultiplier
 
 	// Calculate drawer points - their share also decays with time
-	drawerSharePercent := 0.35 * timeMultiplier // Starts at 35%, decays with time
+	drawerSharePercent := drawerShareMultiplier * timeMultiplier // decays with time
 	drawerPoints := guesserPoints * drawerSharePercent
 
 	return int(guesserPoints), int(drawerPoints)
