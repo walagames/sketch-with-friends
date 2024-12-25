@@ -78,7 +78,7 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 
 		return (
 			<div
-				className="flex items-start gap-4 w-full ml-auto lg:w-auto px-1"
+				className="flex items-start gap-2 w-full ml-auto lg:w-auto px-1"
 				ref={ref}
 			>
 				{roomRole === RoomRole.Host && (
@@ -96,7 +96,7 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 				>
 					{isCurrentPlayer ? (
 						<DropdownMenu modal={false}>
-							<DropdownMenuTrigger className="w-full">
+							<DropdownMenuTrigger className="w-full flex">
 								<CardContent
 									player={player}
 									isCurrentPlayer={isCurrentPlayer}
