@@ -211,7 +211,9 @@ function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
 						)}
 					</p>
 					{!!guess.pointsAwarded && (
-						<p className="text-sm shrink-0">+{guess.pointsAwarded} pts</p>
+						<p className="text-xs shrink-0 py-0.5 px-1">
+							+{guess.pointsAwarded} pts
+						</p>
 					)}
 				</div>
 				<div className="w-full relative">
@@ -224,6 +226,9 @@ function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
 							guess.isCorrect && isOwnMessage && "bg-[#40FF00]"
 						)}
 					>
+						{isOwnMessage && guess.isClose && (
+							<div className="w-1.5 bg-blue-500 ml-auto" />
+						)}
 						{guess.isCorrect ? (
 							<span className="px-3 py-2">
 								{isOwnMessage ? "You guessed it!" : "Guessed it!"}
@@ -233,7 +238,7 @@ function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
 								{guess.guess}
 							</span>
 						)}
-						{((guess.isCorrect && !isOwnMessage) || guess.isClose) && (
+						{!isOwnMessage && (guess.isClose || guess.isCorrect) && (
 							<div
 								className={cn(
 									"w-1.5 bg-blue-500 ml-auto",

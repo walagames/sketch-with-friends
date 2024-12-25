@@ -150,7 +150,7 @@ function EditPlayerInfoModal({
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogContent
-				className="sm:max-w-sm border-4 border-secondary-foreground bg-background-secondary"
+				className="sm:max-w-sm border-4 border-secondary-foreground bg-zinc-100"
 				aria-describedby="edit-player-description"
 			>
 				<DialogHeader>

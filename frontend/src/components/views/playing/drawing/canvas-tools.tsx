@@ -23,7 +23,7 @@ import { RaisedButton } from "../../../ui/raised-button";
 import { getGameRole } from "@/lib/player";
 import { GameRole } from "@/state/features/game";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 const swatches = [
 	// Monochrome
 	"#ffffff", // white
@@ -172,7 +172,7 @@ export function CanvasTools() {
 							</div>
 						</RaisedButton>
 					</DialogTrigger>
-					<DialogContent className="sm:max-w-md bg-background-secondary">
+					<DialogContent className="sm:max-w-md border-4 border-foreground bg-zinc-100">
 						<DialogTitle>
 							<p className="text-lg font-semibold">Color palette</p>
 						</DialogTitle>
@@ -222,7 +222,7 @@ export function CanvasTools() {
 									>
 										<div
 											style={{ backgroundColor: swatch }}
-											className="h-20 w-20 rounded-lg flex items-center justify-center"
+											className="h-11 w-11 -translate-y-0.5 rounded-lg flex items-center justify-center"
 										/>
 									</RaisedButton>
 								))}
