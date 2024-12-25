@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 const textVariants = {
 	hidden: { pathLength: 0, y: 2, x: 3, fillOpacity: 0, opacity: 0 },
 	visible: (i: number) => {
-		const delay = (i - 0.4) * 0.5;
+		const delay = ((i - 0.4) * 0.5) + 0.25;
 		return {
 			opacity: 1,
 			pathLength: 1,
@@ -52,13 +52,14 @@ const textVariants = {
 	},
 };
 
-function AnimatedSketchText(props: React.ComponentProps<typeof motion.svg>) {
+export function AnimatedSketchText(props: React.ComponentProps<typeof motion.svg>) {
 	const strokeWidth = "0.16px";
 	return (
 		<motion.svg
 			{...props}
 			initial="hidden"
 			animate="visible"
+			exit="hidden"
 			viewBox="0 0 39 10"
 			fill="currentColor"
 		>
@@ -144,7 +145,7 @@ function Number({ number }: { number: number }) {
 			}}
 		>
 			<span className="text-7xl absolute -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 flex flex-col items-center justify-center">
-				{number || <AnimatedSketchText className=" h-[4.5rem] text-black" />}
+				{number || <AnimatedSketchText className=" h-[4rem] text-black" />}
 			</span>
 		</motion.div>
 	);
@@ -176,7 +177,7 @@ export function GameStartCountdown() {
 			}}
 			className="h-full w-full absolute inset-0 overflow-hidden z-10"
 		>
-			<div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-3xl w-full h-[500px] bg-secondary/95 blur-[100px]" />
+			{/* <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-3xl w-full h-[500px] bg-secondary/95 blur-[100px]" /> */}
 
 			<AnimatePresence mode="popLayout">
 				<Number key={countdown} number={countdown} />
