@@ -20,6 +20,7 @@ export enum SoundEffect {
 	SCENE_CHANGE = "scene-change",
 	PLAYER_WIN = "player-win",
 	PLAYER_LOSE = "player-lose",
+	SCRIBBLE = "scribble",
 }
 
 type SoundBuffers = {
@@ -48,6 +49,7 @@ const SOUND_PATHS: Record<SoundEffect, SoundConfig> = {
 	[SoundEffect.SCENE_CHANGE]: { path: "/sounds/whoosh.mp3", volume: 0.25 },
 	[SoundEffect.PLAYER_WIN]: { path: "/sounds/player-win.mp3", volume: 1 },
 	[SoundEffect.PLAYER_LOSE]: { path: "/sounds/player-lose.mp3", volume: 1 },
+	[SoundEffect.SCRIBBLE]: { path: "/sounds/scribble.mp3", volume: 0.25 },
 };
 
 export function SoundProvider({ children }: { children: React.ReactNode }) {

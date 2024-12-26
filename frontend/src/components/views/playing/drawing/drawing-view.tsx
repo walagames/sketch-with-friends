@@ -27,6 +27,7 @@ export function DrawingView() {
 			(new Date(currentPhaseDeadline).getTime() - Date.now()) / 1000 <
 		2;
 	const [showSketchText, setShowSketchText] = useState(isWithinFirst2Seconds);
+
 	// Hide the sketch text after the animation is done
 	useEffect(() => {
 		const timeout = setTimeout(() => {
