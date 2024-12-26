@@ -3,21 +3,21 @@ import { RootState } from "@/state/store";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { containerSpring } from "@/config/spring";
-export function CanvasHeader() {
+export function CanvasHeader({ delay }: { delay: number }) {
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: -10 }}
 			animate={{ opacity: 1, y: 4 }}
-			transition={{ ...containerSpring, delay: 1.5 }}
+			transition={{ ...containerSpring, delay }}
 			className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-7rem)] lg:w-full h-16 justify-center"
 		>
 			<RoundInfo />
-			<DrawingStatus />
+			<DrawingStatus delay={delay} />
 		</motion.div>
 	);
 }
 
-export function DrawingStatus() {
+export function DrawingStatus({ delay }: { delay: number }) {
 	const selectedWord = useSelector(
 		(state: RootState) => state.game.selectedWord
 	);
@@ -30,7 +30,7 @@ export function DrawingStatus() {
 	if (isDrawing) {
 		return (
 			<span className="flex items-center gap-1 lg:text-2xl">
-				You're drawing:{" "}
+				You're sketching:{" "}
 				<span className="text-lg lg:text-2xl font-bold">{selectedWord}</span>
 			</span>
 		);
@@ -40,10 +40,10 @@ export function DrawingStatus() {
 
 	return (
 		<span className="flex items-center gap-1 lg:text-2xl">
-			{drawingPlayer?.profile.name} is drawing:{" "}
+			{drawingPlayer?.profile.name} is sketching:{" "}
 			{containsLetterBlanks ? (
 				<span className="text-lg lg:text-2xl font-bold">
-					<WordWithLetterBlanks word={selectedWord} />
+					<WordWithLetterBlanks word={selectedWord} delay={delay - 1} />
 				</span>
 			) : (
 				<span className="text-lg lg:text-2xl font-bold">{selectedWord}</span>
@@ -52,7 +52,13 @@ export function DrawingStatus() {
 	);
 }
 
-function WordWithLetterBlanks({ word }: { word: string }) {
+function WordWithLetterBlanks({
+	word,
+	delay,
+}: {
+	word: string;
+	delay: number;
+}) {
 	const wordLetters = word.replaceAll("*", "_").split("");
 	return (
 		<motion.span
@@ -63,7 +69,7 @@ function WordWithLetterBlanks({ word }: { word: string }) {
 				hidden: {},
 				visible: {
 					transition: {
-						delayChildren: 1.4,
+						delayChildren: delay,
 						staggerChildren: 0.025,
 					},
 				},

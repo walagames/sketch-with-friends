@@ -1,6 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect } from "react";
-import { SoundEffect, useSound } from "@/providers/sound-provider";
 
 const textVariants = {
 	hidden: { pathLength: 0, y: 2, x: 3, fillOpacity: 0, opacity: 0 },
@@ -56,14 +55,6 @@ const textVariants = {
 export function AnimatedSketchText(
 	props: React.ComponentProps<typeof motion.svg>
 ) {
-	const play = useSound();
-	useEffect(() => {
-		const timeout = setTimeout(() => {
-			play(SoundEffect.SCRIBBLE);
-		}, 1250);
-		return () => clearTimeout(timeout);
-	}, []);
-
 	const strokeWidth = "0.16px";
 	return (
 		<motion.svg

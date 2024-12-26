@@ -20,13 +20,13 @@ export function DrawingView() {
 		(state: RootState) => state.game.currentPhaseDeadline
 	);
 
-	// Only play the animation within the first 2 seconds of the drawing phase
+	// Only play the animation within the first second of the drawing phase
 	// Otherwise when the tab refocuses, it will play the animation again
-	const isWithinFirst2Seconds =
+	const isWithinFirstSecond =
 		drawingTime -
 			(new Date(currentPhaseDeadline).getTime() - Date.now()) / 1000 <
-		2;
-	const [showSketchText, setShowSketchText] = useState(isWithinFirst2Seconds);
+		1;
+	const [showSketchText, setShowSketchText] = useState(isWithinFirstSecond);
 
 	// Hide the sketch text after the animation is done
 	useEffect(() => {
@@ -46,7 +46,7 @@ export function DrawingView() {
 					<div className="flex items-center justify-center gap-6 pb-1">
 						<ColorSliders />
 						<div className="flex flex-col items-center justify-center max-w-[800px] w-screen lg:w-auto">
-							<CanvasHeader />
+							<CanvasHeader delay={showSketchText ? 1.5 : 0.35} />
 							<div className="relative">
 								<AnimatePresence>
 									{showSketchText && (

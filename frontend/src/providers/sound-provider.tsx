@@ -1,4 +1,4 @@
-import { GamePhase, Guess } from "@/state/features/game";
+import { ChatMessage, GamePhase } from "@/state/features/game";
 import { Player } from "@/state/features/room";
 import { RootState } from "@/state/store";
 import { createContext, useContext, useEffect, useRef } from "react";
@@ -61,8 +61,10 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 	const audioContextRef = useRef<AudioContext>();
 	const soundBuffersRef = useRef<SoundBuffers>({});
 	const volume = useSelector((state: RootState) => state.preferences.volume);
-	const guesses = useSelector((state: RootState) => state.game.guesses);
-	const prevGuessesRef = useRef<Guess[]>([]);
+	const chatMessages = useSelector(
+		(state: RootState) => state.game.chatMessages
+	);
+	const prevChatMessagesRef = useRef<ChatMessage[]>([]);
 	const phase = useSelector((state: RootState) => state.game.phase);
 	const deadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
@@ -101,26 +103,32 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 
 	// Listen for game state changes and play appropriate sounds
 	useEffect(() => {
-		const newCorrectGuess = guesses.some(
-			(guess) =>
-				guess.isCorrect &&
-				!prevGuessesRef.current.find((prev) => prev.id === guess.id)
-		);
-
-		const newChatMessage = guesses.some(
-			(guess) =>
-				!guess.isCorrect &&
-				!prevGuessesRef.current.find((prev) => prev.id === guess.id)
-		);
-
-		if (newCorrectGuess) {
-			playSound(SoundEffect.CORRECT);
-		} else if (newChatMessage) {
-			playSound(SoundEffect.CHAT_MESSAGE);
+		// Initialize the ref on first mount only
+		if (!isInitializedRef.current) {
+			prevChatMessagesRef.current = chatMessages;
+			isInitializedRef.current = true;
+			return;
 		}
 
-		prevGuessesRef.current = guesses;
-	}, [guesses]);
+		// Only check the most recent message
+		const latestMessage = chatMessages[chatMessages.length - 1];
+		const prevMessages = prevChatMessagesRef.current;
+
+		// Only play sound if there's a new message (comparing lengths)
+		// and the latest message isn't already in the previous messages
+		if (
+			chatMessages.length > prevMessages.length &&
+			!prevMessages.find((prev) => prev.id === latestMessage?.id)
+		) {
+			if (latestMessage?.isCorrect) {
+				playSound(SoundEffect.CORRECT);
+			} else {
+				playSound(SoundEffect.CHAT_MESSAGE);
+			}
+		}
+
+		prevChatMessagesRef.current = chatMessages;
+	}, [chatMessages]);
 
 	// Play clock tick sounds when drawing phase is ending
 	useEffect(() => {

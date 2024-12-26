@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { RootState } from "@/state/store";
-import { GameRole, Guess } from "@/state/features/game";
+import { ChatMessage, GameRole } from "@/state/features/game";
 import { Player } from "@/state/features/room";
 import { generateAvatar } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
@@ -16,7 +16,9 @@ import { UsersIcon } from "lucide-react";
 import { getGameRole } from "@/lib/player";
 import { useMediaQuery } from "@/hooks/use-media-query";
 export function Chat() {
-	const guesses = useSelector((state: RootState) => state.game.guesses);
+	const chatMessages = useSelector(
+		(state: RootState) => state.game.chatMessages
+	);
 	const players = useSelector((state: RootState) => state.room.players);
 	const playerId = useSelector((state: RootState) => state.client.id);
 
@@ -37,9 +39,9 @@ export function Chat() {
 	const listRef = useRef<HTMLUListElement>(null);
 
 	useEffect(() => {
-		if (listRef.current && guesses.length > 0) {
-			const latestGuess = guesses[guesses.length - 1];
-			const isOwnMessage = latestGuess.playerId === playerId;
+		if (listRef.current && chatMessages.length > 0) {
+			const latestMessage = chatMessages[chatMessages.length - 1];
+			const isOwnMessage = latestMessage.playerId === playerId;
 
 			const isScrolledToBottom =
 				listRef.current.scrollTop >=
@@ -67,7 +69,7 @@ export function Chat() {
 				setUnreadCount((prev) => prev + 1);
 			}
 		}
-	}, [guesses, playerId]);
+	}, [chatMessages, playerId]);
 
 	const handleScroll = () => {
 		if (listRef.current) {
@@ -102,14 +104,15 @@ export function Chat() {
 					Round {currentRound} of {totalRounds}
 				</div>
 				<div className="flex gap-1.5 text-lg lg:text-xl font-bold items-center relative ml-auto z-20">
-					<UsersIcon className="size-5 mb-1" /> {Object.keys(players).length}
+					<UsersIcon className="size-5 mb-1" /> {Object.values(players).length}
 				</div>
 				<div className="bg-gradient-to-b from-background-secondary to-transparent top-[0.625rem] left-2 right-2  rounded-lg h-14 absolute z-10 lg:hidden" />
 			</div>
 			<div className="relative flex-1 overflow-hidden">
 				<div className="h-14 w-full absolute lg:hidden z-50 top-0 flex overflow-hidden items-start">
 					<div className="flex gap-1.5 text-xl font-bold items-center relative ml-auto z-20 px-4 py-2">
-						<UsersIcon className="size-5 mb-1" /> {Object.keys(players).length}
+						<UsersIcon className="size-5 mb-1" />{" "}
+						{Object.values(players).length}
 					</div>
 					<div className="bg-gradient-to-b from-background-secondary to-transparent rounded-lg h-14 absolute top-0.5 left-2 right-2" />
 				</div>
@@ -145,11 +148,11 @@ export function Chat() {
 						"contain-strict"
 					)}
 				>
-					{guesses.map((guess) => (
-						<ChatMessage
-							key={guess.id}
-							guess={guess}
-							player={players[guess.playerId]}
+					{chatMessages.map((message) => (
+						<ChatMessageComponent
+							key={message.id}
+							message={message}
+							player={players[message.playerId]}
 						/>
 					))}
 				</motion.ul>
@@ -164,11 +167,38 @@ export function Chat() {
 	);
 }
 
-function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
+function ChatMessageComponent({
+	message,
+	player,
+}: {
+	message: ChatMessage;
+	player: Player | null;
+}) {
+	const playerId = useSelector((state: RootState) => state.client.id);
+
+	// If it's a system message, render a simplified version
+	if (message.isSystemMessage) {
+		return (
+			<motion.li
+				initial={{ opacity: 0, y: 3 }}
+				animate={{ opacity: 1, y: 0 }}
+				className="mx-auto text-center py-2 px-3 rounded-lg bg-white"
+			>
+				<span
+					style={{ wordBreak: "break-word" }}
+					className="block text-sm font-semibold max-w-full"
+				>
+					{message.guess}
+				</span>
+			</motion.li>
+		);
+	}
+
+	if (!player) return null;
+
 	const { avatarSeed, name } = player.profile;
 	const avatarSvg = generateAvatar(avatarSeed);
-	const playerId = useSelector((state: RootState) => state.client.id);
-	const isOwnMessage = playerId === guess.playerId;
+	const isOwnMessage = playerId === message.playerId;
 
 	return (
 		<motion.li
@@ -176,7 +206,7 @@ function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
 			animate={{ opacity: 1, y: 0 }}
 			className={cn(
 				"flex items-start gap-1 ",
-				isOwnMessage && "flex-row-reverse items-end pt-2 -mb-2 ml-auto"
+				isOwnMessage && "flex-row-reverse items-end ml-auto"
 			)}
 		>
 			<img
@@ -210,9 +240,9 @@ function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
 							<span className="text-xs text-foreground/50 px-0.5">(You)</span>
 						)}
 					</p>
-					{!!guess.pointsAwarded && (
+					{!!message.pointsAwarded && (
 						<p className="text-xs shrink-0 py-0.5 px-1">
-							+{guess.pointsAwarded} pts
+							+{message.pointsAwarded} pts
 						</p>
 					)}
 				</div>
@@ -223,26 +253,26 @@ function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
 							isOwnMessage
 								? "rounded-lg rounded-br-none"
 								: "rounded-lg rounded-tl-none",
-							guess.isCorrect && isOwnMessage && "bg-[#40FF00]"
+							message.isCorrect && isOwnMessage && "bg-[#40FF00]"
 						)}
 					>
-						{isOwnMessage && guess.isClose && (
+						{isOwnMessage && message.isClose && (
 							<div className="w-1.5 bg-blue-500 ml-auto" />
 						)}
-						{guess.isCorrect ? (
+						{message.isCorrect ? (
 							<span className="px-3 py-2">
 								{isOwnMessage ? "You guessed it!" : "Guessed it!"}
 							</span>
 						) : (
 							<span className="px-3 py-2 break-words overflow-wrap-anywhere w-full">
-								{guess.guess}
+								{message.guess}
 							</span>
 						)}
-						{!isOwnMessage && (guess.isClose || guess.isCorrect) && (
+						{!isOwnMessage && (message.isClose || message.isCorrect) && (
 							<div
 								className={cn(
 									"w-1.5 bg-blue-500 ml-auto",
-									guess.isCorrect && !isOwnMessage && "bg-green-500"
+									message.isCorrect && !isOwnMessage && "bg-green-500"
 								)}
 							/>
 						)}
@@ -262,21 +292,21 @@ function ChatMessage({ guess, player }: { guess: Guess; player: Player }) {
 }
 
 const FormSchema = z.object({
-	guess: z.string().min(1),
+	message: z.string().min(1),
 });
 export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
 	const dispatch = useDispatch();
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
-			guess: "",
+			message: "",
 		},
 	});
 
 	async function onSubmit(data: z.infer<typeof FormSchema>) {
-		const trimmedGuess = data.guess.trim();
-		if (trimmedGuess) {
-			dispatch({ type: "game/submitGuess", payload: trimmedGuess });
+		const trimmedMessage = data.message.trim();
+		if (trimmedMessage) {
+			dispatch({ type: "game/submitChatMessage", payload: trimmedMessage });
 			form.reset();
 		}
 	}
@@ -285,7 +315,7 @@ export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
 			<form onSubmit={form.handleSubmit(onSubmit)}>
 				<FormField
 					control={form.control}
-					name="guess"
+					name="message"
 					render={({ field }) => (
 						<FormItem className="relative space-y-0">
 							<FormControl>
