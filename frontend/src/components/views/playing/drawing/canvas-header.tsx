@@ -63,8 +63,8 @@ function WordWithLetterBlanks({ word }: { word: string }) {
 				hidden: {},
 				visible: {
 					transition: {
-						delayChildren: 0.15,
-						staggerChildren: 0.05,
+						delayChildren: 1.4,
+						staggerChildren: 0.025,
 					},
 				},
 			}}

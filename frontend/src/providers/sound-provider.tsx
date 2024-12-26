@@ -21,6 +21,7 @@ export enum SoundEffect {
 	PLAYER_WIN = "player-win",
 	PLAYER_LOSE = "player-lose",
 	SCRIBBLE = "scribble",
+	CHAT_MESSAGE = "chat-message",
 }
 
 type SoundBuffers = {
@@ -49,7 +50,11 @@ const SOUND_PATHS: Record<SoundEffect, SoundConfig> = {
 	[SoundEffect.SCENE_CHANGE]: { path: "/sounds/whoosh.mp3", volume: 0.25 },
 	[SoundEffect.PLAYER_WIN]: { path: "/sounds/player-win.mp3", volume: 1 },
 	[SoundEffect.PLAYER_LOSE]: { path: "/sounds/player-lose.mp3", volume: 1 },
-	[SoundEffect.SCRIBBLE]: { path: "/sounds/scribble.mp3", volume: 0.25 },
+	[SoundEffect.SCRIBBLE]: { path: "/sounds/scribble.mp3", volume: 0.3 },
+	[SoundEffect.CHAT_MESSAGE]: {
+		path: "/sounds/chat-pop.mp3",
+		volume: 0.45,
+	},
 };
 
 export function SoundProvider({ children }: { children: React.ReactNode }) {
@@ -102,8 +107,16 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 				!prevGuessesRef.current.find((prev) => prev.id === guess.id)
 		);
 
+		const newChatMessage = guesses.some(
+			(guess) =>
+				!guess.isCorrect &&
+				!prevGuessesRef.current.find((prev) => prev.id === guess.id)
+		);
+
 		if (newCorrectGuess) {
 			playSound(SoundEffect.CORRECT);
+		} else if (newChatMessage) {
+			playSound(SoundEffect.CHAT_MESSAGE);
 		}
 
 		prevGuessesRef.current = guesses;
