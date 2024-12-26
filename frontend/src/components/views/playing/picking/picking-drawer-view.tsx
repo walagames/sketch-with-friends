@@ -57,7 +57,10 @@ export function PickingDrawerView() {
 									</span>
 								</div>
 							</RaisedButton>
-							<p className="text-xs font-semibold text-muted-foreground">
+							<p className="text-xs font-semibold text-muted-foreground flex flex-col items-center">
+								<span className="capitalize text-sm !text-foreground">
+									{word.difficulty}
+								</span>{" "}
 								{wordDifficultyText[word.difficulty]}
 							</p>
 						</div>
