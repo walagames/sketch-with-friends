@@ -60,7 +60,7 @@ export function AnimatedSketchText(
 	useEffect(() => {
 		const timeout = setTimeout(() => {
 			play(SoundEffect.SCRIBBLE);
-		}, 1300);
+		}, 1250);
 		return () => clearTimeout(timeout);
 	}, []);
 

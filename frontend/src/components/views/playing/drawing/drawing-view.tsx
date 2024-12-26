@@ -51,7 +51,7 @@ export function DrawingView() {
 								<AnimatePresence>
 									{showSketchText && (
 										<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-3/4 z-50">
-											<AnimatedSketchText className="lg:h-[5rem] h-[3.5rem] text-black" />
+											<AnimatedSketchText className="lg:h-[4.5rem] h-[3.5rem] text-black" />
 										</div>
 									)}
 								</AnimatePresence>

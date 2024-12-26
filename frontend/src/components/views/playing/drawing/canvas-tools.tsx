@@ -23,7 +23,9 @@ import { RaisedButton } from "../../../ui/raised-button";
 import { getGameRole } from "@/lib/player";
 import { GameRole } from "@/state/features/game";
 import { cn } from "@/lib/utils";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { containerSpring } from "@/config/spring";
 const swatches = [
 	// Monochrome
 	"#ffffff", // white
@@ -144,7 +146,10 @@ export function CanvasTools() {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<div
+		<motion.div
+			initial={{ opacity: 0, y: 10 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{ ...containerSpring, delay: 1.5 }}
 			className={cn(
 				"lg:gap-8 gap-4 w-full items-center py-1.5 lg:py-4 px-3.5 lg:px-0 ",
 				isDrawing ? "flex" : "hidden"
@@ -247,7 +252,7 @@ export function CanvasTools() {
 					<Trash className="lg:size-6 size-5" />
 				</RaisedButton>
 			</div>
-		</div>
+		</motion.div>
 	);
 }
 
@@ -347,7 +352,10 @@ export function ColorSliders() {
 	};
 
 	return (
-		<div
+		<motion.div
+			initial={{ opacity: 0, x: -10 }}
+			animate={{ opacity: 1, x: 0 }}
+			transition={{ ...containerSpring, delay: 1.5 }}
 			className={cn(
 				"gap-6 w-full max-w-sm mt-auto py-24",
 				isDrawing ? "lg:flex hidden" : "hidden"
@@ -392,6 +400,6 @@ export function ColorSliders() {
 					className="h-full"
 				/>
 			</div>
-		</div>
+		</motion.div>
 	);
 }
