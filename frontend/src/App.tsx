@@ -13,8 +13,6 @@ import { MotionConfig } from "framer-motion";
 import {
 	EnterCodeView,
 	EnterPlayerInfoView,
-	PreGameHostView,
-	PreGamePlayerView,
 	PickingDrawerView,
 	PickingGuesserView,
 	PostDrawingView,
@@ -22,6 +20,7 @@ import {
 } from "@/components/views";
 import { useEffect, useState } from "react";
 import { containerSpring } from "@/config/spring";
+import { PreGameView } from "./components/views/pre-game/pre-game-view";
 type ViewComponent = {
 	Component: React.ComponentType;
 	key: string;
@@ -44,13 +43,13 @@ const joinViews: Record<string, ViewComponent> = {
 const roomViews = {
 	[RoomStage.PreGame]: {
 		[RoomRole.Host]: {
-			Component: PreGameHostView,
-			key: "pre-game-host",
+			Component: PreGameView,
+			key: "pre-game",
 			transition: Direction.UP,
 		},
 		[RoomRole.Player]: {
-			Component: PreGamePlayerView,
-			key: "pre-game-player",
+			Component: PreGameView,
+			key: "pre-game",
 			transition: Direction.UP,
 		},
 	},
