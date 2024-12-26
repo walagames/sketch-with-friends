@@ -75,7 +75,9 @@ function VirtualInput({
 								transition={{ ...containerSpring, delay: 0.1 }}
 								className="text-foreground-muted font-semibold"
 							>
-								Tap to start typing...
+								{value
+									? value.replace(/ /g, "\u00A0")
+									: "Tap to start typing..."}
 							</motion.span>
 						)}
 					</div>
