@@ -419,7 +419,8 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 				return fmt.Errorf("invalid player profile payload: %w", err)
 			}
 
-			// Validate the profile inputs
+			// Sanitize the profile inputs
+			profile.Name = sanitizeUsername(profile.Name)
 			if profile.Name == "" {
 				return fmt.Errorf("name cannot be empty")
 			}

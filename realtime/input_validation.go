@@ -10,6 +10,39 @@ const (
 	MAX_GUESS_LENGTH = 128
 )
 
+func sanitizeUsername(username string) string {
+	var result strings.Builder
+	var lastRune rune
+	var lastWasSpace bool
+
+	for i, r := range username {
+		// Allow uppercase letters (A-Z), lowercase letters (a-z), apostrophe, and space
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || r == '\'' || r == ' ' {
+			// Handle spaces: only allow single spaces, not at start/end
+			if r == ' ' {
+				if lastWasSpace || i == 0 || i == len(username)-1 {
+					continue
+				}
+				lastWasSpace = true
+			} else {
+				lastWasSpace = false
+			}
+
+			// Handle apostrophes
+			if r == '\'' {
+				if lastRune == '\'' || i == 0 || i == len(username)-1 {
+					continue
+				}
+			}
+
+			result.WriteRune(r)
+			lastRune = r
+		}
+	}
+
+	return result.String()
+}
+
 func filterInvalidRunes(word string) string {
 	// Convert to lowercase first
 	word = strings.ToLower(word)
