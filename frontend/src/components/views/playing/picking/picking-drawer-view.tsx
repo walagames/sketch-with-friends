@@ -16,12 +16,12 @@ const wordDifficultyColors: Record<WordDifficulty, string> = {
 	[WordDifficulty.Random]: "bg-blue-500",
 } as const;
 
-const wordDifficultyText: Record<WordDifficulty, string> = {
-	[WordDifficulty.Easy]: "1.0x points",
-	[WordDifficulty.Medium]: "1.5x points",
-	[WordDifficulty.Hard]: "2.0x points",
-	[WordDifficulty.Random]: "1.0x points",
-} as const;
+// const wordDifficultyText: Record<WordDifficulty, string> = {
+// 	[WordDifficulty.Easy]: "1.0x points",
+// 	[WordDifficulty.Medium]: "1.5x points",
+// 	[WordDifficulty.Hard]: "2.0x points",
+// 	[WordDifficulty.Random]: "1.0x points",
+// } as const;
 
 export function PickingDrawerView() {
 	const dispatch = useDispatch();
@@ -29,6 +29,7 @@ export function PickingDrawerView() {
 	const isFirstPhase = useSelector(
 		(state: RootState) => state.game.isFirstPhase
 	);
+
 	return (
 		<SkyScene>
 			<div className="flex flex-col items-center justify-center my-auto gap-12">
@@ -60,8 +61,8 @@ export function PickingDrawerView() {
 							<p className="text-xs font-semibold text-muted-foreground flex flex-col items-center">
 								<span className="capitalize text-sm !text-foreground">
 									{word.difficulty}
-								</span>{" "}
-								{wordDifficultyText[word.difficulty]}
+								</span>
+								{/* {isRandomDifficulty && wordDifficultyText[word.difficulty]} */}
 							</p>
 						</div>
 					))}
