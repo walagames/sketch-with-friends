@@ -16,7 +16,7 @@ const (
 // Returns:
 // - guesserScore: points awarded to the current guesser
 // - drawerScore: points awarded to the drawer for this guess
-func CalculateScore(maxGuessers, correctGuesses int, timeRemaining float64, wordDifficulty WordDifficulty) (guesserScore, drawerScore int) {
+func CalculateScore(maxGuessers, correctGuesses int, timeRemaining float64, wordDifficulty WordDifficulty, wordMode WordDifficulty) (guesserScore, drawerScore int) {
 	// Validate inputs
 	if timeRemaining < 0 {
 		timeRemaining = 0
@@ -28,22 +28,24 @@ func CalculateScore(maxGuessers, correctGuesses int, timeRemaining float64, word
 		return 0, 0
 	}
 
-	wordDifficultyMultiplier := 1.0
-	drawerShareMultiplier := 0.25
+	wordDifficultyScoreMultiplier := 1.0
+	drawerSharePercent := 0.25
 	// adjust multipliers based on word difficulty
-	switch wordDifficulty {
-	case WordDifficultyEasy:
-		wordDifficultyMultiplier = 1.0
-		drawerShareMultiplier = 0.25
-	case WordDifficultyMedium:
-		wordDifficultyMultiplier = 1.5
-		drawerShareMultiplier = 0.50
-	case WordDifficultyHard:
-		wordDifficultyMultiplier = 2.0
-		drawerShareMultiplier = 0.75
+	if wordMode == WordDifficultyRandom {
+		switch wordDifficulty {
+		case WordDifficultyEasy:
+			wordDifficultyScoreMultiplier = 1.0
+			drawerSharePercent = 0.25
+		case WordDifficultyMedium:
+			wordDifficultyScoreMultiplier = 1.5
+			drawerSharePercent = 0.375
+		case WordDifficultyHard:
+			wordDifficultyScoreMultiplier = 2.0
+			drawerSharePercent = 0.5
+		}
 	}
 
-	basePoints := int(BASE_POINTS_PER_PLAYER * float64(maxGuessers) * wordDifficultyMultiplier)
+	basePoints := int(BASE_POINTS_PER_PLAYER * float64(maxGuessers) * wordDifficultyScoreMultiplier)
 
 	// Calculate time decay (e^(-2x) where x is the time elapsed)
 	// Using -2 as decay rate - can be adjusted for faster/slower decay
@@ -56,8 +58,7 @@ func CalculateScore(maxGuessers, correctGuesses int, timeRemaining float64, word
 	// Calculate guesser points with decay
 	guesserPoints := float64(basePoints) * timeMultiplier * positionMultiplier
 
-	// Calculate drawer points - their share also decays with time
-	drawerSharePercent := drawerShareMultiplier * timeMultiplier // decays with time
+	// Calculate the drawer's share of the points
 	drawerPoints := guesserPoints * drawerSharePercent
 
 	return int(guesserPoints), int(drawerPoints)

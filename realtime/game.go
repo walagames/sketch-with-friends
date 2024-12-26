@@ -294,7 +294,7 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 
 		timeShare := float64(remainingTime) / float64(totalTime)
 
-		guesserPoints, drawerPoints := CalculateScore(len(g.room.Players)-1, len(g.correctGuessers), timeShare, g.currentWord.Difficulty)
+		guesserPoints, drawerPoints := CalculateScore(len(g.room.Players)-1, len(g.correctGuessers), timeShare, g.currentWord.Difficulty, g.room.Settings.WordDifficulty)
 
 		g.room.Players[playerID].Score += guesserPoints
 		g.pointsAwarded[playerID] = guesserPoints
@@ -586,6 +586,7 @@ func (phase PickingPhase) Start(g *game) {
 
 	// Inform players of the state changes
 	g.room.broadcast(GameRoleAny,
+		action(SelectWord, ""),
 		action(SetPlayers, g.room.Players),
 		action(SetRound, g.currentRound),
 		action(ChangePhase,
@@ -775,7 +776,6 @@ func (phase PostDrawingPhase) End(g *game) {
 	// Inform players of the state changes
 	g.room.broadcast(GameRoleAny,
 		action(ClearStrokes, nil),
-		action(SelectWord, ""),
 		action(SetPlayers, g.room.Players),
 	)
 }
