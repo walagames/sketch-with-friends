@@ -32,17 +32,17 @@ const (
 	SetStrokes     ActionType = "canvas/setStrokes"
 
 	// Game actions
-	SetWord       ActionType = "game/setWord"
-	SubmitGuess   ActionType = "game/submitGuess"
-	WordOptions   ActionType = "game/wordOptions"
-	StartGame     ActionType = "game/startGame"
-	GuessResult   ActionType = "game/guessResult"
-	ClearGuesses  ActionType = "game/clearGuesses"
-	SetGuesses    ActionType = "game/setGuesses"
-	ChangePhase   ActionType = "game/changePhase"
-	SelectWord    ActionType = "game/selectWord"
-	SetRound      ActionType = "game/setRound"
-	PointsAwarded ActionType = "game/pointsAwarded"
+	SetWord           ActionType = "game/setWord"
+	NewChatMessage    ActionType = "game/newChatMessage"
+	WordOptions       ActionType = "game/wordOptions"
+	StartGame         ActionType = "game/startGame"
+	SubmitChatMessage ActionType = "game/submitChatMessage"
+	ClearChat         ActionType = "game/clearChat"
+	SetChat           ActionType = "game/setChat"
+	ChangePhase       ActionType = "game/changePhase"
+	SelectWord        ActionType = "game/selectWord"
+	SetRound          ActionType = "game/setRound"
+	PointsAwarded     ActionType = "game/pointsAwarded"
 
 	// Room actions
 	InitializeRoom      ActionType = "room/initializeRoom"
@@ -182,8 +182,9 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Inform clients of the stage change
 			r.broadcast(GameRoleAny,
-				message(SetPlayers, r.Players),
-				message(ChangeStage, r.Stage),
+				action(SetPlayers, r.Players),
+				action(ChangeStage, r.Stage),
+				action(SetChat, r.game.chatMessages),
 			)
 
 			return nil
@@ -262,7 +263,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Re-broadcast the stroke to the rest of the players
 			r.broadcast(GameRoleGuessing,
-				message(AddStroke, a.Payload),
+				action(AddStroke, a.Payload),
 			)
 			return nil
 		},
@@ -297,7 +298,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Re-broadcast the stroke point to the rest of the players
 			r.broadcast(GameRoleGuessing,
-				message(AddStrokePoint, a.Payload),
+				action(AddStrokePoint, a.Payload),
 			)
 			return nil
 		},
@@ -320,7 +321,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Tell the other players to clear their strokes
 			r.broadcast(GameRoleGuessing,
-				message(ClearStrokes, nil),
+				action(ClearStrokes, nil),
 			)
 			return nil
 		},
@@ -343,12 +344,12 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Tell the other players to undo their last stroke
 			r.broadcast(GameRoleGuessing,
-				message(UndoStroke, nil),
+				action(UndoStroke, nil),
 			)
 			return nil
 		},
 	},
-	SubmitGuess: {
+	SubmitChatMessage: {
 		RoomRoleRequired: RoomRoleAny,
 		GameRoleRequired: GameRoleAny,
 		PayloadType:      "string",
@@ -356,20 +357,18 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			if r.game == nil {
 				return fmt.Errorf("game is not initialized")
 			}
-			if r.game.currentPhase.Name() != Drawing {
-				return fmt.Errorf("not in guessing phase")
-			}
 			if r.Stage != Playing {
 				return fmt.Errorf("game is not active")
 			}
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
-			guess := sanitizeGuess(a.Payload.(string))
-			if guess == "" {
-				return fmt.Errorf("invalid guess")
+			slog.Debug("New chat message", "message", a.Payload)
+			msg := sanitizeGuess(a.Payload.(string))
+			if msg == "" {
+				return fmt.Errorf("invalid msg")
 			}
-			r.game.judgeGuess(a.Player.ID, guess)
+			r.game.judgeGuess(a.Player.ID, msg)
 			return nil
 		},
 	},
@@ -400,7 +399,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Inform clients of the room settings change
 			r.broadcast(GameRoleAny,
-				message(ChangeRoomSettings, r.Settings),
+				action(ChangeRoomSettings, r.Settings),
 			)
 			return nil
 		},
@@ -441,16 +440,15 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Broadcast the change to all players
 			r.broadcast(GameRoleAny,
-				message(SetPlayers, r.Players),
+				action(SetPlayers, r.Players),
 			)
 			return nil
 		},
 	},
 }
 
-// Construct an action message
-// It's named "message" instead of "action" to make it easier to read when used in broadcasts
-func message(actionType ActionType, payload interface{}) *Action {
+// Construct an state action message
+func action(actionType ActionType, payload interface{}) *Action {
 	return &Action{
 		Type:    actionType,
 		Payload: payload,

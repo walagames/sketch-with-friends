@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/csv"
+	"fmt"
 	"log"
 	"log/slog"
 	"math/rand"
@@ -37,13 +38,14 @@ func init() {
 	loadWordBank()
 }
 
-type guess struct {
-	ID            uuid.UUID `json:"id"`
-	PlayerID      uuid.UUID `json:"playerId"`
-	Guess         string    `json:"guess"`
-	IsCorrect     bool      `json:"isCorrect"`
-	PointsAwarded int       `json:"pointsAwarded"`
-	IsClose       bool      `json:"isClose"`
+type ChatMessage struct {
+	ID              uuid.UUID `json:"id"`
+	PlayerID        uuid.UUID `json:"playerId"`
+	Guess           string    `json:"guess"`
+	IsCorrect       bool      `json:"isCorrect"`
+	PointsAwarded   int       `json:"pointsAwarded"`
+	IsClose         bool      `json:"isClose"`
+	IsSystemMessage bool      `json:"isSystemMessage"`
 }
 
 // game represents the current state of a game session.
@@ -66,7 +68,7 @@ type game struct {
 	currentWord     *DrawingWord
 	hintedWord      string
 	strokes         []Stroke
-	guesses         []guess
+	chatMessages    []ChatMessage
 	correctGuessers map[uuid.UUID]bool
 	pointsAwarded   map[uuid.UUID]int
 
@@ -94,12 +96,25 @@ func NewGame(initialPhase Phase, r *room) *game {
 		currentWord:       nil,
 		hintedWord:        "",
 		isCountdownActive: false,
-		guesses:           make([]guess, 0),
+		chatMessages:      make([]ChatMessage, 0),
 		correctGuessers:   make(map[uuid.UUID]bool),
 		pointsAwarded:     make(map[uuid.UUID]int),
 		isFirstPicking:    true,
 		cancelHintRoutine: nil,
 	}
+}
+
+func (g *game) SendSystemMessage(message string) {
+	newMessage := ChatMessage{
+		ID:              uuid.New(),
+		PlayerID:        uuid.Nil,
+		Guess:           message,
+		IsCorrect:       false,
+		PointsAwarded:   0,
+		IsSystemMessage: true,
+	}
+	g.chatMessages = append(g.chatMessages, newMessage)
+	g.room.broadcast(GameRoleAny, action(NewChatMessage, newMessage))
 }
 
 // Adds a player to the drawing queue.
@@ -166,15 +181,17 @@ func (g *game) handlePlayerLeave(player *player) {
 		delete(g.correctGuessers, player.ID)
 		delete(g.pointsAwarded, player.ID)
 
-		// Filter out the player's guesses
-		newGuesses := make([]guess, 0)
-		for _, g := range g.guesses {
+		// Filter out the player's messages
+		newChatMessages := make([]ChatMessage, 0)
+		for _, g := range g.chatMessages {
 			if g.PlayerID != player.ID {
-				newGuesses = append(newGuesses, g)
+				newChatMessages = append(newChatMessages, g)
 			}
 		}
-		g.guesses = newGuesses
-		g.room.broadcast(GameRoleAny, message(SetGuesses, g.guesses))
+		g.chatMessages = newChatMessages
+
+		g.room.broadcast(GameRoleAny, action(SetChat, g.chatMessages))
+		g.SendSystemMessage(fmt.Sprintf("%s left the room", player.Profile.Name))
 	}
 
 	g.removePlayerFromDrawingQueue(player.ID)
@@ -247,8 +264,13 @@ func (g *game) isGuessClose(guess string) bool {
 
 // Clears the guesses and resets the correct guessers map.
 // Used when a new round starts.
-func (g *game) clearGuesses() {
-	g.guesses = make([]guess, 0)
+func (g *game) clearChatMessages() {
+	g.chatMessages = make([]ChatMessage, 0)
+}
+
+// Resets the correct guessers map.
+// Used when a new round starts.
+func (g *game) resetCorrectGuessers() {
 	g.correctGuessers = make(map[uuid.UUID]bool)
 }
 
@@ -259,13 +281,14 @@ func (g *game) playerHasAlreadyGuessedCorrect(playerID uuid.UUID) bool {
 
 // Judges a guess and updates the game state accordingly.
 func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
-	var result guess
+	var result ChatMessage
 
 	playerIsDrawing := g.currentDrawer.ID == playerID
 	playerHasAlreadyGuessedCorrect := g.playerHasAlreadyGuessedCorrect(playerID)
+	phaseIsActive := time.Now().Before(g.currentPhaseDeadline)
 
 	// Check if the guess is correct if the player is not drawing and hasn't guessed correctly yet
-	if strings.EqualFold(guessValue, g.currentWord.Value) && !playerHasAlreadyGuessedCorrect && !playerIsDrawing {
+	if strings.EqualFold(guessValue, g.currentWord.Value) && !playerHasAlreadyGuessedCorrect && !playerIsDrawing && phaseIsActive {
 		remainingTime := time.Until(g.currentPhaseDeadline)
 		totalTime := time.Duration(g.room.Settings.DrawingTimeAllowed) * time.Second
 
@@ -280,7 +303,7 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 		g.currentDrawer.Score += drawerPoints
 		g.pointsAwarded[g.currentDrawer.ID] += drawerPoints
 
-		result = guess{
+		result = ChatMessage{
 			ID:            uuid.New(),
 			PlayerID:      playerID,
 			Guess:         "", // Dont leak the correct word to the other players
@@ -289,22 +312,22 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 		}
 
 		g.correctGuessers[playerID] = true
-		g.room.Players[playerID].Send(message(SelectWord, g.currentWord.Value))
+		g.room.Players[playerID].Send(action(SelectWord, g.currentWord.Value))
 	} else {
-		result = guess{
+		result = ChatMessage{
 			ID:       uuid.New(),
 			PlayerID: playerID,
 			Guess:    guessValue,
 		}
 
-		if !playerIsDrawing && !playerHasAlreadyGuessedCorrect {
+		if !playerIsDrawing && !playerHasAlreadyGuessedCorrect && phaseIsActive {
 			result.IsClose = g.isGuessClose(strings.ToLower(guessValue))
 		}
 	}
 
 	// Tell the other players about the guess
-	g.guesses = append(g.guesses, result)
-	g.room.broadcast(GameRoleAny, message(GuessResult, result))
+	g.chatMessages = append(g.chatMessages, result)
+	g.room.broadcast(GameRoleAny, action(NewChatMessage, result))
 
 	// Skip to the next phase if everyone has guessed correctly already
 	if len(g.correctGuessers) >= len(g.room.Players)-1 {
@@ -348,51 +371,69 @@ func loadWordBank() {
 
 // Returns unique, random words from the word bank based on the specified difficulty.
 func (g *game) randomWordOptions(n int) []DrawingWord {
-	filteredWords := wordBank
-
 	// If the word bank is custom only, we use the custom words if there are any
 	if g.room.Settings.WordBank == WordBankCustom && len(g.customWords) > 0 {
-		filteredWords = g.customWords
+		return g.customWords[:min(n, len(g.customWords))]
 	}
 
-	// If the word bank is mixed, we duplicate custom words multiple times to increase their probability
-	if g.room.Settings.WordBank == WordBankMixed && len(g.customWords) > 0 {
-		// Add custom words multiple times to increase their weight
-		const customWordWeight = 3 // Custom words are 3x more likely to be selected
-		weightedCustomWords := make([]DrawingWord, 0, len(g.customWords)*customWordWeight)
-		for i := 0; i < customWordWeight; i++ {
-			weightedCustomWords = append(weightedCustomWords, g.customWords...)
+	// For non-random difficulty, use the original filtering logic
+	if g.room.Settings.WordDifficulty != WordDifficultyRandom {
+		filteredWords := wordBank
+		if g.room.Settings.WordBank == WordBankMixed && len(g.customWords) > 0 {
+			const customWordWeight = 3
+			weightedCustomWords := make([]DrawingWord, 0, len(g.customWords)*customWordWeight)
+			for i := 0; i < customWordWeight; i++ {
+				weightedCustomWords = append(weightedCustomWords, g.customWords...)
+			}
+			filteredWords = append(filteredWords, weightedCustomWords...)
 		}
-		filteredWords = append(filteredWords, weightedCustomWords...)
-	}
 
-	// If the difficulty is not random or custom only, we filter the word bank based on the difficulty
-	if g.room.Settings.WordDifficulty != WordDifficultyRandom && g.room.Settings.WordBank != WordBankCustom {
 		wordsByDifficulty := make([]DrawingWord, 0)
 		for _, word := range filteredWords {
 			if word.Difficulty == g.room.Settings.WordDifficulty || word.Difficulty == WordDifficultyCustom {
 				wordsByDifficulty = append(wordsByDifficulty, word)
 			}
 		}
-		filteredWords = wordsByDifficulty
+
+		// Create a set to ensure uniqueness
+		wordSet := make(map[DrawingWord]struct{})
+		for len(wordSet) < n && len(wordSet) < len(wordsByDifficulty) {
+			word := wordsByDifficulty[rand.Intn(len(wordsByDifficulty))]
+			wordSet[word] = struct{}{}
+		}
+
+		words := make([]DrawingWord, 0, len(wordSet))
+		for word := range wordSet {
+			words = append(words, word)
+		}
+		return words
 	}
 
-	// Create a set to ensure uniqueness
-	wordSet := make(map[DrawingWord]struct{})
-
-	// Keep adding words until we have the required number or run out of words
-	for len(wordSet) < n && len(wordSet) < len(filteredWords) {
-		word := filteredWords[rand.Intn(len(filteredWords))]
-		wordSet[word] = struct{}{}
+	// For random difficulty, get one word of each difficulty
+	var easyWords, mediumWords, hardWords []DrawingWord
+	for _, word := range wordBank {
+		switch word.Difficulty {
+		case WordDifficultyEasy:
+			easyWords = append(easyWords, word)
+		case WordDifficultyMedium:
+			mediumWords = append(mediumWords, word)
+		case WordDifficultyHard:
+			hardWords = append(hardWords, word)
+		}
 	}
 
-	// Convert set to slice
-	words := make([]DrawingWord, 0, len(wordSet))
-	for word := range wordSet {
-		words = append(words, word)
+	result := make([]DrawingWord, 3)
+	result[0] = easyWords[rand.Intn(len(easyWords))]
+	result[1] = mediumWords[rand.Intn(len(mediumWords))]
+
+	// 30% chance to use a custom word instead of a hard word if available and using mixed word bank
+	if g.room.Settings.WordBank == WordBankMixed && len(g.customWords) > 0 && rand.Float32() < 0.3 {
+		result[2] = g.customWords[rand.Intn(len(g.customWords))]
+	} else {
+		result[2] = hardWords[rand.Intn(len(hardWords))]
 	}
 
-	return words
+	return result
 }
 
 // Applies a new hint to the hinted word.
@@ -453,7 +494,7 @@ func (g *game) hintRoutine(ctx context.Context, phaseDuration time.Duration) {
 			for _, p := range g.room.Players {
 				// Only send the hint to players who are guessing and haven't guessed correctly yet
 				if p.GameRole == GameRoleGuessing && !g.correctGuessers[p.ID] {
-					p.Send(message(SelectWord, g.hintedWord))
+					p.Send(action(SelectWord, g.hintedWord))
 				}
 			}
 		}
@@ -519,7 +560,7 @@ func (phase PickingPhase) Start(g *game) {
 		// It's the last round, end the game
 		if g.currentRound >= g.room.Settings.TotalRounds {
 			g.room.Stage = PreGame
-			g.room.broadcast(GameRoleAny, message(ChangeStage, g.room.Stage))
+			g.room.broadcast(GameRoleAny, action(ChangeStage, g.room.Stage))
 			return
 		}
 
@@ -535,7 +576,7 @@ func (phase PickingPhase) Start(g *game) {
 
 	// Send the drawer their word options
 	g.wordOptions = g.randomWordOptions(3)
-	g.currentDrawer.Send(message(WordOptions, g.wordOptions))
+	g.currentDrawer.Send(action(WordOptions, g.wordOptions))
 
 	// Set the deadline to 1 second before the phase ends to allow
 	// some buffer for the countdown timer to display.
@@ -545,9 +586,9 @@ func (phase PickingPhase) Start(g *game) {
 
 	// Inform players of the state changes
 	g.room.broadcast(GameRoleAny,
-		message(SetPlayers, g.room.Players),
-		message(SetRound, g.currentRound),
-		message(ChangePhase,
+		action(SetPlayers, g.room.Players),
+		action(SetRound, g.currentRound),
+		action(ChangePhase,
 			PhaseChangeMessage{
 				Phase:        g.currentPhase.Name(),
 				Deadline:     g.currentPhaseDeadline,
@@ -566,7 +607,7 @@ func (phase PickingPhase) End(g *game) {
 		g.currentWord = &g.wordOptions[randomIndex]
 
 		// Notify all players of the chosen word
-		g.room.broadcast(GameRoleAny, message(SelectWord, g.currentWord.Value))
+		g.room.broadcast(GameRoleAny, action(SelectWord, g.currentWord.Value))
 	}
 }
 
@@ -597,7 +638,7 @@ func (phase DrawingPhase) Start(g *game) {
 		}
 	}
 	g.hintedWord = string(hintRunes)
-	g.room.broadcast(GameRoleGuessing, message(SelectWord, g.hintedWord))
+	g.room.broadcast(GameRoleGuessing, action(SelectWord, g.hintedWord))
 
 	// We create a cancelable context for the hint routine
 	// so we can cancel it if the drawing phase ends prematurely.
@@ -612,7 +653,7 @@ func (phase DrawingPhase) Start(g *game) {
 
 	// Inform players of the phase change
 	g.room.broadcast(GameRoleAny,
-		message(ChangePhase,
+		action(ChangePhase,
 			PhaseChangeMessage{
 				Phase:        g.currentPhase.Name(),
 				Deadline:     g.currentPhaseDeadline,
@@ -629,31 +670,47 @@ func (phase DrawingPhase) End(g *game) {
 	// Cleanup
 	g.room.timer.Stop()
 	g.cancelHintRoutine()
-	g.clearGuesses()
+	// g.clearChatMessages()
 
 	// Reveal the word
 	g.hintedWord = g.currentWord.Value
 	g.currentPhaseDeadline = time.Now().UTC()
 
 	g.room.broadcast(GameRoleAny,
-		message(SelectWord, g.hintedWord),
+		action(SelectWord, g.hintedWord),
 		// Send another phase change message to stop the countdown timer
 		// in the case we advance early because everyone guessed correctly.
-		message(ChangePhase, PhaseChangeMessage{
+		action(ChangePhase, PhaseChangeMessage{
 			Phase:        g.currentPhase.Name(),
 			Deadline:     g.currentPhaseDeadline, // Stop the timer
 			IsLastPhase:  false,
 			IsFirstPhase: false,
 		}))
 
-	// Let players see the word for a few seconds before transitioning
-	time.Sleep(time.Second * 2)
+	var msg string
+
+	if len(g.correctGuessers) == (len(g.room.Players) - 1) {
+		msg = fmt.Sprintf("%s sketched %s and everyone got it!", g.currentDrawer.Profile.Name, g.hintedWord)
+	} else if len(g.correctGuessers) > 0 {
+		playersStr := "player"
+		if len(g.correctGuessers) > 1 {
+			playersStr = "players"
+		}
+		msg = fmt.Sprintf("%s sketched %s and %d %s got it.", g.currentDrawer.Profile.Name, g.hintedWord, len(g.correctGuessers), playersStr)
+	} else if len(g.correctGuessers) == 0 {
+		msg = fmt.Sprintf("%s sketched %s and no one got it lol", g.currentDrawer.Profile.Name, g.hintedWord)
+	} else {
+		msg = fmt.Sprintf("%s sketched %s", g.currentDrawer.Profile.Name, g.hintedWord)
+	}
+
+	g.SendSystemMessage(msg)
 
 	// Inform players of the state changes
 	g.room.broadcast(GameRoleAny,
-		message(SetGuesses, g.guesses),
-		message(SetPlayers, g.room.Players),
+		action(SetPlayers, g.room.Players),
 	)
+
+	g.resetCorrectGuessers()
 }
 
 func (phase DrawingPhase) Next(g *game) {
@@ -667,33 +724,38 @@ func (phase PostDrawingPhase) Name() PhaseName {
 }
 
 func (phase PostDrawingPhase) Start(g *game) {
-	phaseDuration := PostDrawingPhaseDuration
+	go func() {
+		// Wait for few seconds to allow players to see the correct word
+		time.Sleep(time.Second * 4)
 
-	// If its the last phase, we increase the duration to allow
-	// players to see the correct word and scoreboard for longer.
-	isLastPhase := g.currentRound >= g.room.Settings.TotalRounds && len(g.drawingQueue) == 0
-	if isLastPhase {
-		phaseDuration = time.Second * 15
-	}
+		phaseDuration := PostDrawingPhaseDuration
 
-	// Set the deadline to 1 second before the phase ends to allow
-	// some buffer for the countdown timer to display.
-	g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
+		// If its the last phase, we increase the duration to allow
+		// players to see the correct word and scoreboard for longer.
+		isLastPhase := g.currentRound >= g.room.Settings.TotalRounds && len(g.drawingQueue) == 0
+		if isLastPhase {
+			phaseDuration = time.Second * 15
+		}
 
-	// Inform players of the phase change and points awarded
-	g.room.broadcast(GameRoleAny,
-		message(PointsAwarded, g.pointsAwarded),
-		message(ChangePhase,
-			PhaseChangeMessage{
-				Phase:        g.currentPhase.Name(),
-				Deadline:     g.currentPhaseDeadline,
-				IsLastPhase:  isLastPhase,
-				IsFirstPhase: false,
-			}),
-	)
+		// Set the deadline to 1 second before the phase ends to allow
+		// some buffer for the countdown timer to display.
+		g.currentPhaseDeadline = time.Now().Add(phaseDuration - time.Second*1).UTC()
 
-	// Start the timer
-	g.room.timer.Reset(phaseDuration)
+		// Inform players of the phase change and points awarded
+		g.room.broadcast(GameRoleAny,
+			action(PointsAwarded, g.pointsAwarded),
+			action(ChangePhase,
+				PhaseChangeMessage{
+					Phase:        g.currentPhase.Name(),
+					Deadline:     g.currentPhaseDeadline,
+					IsLastPhase:  isLastPhase,
+					IsFirstPhase: false,
+				}),
+		)
+
+		// Start the timer
+		g.room.timer.Reset(phaseDuration)
+	}()
 }
 
 func (phase PostDrawingPhase) End(g *game) {
@@ -712,9 +774,9 @@ func (phase PostDrawingPhase) End(g *game) {
 
 	// Inform players of the state changes
 	g.room.broadcast(GameRoleAny,
-		message(ClearStrokes, nil),
-		message(SelectWord, ""),
-		message(SetPlayers, g.room.Players),
+		action(ClearStrokes, nil),
+		action(SelectWord, ""),
+		action(SetPlayers, g.room.Players),
 	)
 }
 
