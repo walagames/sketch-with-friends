@@ -24,7 +24,7 @@ export interface GameState {
 	currentPhaseDeadline: string;
 	currentRound: number;
 	wordOptions: DrawingWord[];
-	guesses: Guess[];
+	chatMessages: ChatMessage[];
 	selectedWord: string;
 	isLastPhase: boolean;
 	isFirstPhase: boolean;
@@ -37,20 +37,21 @@ const initialState: GameState = {
 	currentPhaseDeadline: new Date().toISOString(),
 	currentRound: 0,
 	wordOptions: [],
-	guesses: [],
+	chatMessages: [],
 	selectedWord: "",
 	isLastPhase: false,
 	isFirstPhase: false,
 	pointsAwarded: {},
 };
 
-export type Guess = {
+export type ChatMessage = {
 	id: string;
 	playerId: string;
 	guess: boolean;
 	isCorrect: boolean;
 	pointsAwarded: number;
 	isClose: boolean;
+	isSystemMessage: boolean;
 };
 
 export const gameSlice = createSlice({
@@ -87,11 +88,11 @@ export const gameSlice = createSlice({
 		setRound: (state, action: PayloadAction<number>) => {
 			state.currentRound = action.payload;
 		},
-		guessResult: (state, action: PayloadAction<Guess>) => {
-			state.guesses.push(action.payload);
+		newChatMessage: (state, action: PayloadAction<ChatMessage>) => {
+			state.chatMessages.push(action.payload);
 		},
-		setGuesses: (state, action: PayloadAction<Guess[]>) => {
-			state.guesses = action.payload;
+		setChat: (state, action: PayloadAction<ChatMessage[]>) => {
+			state.chatMessages = action.payload;
 		},
 		setPhaseDeadline: (state, action: PayloadAction<string>) => {
 			state.currentPhaseDeadline = action.payload;
