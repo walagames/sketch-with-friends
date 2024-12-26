@@ -6,8 +6,10 @@ import { addStroke, addStrokePoint, Stroke } from "@/state/features/canvas";
 import { useWindowSize } from "@/hooks/use-window-size";
 import { getGameRole } from "@/lib/player";
 import { addRecentlyUsedColor } from "@/state/features/client";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 const CANVAS_SCALE = 2;
+const MOBILE_OFFSET = 20;
 
 function Canvas({
 	padding,
@@ -34,6 +36,8 @@ function Canvas({
 	const players = useSelector((state: RootState) => state.room.players);
 	const playerId = useSelector((state: RootState) => state.client.id);
 	const role = getGameRole(playerId, players);
+
+	const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 
 	const currentPhaseDeadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
@@ -194,7 +198,11 @@ function Canvas({
 		isDrawing.current = true;
 		lastPointRef.current = null; // Reset last point on new stroke
 		const rect = e.currentTarget.getBoundingClientRect();
-		const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
+		const [x, y] = getScaledCoordinates(
+			e.clientX,
+			e.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
+			rect
+		);
 
 		dispatch(
 			addStroke({
@@ -216,7 +224,11 @@ function Canvas({
 			return;
 
 		const rect = e.currentTarget.getBoundingClientRect();
-		const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
+		const [x, y] = getScaledCoordinates(
+			e.clientX,
+			e.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
+			rect
+		);
 
 		// Allow points slightly outside bounds to be recorded
 		dispatch(addStrokePoint([x, y]));
@@ -227,7 +239,11 @@ function Canvas({
 			e.preventDefault();
 			const rect = e.currentTarget.getBoundingClientRect();
 			const touch = e.touches[0];
-			const [x, y] = getScaledCoordinates(touch.clientX, touch.clientY, rect);
+			const [x, y] = getScaledCoordinates(
+				touch.clientX,
+				touch.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
+				rect
+			);
 
 			dispatch(addStrokePoint([x, y]));
 		}
@@ -238,7 +254,11 @@ function Canvas({
 			e.preventDefault();
 			const rect = e.currentTarget.getBoundingClientRect();
 			const touch = e.touches[0];
-			const [x, y] = getScaledCoordinates(touch.clientX, touch.clientY, rect);
+			const [x, y] = getScaledCoordinates(
+				touch.clientX,
+				touch.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
+				rect
+			);
 			dispatch(
 				addStroke({
 					color: strokeColor,
@@ -253,7 +273,7 @@ function Canvas({
 	const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
 		if (role === GameRole.Drawing && roundIsActive()) {
 			const cursor = cursorRef.current;
-			if (cursor) {
+			if (cursor && isLargeScreen) {
 				cursor.style.display = "block";
 				cursor.style.left = `${e.clientX + 2.5}px`;
 				cursor.style.top = `${e.clientY + 2.5}px`;
@@ -305,7 +325,11 @@ function Canvas({
 					handleMouseLeave();
 					if (isDrawing.current) {
 						const rect = e.currentTarget.getBoundingClientRect();
-						const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
+						const [x, y] = getScaledCoordinates(
+							e.clientX,
+							e.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
+							rect
+						);
 						dispatch(addStrokePoint([x, y]));
 						isDrawing.current = false;
 					}
@@ -313,7 +337,12 @@ function Canvas({
 				onMouseEnter={(e) => {
 					if (e.buttons === 1 && role === GameRole.Drawing && roundIsActive()) {
 						const rect = e.currentTarget.getBoundingClientRect();
-						const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
+
+						const [x, y] = getScaledCoordinates(
+							e.clientX,
+							e.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
+							rect
+						);
 
 						isDrawing.current = true;
 						dispatch(
