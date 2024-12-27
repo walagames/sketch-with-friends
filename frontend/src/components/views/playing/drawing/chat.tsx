@@ -296,6 +296,10 @@ const FormSchema = z.object({
 });
 export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
 	const dispatch = useDispatch();
+	const [messageHistory, setMessageHistory] = useState<string[]>([]);
+	const [historyIndex, setHistoryIndex] = useState(-1);
+	const [currentMessage, setCurrentMessage] = useState("");
+
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -303,13 +307,39 @@ export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
 		},
 	});
 
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+		if (e.key === "ArrowUp") {
+			e.preventDefault();
+			if (historyIndex < messageHistory.length - 1) {
+				const newIndex = historyIndex + 1;
+				setHistoryIndex(newIndex);
+				const historicMessage = messageHistory[newIndex];
+				form.setValue("message", historicMessage);
+				setCurrentMessage(historicMessage);
+			}
+		} else if (e.key === "ArrowDown") {
+			e.preventDefault();
+			if (historyIndex > -1) {
+				const newIndex = historyIndex - 1;
+				setHistoryIndex(newIndex);
+				const historicMessage =
+					newIndex === -1 ? currentMessage : messageHistory[newIndex];
+				form.setValue("message", historicMessage);
+			}
+		}
+	};
+
 	async function onSubmit(data: z.infer<typeof FormSchema>) {
 		const trimmedMessage = data.message.trim();
 		if (trimmedMessage) {
+			setMessageHistory((prev) => [trimmedMessage, ...prev]);
+			setHistoryIndex(-1);
+			setCurrentMessage("");
 			dispatch({ type: "game/submitChatMessage", payload: trimmedMessage });
 			form.reset();
 		}
 	}
+
 	return (
 		<Form {...form}>
 			<form onSubmit={form.handleSubmit(onSubmit)}>
@@ -323,7 +353,14 @@ export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
 									<RaisedInput
 										autoComplete="off"
 										placeholder={isGuessing ? "Guess" : "Chat"}
+										onKeyDown={handleKeyDown}
 										{...field}
+										onChange={(e) => {
+											field.onChange(e);
+											if (historyIndex === -1) {
+												setCurrentMessage(e.target.value);
+											}
+										}}
 									/>
 								</div>
 							</FormControl>
