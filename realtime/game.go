@@ -732,7 +732,7 @@ func (phase PostDrawingPhase) Name() PhaseName {
 func (phase PostDrawingPhase) Start(g *game) {
 	go func() {
 		// Wait for few seconds to allow players to see the correct word
-		time.Sleep(time.Second * 4)
+		time.Sleep(time.Second * 3)
 
 		phaseDuration := PostDrawingPhaseDuration
 
