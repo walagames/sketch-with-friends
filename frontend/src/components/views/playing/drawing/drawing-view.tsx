@@ -32,7 +32,7 @@ export function DrawingView() {
 	useEffect(() => {
 		const timeout = setTimeout(() => {
 			setShowSketchText(false);
-		}, 1400);
+		}, 1250);
 
 		return () => {
 			clearTimeout(timeout);

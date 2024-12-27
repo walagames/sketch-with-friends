@@ -107,11 +107,12 @@ function LeaderboardPlace({
 		profile: { name, avatarSeed },
 	} = player;
 	const avatarSvg = generateAvatar(avatarSeed);
-	const currentPlayerId = useSelector((state: RootState) => state.client.id);
-	const isCurrentPlayer = currentPlayerId === player.id;
 
 	const points =
 		useSelector((state: RootState) => state.game.pointsAwarded[player.id]) ?? 0;
+
+	const currentPlayerId = useSelector((state: RootState) => state.client.id);
+	const isCurrentPlayer = currentPlayerId === player.id;
 
 	return (
 		<div className="flex lg:gap-6 gap-2 w-full items-center">
@@ -162,9 +163,9 @@ function PodiumPlace({
 	const avatarSvg = generateAvatar(avatarSeed);
 
 	const podiumColor = {
-		1: { color: "bg-primary", height: 180, placeText: "1st", delay: 0.4 },
-		2: { color: "bg-sky-500", height: 140, placeText: "2nd", delay: 0.3 },
-		3: { color: "bg-red-500", height: 120, placeText: "3rd", delay: 0.2 },
+		1: { color: "bg-primary", height: 180, placeText: "1st", delay: 0.2 },
+		2: { color: "bg-sky-500", height: 140, placeText: "2nd", delay: 0.1 },
+		3: { color: "bg-red-500", height: 120, placeText: "3rd", delay: 0.0 },
 	};
 
 	const { color, height, placeText, delay } =

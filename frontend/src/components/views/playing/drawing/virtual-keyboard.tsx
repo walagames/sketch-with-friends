@@ -173,9 +173,9 @@ export const VirtualKeyboard = forwardRef<
 	};
 
 	const handleSubmit = useCallback(() => {
-		const trimmedGuess = inputBufferRef.current.trim();
-		if (trimmedGuess) {
-			dispatch({ type: "game/submitGuess", payload: trimmedGuess });
+		const trimmedMessage = inputBufferRef.current.trim();
+		if (trimmedMessage) {
+			dispatch({ type: "game/submitChatMessage", payload: trimmedMessage });
 			inputBufferRef.current = "";
 			setInput("");
 		}
