@@ -39,6 +39,16 @@ export const JoinRoomFormSchema = z.object({
 		})
 		.max(16, {
 			message: "Username must be at most 16 characters.",
+		})
+		.refine((value) => /^[a-zA-Z'][a-zA-Z' ]*[a-zA-Z']$/.test(value), {
+			message:
+				"Username can only contain letters, apostrophes, and single spaces between words.",
+		})
+		.refine((value) => !value.includes("  "), {
+			message: "Username cannot contain consecutive spaces.",
+		})
+		.refine((value) => !value.includes("''"), {
+			message: "Username cannot contain consecutive apostrophes.",
 		}),
 });
 
@@ -58,7 +68,9 @@ export function PlayerInfoForm({
 	handleSubmit,
 	defaultValues,
 }: PlayerInfoFormProps) {
-	const [avatarSeed, setAvatarSeed] = useState(defaultValues?.avatarSeed ?? randomAvatarSeed());
+	const [avatarSeed, setAvatarSeed] = useState(
+		defaultValues?.avatarSeed ?? randomAvatarSeed()
+	);
 	const [avatarSvg, setAvatarSvg] = useState("");
 
 	const form = useForm<z.infer<typeof JoinRoomFormSchema>>({
@@ -79,7 +91,7 @@ export function PlayerInfoForm({
 			avatarSeed: avatarSeed,
 			avatarColor: colors[0],
 		});
-	}
+	};
 
 	return (
 		<div className="max-w-56 w-full flex flex-col gap-5 items-center relative z-50">
@@ -126,9 +138,7 @@ export function PlayerInfoForm({
 								</FormControl>
 								<FormMessage />
 								{bottomButton && (
-									<div className="flex justify-end pt-2">
-										{bottomButton}
-									</div>
+									<div className="flex justify-end pt-2">{bottomButton}</div>
 								)}
 							</FormItem>
 						)}
