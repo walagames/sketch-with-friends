@@ -77,6 +77,41 @@ func TestFilterInvalidRunes(t *testing.T) {
 			input:    "héllö wørld",
 			expected: "hll wrld",
 		},
+		{
+			name:     "valid hyphenated word",
+			input:    "well-known",
+			expected: "well-known",
+		},
+		{
+			name:     "hyphenated word with spaces",
+			input:    "well - known",
+			expected: "well known",
+		},
+		{
+			name:     "multiple valid hyphens",
+			input:    "up-to-date",
+			expected: "up-to-date",
+		},
+		{
+			name:     "leading hyphen",
+			input:    "-test",
+			expected: "test",
+		},
+		{
+			name:     "trailing hyphen",
+			input:    "test-",
+			expected: "test",
+		},
+		{
+			name:     "multiple consecutive hyphens",
+			input:    "test--word",
+			expected: "test-word",
+		},
+		{
+			name:     "hyphen with apostrophe",
+			input:    "don't-worry",
+			expected: "don't-worry",
+		},
 	}
 
 	for _, tt := range tests {

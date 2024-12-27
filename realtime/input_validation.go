@@ -51,14 +51,26 @@ func filterInvalidRunes(word string) string {
 	var lastRune rune
 
 	for i, r := range word {
-		// Allow only lowercase letters (a-z), apostrophe, and space
-		if (r >= 'a' && r <= 'z') || r == '\'' || r == ' ' {
+		// Allow lowercase letters (a-z), apostrophe, space, and dash
+		if (r >= 'a' && r <= 'z') || r == '\'' || r == ' ' || r == '-' {
 			// Skip if this is a space and either:
 			// - it's the first character (no leading spaces)
 			// - it's right after another space (no consecutive spaces)
 			// - it's the last character (no trailing spaces)
 			if r == ' ' {
 				if i == 0 || lastRune == ' ' || i == len(word)-1 {
+					continue
+				}
+			}
+
+			// Skip dash if:
+			// - it's the first or last character
+			// - it's next to another dash
+			// - it's next to a space
+			// - it's next to an apostrophe
+			if r == '-' {
+				if i == 0 || i == len(word)-1 || 
+				   lastRune == '-' || lastRune == ' ' || lastRune == '\'' {
 					continue
 				}
 			}

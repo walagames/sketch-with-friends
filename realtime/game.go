@@ -632,8 +632,8 @@ func (phase DrawingPhase) Start(g *game) {
 	wordRunes := []rune(g.currentWord.Value)
 	hintRunes := make([]rune, len(wordRunes))
 	for i, r := range wordRunes {
-		if r == ' ' {
-			hintRunes[i] = ' '
+		if r == ' ' || r == '-' {
+			hintRunes[i] = r
 		} else {
 			hintRunes[i] = '*'
 		}
@@ -689,19 +689,24 @@ func (phase DrawingPhase) End(g *game) {
 		}))
 
 	var msg string
+	drawerName := "A player"
+
+	if g.currentDrawer != nil {
+		drawerName = g.currentDrawer.Profile.Name
+	}
 
 	if len(g.correctGuessers) == (len(g.room.Players) - 1) {
-		msg = fmt.Sprintf("%s sketched %s and everyone got it!", g.currentDrawer.Profile.Name, g.hintedWord)
+		msg = fmt.Sprintf("%s sketched %s and everyone got it!", drawerName, g.hintedWord)
 	} else if len(g.correctGuessers) > 0 {
 		playersStr := "player"
 		if len(g.correctGuessers) > 1 {
 			playersStr = "players"
 		}
-		msg = fmt.Sprintf("%s sketched %s and %d %s got it.", g.currentDrawer.Profile.Name, g.hintedWord, len(g.correctGuessers), playersStr)
+		msg = fmt.Sprintf("%s sketched %s and %d %s got it.", drawerName, g.hintedWord, len(g.correctGuessers), playersStr)
 	} else if len(g.correctGuessers) == 0 {
-		msg = fmt.Sprintf("%s sketched %s and no one got it lol", g.currentDrawer.Profile.Name, g.hintedWord)
+		msg = fmt.Sprintf("%s sketched %s and no one got it lol", drawerName, g.hintedWord)
 	} else {
-		msg = fmt.Sprintf("%s sketched %s", g.currentDrawer.Profile.Name, g.hintedWord)
+		msg = fmt.Sprintf("%s sketched %s", drawerName, g.hintedWord)
 	}
 
 	g.SendSystemMessage(msg)
