@@ -32,7 +32,7 @@ export function DrawingView() {
 	useEffect(() => {
 		const timeout = setTimeout(() => {
 			setShowSketchText(false);
-		}, 1500);
+		}, 1400);
 
 		return () => {
 			clearTimeout(timeout);
@@ -50,9 +50,7 @@ export function DrawingView() {
 							<div className="relative">
 								<AnimatePresence>
 									{showSketchText && (
-										<div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-3/4 z-50">
-											<AnimatedSketchText className="lg:h-[4.5rem] h-[3.5rem] text-black" />
-										</div>
+										<AnimatedSketchText className="lg:h-[4rem] h-[3rem] text-black absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-3/4 z-50" />
 									)}
 								</AnimatePresence>
 								<Canvas padding={10} width={800} height={600} />

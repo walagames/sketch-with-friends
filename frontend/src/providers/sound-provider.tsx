@@ -50,7 +50,7 @@ const SOUND_PATHS: Record<SoundEffect, SoundConfig> = {
 	[SoundEffect.SCENE_CHANGE]: { path: "/sounds/whoosh.mp3", volume: 0.25 },
 	[SoundEffect.PLAYER_WIN]: { path: "/sounds/player-win.mp3", volume: 1 },
 	[SoundEffect.PLAYER_LOSE]: { path: "/sounds/player-lose.mp3", volume: 1 },
-	[SoundEffect.SCRIBBLE]: { path: "/sounds/scribble.mp3", volume: 0.5 },
+	[SoundEffect.SCRIBBLE]: { path: "/sounds/scribble.mp3", volume: 0.25 },
 	[SoundEffect.CHAT_MESSAGE]: {
 		path: "/sounds/chat-pop.mp3",
 		volume: 0.6,

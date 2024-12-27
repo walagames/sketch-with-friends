@@ -180,8 +180,8 @@ function ChatMessageComponent({
 	if (message.isSystemMessage) {
 		return (
 			<motion.li
-				initial={{ opacity: 0, y: 3 }}
-				animate={{ opacity: 1, y: 0 }}
+				initial={{ opacity: 0, y: 3, scale: 0.9 }}
+				animate={{ opacity: 1, y: 0, scale: 1 }}
 				className="mx-auto text-center py-2 px-3 rounded-lg bg-white"
 			>
 				<span
