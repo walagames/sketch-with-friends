@@ -13,6 +13,7 @@ export type Player = {
 	roomRole: RoomRole;
 	gameRole: GameRole;
 	score: number;
+	streak: number;
 };
 
 export type PlayerProfile = {

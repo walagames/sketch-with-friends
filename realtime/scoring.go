@@ -1,65 +1,127 @@
 package main
 
-import "math"
+import (
+	"math"
+	"slices"
+	"strings"
 
-const (
-	BASE_POINTS_PER_PLAYER = 100.0
-	DECAY_RATE             = 1.25
+	"github.com/google/uuid"
 )
 
-// CalculateScore calculates the points for both guesser and drawer using exponential decay
+const (
+	// Base points for a correct guess
+	BASE_POINTS       = 300
+	POINTS_PER_PLAYER = 25
+
+	// Share of points for the drawer based on word difficulty
+	HARD_WORD_SHARE   = 0.6
+	MEDIUM_WORD_SHARE = 0.35
+	EASY_WORD_SHARE   = 0.15
+
+	// Base points for a streak bonus (per streak)
+	BASE_STREAK_BONUS = 10.0
+
+	// Maximum streak bonus
+	MAX_STREAK = 10
+)
+
+// GuessPoints calculates the points for both guesser and drawer using exponential decay
 //
 // Parameters:
 // - maxGuessers: total number of players who can guess (excluding drawer)
 // - correctGuesses: number of players who have already guessed correctly
-// - timeRemaining: percentage of time remaining (1.0 = full time, 0.0 = no time)
+// - wordDifficulty: the difficulty of the word being guessed
+//
 // Returns:
 // - guesserScore: points awarded to the current guesser
 // - drawerScore: points awarded to the drawer for this guess
-func CalculateScore(maxGuessers, correctGuesses int, timeRemaining float64, wordDifficulty WordDifficulty, wordMode WordDifficulty) (guesserScore, drawerScore int) {
-	// Validate inputs
-	if timeRemaining < 0 {
-		timeRemaining = 0
-	}
-	if timeRemaining > 1 {
-		timeRemaining = 1
-	}
-	if correctGuesses >= maxGuessers {
-		return 0, 0
+func GuessPoints(maxGuessers, correctGuesses int, wordDifficulty WordDifficulty) (guesserScore, drawerScore int) {
+	drawerSharePercent := EASY_WORD_SHARE
+
+	// Adjust the drawer's share based on the word difficulty
+	switch wordDifficulty {
+	case WordDifficultyEasy:
+		drawerSharePercent = EASY_WORD_SHARE
+	case WordDifficultyMedium, WordDifficultyCustom:
+		drawerSharePercent = MEDIUM_WORD_SHARE
+	case WordDifficultyHard:
+		drawerSharePercent = HARD_WORD_SHARE
 	}
 
-	wordDifficultyScoreMultiplier := 1.0
-	drawerSharePercent := 0.25
-	// adjust multipliers based on word difficulty
-	if wordMode == WordDifficultyRandom {
-		switch wordDifficulty {
-		case WordDifficultyEasy:
-			wordDifficultyScoreMultiplier = 1.0
-			drawerSharePercent = 0.25
-		case WordDifficultyMedium:
-			wordDifficultyScoreMultiplier = 1.5
-			drawerSharePercent = 0.375
-		case WordDifficultyHard:
-			wordDifficultyScoreMultiplier = 2.0
-			drawerSharePercent = 0.5
-		}
-	}
-
-	basePoints := int(BASE_POINTS_PER_PLAYER * float64(maxGuessers) * wordDifficultyScoreMultiplier)
-
-	// Calculate time decay (e^(-2x) where x is the time elapsed)
-	// Using -2 as decay rate - can be adjusted for faster/slower decay
-	timeElapsed := 1.0 - timeRemaining
-	timeMultiplier := math.Exp(-DECAY_RATE * timeElapsed)
+	maxPoints := BASE_POINTS + POINTS_PER_PLAYER*maxGuessers
 
 	// Calculate position multiplier (earlier guessers get larger share)
-	positionMultiplier := float64(maxGuessers-correctGuesses) / float64(maxGuessers)
-
-	// Calculate guesser points with decay
-	guesserPoints := float64(basePoints) * timeMultiplier * positionMultiplier
+	positionMultiplier := float32(maxGuessers-correctGuesses) / float32(maxGuessers)
+	guesserPoints := float32(maxPoints) * positionMultiplier
 
 	// Calculate the drawer's share of the points
-	drawerPoints := guesserPoints * drawerSharePercent
+	drawerPoints := guesserPoints * float32(drawerSharePercent)
 
 	return int(guesserPoints), int(drawerPoints)
+}
+
+// StreakBonus calculates the points for a streak bonus with exponential decay for top players
+//
+// Parameters:
+// - position: the position of the player in the game (1-based ranking)
+// - totalPlayers: the total number of players in the game
+// - streak: the number of consecutive correct guesses
+//
+// Returns:
+// - streakBonus: the points for the streak bonus
+func StreakBonus(position int, totalPlayers int, streak int) int {
+	// Convert position to 0-based for calculation
+	zeroBasedPos := position - 1
+
+	// Calculate exponential multiplier (e^(-3x/n)) where x is position and n is total players
+	exponent := -2.0 * float32(zeroBasedPos) / float32(totalPlayers)
+	multiplier := 1.0 - float32(1.0-math.Exp(float64(exponent)))
+
+	// Invert the multiplier so last place gets highest bonus
+	multiplier = 1.0 - multiplier
+
+	// Adjust range to be between 0.25 and 1.0 instead of 0 to 1.0
+	multiplier = 0.25 + (multiplier * 0.75)
+
+	return int(BASE_STREAK_BONUS * float32(totalPlayers) * float32(min(streak, MAX_STREAK)) * multiplier)
+}
+
+// Returns a sorted slice of player IDs by score (highest to lowest).
+// This is useful for determining player rankings.
+func getSortedPlayersByScore(players map[uuid.UUID]*player) []uuid.UUID {
+	// Create a slice of player IDs
+	playerIDs := make([]uuid.UUID, 0, len(players))
+	for id := range players {
+		playerIDs = append(playerIDs, id)
+	}
+
+	// Sort the IDs based on player scores
+	slices.SortFunc(playerIDs, func(a, b uuid.UUID) int {
+		// Sort by score (descending)
+		scoreA := players[a].Score
+		scoreB := players[b].Score
+		if scoreA != scoreB {
+			return int(scoreB - scoreA)
+		}
+		// If scores are equal, sort by name (ascending) to ensure stable ordering
+		return strings.Compare(players[a].Profile.Name, players[b].Profile.Name)
+	})
+
+	return playerIDs
+}
+
+// Returns a map of player IDs to their position (1-based ranking)
+func getPlayerPositions(players map[uuid.UUID]*player) map[uuid.UUID]int {
+	// Create position map
+	positions := make(map[uuid.UUID]int, len(players))
+
+	// Get sorted players first
+	playerIDs := getSortedPlayersByScore(players)
+
+	// Assign positions (1-based)
+	for i, id := range playerIDs {
+		positions[id] = i + 1
+	}
+
+	return positions
 }

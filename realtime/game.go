@@ -71,7 +71,6 @@ type game struct {
 	chatMessages    []ChatMessage
 	correctGuessers map[uuid.UUID]bool
 	pointsAwarded   map[uuid.UUID]int
-
 	// Time management
 	currentPhaseDeadline time.Time
 	isCountdownActive    bool
@@ -289,19 +288,12 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 
 	// Check if the guess is correct if the player is not drawing and hasn't guessed correctly yet
 	if strings.EqualFold(guessValue, g.currentWord.Value) && !playerHasAlreadyGuessedCorrect && !playerIsDrawing && phaseIsActive {
-		remainingTime := time.Until(g.currentPhaseDeadline)
-		totalTime := time.Duration(g.room.Settings.DrawingTimeAllowed) * time.Second
+		guesserPoints, drawerPoints := GuessPoints(len(g.room.Players)-1, len(g.correctGuessers), g.currentWord.Difficulty)
 
-		timeShare := float64(remainingTime) / float64(totalTime)
-
-		guesserPoints, drawerPoints := CalculateScore(len(g.room.Players)-1, len(g.correctGuessers), timeShare, g.currentWord.Difficulty, g.room.Settings.WordDifficulty)
-
-		g.room.Players[playerID].Score += guesserPoints
+		// track the points awarded to the guesser and drawer
 		g.pointsAwarded[playerID] = guesserPoints
-
-		// Award points to the drawer for making a good drawing
-		g.currentDrawer.Score += drawerPoints
 		g.pointsAwarded[g.currentDrawer.ID] += drawerPoints
+		g.correctGuessers[playerID] = true
 
 		result = ChatMessage{
 			ID:            uuid.New(),
@@ -310,8 +302,6 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 			IsCorrect:     true,
 			PointsAwarded: guesserPoints,
 		}
-
-		g.correctGuessers[playerID] = true
 		g.room.Players[playerID].Send(action(SelectWord, g.currentWord.Value))
 	} else {
 		result = ChatMessage{
@@ -597,6 +587,7 @@ func (phase PickingPhase) Start(g *game) {
 				IsFirstPhase: g.isFirstPicking,
 			}),
 	)
+
 	g.isFirstPicking = false
 }
 
@@ -671,7 +662,6 @@ func (phase DrawingPhase) End(g *game) {
 	// Cleanup
 	g.room.timer.Stop()
 	g.cancelHintRoutine()
-	// g.clearChatMessages()
 
 	// Reveal the word
 	g.hintedWord = g.currentWord.Value
@@ -710,6 +700,31 @@ func (phase DrawingPhase) End(g *game) {
 	}
 
 	g.SendSystemMessage(msg)
+
+	playerPositions := getPlayerPositions(g.room.Players)
+
+	// Update the streaks of all players and award them a streak bonus
+	for _, p := range g.room.Players {
+		// If the player guessed correctly or
+		// if the player is the drawer and at least one person guessed correctly, increment their streak
+		if g.correctGuessers[p.ID] || (p.ID == g.currentDrawer.ID && len(g.correctGuessers) > 0) {
+			p.Streak++
+		} else {
+			// Otherwise, reset the streak
+			p.Streak = 0
+		}
+
+		// Award them a streak bonus
+		streakBonus := StreakBonus(playerPositions[p.ID], len(g.room.Players), p.Streak)
+		g.pointsAwarded[p.ID] += streakBonus
+
+		slog.Debug("Streak bonus awarded", "player", p.ID, "streak", p.Streak, "streakBonus", streakBonus, "playerPosition", playerPositions[p.ID])
+	}
+
+	// update player scores
+	for _, p := range g.room.Players {
+		p.Score += g.pointsAwarded[p.ID]
+	}
 
 	// Inform players of the state changes
 	g.room.broadcast(GameRoleAny,

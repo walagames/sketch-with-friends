@@ -175,7 +175,9 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			for _, p := range r.Players {
 				p.GameRole = GameRoleGuessing
 				p.Score = 0
+				p.Streak = 0
 			}
+
 			r.game = NewGame(&PickingPhase{}, r)
 			r.game.fillDrawingQueue()
 			r.game.currentPhase.Start(r.game)

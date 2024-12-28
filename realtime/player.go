@@ -49,9 +49,9 @@ type player struct {
 	RoomRole          RoomRole      `json:"roomRole"`
 	GameRole          GameRole      `json:"gameRole"`
 	Score             int           `json:"score"`
+	Streak            int           `json:"streak"`
 	lastInteractionAt time.Time
 	client            *client
-	limiter           *rate.Limiter
 }
 
 func NewPlayer(opts *playerOptions) *player {
@@ -66,6 +66,7 @@ func NewPlayer(opts *playerOptions) *player {
 		Score:             0,
 		GameRole:          GameRoleGuessing,
 		lastInteractionAt: time.Now(),
+		Streak:            0,
 	}
 }
 

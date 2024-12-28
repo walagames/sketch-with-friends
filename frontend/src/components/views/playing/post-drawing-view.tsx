@@ -3,7 +3,7 @@ import { RootState } from "@/state/store";
 import { SkyScene } from "@/components/scenes/sky-scene";
 import { Player } from "@/state/features/room";
 import { generateAvatar } from "@/lib/avatar";
-import { CrownIcon } from "lucide-react";
+import { CrownIcon, FlameIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { AnimatePresence, motion } from "framer-motion";
@@ -129,8 +129,14 @@ function LeaderboardPlace({
 			</p>
 			<div className="relative text-lg font-medium text-foreground ml-auto">
 				{points > 0 && (
-					<div className="absolute lg:text-base text-sm flex -top-1 lg:-top-1.5 right-20 lg:right-24 bg-white border border-zinc-300 rounded-lg shadow-sm lg:px-3 px-2 lg:py-1.5 py-1">
-						+{points}
+					<div className="absolute lg:text-base gap-1 text-sm flex -top-1 lg:-top-1.5 right-20 lg:right-24 bg-white border border-zinc-300 rounded-lg shadow-sm lg:px-3 px-2 lg:py-1.5 py-1">
+						<span className="flex items-center">+{points}</span>
+						{player.streak > 0 && (
+							<span className="flex items-center font-bold">
+								<FlameIcon className="w-4 h-4 -translate-y-[1px] text-red-500" />{" "}
+								{player.streak}
+							</span>
+						)}
 					</div>
 				)}
 				<AnimatedNumber value={score} previous={score - points} /> pts
@@ -226,7 +232,9 @@ function PodiumPlace({
 					<AnimatedNumber delay={450} previous={score - points} value={score} />{" "}
 					pts
 				</p>
-				{points > 0 && <AwardedPointsCard points={points} />}
+				{points > 0 && (
+					<AwardedPointsCard points={points} streak={player.streak} />
+				)}
 			</motion.div>
 			<motion.p
 				initial={{
@@ -247,7 +255,13 @@ function PodiumPlace({
 	);
 }
 
-function AwardedPointsCard({ points }: { points: number }) {
+function AwardedPointsCard({
+	points,
+	streak,
+}: {
+	points: number;
+	streak: number;
+}) {
 	return (
 		<motion.div
 			className="relative mt-2.5 bg-white border border-zinc-300 rounded-lg px-3 py-1.5 shadow-lg"
@@ -262,7 +276,15 @@ function AwardedPointsCard({ points }: { points: number }) {
 					"border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[10px] border-b-white"
 				)}
 			/>
-			<p className="text-md">+ {points}</p>
+			<p className="text-md flex items-center gap-1.5">
+				+{points}
+				{streak > 0 && (
+					<span className="flex items-center font-bold">
+						<FlameIcon className="w-4 h-4 -translate-y-[1px] text-red-500" />{" "}
+						{streak}
+					</span>
+				)}
+			</p>
 		</motion.div>
 	);
 }

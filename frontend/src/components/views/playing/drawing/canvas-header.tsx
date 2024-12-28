@@ -39,7 +39,7 @@ export function DrawingStatus({ delay }: { delay: number }) {
 	const containsLetterBlanks = selectedWord.includes("*");
 
 	return (
-		<span className="flex items-start flex-wrap text-sm lg:text-2xl">
+		<span className="flex items-start flex-wrap text-sm lg:text-2xl gap-1">
 			<span className="flex-wrap">
 				{drawingPlayer?.profile.name} is sketching:{" "}
 			</span>
