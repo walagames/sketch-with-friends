@@ -290,10 +290,14 @@ func (g *game) judgeGuess(playerID uuid.UUID, guessValue string) {
 	if strings.EqualFold(guessValue, g.currentWord.Value) && !playerHasAlreadyGuessedCorrect && !playerIsDrawing && phaseIsActive {
 		guesserPoints, drawerPoints := GuessPoints(len(g.room.Players)-1, len(g.correctGuessers), g.currentWord.Difficulty)
 
-		// track the points awarded to the guesser and drawer
+		// Update the guesser's points
 		g.pointsAwarded[playerID] = guesserPoints
-		g.pointsAwarded[g.currentDrawer.ID] += drawerPoints
+		g.room.Players[playerID].Score += guesserPoints
 		g.correctGuessers[playerID] = true
+
+		// Update the drawer's points
+		g.pointsAwarded[g.currentDrawer.ID] += drawerPoints
+		g.room.Players[g.currentDrawer.ID].Score += drawerPoints
 
 		result = ChatMessage{
 			ID:            uuid.New(),
@@ -717,13 +721,9 @@ func (phase DrawingPhase) End(g *game) {
 		// Award them a streak bonus
 		streakBonus := StreakBonus(playerPositions[p.ID], len(g.room.Players), p.Streak)
 		g.pointsAwarded[p.ID] += streakBonus
+		p.Score += streakBonus
 
 		slog.Debug("Streak bonus awarded", "player", p.ID, "streak", p.Streak, "streakBonus", streakBonus, "playerPosition", playerPositions[p.ID])
-	}
-
-	// update player scores
-	for _, p := range g.room.Players {
-		p.Score += g.pointsAwarded[p.ID]
 	}
 
 	// Inform players of the state changes
