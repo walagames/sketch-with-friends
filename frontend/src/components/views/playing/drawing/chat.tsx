@@ -260,7 +260,7 @@ function ChatMessageComponent({
 							<div className="w-1.5 bg-blue-500 ml-auto" />
 						)}
 						{message.isCorrect ? (
-							<span className="px-3 py-2">
+							<span className="px-3 py-2 break-words overflow-wrap-anywhere w-full">
 								{isOwnMessage ? "You guessed it!" : "Guessed it!"}
 							</span>
 						) : (

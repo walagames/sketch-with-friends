@@ -35,16 +35,16 @@ function CardContent({
 }) {
 	return (
 		<RaisedButton variant="card" size="card" className="w-full justify-start">
-			<div className="flex items-center h-14 -translate-y-0.5 lg:w-64 min-h-0 flex-1">
+			<div className="flex items-center h-14 -translate-y-0.5 lg:w-64 min-h-0 flex-1 pr-4">
 				<img
 					className="rounded-l-lg h-full aspect-square relative"
 					src={generateAvatar(player.profile.avatarSeed)}
 				/>
-				<p className="text-xl leading-0 font-bold truncate pl-4 translate-y-0.5">
+				<p className="text-xl leading-0 font-bold truncate pl-2 translate-y-0.5">
 					{player.profile.name}
 				</p>
 				{isCurrentPlayer && (
-					<p className="text-lg text-foreground/50 leading-0 font-bold px-2 pr-4 translate-y-0.5">
+					<p className="text-sm text-foreground/50 leading-0 font-bold px-1 translate-y-0.5">
 						(You)
 					</p>
 				)}

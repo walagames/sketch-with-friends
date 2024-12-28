@@ -9,7 +9,7 @@ import { addRecentlyUsedColor } from "@/state/features/client";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 const CANVAS_SCALE = 2;
-const MOBILE_OFFSET = 20;
+const MOBILE_OFFSET = 10;
 
 function Canvas({
 	padding,

@@ -37,8 +37,8 @@ export const JoinRoomFormSchema = z.object({
 		.min(2, {
 			message: "Username must be at least 2 characters.",
 		})
-		.max(16, {
-			message: "Username must be at most 16 characters.",
+		.max(12, {
+			message: "Username must be at most 12 characters.",
 		})
 		.refine((value) => /^[a-zA-Z'][a-zA-Z' ]*[a-zA-Z']$/.test(value), {
 			message:

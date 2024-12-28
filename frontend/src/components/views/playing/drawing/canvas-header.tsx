@@ -9,7 +9,7 @@ export function CanvasHeader({ delay }: { delay: number }) {
 			initial={{ opacity: 0, y: -10 }}
 			animate={{ opacity: 1, y: 4 }}
 			transition={{ ...containerSpring, delay }}
-			className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-7rem)] lg:w-full h-16 justify-center"
+			className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-7rem)] pr-3 lg:w-full h-16 justify-center"
 		>
 			<RoundInfo />
 			<DrawingStatus delay={delay} />
@@ -29,9 +29,9 @@ export function DrawingStatus({ delay }: { delay: number }) {
 
 	if (isDrawing) {
 		return (
-			<span className="flex items-center gap-1 lg:text-2xl">
+			<span className="flex items-center text-sm gap-1 lg:text-2xl">
 				You're sketching:{" "}
-				<span className="text-lg lg:text-2xl font-bold">{selectedWord}</span>
+				<span className="lg:text-2xl font-bold">{selectedWord}</span>
 			</span>
 		);
 	}
@@ -39,14 +39,16 @@ export function DrawingStatus({ delay }: { delay: number }) {
 	const containsLetterBlanks = selectedWord.includes("*");
 
 	return (
-		<span className="flex items-center gap-1 lg:text-2xl">
-			{drawingPlayer?.profile.name} is sketching:{" "}
+		<span className="flex items-start flex-wrap text-sm lg:text-2xl">
+			<span className="flex-wrap">
+				{drawingPlayer?.profile.name} is sketching:{" "}
+			</span>
 			{containsLetterBlanks ? (
-				<span className="text-lg lg:text-2xl font-bold">
-					<WordWithLetterBlanks word={selectedWord} delay={delay - 1} />
+				<span className=" lg:text-2xl font-bold">
+					<WordWithLetterBlanks word={selectedWord} delay={delay - 0.1} />
 				</span>
 			) : (
-				<span className="text-lg lg:text-2xl font-bold">{selectedWord}</span>
+				<span className=" lg:text-2xl font-bold">{selectedWord}</span>
 			)}
 		</span>
 	);
@@ -63,6 +65,7 @@ function WordWithLetterBlanks({
 	const spaceSeparatedParts = word
 		.split(" ")
 		.filter((segment) => segment.length > 0);
+
 	const processedSegments = spaceSeparatedParts
 		.map((part) => {
 			// Split by dashes but keep the dashes
@@ -79,22 +82,23 @@ function WordWithLetterBlanks({
 		.flat();
 
 	return (
-		<motion.span
-			className="lg:text-2xl font-bold inline-flex gap-0.5 px-1.5"
-			initial="hidden"
-			animate="visible"
-			variants={{
-				hidden: {},
-				visible: {
-					transition: {
-						delayChildren: delay,
-						staggerChildren: 0.025,
-					},
-				},
-			}}
-		>
+		<span className="lg:text-2xl font-bold inline-flex gap-4 px-1.5">
 			{processedSegments.map((segment, segmentIndex) => (
-				<motion.span key={segmentIndex} className="flex items-center gap-1">
+				<motion.span
+					initial="hidden"
+					animate="visible"
+					variants={{
+						hidden: {},
+						visible: {
+							transition: {
+								delayChildren: delay,
+								staggerChildren: 0.025,
+							},
+						},
+					}}
+					key={segmentIndex}
+					className="flex items-center gap-1 relative"
+				>
 					{segment.text.split("").map((letter, letterIndex) => (
 						<motion.span
 							key={letterIndex}
@@ -114,7 +118,7 @@ function WordWithLetterBlanks({
 					))}
 					{!segment.isDash && (
 						<motion.span
-							className="!text-xs ml-1 mt-3 lg:mt-6"
+							className=" text-xs"
 							variants={{
 								hidden: { y: -5, opacity: 0 },
 								visible: {
@@ -126,31 +130,12 @@ function WordWithLetterBlanks({
 								},
 							}}
 						>
-							{segment.count}
+							({segment.count})
 						</motion.span>
 					)}
-					{segmentIndex < processedSegments.length - 1 &&
-						!segment.isDash &&
-						processedSegments[segmentIndex + 1].text !== "-" && (
-							<motion.span
-								className="px-1.5"
-								variants={{
-									hidden: { y: -5, opacity: 0 },
-									visible: {
-										y: 0,
-										opacity: 1,
-										transition: {
-											type: "spring",
-										},
-									},
-								}}
-							>
-								{" "}
-							</motion.span>
-						)}
 				</motion.span>
 			))}
-		</motion.span>
+		</span>
 	);
 }
 

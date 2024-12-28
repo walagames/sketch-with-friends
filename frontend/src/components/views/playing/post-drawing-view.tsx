@@ -205,7 +205,7 @@ function PodiumPlace({
 			</motion.div>
 			<motion.p
 				layout
-				className="text-lg lg:text-xl font-bold text-foreground max-w-full"
+				className=" lg:text-xl font-bold text-foreground lg:max-w-40 max-w-32 flex items-center"
 			>
 				<span className="truncate">{name}</span>
 				<span className="text-sm text-foreground/50 px-1">
