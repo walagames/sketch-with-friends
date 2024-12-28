@@ -163,9 +163,9 @@ function PodiumPlace({
 	const avatarSvg = generateAvatar(avatarSeed);
 
 	const podiumColor = {
-		1: { color: "bg-primary", height: 180, placeText: "1st", delay: 0.2 },
-		2: { color: "bg-sky-500", height: 140, placeText: "2nd", delay: 0.1 },
-		3: { color: "bg-red-500", height: 120, placeText: "3rd", delay: 0.0 },
+		1: { color: "bg-primary", height: 180, placeText: "1st", delay: 0.4 },
+		2: { color: "bg-sky-500", height: 140, placeText: "2nd", delay: 0.3 },
+		3: { color: "bg-red-500", height: 120, placeText: "3rd", delay: 0.2 },
 	};
 
 	const { color, height, placeText, delay } =
