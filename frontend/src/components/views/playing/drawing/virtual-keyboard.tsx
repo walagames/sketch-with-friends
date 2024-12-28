@@ -48,7 +48,7 @@ function VirtualInput({
 				<div
 					className={cn(
 						"absolute inset-0",
-						"shadow-accent-md bg-background px-3 py-2 rounded-lg",
+						"shadow-accent-md bg-background px-3 py-2 pr-8 rounded-lg",
 						"focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
 						"flex items-center overflow-hidden"
 					)}
@@ -82,6 +82,11 @@ function VirtualInput({
 						)}
 					</div>
 				</div>
+				{value && (
+					<div className="absolute right-3 font-bold top-1/2 -translate-y-1/2">
+						{value.length}
+					</div>
+				)}
 			</div>
 		</AnimatePresence>
 	);

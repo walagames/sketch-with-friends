@@ -349,7 +349,7 @@ export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
 					render={({ field }) => (
 						<FormItem className="relative space-y-0">
 							<FormControl>
-								<div className="flex items-center gap-3 ">
+								<div className="flex items-center gap-3 relative">
 									<RaisedInput
 										autoComplete="off"
 										placeholder={isGuessing ? "Guess" : "Chat"}
@@ -361,7 +361,13 @@ export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
 												setCurrentMessage(e.target.value);
 											}
 										}}
+										className="pr-10"
 									/>
+									{field.value.length > 0 && (
+										<div className="absolute right-3 top-1/2 -translate-y-3/4 font-bold">
+											{field.value.length}
+										</div>
+									)}
 								</div>
 							</FormControl>
 						</FormItem>

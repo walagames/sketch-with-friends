@@ -59,7 +59,25 @@ function WordWithLetterBlanks({
 	word: string;
 	delay: number;
 }) {
-	const wordLetters = word.replaceAll("*", "_").split("");
+	// Split only by spaces first
+	const spaceSeparatedParts = word
+		.split(" ")
+		.filter((segment) => segment.length > 0);
+	const processedSegments = spaceSeparatedParts
+		.map((part) => {
+			// Split by dashes but keep the dashes
+			const subParts = part
+				.split(/(?=-)|(?<=-)/)
+				.filter((segment) => segment.length > 0);
+			return subParts.map((segment) => ({
+				text: segment.replaceAll("*", "_"),
+				// Only count length if it's not a dash
+				count: segment === "-" ? 0 : segment.length,
+				isDash: segment === "-",
+			}));
+		})
+		.flat();
+
 	return (
 		<motion.span
 			className="lg:text-2xl font-bold inline-flex gap-0.5 px-1.5"
@@ -75,22 +93,61 @@ function WordWithLetterBlanks({
 				},
 			}}
 		>
-			{wordLetters.map((letter, index) => (
-				<motion.span
-					key={index}
-					className={letter === " " ? "px-1.5" : undefined}
-					variants={{
-						hidden: { y: -5, opacity: 0 },
-						visible: {
-							y: 0,
-							opacity: 1,
-							transition: {
-								type: "spring",
-							},
-						},
-					}}
-				>
-					{letter}
+			{processedSegments.map((segment, segmentIndex) => (
+				<motion.span key={segmentIndex} className="flex items-center gap-1">
+					{segment.text.split("").map((letter, letterIndex) => (
+						<motion.span
+							key={letterIndex}
+							variants={{
+								hidden: { y: -5, opacity: 0 },
+								visible: {
+									y: 0,
+									opacity: 1,
+									transition: {
+										type: "spring",
+									},
+								},
+							}}
+						>
+							{letter}
+						</motion.span>
+					))}
+					{!segment.isDash && (
+						<motion.span
+							className="!text-xs ml-1 mt-3 lg:mt-6"
+							variants={{
+								hidden: { y: -5, opacity: 0 },
+								visible: {
+									y: 0,
+									opacity: 1,
+									transition: {
+										type: "spring",
+									},
+								},
+							}}
+						>
+							{segment.count}
+						</motion.span>
+					)}
+					{segmentIndex < processedSegments.length - 1 &&
+						!segment.isDash &&
+						processedSegments[segmentIndex + 1].text !== "-" && (
+							<motion.span
+								className="px-1.5"
+								variants={{
+									hidden: { y: -5, opacity: 0 },
+									visible: {
+										y: 0,
+										opacity: 1,
+										transition: {
+											type: "spring",
+										},
+									},
+								}}
+							>
+								{" "}
+							</motion.span>
+						)}
 				</motion.span>
 			))}
 		</motion.span>
