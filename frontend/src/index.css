@@ -11,6 +11,7 @@ html,
 body {
 	height: 100dvh;
 	overflow: hidden;
+	user-select: none;
 }
 
 @layer base {

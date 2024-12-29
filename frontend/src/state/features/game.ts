@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { WordDifficulty } from "./room";
 
 export enum GamePhase {
 	Picking = "picking",
@@ -12,13 +13,18 @@ export enum GameRole {
 	Guessing = "guessing",
 }
 
+export type DrawingWord = {
+	value: string;
+	difficulty: WordDifficulty;
+};
+
 export interface GameState {
 	round: number;
 	phase: GamePhase;
 	currentPhaseDeadline: string;
 	currentRound: number;
-	wordOptions: string[];
-	guesses: Guess[];
+	wordOptions: DrawingWord[];
+	chatMessages: ChatMessage[];
 	selectedWord: string;
 	isLastPhase: boolean;
 	isFirstPhase: boolean;
@@ -31,20 +37,21 @@ const initialState: GameState = {
 	currentPhaseDeadline: new Date().toISOString(),
 	currentRound: 0,
 	wordOptions: [],
-	guesses: [],
+	chatMessages: [],
 	selectedWord: "",
 	isLastPhase: false,
 	isFirstPhase: false,
 	pointsAwarded: {},
 };
 
-export type Guess = {
+export type ChatMessage = {
 	id: string;
 	playerId: string;
 	guess: boolean;
 	isCorrect: boolean;
 	pointsAwarded: number;
 	isClose: boolean;
+	isSystemMessage: boolean;
 };
 
 export const gameSlice = createSlice({
@@ -72,7 +79,7 @@ export const gameSlice = createSlice({
 			state.isLastPhase = action.payload.isLastPhase;
 			state.isFirstPhase = action.payload.isFirstPhase;
 		},
-		wordOptions: (state, action: PayloadAction<string[]>) => {
+		wordOptions: (state, action: PayloadAction<DrawingWord[]>) => {
 			state.wordOptions = action.payload;
 		},
 		selectWord: (state, action: PayloadAction<string>) => {
@@ -81,11 +88,11 @@ export const gameSlice = createSlice({
 		setRound: (state, action: PayloadAction<number>) => {
 			state.currentRound = action.payload;
 		},
-		guessResult: (state, action: PayloadAction<Guess>) => {
-			state.guesses.push(action.payload);
+		newChatMessage: (state, action: PayloadAction<ChatMessage>) => {
+			state.chatMessages.push(action.payload);
 		},
-		setGuesses: (state, action: PayloadAction<Guess[]>) => {
-			state.guesses = action.payload;
+		setChat: (state, action: PayloadAction<ChatMessage[]>) => {
+			state.chatMessages = action.payload;
 		},
 		setPhaseDeadline: (state, action: PayloadAction<string>) => {
 			state.currentPhaseDeadline = action.payload;

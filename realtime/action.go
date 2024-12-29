@@ -32,17 +32,17 @@ const (
 	SetStrokes     ActionType = "canvas/setStrokes"
 
 	// Game actions
-	SetWord       ActionType = "game/setWord"
-	SubmitGuess   ActionType = "game/submitGuess"
-	WordOptions   ActionType = "game/wordOptions"
-	StartGame     ActionType = "game/startGame"
-	GuessResult   ActionType = "game/guessResult"
-	ClearGuesses  ActionType = "game/clearGuesses"
-	SetGuesses    ActionType = "game/setGuesses"
-	ChangePhase   ActionType = "game/changePhase"
-	SelectWord    ActionType = "game/selectWord"
-	SetRound      ActionType = "game/setRound"
-	PointsAwarded ActionType = "game/pointsAwarded"
+	SetWord           ActionType = "game/setWord"
+	NewChatMessage    ActionType = "game/newChatMessage"
+	WordOptions       ActionType = "game/wordOptions"
+	StartGame         ActionType = "game/startGame"
+	SubmitChatMessage ActionType = "game/submitChatMessage"
+	ClearChat         ActionType = "game/clearChat"
+	SetChat           ActionType = "game/setChat"
+	ChangePhase       ActionType = "game/changePhase"
+	SelectWord        ActionType = "game/selectWord"
+	SetRound          ActionType = "game/setRound"
+	PointsAwarded     ActionType = "game/pointsAwarded"
 
 	// Room actions
 	InitializeRoom      ActionType = "room/initializeRoom"
@@ -100,6 +100,57 @@ func (def *ActionDefinition) ValidateAction(room *room, a *Action) error {
 	return def.validator(room)
 }
 
+// Room settings validation constants
+const (
+	MIN_PLAYERS      = 2
+	MAX_PLAYERS      = 10
+	MIN_DRAWING_TIME = 15  // seconds
+	MAX_DRAWING_TIME = 240 // seconds
+	MIN_ROUNDS       = 1
+	MAX_ROUNDS       = 10
+)
+
+// validateRoomSettings checks if room settings are within allowed bounds
+func validateRoomSettings(settings *RoomSettings) error {
+	if settings.PlayerLimit < MIN_PLAYERS || settings.PlayerLimit > MAX_PLAYERS {
+		return fmt.Errorf("player limit must be between %d and %d", MIN_PLAYERS, MAX_PLAYERS)
+	}
+
+	if settings.DrawingTimeAllowed < MIN_DRAWING_TIME || settings.DrawingTimeAllowed > MAX_DRAWING_TIME {
+		return fmt.Errorf("drawing time must be between %d and %d seconds", MIN_DRAWING_TIME, MAX_DRAWING_TIME)
+	}
+
+	if settings.TotalRounds < MIN_ROUNDS || settings.TotalRounds > MAX_ROUNDS {
+		return fmt.Errorf("total rounds must be between %d and %d", MIN_ROUNDS, MAX_ROUNDS)
+	}
+
+	// Validate word difficulty
+	switch settings.WordDifficulty {
+	case WordDifficultyEasy, WordDifficultyMedium, WordDifficultyHard, WordDifficultyRandom, WordDifficultyCustom:
+		// Valid values
+	default:
+		return fmt.Errorf("invalid word difficulty: %s", settings.WordDifficulty)
+	}
+
+	// Validate word bank
+	switch settings.WordBank {
+	case WordBankDefault, WordBankCustom, WordBankMixed:
+		// Valid values
+	default:
+		return fmt.Errorf("invalid word bank: %s", settings.WordBank)
+	}
+
+	// Validate game mode
+	switch settings.GameMode {
+	case GameModeClassic, GameModeNoHints:
+		// Valid values
+	default:
+		return fmt.Errorf("invalid game mode: %s", settings.GameMode)
+	}
+
+	return nil
+}
+
 var ActionDefinitions = map[ActionType]ActionDefinition{
 	StartGame: {
 		RoomRoleRequired: RoomRoleHost,
@@ -124,15 +175,18 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			for _, p := range r.Players {
 				p.GameRole = GameRoleGuessing
 				p.Score = 0
+				p.Streak = 0
 			}
+
 			r.game = NewGame(&PickingPhase{}, r)
 			r.game.fillDrawingQueue()
 			r.game.currentPhase.Start(r.game)
 
 			// Inform clients of the stage change
 			r.broadcast(GameRoleAny,
-				message(SetPlayers, r.Players),
-				message(ChangeStage, r.Stage),
+				action(SetPlayers, r.Players),
+				action(ChangeStage, r.Stage),
+				action(SetChat, r.game.chatMessages),
 			)
 
 			return nil
@@ -211,7 +265,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Re-broadcast the stroke to the rest of the players
 			r.broadcast(GameRoleGuessing,
-				message(AddStroke, a.Payload),
+				action(AddStroke, a.Payload),
 			)
 			return nil
 		},
@@ -246,7 +300,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Re-broadcast the stroke point to the rest of the players
 			r.broadcast(GameRoleGuessing,
-				message(AddStrokePoint, a.Payload),
+				action(AddStrokePoint, a.Payload),
 			)
 			return nil
 		},
@@ -269,7 +323,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Tell the other players to clear their strokes
 			r.broadcast(GameRoleGuessing,
-				message(ClearStrokes, nil),
+				action(ClearStrokes, nil),
 			)
 			return nil
 		},
@@ -292,12 +346,12 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Tell the other players to undo their last stroke
 			r.broadcast(GameRoleGuessing,
-				message(UndoStroke, nil),
+				action(UndoStroke, nil),
 			)
 			return nil
 		},
 	},
-	SubmitGuess: {
+	SubmitChatMessage: {
 		RoomRoleRequired: RoomRoleAny,
 		GameRoleRequired: GameRoleAny,
 		PayloadType:      "string",
@@ -305,20 +359,18 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			if r.game == nil {
 				return fmt.Errorf("game is not initialized")
 			}
-			if r.game.currentPhase.Name() != Drawing {
-				return fmt.Errorf("not in guessing phase")
-			}
 			if r.Stage != Playing {
 				return fmt.Errorf("game is not active")
 			}
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
-			guess := sanitizeGuess(a.Payload.(string))
-			if guess == "" {
-				return fmt.Errorf("invalid guess")
+			slog.Debug("New chat message", "message", a.Payload)
+			msg := sanitizeGuess(a.Payload.(string))
+			if msg == "" {
+				return fmt.Errorf("invalid msg")
 			}
-			r.game.judgeGuess(a.Player.ID, guess)
+			r.game.judgeGuess(a.Player.ID, msg)
 			return nil
 		},
 	},
@@ -327,30 +379,29 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		GameRoleRequired: GameRoleAny,
 		PayloadType:      map[string]interface{}{},
 		validator: func(r *room) error {
-			// TODO: validate settings inputs
 			if r.Stage != PreGame {
 				return fmt.Errorf("can only change room settings in pre game stage")
 			}
 			return nil
 		},
 		execute: func(r *room, a *Action) error {
-			// ! need a better way to do this
-			r.Settings.DrawingTimeAllowed = int(a.Payload.(map[string]interface{})["drawingTimeAllowed"].(float64))
-			r.Settings.PlayerLimit = int(a.Payload.(map[string]interface{})["playerLimit"].(float64))
-			r.Settings.TotalRounds = int(a.Payload.(map[string]interface{})["totalRounds"].(float64))
-			r.Settings.WordDifficulty = WordDifficulty(a.Payload.(map[string]interface{})["wordDifficulty"].(string))
-			r.Settings.WordBank = WordBank(a.Payload.(map[string]interface{})["wordBank"].(string))
-			r.Settings.GameMode = GameMode(a.Payload.(map[string]interface{})["gameMode"].(string))
-			rawCustomWords := a.Payload.(map[string]interface{})["customWords"].([]interface{})
-			customWords := make([]string, len(rawCustomWords))
-			for i, word := range rawCustomWords {
-				customWords[i] = word.(string)
+			settings, err := decodePayload[RoomSettings](a.Payload)
+			if err != nil {
+				return fmt.Errorf("failed to decode room settings: %w", err)
 			}
-			r.Settings.CustomWords = filterDuplicateWords(filterInvalidWords(customWords))
+
+			// Validate the settings before applying them
+			if err := validateRoomSettings(&settings); err != nil {
+				return fmt.Errorf("invalid room settings: %w", err)
+			}
+
+			// Update room settings
+			r.Settings = settings
+			r.Settings.CustomWords = filterDuplicateWords(filterInvalidWords(settings.CustomWords))
 
 			// Inform clients of the room settings change
 			r.broadcast(GameRoleAny,
-				message(ChangeRoomSettings, r.Settings),
+				action(ChangeRoomSettings, r.Settings),
 			)
 			return nil
 		},
@@ -370,7 +421,8 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 				return fmt.Errorf("invalid player profile payload: %w", err)
 			}
 
-			// Validate the profile inputs
+			// Sanitize the profile inputs
+			profile.Name = sanitizeUsername(profile.Name)
 			if profile.Name == "" {
 				return fmt.Errorf("name cannot be empty")
 			}
@@ -391,16 +443,15 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Broadcast the change to all players
 			r.broadcast(GameRoleAny,
-				message(SetPlayers, r.Players),
+				action(SetPlayers, r.Players),
 			)
 			return nil
 		},
 	},
 }
 
-// Construct an action message
-// It's named "message" instead of "action" to make it easier to read when used in broadcasts
-func message(actionType ActionType, payload interface{}) *Action {
+// Construct an state action message
+func action(actionType ActionType, payload interface{}) *Action {
 	return &Action{
 		Type:    actionType,
 		Payload: payload,

@@ -58,11 +58,11 @@ export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 					</div>
 				</div>
 			</div>
-			<div className="w-full lg:aspect-[4/3] flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex items-start justify-center lg:p-6 px-4 pt-2">
+			<div className="w-full lg:aspect-[4/3] flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex items-start justify-center lg:p-6 px-4 pt-2 max-h-[calc(100vh-200px)] overflow-y-auto">
 				{showSettings ? (
 					<RoomSettingsForm />
 				) : (
-					<ul className="gap-3 grid lg:grid-cols-2 w-full lg:w-auto py-2">
+					<ul className="lg:gap-4 gap-3 grid lg:grid-cols-2 w-full lg:w-auto py-2">
 						<AnimatePresence initial={false} mode="popLayout">
 							{Object.values(players)
 								.sort((a, b) => b.score - a.score)

@@ -6,8 +6,10 @@ import { addStroke, addStrokePoint, Stroke } from "@/state/features/canvas";
 import { useWindowSize } from "@/hooks/use-window-size";
 import { getGameRole } from "@/lib/player";
 import { addRecentlyUsedColor } from "@/state/features/client";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 const CANVAS_SCALE = 2;
+const MOBILE_OFFSET = 10;
 
 function Canvas({
 	padding,
@@ -34,6 +36,8 @@ function Canvas({
 	const players = useSelector((state: RootState) => state.room.players);
 	const playerId = useSelector((state: RootState) => state.client.id);
 	const role = getGameRole(playerId, players);
+
+	const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 
 	const currentPhaseDeadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
@@ -89,9 +93,20 @@ function Canvas({
 		[width, height]
 	);
 
-	const roundIsActive = React.useMemo(() => {
-		return new Date(currentPhaseDeadline).getTime() > Date.now();
-	}, [currentPhaseDeadline]);
+	const drawingTime = useSelector(
+		(state: RootState) => state.room.settings.drawingTimeAllowed
+	);
+
+	const roundIsActive = () => {
+		const currentTime = Date.now();
+		const startingAnimationActive =
+			drawingTime -
+				(new Date(currentPhaseDeadline).getTime() - Date.now()) / 1000 <
+			1.5;
+		const deadlineTime = new Date(currentPhaseDeadline).getTime();
+		const timeSinceStart = deadlineTime - currentTime;
+		return timeSinceStart > 0 && !startingAnimationActive;
+	};
 
 	const clearCanvas = (ctx: CanvasRenderingContext2D) => {
 		ctx.clearRect(0, 0, width * CANVAS_SCALE, height * CANVAS_SCALE);
@@ -177,15 +192,73 @@ function Canvas({
 
 	const lastPointRef = React.useRef<[number, number] | null>(null);
 
-	const handleNewStroke = React.useCallback(
-		(e: React.MouseEvent<HTMLCanvasElement>) => {
-			if (!roundIsActive || e.button !== 0 || role !== GameRole.Drawing) return;
+	const handleNewStroke = (e: React.MouseEvent<HTMLCanvasElement>) => {
+		if (!roundIsActive() || e.button !== 0 || role !== GameRole.Drawing) return;
 
-			isDrawing.current = true;
-			lastPointRef.current = null; // Reset last point on new stroke
+		isDrawing.current = true;
+		lastPointRef.current = null; // Reset last point on new stroke
+		const rect = e.currentTarget.getBoundingClientRect();
+		const [x, y] = getScaledCoordinates(
+			e.clientX,
+			e.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
+			rect
+		);
+
+		dispatch(
+			addStroke({
+				color: strokeColor,
+				width: strokeWidth,
+				points: [[x, y]],
+			})
+		);
+		dispatch(addRecentlyUsedColor(strokeColor));
+	};
+
+	const handleStrokePoint = (e: React.MouseEvent<HTMLCanvasElement>) => {
+		if (
+			!isDrawing.current ||
+			e.buttons !== 1 ||
+			!roundIsActive ||
+			role !== GameRole.Drawing
+		)
+			return;
+
+		const rect = e.currentTarget.getBoundingClientRect();
+		const [x, y] = getScaledCoordinates(
+			e.clientX,
+			e.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
+			rect
+		);
+
+		// Allow points slightly outside bounds to be recorded
+		dispatch(addStrokePoint([x, y]));
+	};
+
+	const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+		if (role === GameRole.Drawing && roundIsActive()) {
+			e.preventDefault();
 			const rect = e.currentTarget.getBoundingClientRect();
-			const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
+			const touch = e.touches[0];
+			const [x, y] = getScaledCoordinates(
+				touch.clientX,
+				touch.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
+				rect
+			);
 
+			dispatch(addStrokePoint([x, y]));
+		}
+	};
+
+	const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+		if (role === GameRole.Drawing && roundIsActive()) {
+			e.preventDefault();
+			const rect = e.currentTarget.getBoundingClientRect();
+			const touch = e.touches[0];
+			const [x, y] = getScaledCoordinates(
+				touch.clientX,
+				touch.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
+				rect
+			);
 			dispatch(
 				addStroke({
 					color: strokeColor,
@@ -194,92 +267,35 @@ function Canvas({
 				})
 			);
 			dispatch(addRecentlyUsedColor(strokeColor));
-		},
-		[roundIsActive, dispatch, strokeColor, strokeWidth]
-	);
+		}
+	};
 
-	const handleStrokePoint = React.useCallback(
-		(e: React.MouseEvent<HTMLCanvasElement>) => {
-			if (
-				!isDrawing.current ||
-				e.buttons !== 1 ||
-				!roundIsActive ||
-				role !== GameRole.Drawing
-			)
-				return;
-
-			const rect = e.currentTarget.getBoundingClientRect();
-			const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
-
-			// Allow points slightly outside bounds to be recorded
-			dispatch(addStrokePoint([x, y]));
-		},
-		[roundIsActive, dispatch]
-	);
-
-	const handleTouchMove = React.useCallback(
-		(e: React.TouchEvent<HTMLCanvasElement>) => {
-			if (role === GameRole.Drawing && roundIsActive) {
-				e.preventDefault();
-				const rect = e.currentTarget.getBoundingClientRect();
-				const touch = e.touches[0];
-				const [x, y] = getScaledCoordinates(touch.clientX, touch.clientY, rect);
-
-				dispatch(addStrokePoint([x, y]));
+	const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+		if (role === GameRole.Drawing && roundIsActive()) {
+			const cursor = cursorRef.current;
+			if (cursor && isLargeScreen) {
+				cursor.style.display = "block";
+				cursor.style.left = `${e.clientX + 2.5}px`;
+				cursor.style.top = `${e.clientY + 2.5}px`;
+				cursor.style.width = `${(strokeWidth * scaleFactor) / 2}px`;
+				cursor.style.height = `${(strokeWidth * scaleFactor) / 2}px`;
+				cursor.style.backgroundColor = `${strokeColor}33`;
+				cursor.style.border = "1px solid white";
+				cursor.style.boxShadow = "0 0 0 1px grey";
+				cursor.style.transform = "translate(-50%, -50%)";
+				cursor.style.position = "fixed";
 			}
-		},
-		[role, roundIsActive, dispatch]
-	);
+		}
+	};
 
-	const handleTouchStart = React.useCallback(
-		(e: React.TouchEvent<HTMLCanvasElement>) => {
-			if (role === GameRole.Drawing && roundIsActive) {
-				e.preventDefault();
-				const rect = e.currentTarget.getBoundingClientRect();
-				const touch = e.touches[0];
-				const [x, y] = getScaledCoordinates(touch.clientX, touch.clientY, rect);
-				dispatch(
-					addStroke({
-						color: strokeColor,
-						width: strokeWidth,
-						points: [[x, y]],
-					})
-				);
-				dispatch(addRecentlyUsedColor(strokeColor));
-			}
-		},
-		[role, roundIsActive, dispatch, strokeColor, strokeWidth]
-	);
-
-	const handleMouseMove = React.useCallback(
-		(e: React.MouseEvent<HTMLCanvasElement>) => {
-			if (role === GameRole.Drawing) {
-				const cursor = cursorRef.current;
-				if (cursor) {
-					cursor.style.display = "block";
-					cursor.style.left = `${e.clientX + 2.5}px`;
-					cursor.style.top = `${e.clientY + 2.5}px`;
-					cursor.style.width = `${(strokeWidth * scaleFactor) / 2}px`;
-					cursor.style.height = `${(strokeWidth * scaleFactor) / 2}px`;
-					cursor.style.backgroundColor = `${strokeColor}33`;
-					cursor.style.border = "1px solid white";
-					cursor.style.boxShadow = "0 0 0 1px grey";
-					cursor.style.transform = "translate(-50%, -50%)";
-					cursor.style.position = "fixed";
-				}
-			}
-		},
-		[role, strokeWidth, strokeColor, scaleFactor]
-	);
-
-	const handleMouseLeave = React.useCallback(() => {
-		if (role === GameRole.Drawing) {
+	const handleMouseLeave = () => {
+		if (role === GameRole.Drawing && roundIsActive()) {
 			const cursor = cursorRef.current;
 			if (cursor) {
 				cursor.style.display = "none";
 			}
 		}
-	}, [role]);
+	};
 
 	return (
 		<div
@@ -297,8 +313,10 @@ function Canvas({
 				height={height * CANVAS_SCALE - (padding ?? 0)}
 				onMouseDown={handleNewStroke}
 				onMouseMove={(e) => {
-					handleMouseMove(e);
-					handleStrokePoint(e);
+					if (roundIsActive()) {
+						handleMouseMove(e);
+						handleStrokePoint(e);
+					}
 				}}
 				onMouseUp={() => {
 					isDrawing.current = false;
@@ -307,15 +325,24 @@ function Canvas({
 					handleMouseLeave();
 					if (isDrawing.current) {
 						const rect = e.currentTarget.getBoundingClientRect();
-						const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
+						const [x, y] = getScaledCoordinates(
+							e.clientX,
+							e.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
+							rect
+						);
 						dispatch(addStrokePoint([x, y]));
 						isDrawing.current = false;
 					}
 				}}
 				onMouseEnter={(e) => {
-					if (e.buttons === 1 && role === GameRole.Drawing && roundIsActive) {
+					if (e.buttons === 1 && role === GameRole.Drawing && roundIsActive()) {
 						const rect = e.currentTarget.getBoundingClientRect();
-						const [x, y] = getScaledCoordinates(e.clientX, e.clientY, rect);
+
+						const [x, y] = getScaledCoordinates(
+							e.clientX,
+							e.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
+							rect
+						);
 
 						isDrawing.current = true;
 						dispatch(

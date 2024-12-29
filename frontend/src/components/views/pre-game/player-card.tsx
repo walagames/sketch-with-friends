@@ -26,17 +26,28 @@ import { PlayerProfile } from "@/state/features/room";
 import { containerSpring } from "@/config/spring";
 import { SoundEffect, useSound } from "@/providers/sound-provider";
 
-function CardContent({ player }: { player: Player }) {
+function CardContent({
+	player,
+	isCurrentPlayer,
+}: {
+	player: Player;
+	isCurrentPlayer: boolean;
+}) {
 	return (
 		<RaisedButton variant="card" size="card" className="w-full justify-start">
-			<div className="flex items-center h-14 -translate-y-0.5 lg:w-64 min-h-0 flex-1">
+			<div className="flex items-center h-14 -translate-y-0.5 lg:w-64 min-h-0 flex-1 pr-4">
 				<img
 					className="rounded-l-lg h-full aspect-square relative"
 					src={generateAvatar(player.profile.avatarSeed)}
 				/>
-				<p className="text-xl leading-0 font-bold truncate px-4 translate-y-0.5">
+				<p className="text-xl leading-0 font-bold truncate pl-2 translate-y-0.5">
 					{player.profile.name}
 				</p>
+				{isCurrentPlayer && (
+					<p className="text-sm text-foreground/50 leading-0 font-bold px-1 translate-y-0.5">
+						(You)
+					</p>
+				)}
 			</div>
 		</RaisedButton>
 	);
@@ -67,7 +78,7 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 
 		return (
 			<div
-				className="flex items-start gap-4 w-full ml-auto lg:w-auto px-1"
+				className="flex items-start gap-2 w-full ml-auto lg:w-auto px-1"
 				ref={ref}
 			>
 				{roomRole === RoomRole.Host && (
@@ -85,8 +96,11 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 				>
 					{isCurrentPlayer ? (
 						<DropdownMenu modal={false}>
-							<DropdownMenuTrigger className="w-full">
-								<CardContent player={player} />
+							<DropdownMenuTrigger className="w-full flex">
+								<CardContent
+									player={player}
+									isCurrentPlayer={isCurrentPlayer}
+								/>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent className="w-60 translate-x-1">
 								<DropdownMenuLabel>
@@ -106,7 +120,7 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 							</DropdownMenuContent>
 						</DropdownMenu>
 					) : (
-						<CardContent player={player} />
+						<CardContent player={player} isCurrentPlayer={isCurrentPlayer} />
 					)}
 				</motion.div>
 
@@ -136,7 +150,7 @@ function EditPlayerInfoModal({
 	return (
 		<Dialog open={isOpen} onOpenChange={setIsOpen}>
 			<DialogContent
-				className="sm:max-w-sm border-4 border-secondary-foreground bg-background-secondary"
+				className="sm:max-w-sm border-4 border-secondary-foreground bg-zinc-100"
 				aria-describedby="edit-player-description"
 			>
 				<DialogHeader>

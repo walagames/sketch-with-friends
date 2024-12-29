@@ -82,7 +82,7 @@ export function RoomSettingsForm() {
 	}, 300);
 
 	return (
-		<div className="w-full flex flex-col lg:gap-4 gap-1 max-h-[calc(100vh-200px)] overflow-y-auto px-1.5">
+		<div className="w-full flex flex-col lg:gap-4 gap-1 h-full px-1.5">
 			<h1 className="lg:text-3xl text-2xl font-bold z-10">Room settings</h1>
 			<Form {...form}>
 				<form
@@ -128,7 +128,7 @@ export function RoomSettingsForm() {
 										<FormControl>
 											<Slider
 												min={15}
-												max={90}
+												max={240}
 												step={5}
 												defaultValue={[field.value]}
 												onValueChange={(vals) => {
@@ -278,9 +278,9 @@ export function RoomSettingsForm() {
 							<FormItem>
 								<FormLabel>Custom Words</FormLabel>
 								<FormControl>
-									<Textarea 
-										rows={5} 
-										{...field} 
+									<Textarea
+										rows={5}
+										{...field}
 										spellCheck={false}
 										onFocus={() => setIsEditing(true)}
 										onBlur={() => setIsEditing(false)}

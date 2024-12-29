@@ -85,6 +85,18 @@ func host(rm RoomManager) http.HandlerFunc {
 			return
 		}
 
+		// Sanitize the username to remove any invalid characters
+		username = sanitizeUsername(username)
+		if username == "" {
+			slog.Warn("Invalid username",
+				"username", username,
+				"query", r.URL.Query().Encode(),
+				"request_id", requestID,
+			)
+			http.Error(w, "Invalid username", http.StatusBadRequest)
+			return
+		}
+
 		// Upgrade the HTTP connection to a WebSocket connection
 		conn, err := UpgradeConnection(w, r)
 		if err != nil {
@@ -147,6 +159,18 @@ func join(rm RoomManager) http.HandlerFunc {
 				"request_id", requestID,
 			)
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Sanitize the username to remove any invalid characters
+		username = sanitizeUsername(username)
+		if username == "" {
+			slog.Warn("Invalid username",
+				"username", username,
+				"query", r.URL.Query().Encode(),
+				"request_id", requestID,
+			)
+			http.Error(w, "Invalid username", http.StatusBadRequest)
 			return
 		}
 

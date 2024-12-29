@@ -1,5 +1,4 @@
-import { PreGameHostView } from "./pre-game/pre-game-host-view";
-import { PreGamePlayerView } from "./pre-game/pre-game-player-view";
+import { PreGameView } from "./pre-game/pre-game-view";
 import { PickingDrawerView } from "./playing/picking/picking-drawer-view";
 import { PickingGuesserView } from "./playing/picking/picking-guesser-view";
 import { DrawingView } from "./playing/drawing/drawing-view";
@@ -10,8 +9,7 @@ import { EnterPlayerInfoView } from "./join-room/enter-player-info-view";
 export {
 	EnterCodeView,
 	EnterPlayerInfoView,
-	PreGameHostView,
-	PreGamePlayerView,
+	PreGameView,
 	PickingDrawerView,
 	PickingGuesserView,
 	DrawingView,

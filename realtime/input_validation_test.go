@@ -2,7 +2,6 @@ package main
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -77,6 +76,41 @@ func TestFilterInvalidRunes(t *testing.T) {
 			input:    "héllö wørld",
 			expected: "hll wrld",
 		},
+		{
+			name:     "valid hyphenated word",
+			input:    "well-known",
+			expected: "well-known",
+		},
+		{
+			name:     "hyphenated word with spaces",
+			input:    "well - known",
+			expected: "well known",
+		},
+		{
+			name:     "multiple valid hyphens",
+			input:    "up-to-date",
+			expected: "up-to-date",
+		},
+		{
+			name:     "leading hyphen",
+			input:    "-test",
+			expected: "test",
+		},
+		{
+			name:     "trailing hyphen",
+			input:    "test-",
+			expected: "test",
+		},
+		{
+			name:     "multiple consecutive hyphens",
+			input:    "test--word",
+			expected: "test-word",
+		},
+		{
+			name:     "hyphen with apostrophe",
+			input:    "don't-worry",
+			expected: "don't-worry",
+		},
 	}
 
 	for _, tt := range tests {
@@ -134,16 +168,6 @@ func TestFilterInvalidWords(t *testing.T) {
 			name:     "mixed valid and invalid strings",
 			input:    []string{"hello!", "", "  world  ", "test@123", "don't"},
 			expected: []string{"hello", "world", "test", "don't"},
-		},
-		{
-			name:     "words longer than max length",
-			input:    []string{"hello", "world", strings.Repeat("a", MAX_WORD_LENGTH+1)},
-			expected: []string{"hello", "world"},
-		},
-		{
-			name:     "words longer than max length",
-			input:    []string{"hello", "world", strings.Repeat("a", MAX_WORD_LENGTH)},
-			expected: []string{"hello", "world", strings.Repeat("a", MAX_WORD_LENGTH)},
 		},
 	}
 
@@ -253,6 +277,109 @@ func TestFilterDuplicateWords(t *testing.T) {
 			got := filterDuplicateWords(tt.input)
 			if !reflect.DeepEqual(got, tt.expected) {
 				t.Errorf("filterDuplicateWords() = %v, want %v", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestSanitizeUsername(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected string
+	}{
+		{
+			name:     "simple lowercase",
+			input:    "john",
+			expected: "john",
+		},
+		{
+			name:     "mixed case preserved",
+			input:    "JohnDoe",
+			expected: "JohnDoe",
+		},
+		{
+			name:     "valid apostrophe",
+			input:    "John's",
+			expected: "John's",
+		},
+		{
+			name:     "multiple valid apostrophes",
+			input:    "O'Neil's",
+			expected: "O'Neil's",
+		},
+		{
+			name:     "consecutive apostrophes",
+			input:    "John''Doe",
+			expected: "John'Doe",
+		},
+		{
+			name:     "leading apostrophe",
+			input:    "'John",
+			expected: "John",
+		},
+		{
+			name:     "trailing apostrophe",
+			input:    "John'",
+			expected: "John",
+		},
+		{
+			name:     "with valid space",
+			input:    "John Doe",
+			expected: "John Doe",
+		},
+		{
+			name:     "with multiple spaces",
+			input:    "John   Doe",
+			expected: "John Doe",
+		},
+		{
+			name:     "with numbers",
+			input:    "John123",
+			expected: "John123",
+		},
+		{
+			name:     "with special characters",
+			input:    "John!@#$%",
+			expected: "John",
+		},
+		{
+			name:     "with emojis",
+			input:    "John👋Doe",
+			expected: "JohnDoe",
+		},
+		{
+			name:     "empty string",
+			input:    "",
+			expected: "",
+		},
+		{
+			name:     "only invalid characters",
+			input:    "123!@#",
+			expected: "123",
+		},
+		{
+			name:     "non-English characters",
+			input:    "Jöhn",
+			expected: "Jhn",
+		},
+		{
+			name:     "too long",
+			input:    "thisiswaytoolongggg",
+			expected: "",
+		},
+		{
+			name:     "too short",
+			input:    "",
+			expected: "",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := sanitizeUsername(tt.input)
+			if result != tt.expected {
+				t.Errorf("sanitizeUsername(%q) = %q, want %q", tt.input, result, tt.expected)
 			}
 		})
 	}

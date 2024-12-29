@@ -3,30 +3,21 @@ import { RootState } from "@/state/store";
 import { useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { containerSpring } from "@/config/spring";
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { useMemo } from "react";
-
-export function CanvasHeader() {
-	const isLargeScreen = useMediaQuery("(min-width: 1024px)"); // matches lg: breakpoint
-
-	const delay = useMemo(() => {
-		return isLargeScreen ? 0.1 : 0.35;
-	}, [isLargeScreen]);
-
+export function CanvasHeader({ delay }: { delay: number }) {
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: -10 }}
 			animate={{ opacity: 1, y: 4 }}
 			transition={{ ...containerSpring, delay }}
-			className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-7rem)] lg:w-full h-16 justify-center"
+			className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-7rem)] pr-3 lg:w-full h-16 justify-center"
 		>
 			<RoundInfo />
-			<DrawingStatus />
+			<DrawingStatus delay={delay} />
 		</motion.div>
 	);
 }
 
-export function DrawingStatus() {
+export function DrawingStatus({ delay }: { delay: number }) {
 	const selectedWord = useSelector(
 		(state: RootState) => state.game.selectedWord
 	);
@@ -38,9 +29,9 @@ export function DrawingStatus() {
 
 	if (isDrawing) {
 		return (
-			<span className="flex items-center gap-1 lg:text-2xl">
-				You're drawing:{" "}
-				<span className="text-lg lg:text-2xl font-bold">{selectedWord}</span>
+			<span className="flex items-center text-sm gap-1 lg:text-2xl">
+				You're sketching:{" "}
+				<span className="lg:text-2xl font-bold">{selectedWord}</span>
 			</span>
 		);
 	}
@@ -48,55 +39,103 @@ export function DrawingStatus() {
 	const containsLetterBlanks = selectedWord.includes("*");
 
 	return (
-		<span className="flex items-center gap-1 lg:text-2xl">
-			{drawingPlayer?.profile.name} is drawing:{" "}
+		<span className="flex items-start flex-wrap text-sm lg:text-2xl gap-1">
+			<span className="flex-wrap">
+				{drawingPlayer?.profile.name} is sketching:{" "}
+			</span>
 			{containsLetterBlanks ? (
-				<span className="text-lg lg:text-2xl font-bold">
-					<WordWithLetterBlanks word={selectedWord} />
+				<span className=" lg:text-2xl font-bold">
+					<WordWithLetterBlanks word={selectedWord} delay={delay - 0.1} />
 				</span>
 			) : (
-				<span className="text-lg lg:text-2xl font-bold">{selectedWord}</span>
+				<span className=" lg:text-2xl font-bold">{selectedWord}</span>
 			)}
 		</span>
 	);
 }
 
-function WordWithLetterBlanks({ word }: { word: string }) {
-	const wordLetters = word.replaceAll("*", "_").split("");
+function WordWithLetterBlanks({
+	word,
+	delay,
+}: {
+	word: string;
+	delay: number;
+}) {
+	// Split only by spaces first
+	const spaceSeparatedParts = word
+		.split(" ")
+		.filter((segment) => segment.length > 0);
+
+	const processedSegments = spaceSeparatedParts
+		.map((part) => {
+			// Split by dashes but keep the dashes
+			const subParts = part
+				.split(/(?=-)|(?<=-)/)
+				.filter((segment) => segment.length > 0);
+			return subParts.map((segment) => ({
+				text: segment.replaceAll("*", "_"),
+				// Only count length if it's not a dash
+				count: segment === "-" ? 0 : segment.length,
+				isDash: segment === "-",
+			}));
+		})
+		.flat();
+
 	return (
-		<motion.span
-			className="lg:text-2xl font-bold inline-flex gap-0.5 px-1.5"
-			initial="hidden"
-			animate="visible"
-			variants={{
-				hidden: {},
-				visible: {
-					transition: {
-						delayChildren: 0.15,
-						staggerChildren: 0.05,
-					},
-				},
-			}}
-		>
-			{wordLetters.map((letter, index) => (
+		<span className="lg:text-2xl font-bold inline-flex gap-4 px-1.5">
+			{processedSegments.map((segment, segmentIndex) => (
 				<motion.span
-					key={index}
-					className={letter === " " ? "px-1.5" : undefined}
+					initial="hidden"
+					animate="visible"
 					variants={{
-						hidden: { y: -5, opacity: 0 },
+						hidden: {},
 						visible: {
-							y: 0,
-							opacity: 1,
 							transition: {
-								type: "spring",
+								delayChildren: delay,
+								staggerChildren: 0.025,
 							},
 						},
 					}}
+					key={segmentIndex}
+					className="flex items-center gap-1 relative"
 				>
-					{letter}
+					{segment.text.split("").map((letter, letterIndex) => (
+						<motion.span
+							key={letterIndex}
+							variants={{
+								hidden: { y: -5, opacity: 0 },
+								visible: {
+									y: 0,
+									opacity: 1,
+									transition: {
+										type: "spring",
+									},
+								},
+							}}
+						>
+							{letter}
+						</motion.span>
+					))}
+					{!segment.isDash && (
+						<motion.span
+							className=" text-xs"
+							variants={{
+								hidden: { y: -5, opacity: 0 },
+								visible: {
+									y: 0,
+									opacity: 1,
+									transition: {
+										type: "spring",
+									},
+								},
+							}}
+						>
+							({segment.count})
+						</motion.span>
+					)}
 				</motion.span>
 			))}
-		</motion.span>
+		</span>
 	);
 }
 

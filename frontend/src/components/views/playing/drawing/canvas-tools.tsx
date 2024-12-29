@@ -1,4 +1,4 @@
-import { Brush, Undo2, Trash, SwatchBook } from "lucide-react";
+import { Brush, Undo2, Trash } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { Slider } from "../../../ui/slider";
@@ -24,6 +24,8 @@ import { getGameRole } from "@/lib/player";
 import { GameRole } from "@/state/features/game";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { containerSpring } from "@/config/spring";
 const swatches = [
 	// Monochrome
 	"#ffffff", // white
@@ -71,6 +73,61 @@ const swatches = [
 	"#a0522d", // light brown
 	"#63300d", // dark brown
 ];
+
+function PalleteIcon({
+	className,
+	style,
+}: {
+	className?: string;
+	style?: React.CSSProperties;
+}) {
+	return (
+		<svg
+			xmlns="http://www.w3.org/2000/svg"
+			width="24"
+			height="24"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke="currentColor"
+			strokeWidth="2"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+			className={cn("", className)}
+			style={style}
+		>
+			<circle
+				cx="13.5"
+				cy="6.5"
+				r=".5"
+				fill="currentColor"
+				className="text-green-500"
+			/>
+			<circle
+				cx="17.5"
+				cy="10.5"
+				r=".5"
+				fill="currentColor"
+				className="text-blue-500"
+			/>
+			<circle
+				cx="8.5"
+				cy="7.5"
+				r=".5"
+				fill="currentColor"
+				className="text-orange-500"
+			/>
+			<circle
+				cx="6.5"
+				cy="12.5"
+				r=".5"
+				fill="currentColor"
+				className="text-red-500"
+			/>
+			<path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+		</svg>
+	);
+}
+
 export function CanvasTools() {
 	const dispatch = useDispatch();
 	const players = useSelector((state: RootState) => state.room.players);
@@ -89,7 +146,10 @@ export function CanvasTools() {
 	const [isOpen, setIsOpen] = useState(false);
 
 	return (
-		<div
+		<motion.div
+			initial={{ opacity: 0, y: 10 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{ ...containerSpring, delay: 1.5 }}
 			className={cn(
 				"lg:gap-8 gap-4 w-full items-center py-1.5 lg:py-4 px-3.5 lg:px-0 ",
 				isDrawing ? "flex" : "hidden"
@@ -113,18 +173,13 @@ export function CanvasTools() {
 							shift={false}
 						>
 							<div className="h-11 w-11 rounded-lg flex items-center justify-center">
-								<SwatchBook
-									style={{
-										color: currentColor,
-									}}
-									className="size-5 lg:size-6"
-								/>
+								<PalleteIcon className="size-5 lg:size-7" />
 							</div>
 						</RaisedButton>
 					</DialogTrigger>
-					<DialogContent className="sm:max-w-md bg-background-secondary">
+					<DialogContent className="sm:max-w-md border-4 border-foreground bg-zinc-100">
 						<DialogTitle>
-							<p className="text-lg font-semibold">Color options</p>
+							<p className="text-lg font-semibold">Color palette</p>
 						</DialogTitle>
 						<div className="flex flex-col gap-8">
 							<div className="flex gap-6">
@@ -172,7 +227,7 @@ export function CanvasTools() {
 									>
 										<div
 											style={{ backgroundColor: swatch }}
-											className="h-20 w-20 rounded-lg flex items-center justify-center"
+											className="h-11 w-11 -translate-y-0.5 rounded-lg flex items-center justify-center"
 										/>
 									</RaisedButton>
 								))}
@@ -197,7 +252,7 @@ export function CanvasTools() {
 					<Trash className="lg:size-6 size-5" />
 				</RaisedButton>
 			</div>
-		</div>
+		</motion.div>
 	);
 }
 
@@ -297,7 +352,10 @@ export function ColorSliders() {
 	};
 
 	return (
-		<div
+		<motion.div
+			initial={{ opacity: 0, x: -10 }}
+			animate={{ opacity: 1, x: 0 }}
+			transition={{ ...containerSpring, delay: 1.5 }}
 			className={cn(
 				"gap-6 w-full max-w-sm mt-auto py-24",
 				isDrawing ? "lg:flex hidden" : "hidden"
@@ -342,6 +400,6 @@ export function ColorSliders() {
 					className="h-full"
 				/>
 			</div>
-		</div>
+		</motion.div>
 	);
 }

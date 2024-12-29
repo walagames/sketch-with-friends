@@ -6,8 +6,39 @@ import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { CanvasHeader } from "./canvas-header";
+import { AnimatedSketchText } from "@/components/ui/game-start-countdown";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "@/state/store";
 
 export function DrawingView() {
+	const drawingTime = useSelector(
+		(state: RootState) => state.room.settings.drawingTimeAllowed
+	);
+
+	const currentPhaseDeadline = useSelector(
+		(state: RootState) => state.game.currentPhaseDeadline
+	);
+
+	// Only play the animation within the first second of the drawing phase
+	// Otherwise when the tab refocuses, it will play the animation again
+	const isWithinFirstSecond =
+		drawingTime -
+			(new Date(currentPhaseDeadline).getTime() - Date.now()) / 1000 <
+		1;
+	const [showSketchText, setShowSketchText] = useState(isWithinFirstSecond);
+
+	// Hide the sketch text after the animation is done
+	useEffect(() => {
+		const timeout = setTimeout(() => {
+			setShowSketchText(false);
+		}, 1250);
+
+		return () => {
+			clearTimeout(timeout);
+		};
+	}, []);
+
 	return (
 		<SkyScene>
 			<div className="mx-auto mb-auto lg:my-auto flex flex-col gap-2 items-center relative z-50">
@@ -15,8 +46,15 @@ export function DrawingView() {
 					<div className="flex items-center justify-center gap-6 pb-1">
 						<ColorSliders />
 						<div className="flex flex-col items-center justify-center max-w-[800px] w-screen lg:w-auto">
-							<CanvasHeader />
-							<Canvas padding={10} width={800} height={600} />
+							<CanvasHeader delay={showSketchText ? 1.5 : 0.35} />
+							<div className="relative">
+								<AnimatePresence>
+									{showSketchText && (
+										<AnimatedSketchText className="lg:h-[4rem] h-[3rem] text-black absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-3/4 z-50" />
+									)}
+								</AnimatePresence>
+								<Canvas padding={10} width={800} height={600} />
+							</div>
 							<CanvasTools />
 						</div>
 					</div>

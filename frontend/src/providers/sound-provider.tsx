@@ -1,7 +1,14 @@
-import { GamePhase, Guess } from "@/state/features/game";
-import { Player } from "@/state/features/room";
+import { ChatMessage, GamePhase } from "@/state/features/game";
+import { Player, RoomStage } from "@/state/features/room";
 import { RootState } from "@/state/store";
-import { createContext, useContext, useEffect, useRef } from "react";
+import {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useRef,
+	useMemo,
+} from "react";
 import { useSelector } from "react-redux";
 
 declare global {
@@ -20,6 +27,8 @@ export enum SoundEffect {
 	SCENE_CHANGE = "scene-change",
 	PLAYER_WIN = "player-win",
 	PLAYER_LOSE = "player-lose",
+	SCRIBBLE = "scribble",
+	CHAT_MESSAGE = "chat-message",
 }
 
 type SoundBuffers = {
@@ -32,7 +41,6 @@ type SoundContextType = {
 
 const SoundContext = createContext<SoundContextType | null>(null);
 
-// Create a type for sound configuration
 type SoundConfig = {
 	path: string;
 	volume: number;
@@ -48,14 +56,21 @@ const SOUND_PATHS: Record<SoundEffect, SoundConfig> = {
 	[SoundEffect.SCENE_CHANGE]: { path: "/sounds/whoosh.mp3", volume: 0.25 },
 	[SoundEffect.PLAYER_WIN]: { path: "/sounds/player-win.mp3", volume: 1 },
 	[SoundEffect.PLAYER_LOSE]: { path: "/sounds/player-lose.mp3", volume: 1 },
+	[SoundEffect.SCRIBBLE]: { path: "/sounds/scribble.mp3", volume: 0.5 },
+	[SoundEffect.CHAT_MESSAGE]: {
+		path: "/sounds/chat-pop.mp3",
+		volume: 0.6,
+	},
 };
 
 export function SoundProvider({ children }: { children: React.ReactNode }) {
 	const audioContextRef = useRef<AudioContext>();
 	const soundBuffersRef = useRef<SoundBuffers>({});
 	const volume = useSelector((state: RootState) => state.preferences.volume);
-	const guesses = useSelector((state: RootState) => state.game.guesses);
-	const prevGuessesRef = useRef<Guess[]>([]);
+	const chatMessages = useSelector(
+		(state: RootState) => state.game.chatMessages
+	);
+	const prevChatMessagesRef = useRef<ChatMessage[]>([]);
 	const phase = useSelector((state: RootState) => state.game.phase);
 	const deadline = useSelector(
 		(state: RootState) => state.game.currentPhaseDeadline
@@ -66,7 +81,27 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 	const prevPlayersRef = useRef<{ [key: string]: Player }>({});
 	const isInitializedRef = useRef(false);
 	const gamePhase = useSelector((state: RootState) => state.game.phase);
+	const roomStage = useSelector((state: RootState) => state.room.stage);
 	const prevPhaseRef = useRef(gamePhase);
+
+	const playSound = useCallback(
+		(sound: SoundEffect) => {
+			if (!audioContextRef.current || !soundBuffersRef.current[sound]) return;
+
+			const source = audioContextRef.current.createBufferSource();
+			source.buffer = soundBuffersRef.current[sound]!;
+
+			const gainNode = audioContextRef.current.createGain();
+			// Multiply the user's volume preference with the sound's default volume
+			gainNode.gain.value = volume * SOUND_PATHS[sound].volume;
+
+			source.connect(gainNode);
+			gainNode.connect(audioContextRef.current.destination);
+
+			source.start(0);
+		},
+		[audioContextRef, soundBuffersRef, volume]
+	);
 
 	useEffect(() => {
 		// Initialize AudioContext
@@ -94,18 +129,32 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 
 	// Listen for game state changes and play appropriate sounds
 	useEffect(() => {
-		const newCorrectGuess = guesses.some(
-			(guess) =>
-				guess.isCorrect &&
-				!prevGuessesRef.current.find((prev) => prev.id === guess.id)
-		);
-
-		if (newCorrectGuess) {
-			playSound(SoundEffect.CORRECT);
+		// Initialize the ref on first mount only
+		if (!isInitializedRef.current) {
+			prevChatMessagesRef.current = chatMessages;
+			isInitializedRef.current = true;
+			return;
 		}
 
-		prevGuessesRef.current = guesses;
-	}, [guesses]);
+		// Only check the most recent message
+		const latestMessage = chatMessages[chatMessages.length - 1];
+		const prevMessages = prevChatMessagesRef.current;
+
+		// Only play sound if there's a new message (comparing lengths)
+		// and the latest message isn't already in the previous messages
+		if (
+			chatMessages.length > prevMessages.length &&
+			!prevMessages.find((prev) => prev.id === latestMessage?.id)
+		) {
+			if (latestMessage?.isCorrect) {
+				playSound(SoundEffect.CORRECT);
+			} else {
+				playSound(SoundEffect.CHAT_MESSAGE);
+			}
+		}
+
+		prevChatMessagesRef.current = chatMessages;
+	}, [chatMessages, playSound]);
 
 	// Play clock tick sounds when drawing phase is ending
 	useEffect(() => {
@@ -115,7 +164,11 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 			if (intervalRef.current) clearInterval(intervalRef.current);
 		};
 
-		if (phase === GamePhase.Drawing && deadline) {
+		if (
+			phase === GamePhase.Drawing &&
+			deadline &&
+			roomStage === RoomStage.Playing
+		) {
 			const now = Date.now();
 			const timeUntilDeadline = new Date(deadline).getTime() - now;
 			const timeUntilWarning = timeUntilDeadline - 9000; // 9 seconds before deadline
@@ -134,7 +187,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 		}
 
 		return cleanup;
-	}, [phase, deadline]);
+	}, [phase, deadline, playSound, roomStage]);
 
 	// Play player join/leave sounds when players change
 	useEffect(() => {
@@ -163,7 +216,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 		}
 
 		prevPlayersRef.current = players;
-	}, [players]);
+	}, [players, playSound]);
 
 	// Play scene change sound when phase changes
 	useEffect(() => {
@@ -172,26 +225,12 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 		}
 
 		prevPhaseRef.current = gamePhase;
-	}, [gamePhase]);
+	}, [gamePhase, playSound]);
 
-	const playSound = (sound: SoundEffect) => {
-		if (!audioContextRef.current || !soundBuffersRef.current[sound]) return;
-
-		const source = audioContextRef.current.createBufferSource();
-		source.buffer = soundBuffersRef.current[sound]!;
-
-		const gainNode = audioContextRef.current.createGain();
-		// Multiply the user's volume preference with the sound's default volume
-		gainNode.gain.value = volume * SOUND_PATHS[sound].volume;
-
-		source.connect(gainNode);
-		gainNode.connect(audioContextRef.current.destination);
-
-		source.start(0);
-	};
+	const contextValue = useMemo(() => ({ playSound }), [playSound]);
 
 	return (
-		<SoundContext.Provider value={{ playSound }}>
+		<SoundContext.Provider value={contextValue}>
 			{children}
 		</SoundContext.Provider>
 	);

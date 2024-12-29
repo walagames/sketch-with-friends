@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -18,7 +19,8 @@ const (
 	PLAYER_TIMEOUT = 15 * time.Minute
 
 	// Maximum length of a player's name
-	MAX_NAME_LENGTH = 16
+	MAX_NAME_LENGTH = 14
+	MIN_NAME_LENGTH = 1
 )
 
 // We send these to clients to display alerts
@@ -122,7 +124,7 @@ func NewRoom(id string) Room {
 		lastInteractionAt: time.Now(),
 		Settings: RoomSettings{
 			PlayerLimit:        6,
-			DrawingTimeAllowed: 60,
+			DrawingTimeAllowed: 90,
 			TotalRounds:        3,
 			WordDifficulty:     WordDifficultyRandom,
 			GameMode:           GameModeClassic,
@@ -205,29 +207,30 @@ func (r *room) register(ctx context.Context, player *player) error {
 
 	// Tell the other players that a new player joined
 	r.broadcast(GameRoleAny,
-		message(PlayerJoined, player),
+		action(PlayerJoined, player),
 	)
 
 	// Send the player the current room state and tell them what their ID is
 	player.Send(
-		message(InitializeClient, player.ID),
-		message(InitializeRoom, r),
+		action(InitializeClient, player.ID),
+		action(InitializeRoom, r),
 	)
 
 	// If the room is already playing, we need to send them the game state as well
 	// and add them to the drawing queue.
 	if r.Stage == Playing {
+		r.game.SendSystemMessage(fmt.Sprintf("%s joined the room", player.Profile.Name))
 		r.game.enqueueDrawingPlayer(player)
 		player.Send(
-			message(ChangePhase, PhaseChangeMessage{
+			action(ChangePhase, PhaseChangeMessage{
 				Phase:    r.game.currentPhase.Name(),
 				Deadline: r.game.currentPhaseDeadline,
 			}),
-			message(SetStrokes, r.game.strokes),
-			message(SelectWord, r.game.hintedWord),
-			message(SetRound, r.game.currentRound),
-			message(SetGuesses, r.game.guesses),
-			message(PointsAwarded, r.game.pointsAwarded),
+			action(SetStrokes, r.game.strokes),
+			action(SelectWord, r.game.hintedWord),
+			action(SetRound, r.game.currentRound),
+			action(SetChat, r.game.chatMessages),
+			action(PointsAwarded, r.game.pointsAwarded),
 		)
 	}
 
@@ -252,25 +255,28 @@ func (r *room) unregister(player *player) {
 	// otherwise the alert will not display to the other players.
 	r.broadcast(
 		GameRoleAny,
-		message(PlayerLeft, player.ID),
+		action(PlayerLeft, player.ID),
 	)
-
-	// Remove the player from the room state
-	delete(r.Players, player.ID)
 
 	// If the player is the host, we need to migrate the host role to a new player
 	if player.RoomRole == RoomRoleHost {
 		// Assign the host role to the first player we find
 		for _, p := range r.Players {
+			if p.ID == player.ID {
+				continue
+			}
 			p.RoomRole = RoomRoleHost
 			r.broadcast(
 				GameRoleAny,
-				message(SetPlayers, r.Players),
+				action(SetPlayers, r.Players),
 			)
 			slog.Debug("host changed to", "playerId", p.ID)
 			break
 		}
 	}
+
+	// Remove the player from the room state
+	delete(r.Players, player.ID)
 
 	// If there are no players left in the room, we need to cancel the game
 	// and reset the room stage.
@@ -299,9 +305,9 @@ func (r *room) unregister(player *player) {
 
 		// Tell the remaining player that the game has ended
 		r.broadcast(GameRoleAny,
-			message(ChangeStage, r.Stage),
-			message(ClearStrokes, nil),
-			message(Error, "Not enough players to continue game"),
+			action(ChangeStage, r.Stage),
+			action(ClearStrokes, nil),
+			action(Error, "Not enough players to continue game"),
 		)
 	}
 
@@ -336,7 +342,7 @@ func (r *room) dispatch(a *Action) {
 	def, exists := ActionDefinitions[a.Type]
 	if !exists {
 		slog.Debug("unknown action", "action", a.Type)
-		a.Player.Send(message(Error, "unknown action"))
+		a.Player.Send(action(Error, "unknown action"))
 		return
 	}
 
@@ -344,7 +350,7 @@ func (r *room) dispatch(a *Action) {
 	err := def.ValidateAction(r, a)
 	if err != nil {
 		slog.Debug("action validation failed", "reason", err)
-		a.Player.Send(message(Error, err.Error()))
+		a.Player.Send(action(Error, err.Error()))
 		return
 	}
 
@@ -352,7 +358,7 @@ func (r *room) dispatch(a *Action) {
 	err = def.execute(r, a)
 	if err != nil {
 		slog.Debug("action execution failed", "reason", err)
-		a.Player.Send(message(Error, err.Error()))
+		a.Player.Send(action(Error, err.Error()))
 		return
 	}
 }
@@ -415,7 +421,9 @@ func (r *room) Run(rm RoomManager) {
 			}
 		case <-r.timer.C:
 			// Transition the game to the next phase when the timer fires
-			r.game.currentPhase.Next(r.game)
+			if r.game != nil {
+				r.game.currentPhase.Next(r.game)
+			}
 		case req := <-r.connect:
 			// A new client has connected to the room
 			req.result <- r.register(ctx, req.player)
