@@ -161,7 +161,7 @@ export function Chat() {
 				<ChatForm isGuessing={isGuessing} />
 			</div>
 			<div className="w-full sm:hidden">
-				<VirtualKeyboard className="w-full" />
+				<VirtualKeyboard isGuessing={isGuessing} className="w-full" />
 			</div>
 		</div>
 	);
@@ -300,6 +300,12 @@ export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
 	const [historyIndex, setHistoryIndex] = useState(-1);
 	const [currentMessage, setCurrentMessage] = useState("");
 
+	const selectedWord = useSelector(
+		(state: RootState) => state.game.selectedWord
+	);
+
+	const hasNotGuessedAlready = selectedWord.includes("*");
+
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
 		defaultValues: {
@@ -346,32 +352,44 @@ export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
 				<FormField
 					control={form.control}
 					name="message"
-					render={({ field }) => (
-						<FormItem className="relative space-y-0">
-							<FormControl>
-								<div className="flex items-center gap-3 relative">
-									<RaisedInput
-										autoComplete="off"
-										placeholder={isGuessing ? "Guess" : "Chat"}
-										onKeyDown={handleKeyDown}
-										{...field}
-										onChange={(e) => {
-											field.onChange(e);
-											if (historyIndex === -1) {
-												setCurrentMessage(e.target.value);
-											}
-										}}
-										className="pr-10"
-									/>
-									{field.value.length > 0 && (
-										<div className="absolute right-3 top-1/2 -translate-y-3/4 font-bold">
-											{field.value.length}
-										</div>
-									)}
-								</div>
-							</FormControl>
-						</FormItem>
-					)}
+					render={({ field }) => {
+						const length = field.value.length;
+						return (
+							<FormItem className="relative space-y-0">
+								<FormControl>
+									<div className="flex items-center gap-3 relative">
+										<RaisedInput
+											autoComplete="off"
+											placeholder={isGuessing ? "Guess" : "Chat"}
+											onKeyDown={handleKeyDown}
+											{...field}
+											onChange={(e) => {
+												field.onChange(e);
+												if (historyIndex === -1) {
+													setCurrentMessage(e.target.value);
+												}
+											}}
+											className="pr-10"
+										/>
+										{field.value.length > 0 &&
+											isGuessing &&
+											hasNotGuessedAlready && (
+												<div
+													className={cn(
+														"absolute right-3 top-1/2 -translate-y-3/4 font-bold",
+														length > selectedWord.length && "text-red-500",
+														length === selectedWord.length && "text-green-500",
+														length < selectedWord.length && "text-yellow-500"
+													)}
+												>
+													{length}
+												</div>
+											)}
+									</div>
+								</FormControl>
+							</FormItem>
+						);
+					}}
 				></FormField>
 			</form>
 		</Form>

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useCallback, forwardRef } from "react";
 import { cn } from "@/lib/utils";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
 	ArrowBigDownIcon,
 	ArrowBigUpIcon,
@@ -10,6 +10,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { containerSpring, containerSpringFast } from "@/config/spring";
 import { RaisedButton } from "@/components/ui/raised-button";
+import { RootState } from "@/state/store";
 const keys = [
 	["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
 	["a", "s", "d", "f", "g", "h", "j", "k", "l"],
@@ -21,12 +22,14 @@ function VirtualInput({
 	toggleKeyboard,
 	fakeInputRef,
 	isOpen,
+	isGuessing,
 }: {
 	value: string;
 	showKeyboard: boolean;
 	toggleKeyboard: () => void;
 	fakeInputRef: React.RefObject<HTMLDivElement>;
 	isOpen: boolean;
+	isGuessing: boolean;
 }) {
 	const inputRef = useRef<HTMLDivElement>(null);
 
@@ -35,6 +38,13 @@ function VirtualInput({
 			inputRef.current.scrollLeft = inputRef.current.scrollWidth;
 		}
 	}, [value]);
+
+	const selectedWord = useSelector(
+		(state: RootState) => state.game.selectedWord
+	);
+
+	const hasNotGuessedAlready = selectedWord.includes("*");
+	const length = value.length;
 
 	return (
 		<AnimatePresence>
@@ -82,9 +92,16 @@ function VirtualInput({
 						)}
 					</div>
 				</div>
-				{value && (
-					<div className="absolute right-3 font-bold top-1/2 -translate-y-1/2">
-						{value.length}
+				{value && isGuessing && hasNotGuessedAlready && (
+					<div
+						className={cn(
+							"absolute right-3 font-bold top-1/2 -translate-y-1/2",
+							length > selectedWord.length && "text-red-500",
+							length === selectedWord.length && "text-green-500",
+							length < selectedWord.length && "text-yellow-500"
+						)}
+					>
+						{length}
 					</div>
 				)}
 			</div>
@@ -131,8 +148,8 @@ function KeyboardButton({
 
 export const VirtualKeyboard = forwardRef<
 	HTMLDivElement,
-	{ className?: string }
->(function VirtualKeyboard({ className }, ref) {
+	{ className?: string; isGuessing: boolean }
+>(function VirtualKeyboard({ className, isGuessing }, ref) {
 	const [isUpperCase, setIsUpperCase] = useState(false);
 	const [showKeyboard, setShowKeyboard] = useState(false);
 	const [input, setInput] = useState("");
@@ -221,6 +238,7 @@ export const VirtualKeyboard = forwardRef<
 		>
 			<div className="flex mb-2 w-[calc(100%-0.75rem)] mx-auto gap-1 min-w-0">
 				<VirtualInput
+					isGuessing={isGuessing}
 					value={input}
 					showKeyboard={showKeyboard}
 					toggleKeyboard={toggleKeyboard}
