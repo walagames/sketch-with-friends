@@ -17,10 +17,10 @@ import {
 	PickingGuesserView,
 	PostDrawingView,
 	DrawingView,
+	PreGameView,
 } from "@/components/views";
 import { useEffect, useState } from "react";
 import { containerSpring } from "@/config/spring";
-import { PreGameView } from "./components/views/pre-game/pre-game-view";
 type ViewComponent = {
 	Component: React.ComponentType;
 	key: string;
