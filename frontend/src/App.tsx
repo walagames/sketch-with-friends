@@ -67,16 +67,9 @@ const roomViews = {
 			},
 		},
 		[GamePhase.Drawing]: {
-			[GameRole.Drawing]: {
-				Component: DrawingView,
-				key: "playing-drawing-drawer",
-				transition: Direction.LEFT,
-			},
-			[GameRole.Guessing]: {
-				Component: DrawingView,
-				key: "playing-drawing-guesser",
-				transition: Direction.LEFT,
-			},
+			Component: DrawingView,
+			key: "playing-drawing",
+			transition: Direction.LEFT,
 		},
 		[GamePhase.PostDrawing]: {
 			Component: PostDrawingView,
@@ -90,16 +83,9 @@ const roomViews = {
 		},
 	},
 	[RoomStage.Unanimous]: {
-		[RoomRole.Host]: {
-			Component: () => <></>,
-			key: "unanimous-host",
-			transition: Direction.LEFT,
-		},
-		[RoomRole.Player]: {
-			Component: () => <></>,
-			key: "unanimous-player",
-			transition: Direction.LEFT,
-		},
+		Component: () => <></>,
+		key: "unanimous",
+		transition: Direction.LEFT,
 	},
 } as const;
 
@@ -126,7 +112,9 @@ function roomView({
 		return isFirstPhase ? { ...view, transition: Direction.DOWN_FADE } : view;
 	}
 
-	return roomViews[roomStage][roomRole];
+	return roomViews[roomStage][
+		roomRole as keyof (typeof roomViews)[typeof roomStage]
+	];
 }
 
 function joinView(enteredRoomCode: string): ViewComponent {
