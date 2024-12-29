@@ -18,7 +18,8 @@ const (
 	PLAYER_TIMEOUT = 15 * time.Minute
 
 	// Maximum length of a player's name
-	MAX_NAME_LENGTH = 12
+	MAX_NAME_LENGTH = 14
+	MIN_NAME_LENGTH = 1
 )
 
 // We send these to clients to display alerts

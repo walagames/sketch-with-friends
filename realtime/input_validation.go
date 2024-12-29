@@ -17,7 +17,8 @@ func sanitizeUsername(username string) string {
 
 	for i, r := range username {
 		// Allow uppercase letters (A-Z), lowercase letters (a-z), apostrophe, and space
-		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || r == '\'' || r == ' ' {
+		if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9') ||
+			r == '\'' || r == ' ' {
 			// Handle spaces: only allow single spaces, not at start/end
 			if r == ' ' {
 				if lastWasSpace || i == 0 || i == len(username)-1 {
@@ -40,7 +41,12 @@ func sanitizeUsername(username string) string {
 		}
 	}
 
-	return result.String()
+	// Add length validation
+	sanitized := result.String()
+	if len(sanitized) < MIN_NAME_LENGTH || len(sanitized) > MAX_NAME_LENGTH {
+		return ""
+	}
+	return sanitized
 }
 
 func filterInvalidRunes(word string) string {
@@ -69,8 +75,8 @@ func filterInvalidRunes(word string) string {
 			// - it's next to a space
 			// - it's next to an apostrophe
 			if r == '-' {
-				if i == 0 || i == len(word)-1 || 
-				   lastRune == '-' || lastRune == ' ' || lastRune == '\'' {
+				if i == 0 || i == len(word)-1 ||
+					lastRune == '-' || lastRune == ' ' || lastRune == '\'' {
 					continue
 				}
 			}

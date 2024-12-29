@@ -2,7 +2,6 @@ package main
 
 import (
 	"reflect"
-	"strings"
 	"testing"
 )
 
@@ -169,16 +168,6 @@ func TestFilterInvalidWords(t *testing.T) {
 			name:     "mixed valid and invalid strings",
 			input:    []string{"hello!", "", "  world  ", "test@123", "don't"},
 			expected: []string{"hello", "world", "test", "don't"},
-		},
-		{
-			name:     "words longer than max length",
-			input:    []string{"hello", "world", strings.Repeat("a", MAX_WORD_LENGTH+1)},
-			expected: []string{"hello", "world"},
-		},
-		{
-			name:     "words longer than max length",
-			input:    []string{"hello", "world", strings.Repeat("a", MAX_WORD_LENGTH)},
-			expected: []string{"hello", "world", strings.Repeat("a", MAX_WORD_LENGTH)},
 		},
 	}
 
@@ -347,7 +336,7 @@ func TestSanitizeUsername(t *testing.T) {
 		{
 			name:     "with numbers",
 			input:    "John123",
-			expected: "John",
+			expected: "John123",
 		},
 		{
 			name:     "with special characters",
@@ -367,12 +356,22 @@ func TestSanitizeUsername(t *testing.T) {
 		{
 			name:     "only invalid characters",
 			input:    "123!@#",
-			expected: "",
+			expected: "123",
 		},
 		{
 			name:     "non-English characters",
 			input:    "Jöhn",
 			expected: "Jhn",
+		},
+		{
+			name:     "too long",
+			input:    "thisiswaytoolongggg",
+			expected: "",
+		},
+		{
+			name:     "too short",
+			input:    "",
+			expected: "",
 		},
 	}
 

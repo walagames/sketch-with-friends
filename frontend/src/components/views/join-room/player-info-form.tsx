@@ -34,15 +34,15 @@ function randomAvatarSeed() {
 export const JoinRoomFormSchema = z.object({
 	username: z
 		.string()
-		.min(2, {
-			message: "Username must be at least 2 characters.",
+		.min(1, {
+			message: "Username must be at least 1 character.",
 		})
-		.max(12, {
-			message: "Username must be at most 12 characters.",
+		.max(14, {
+			message: "Username must be at most 14 characters.",
 		})
-		.refine((value) => /^[a-zA-Z'][a-zA-Z' ]*[a-zA-Z']$/.test(value), {
+		.refine((value) => /^[a-zA-Z0-9'][a-zA-Z0-9' ]*[a-zA-Z0-9']$/.test(value), {
 			message:
-				"Username can only contain letters, apostrophes, and single spaces between words.",
+				"Username can only contain letters, numbers, apostrophes, and single spaces between words.",
 		})
 		.refine((value) => !value.includes("  "), {
 			message: "Username cannot contain consecutive spaces.",
