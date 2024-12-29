@@ -690,15 +690,15 @@ func (phase DrawingPhase) End(g *game) {
 	}
 
 	if len(g.correctGuessers) == (len(g.room.Players) - 1) {
-		msg = fmt.Sprintf("%s sketched %s and everyone got it!", drawerName, g.hintedWord)
+		msg = fmt.Sprintf("%s sketched %s and everyone guessed it!", drawerName, g.hintedWord)
 	} else if len(g.correctGuessers) > 0 {
 		playersStr := "player"
 		if len(g.correctGuessers) > 1 {
 			playersStr = "players"
 		}
-		msg = fmt.Sprintf("%s sketched %s and %d %s got it.", drawerName, g.hintedWord, len(g.correctGuessers), playersStr)
+		msg = fmt.Sprintf("%s sketched %s and %d %s guessed it.", drawerName, g.hintedWord, len(g.correctGuessers), playersStr)
 	} else if len(g.correctGuessers) == 0 {
-		msg = fmt.Sprintf("%s sketched %s and no one got it lol", drawerName, g.hintedWord)
+		msg = fmt.Sprintf("%s sketched %s but nobody guessed it.", drawerName, g.hintedWord)
 	} else {
 		msg = fmt.Sprintf("%s sketched %s", drawerName, g.hintedWord)
 	}
