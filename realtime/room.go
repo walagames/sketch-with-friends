@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -218,6 +219,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 	// If the room is already playing, we need to send them the game state as well
 	// and add them to the drawing queue.
 	if r.Stage == Playing {
+		r.game.SendSystemMessage(fmt.Sprintf("%s joined the room", player.Profile.Name))
 		r.game.enqueueDrawingPlayer(player)
 		player.Send(
 			action(ChangePhase, PhaseChangeMessage{

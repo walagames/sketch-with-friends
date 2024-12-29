@@ -20,7 +20,7 @@ var (
 	PickingPhaseDuration = time.Second * 15
 
 	// Duration after drawing for score updates and displaying the word
-	PostDrawingPhaseDuration = time.Second * 5
+	PostDrawingPhaseDuration = time.Second * 6
 )
 
 // DrawingWord represents a word that the drawer can choose from.
@@ -714,6 +714,11 @@ func (phase DrawingPhase) End(g *game) {
 		if g.correctGuessers[p.ID] || (p.ID == g.currentDrawer.ID && len(g.correctGuessers) > 0) {
 			p.Streak++
 		} else {
+			// If the player lost their streak, show a message in chat
+			if p.Streak >= 5 {
+				g.SendSystemMessage(fmt.Sprintf("%s lost their streak of %d", p.Profile.Name, p.Streak))
+			}
+
 			// Otherwise, reset the streak
 			p.Streak = 0
 		}
@@ -773,6 +778,12 @@ func (phase PostDrawingPhase) Start(g *game) {
 					IsFirstPhase: false,
 				}),
 		)
+
+		// Show a message in chat if the lead changes
+		leadChange := CheckLeadChange(g.pointsAwarded, g.room.Players)
+		if leadChange != "" {
+			g.SendSystemMessage(leadChange)
+		}
 
 		// Start the timer
 		g.room.timer.Reset(phaseDuration)

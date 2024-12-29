@@ -125,3 +125,44 @@ func getPlayerPositions(players map[uuid.UUID]*player) map[uuid.UUID]int {
 
 	return positions
 }
+
+// CheckLeadChange determines if there was a change in who's leading the game
+// based on the points awarded in the current round.
+//
+// Parameters:
+// - roundPoints: map of player IDs to points awarded in this round
+// - players: map of player IDs to player objects (contains current total scores)
+//
+// Returns:
+// - string: a message describing the lead change, or empty string if no change
+func CheckLeadChange(roundPoints map[uuid.UUID]int, players map[uuid.UUID]*player) string {
+	// Find previous leader (by subtracting round points from current scores)
+	var oldLeader uuid.UUID
+	highestOldScore := -1
+	for id, player := range players {
+		oldScore := player.Score - roundPoints[id]
+		if oldScore > highestOldScore {
+			highestOldScore = oldScore
+			oldLeader = id
+		}
+	}
+
+	// Find current leader
+	var newLeader uuid.UUID
+	highestNewScore := -1
+	for id, player := range players {
+		if player.Score > highestNewScore {
+			highestNewScore = player.Score
+			newLeader = id
+		}
+	}
+
+	// If the leader changed, return appropriate message
+	if oldLeader != newLeader {
+		oldLeaderName := players[oldLeader].Profile.Name
+		newLeaderName := players[newLeader].Profile.Name
+		return newLeaderName + " took the lead from " + oldLeaderName
+	}
+
+	return ""
+}
