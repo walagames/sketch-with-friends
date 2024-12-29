@@ -9,6 +9,7 @@ import { AnimatedNumber } from "@/components/ui/animated-number";
 import { AnimatePresence, motion } from "framer-motion";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
+import { getDrawingPlayer } from "@/lib/player";
 const springConfig = {
 	type: "spring",
 	stiffness: 100,
@@ -22,12 +23,18 @@ export function PostDrawingView() {
 		(a, b) => b.score - a.score
 	);
 
+	const drawingPlayer = getDrawingPlayer(players);
+
+	const message = drawingPlayer
+		? `${drawingPlayer.profile.name} sketched: `
+		: "The word was: ";
+
 	const isLastPhase = useSelector((state: RootState) => state.game.isLastPhase);
 
 	return (
 		<SkyScene className="px-4 lg:px-0">
 			<h1 className="text-xl lg:text-2xl lg:py-2">
-				The word was:{" "}
+				{message}
 				<span className="lg:text-3xl text-xl font-bold">{word}</span>
 			</h1>
 			<Podium players={sortedPlayers.slice(0, 3)} />
