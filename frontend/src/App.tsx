@@ -42,16 +42,9 @@ const joinViews: Record<string, ViewComponent> = {
 
 const roomViews = {
 	[RoomStage.PreGame]: {
-		[RoomRole.Host]: {
-			Component: PreGameView,
-			key: "pre-game",
-			transition: Direction.UP,
-		},
-		[RoomRole.Player]: {
-			Component: PreGameView,
-			key: "pre-game",
-			transition: Direction.UP,
-		},
+		Component: PreGameView,
+		key: "pre-game",
+		transition: Direction.UP,
 	},
 	[RoomStage.Playing]: {
 		[GamePhase.Picking]: {
@@ -112,9 +105,11 @@ function roomView({
 		return isFirstPhase ? { ...view, transition: Direction.DOWN_FADE } : view;
 	}
 
-	return roomViews[roomStage][
-		roomRole as keyof (typeof roomViews)[typeof roomStage]
-	];
+	const view = roomViews[roomStage];
+	if ("Component" in view) {
+		return view;
+	}
+	return view[roomRole];
 }
 
 function joinView(enteredRoomCode: string): ViewComponent {
