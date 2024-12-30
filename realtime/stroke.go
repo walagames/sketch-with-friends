@@ -6,6 +6,7 @@ type Stroke struct {
 	Points [][]int `json:"points"`
 	Color  string  `json:"color"` // hex color
 	Width  int     `json:"width"`
+	Type   string  `json:"type,omitempty"` // "brush" or "fill"
 }
 
 // Decodes the raw payload into a Stroke.

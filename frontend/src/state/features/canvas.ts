@@ -8,6 +8,7 @@ export type Stroke = {
 	points: number[][];
 	color: string;
 	width: number;
+	type?: "brush" | "fill";
 };
 
 const initialState: CanvasState = {

@@ -1,4 +1,4 @@
-import { Brush, Undo2, Trash } from "lucide-react";
+import { Brush, Undo2, Trash, Paintbrush2 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { Slider } from "../../../ui/slider";
@@ -139,6 +139,9 @@ export function CanvasTools() {
 	const currentColor = useSelector(
 		(state: RootState) => state.client.canvas.color
 	);
+	const currentTool = useSelector(
+		(state: RootState) => state.client.canvas.tool
+	);
 	const recentlyUsedColors = useSelector(
 		(state: RootState) => state.client.canvas.recentlyUsedColors
 	);
@@ -159,11 +162,19 @@ export function CanvasTools() {
 			<div className="flex gap-2">
 				<RaisedButton
 					size="icon"
-					variant="action"
+					variant={currentTool === CanvasTool.Brush ? "action" : "basic"}
 					shift={false}
 					onClick={() => dispatch(changeTool(CanvasTool.Brush))}
 				>
 					<Brush className="lg:size-6 size-5" />
+				</RaisedButton>
+				<RaisedButton
+					size="icon"
+					variant={currentTool === CanvasTool.Bucket ? "action" : "basic"}
+					shift={false}
+					onClick={() => dispatch(changeTool(CanvasTool.Bucket))}
+				>
+					<Paintbrush2 className="lg:size-6 size-5" />
 				</RaisedButton>
 				<Dialog open={isOpen} onOpenChange={setIsOpen}>
 					<DialogTrigger asChild>
