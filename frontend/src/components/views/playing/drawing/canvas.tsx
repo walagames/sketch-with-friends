@@ -418,14 +418,36 @@ function Canvas({
 				touch.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
 				rect
 			);
-			dispatch(
-				addStroke({
+
+			if (currentTool === CanvasTool.Bucket) {
+				const ctx = canvasRef.current?.getContext("2d");
+				if (!ctx) return;
+
+				// Create a fill stroke
+				const fillStroke: Stroke = {
 					color: strokeColor,
-					width: strokeWidth,
+					width: 0,
 					points: [[x, y]],
-				})
-			);
-			dispatch(addRecentlyUsedColor(strokeColor));
+					type: "fill",
+				};
+
+				// Apply the fill
+				fillCanvasWithStroke(ctx, fillStroke);
+
+				// Add the flood fill as a stroke
+				dispatch(addStroke(fillStroke));
+				dispatch(addRecentlyUsedColor(strokeColor));
+			} else {
+				dispatch(
+					addStroke({
+						color: strokeColor,
+						width: strokeWidth,
+						points: [[x, y]],
+						type: "brush",
+					})
+				);
+				dispatch(addRecentlyUsedColor(strokeColor));
+			}
 		}
 	};
 
