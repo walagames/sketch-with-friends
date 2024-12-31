@@ -98,8 +98,8 @@ function Canvas({
 
 			const colorMatch = (c1: number[], c2: number[]) => {
 				if (c1[0] === -1 || c2[0] === -1) return false;
-				const tolerance = 100;
-				const alphaTolerance = 64;
+				const tolerance = 20;
+				const alphaTolerance = 154;
 				return (
 					Math.abs(c1[0] - c2[0]) <= tolerance &&
 					Math.abs(c1[1] - c2[1]) <= tolerance &&

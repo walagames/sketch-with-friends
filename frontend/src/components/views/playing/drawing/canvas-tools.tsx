@@ -26,6 +26,11 @@ import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { containerSpring } from "@/config/spring";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 const swatches = [
 	// Monochrome
 	"#ffffff", // white
@@ -147,6 +152,7 @@ export function CanvasTools() {
 	);
 
 	const [isOpen, setIsOpen] = useState(false);
+	const [toolSelectOpen, setToolSelectOpen] = useState(false);
 
 	return (
 		<motion.div
@@ -160,30 +166,58 @@ export function CanvasTools() {
 		>
 			<StrokeWidthSlider />
 			<div className="flex gap-2">
-				<RaisedButton
-					size="icon"
-					variant={currentTool === CanvasTool.Brush ? "action" : "basic"}
-					shift={false}
-					onClick={() => dispatch(changeTool(CanvasTool.Brush))}
-				>
-					<Brush className="lg:size-6 size-5" />
-				</RaisedButton>
-				<RaisedButton
-					size="icon"
-					variant={currentTool === CanvasTool.Bucket ? "action" : "basic"}
-					shift={false}
-					onClick={() => dispatch(changeTool(CanvasTool.Bucket))}
-				>
-					<Paintbrush2 className="lg:size-6 size-5" />
-				</RaisedButton>
-				<RaisedButton
-					size="icon"
-					variant={currentTool === CanvasTool.Eraser ? "action" : "basic"}
-					shift={false}
-					onClick={() => dispatch(changeTool(CanvasTool.Eraser))}
-				>
-					<Eraser className="lg:size-6 size-5" />
-				</RaisedButton>
+				<DropdownMenu open={toolSelectOpen} onOpenChange={setToolSelectOpen}>
+					<DropdownMenuTrigger asChild>
+						<RaisedButton size="icon" variant="action" shift={false}>
+							{currentTool === CanvasTool.Brush ? (
+								<Brush className="lg:size-6 size-5" />
+							) : currentTool === CanvasTool.Bucket ? (
+								<Paintbrush2 className="lg:size-6 size-5" />
+							) : (
+								<Eraser className="lg:size-6 size-5" />
+							)}
+						</RaisedButton>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent
+						side="top"
+						sideOffset={10}
+						className="flex gap-3 p-2 bg-background-secondary"
+					>
+						<RaisedButton
+							size="icon"
+							variant={currentTool === CanvasTool.Brush ? "action" : "basic"}
+							shift={false}
+							onClick={() => {
+								dispatch(changeTool(CanvasTool.Brush));
+								setToolSelectOpen(false);
+							}}
+						>
+							<Brush className="lg:size-6 size-5" />
+						</RaisedButton>
+						<RaisedButton
+							size="icon"
+							variant={currentTool === CanvasTool.Bucket ? "action" : "basic"}
+							shift={false}
+							onClick={() => {
+								dispatch(changeTool(CanvasTool.Bucket));
+								setToolSelectOpen(false);
+							}}
+						>
+							<Paintbrush2 className="lg:size-6 size-5" />
+						</RaisedButton>
+						<RaisedButton
+							size="icon"
+							variant={currentTool === CanvasTool.Eraser ? "action" : "basic"}
+							shift={false}
+							onClick={() => {
+								dispatch(changeTool(CanvasTool.Eraser));
+								setToolSelectOpen(false);
+							}}
+						>
+							<Eraser className="lg:size-6 size-5" />
+						</RaisedButton>
+					</DropdownMenuContent>
+				</DropdownMenu>
 				<Dialog open={isOpen} onOpenChange={setIsOpen}>
 					<DialogTrigger asChild>
 						<RaisedButton
