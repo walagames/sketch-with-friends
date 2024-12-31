@@ -98,12 +98,13 @@ function Canvas({
 
 			const colorMatch = (c1: number[], c2: number[]) => {
 				if (c1[0] === -1 || c2[0] === -1) return false;
-				const tolerance = 32;
+				const tolerance = 100;
+				const alphaTolerance = 64;
 				return (
 					Math.abs(c1[0] - c2[0]) <= tolerance &&
 					Math.abs(c1[1] - c2[1]) <= tolerance &&
 					Math.abs(c1[2] - c2[2]) <= tolerance &&
-					Math.abs(c1[3] - c2[3]) <= tolerance
+					Math.abs(c1[3] - c2[3]) <= alphaTolerance
 				);
 			};
 
@@ -121,7 +122,12 @@ function Canvas({
 					y: number,
 					direction: number
 				) => {
-					spansToCheck.push({ left, right, y, direction });
+					spansToCheck.push({
+						left: Math.max(0, left - 1),
+						right: Math.min(imageData.width - 1, right + 1),
+						y,
+						direction,
+					});
 				};
 
 				const checkSpan = (
