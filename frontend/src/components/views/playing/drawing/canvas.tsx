@@ -217,8 +217,14 @@ function Canvas({
 		ctx.clip(); // Clip to canvas bounds
 
 		ctx.beginPath();
-		ctx.strokeStyle = stroke.color;
-		ctx.fillStyle = stroke.color;
+		if (stroke.type === "eraser") {
+			ctx.globalCompositeOperation = "destination-out";
+			ctx.strokeStyle = "rgba(0,0,0,1)";
+			ctx.fillStyle = "rgba(0,0,0,1)";
+		} else {
+			ctx.strokeStyle = stroke.color;
+			ctx.fillStyle = stroke.color;
+		}
 		ctx.lineWidth = stroke.width;
 		ctx.lineCap = "round";
 		ctx.lineJoin = "round";
@@ -367,10 +373,12 @@ function Canvas({
 				color: strokeColor,
 				width: strokeWidth,
 				points: [[x, y]],
-				type: "brush",
+				type: currentTool === CanvasTool.Eraser ? "eraser" : "brush",
 			})
 		);
-		dispatch(addRecentlyUsedColor(strokeColor));
+		if (currentTool !== CanvasTool.Eraser) {
+			dispatch(addRecentlyUsedColor(strokeColor));
+		}
 	};
 
 	const handleStrokePoint = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -443,10 +451,12 @@ function Canvas({
 						color: strokeColor,
 						width: strokeWidth,
 						points: [[x, y]],
-						type: "brush",
+						type: currentTool === CanvasTool.Eraser ? "eraser" : "brush",
 					})
 				);
-				dispatch(addRecentlyUsedColor(strokeColor));
+				if (currentTool !== CanvasTool.Eraser) {
+					dispatch(addRecentlyUsedColor(strokeColor));
+				}
 			}
 		}
 	};
@@ -460,7 +470,8 @@ function Canvas({
 				cursor.style.top = `${e.clientY + 2.5}px`;
 				cursor.style.width = `${(strokeWidth * scaleFactor) / 2}px`;
 				cursor.style.height = `${(strokeWidth * scaleFactor) / 2}px`;
-				cursor.style.backgroundColor = `${strokeColor}33`;
+				cursor.style.backgroundColor =
+					currentTool === CanvasTool.Eraser ? "#ffffff33" : `${strokeColor}33`;
 				cursor.style.border = "1px solid white";
 				cursor.style.boxShadow = "0 0 0 1px grey";
 				cursor.style.transform = "translate(-50%, -50%)";

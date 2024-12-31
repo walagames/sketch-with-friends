@@ -1,4 +1,4 @@
-import { Brush, Undo2, Trash, Paintbrush2 } from "lucide-react";
+import { Brush, Undo2, Trash, Paintbrush2, Eraser } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { Slider } from "../../../ui/slider";
@@ -175,6 +175,14 @@ export function CanvasTools() {
 					onClick={() => dispatch(changeTool(CanvasTool.Bucket))}
 				>
 					<Paintbrush2 className="lg:size-6 size-5" />
+				</RaisedButton>
+				<RaisedButton
+					size="icon"
+					variant={currentTool === CanvasTool.Eraser ? "action" : "basic"}
+					shift={false}
+					onClick={() => dispatch(changeTool(CanvasTool.Eraser))}
+				>
+					<Eraser className="lg:size-6 size-5" />
 				</RaisedButton>
 				<Dialog open={isOpen} onOpenChange={setIsOpen}>
 					<DialogTrigger asChild>
