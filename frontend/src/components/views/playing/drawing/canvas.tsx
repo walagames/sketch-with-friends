@@ -8,6 +8,7 @@ import { getGameRole } from "@/lib/player";
 import { addRecentlyUsedColor } from "@/state/features/client";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { CanvasTool } from "@/state/features/client";
+import { EraserIcon, PaintBucketIcon } from "lucide-react";
 
 const CANVAS_SCALE = 2;
 const MOBILE_OFFSET = 10;
@@ -595,7 +596,18 @@ function Canvas({
 						transform: "translate(-50%, -50%)",
 						position: "absolute",
 					}}
-				/>
+				>
+					{(currentTool === CanvasTool.Bucket ||
+						currentTool === CanvasTool.Eraser) && (
+						<div className="absolute -bottom-5 -right-5">
+							{currentTool === CanvasTool.Bucket ? (
+								<PaintBucketIcon className="size-5" />
+							) : (
+								<EraserIcon className="size-5" />
+							)}
+						</div>
+					)}
+				</div>
 			)}
 		</div>
 	);
