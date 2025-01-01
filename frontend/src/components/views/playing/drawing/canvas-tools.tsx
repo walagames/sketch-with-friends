@@ -1,4 +1,11 @@
-import { Brush, Undo2, Trash, Paintbrush2, Eraser } from "lucide-react";
+import {
+	Brush,
+	Undo2,
+	Trash,
+	Paintbrush2,
+	Eraser,
+	PaintBucket,
+} from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { Slider } from "../../../ui/slider";
@@ -23,7 +30,7 @@ import { RaisedButton } from "../../../ui/raised-button";
 import { getGameRole } from "@/lib/player";
 import { GameRole } from "@/state/features/game";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { containerSpring } from "@/config/spring";
 import {
@@ -154,6 +161,49 @@ export function CanvasTools() {
 	const [isOpen, setIsOpen] = useState(false);
 	const [toolSelectOpen, setToolSelectOpen] = useState(false);
 
+	// Add keyboard shortcut handling
+	useEffect(() => {
+		if (!isDrawing) return;
+
+		const handleKeyDown = (e: KeyboardEvent) => {
+			// Ignore if user is typing in an input
+			if (
+				e.target instanceof HTMLInputElement ||
+				e.target instanceof HTMLTextAreaElement
+			) {
+				return;
+			}
+
+			switch (e.key.toLowerCase()) {
+				case "b":
+					dispatch(changeTool(CanvasTool.Brush));
+					break;
+				case "f":
+					dispatch(changeTool(CanvasTool.Bucket));
+					break;
+				case "e":
+					dispatch(changeTool(CanvasTool.Eraser));
+					break;
+				case "p":
+					setIsOpen(true);
+					break;
+				case "z":
+					if (e.metaKey || e.ctrlKey) {
+						dispatch(undoStroke());
+					}
+					break;
+				case "c":
+					if (e.metaKey || e.ctrlKey) {
+						dispatch(clearStrokes());
+					}
+					break;
+			}
+		};
+
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [dispatch, isDrawing]);
+
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 10 }}
@@ -166,67 +216,108 @@ export function CanvasTools() {
 		>
 			<StrokeWidthSlider />
 			<div className="flex gap-2">
-				<DropdownMenu open={toolSelectOpen} onOpenChange={setToolSelectOpen}>
-					<DropdownMenuTrigger asChild>
-						<RaisedButton size="icon" variant="action" shift={false}>
-							{currentTool === CanvasTool.Brush ? (
-								<Brush className="lg:size-6 size-5" />
-							) : currentTool === CanvasTool.Bucket ? (
-								<Paintbrush2 className="lg:size-6 size-5" />
-							) : (
-								<Eraser className="lg:size-6 size-5" />
-							)}
-						</RaisedButton>
-					</DropdownMenuTrigger>
-					<DropdownMenuContent
-						side="top"
-						sideOffset={10}
-						className="flex gap-3 p-2 bg-background-secondary"
+				<div className="gap-2 hidden lg:flex">
+					<RaisedButton
+						size="icon"
+						variant={currentTool === CanvasTool.Brush ? "action" : "basic"}
+						shift={false}
+						onClick={() => {
+							dispatch(changeTool(CanvasTool.Brush));
+							setToolSelectOpen(false);
+						}}
+						shortcut="B"
 					>
-						<RaisedButton
-							size="icon"
-							variant={currentTool === CanvasTool.Brush ? "action" : "basic"}
-							shift={false}
-							onClick={() => {
-								dispatch(changeTool(CanvasTool.Brush));
-								setToolSelectOpen(false);
-							}}
+						<Brush className="size-5" />
+					</RaisedButton>
+					<RaisedButton
+						size="icon"
+						variant={currentTool === CanvasTool.Bucket ? "action" : "basic"}
+						shift={false}
+						onClick={() => {
+							dispatch(changeTool(CanvasTool.Bucket));
+							setToolSelectOpen(false);
+						}}
+						shortcut="F"
+					>
+						<PaintBucket className="size-5" />
+					</RaisedButton>
+					<RaisedButton
+						size="icon"
+						variant={currentTool === CanvasTool.Eraser ? "action" : "basic"}
+						shift={false}
+						onClick={() => {
+							dispatch(changeTool(CanvasTool.Eraser));
+							setToolSelectOpen(false);
+						}}
+						shortcut="E"
+					>
+						<Eraser className="size-5" />
+					</RaisedButton>
+				</div>
+				<div className="lg:hidden">
+					<DropdownMenu open={toolSelectOpen} onOpenChange={setToolSelectOpen}>
+						<DropdownMenuTrigger asChild>
+							<RaisedButton size="icon" variant="action" shift={false}>
+								{currentTool === CanvasTool.Brush ? (
+									<Brush className="size-5" />
+								) : currentTool === CanvasTool.Bucket ? (
+									<Paintbrush2 className="size-5" />
+								) : (
+									<Eraser className="size-5" />
+								)}
+							</RaisedButton>
+						</DropdownMenuTrigger>
+						<DropdownMenuContent
+							side="top"
+							sideOffset={10}
+							className="flex gap-3 p-3 bg-background-secondary"
 						>
-							<Brush className="lg:size-6 size-5" />
-						</RaisedButton>
-						<RaisedButton
-							size="icon"
-							variant={currentTool === CanvasTool.Bucket ? "action" : "basic"}
-							shift={false}
-							onClick={() => {
-								dispatch(changeTool(CanvasTool.Bucket));
-								setToolSelectOpen(false);
-							}}
-						>
-							<Paintbrush2 className="lg:size-6 size-5" />
-						</RaisedButton>
-						<RaisedButton
-							size="icon"
-							variant={currentTool === CanvasTool.Eraser ? "action" : "basic"}
-							shift={false}
-							onClick={() => {
-								dispatch(changeTool(CanvasTool.Eraser));
-								setToolSelectOpen(false);
-							}}
-						>
-							<Eraser className="lg:size-6 size-5" />
-						</RaisedButton>
-					</DropdownMenuContent>
-				</DropdownMenu>
+							<RaisedButton
+								size="icon"
+								variant={currentTool === CanvasTool.Brush ? "action" : "basic"}
+								shift={false}
+								onClick={() => {
+									dispatch(changeTool(CanvasTool.Brush));
+									setToolSelectOpen(false);
+								}}
+							>
+								<Brush className="size-5" />
+							</RaisedButton>
+							<RaisedButton
+								size="icon"
+								variant={currentTool === CanvasTool.Bucket ? "action" : "basic"}
+								shift={false}
+								onClick={() => {
+									dispatch(changeTool(CanvasTool.Bucket));
+									setToolSelectOpen(false);
+								}}
+							>
+								<PaintBucket className="size-5" />
+							</RaisedButton>
+							<RaisedButton
+								size="icon"
+								variant={currentTool === CanvasTool.Eraser ? "action" : "basic"}
+								shift={false}
+								onClick={() => {
+									dispatch(changeTool(CanvasTool.Eraser));
+									setToolSelectOpen(false);
+								}}
+							>
+								<Eraser className="size-5" />
+							</RaisedButton>
+						</DropdownMenuContent>
+					</DropdownMenu>
+				</div>
 				<Dialog open={isOpen} onOpenChange={setIsOpen}>
 					<DialogTrigger asChild>
 						<RaisedButton
 							size="icon"
 							variant={currentColor === "#ffffff" ? "action" : "basic"}
 							shift={false}
+							shortcut="P"
 						>
 							<div className="h-11 w-11 rounded-lg flex items-center justify-center">
-								<PalleteIcon className="size-5 lg:size-7" />
+								<PalleteIcon className="size-5" />
 							</div>
 						</RaisedButton>
 					</DialogTrigger>
@@ -294,15 +385,17 @@ export function CanvasTools() {
 					shift={false}
 					size="icon"
 					onClick={() => dispatch(undoStroke())}
+					shortcut="⌘Z"
 				>
-					<Undo2 className="lg:size-6 size-5" />
+					<Undo2 className="size-5" />
 				</RaisedButton>
 				<RaisedButton
 					shift={false}
 					size="icon"
 					onClick={() => dispatch(clearStrokes())}
+					shortcut="⌘C"
 				>
-					<Trash className="lg:size-6 size-5" />
+					<Trash className="size-5" />
 				</RaisedButton>
 			</div>
 		</motion.div>
@@ -332,8 +425,8 @@ function StrokeWidthSlider() {
 					trackStyles={{
 						borderRadius: "0px",
 					}}
-					min={6}
-					max={60}
+					min={1}
+					max={50}
 					step={1}
 					value={[strokeWidth]}
 					onValueChange={handleStrokeWidthChange}
