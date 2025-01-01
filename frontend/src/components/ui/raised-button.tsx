@@ -57,6 +57,7 @@ interface RaisedButtonProps extends ButtonProps {
 	shift?: boolean;
 	offset?: "default" | "small" | "md";
 	rounded?: "none" | "sm" | "md" | "lg" | "xl" | "full";
+	shortcut?: string;
 }
 
 const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
@@ -68,6 +69,7 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 			shift = true,
 			onClick,
 			offset,
+			shortcut,
 			rounded = "lg",
 			...props
 		},
@@ -91,7 +93,7 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 		return (
 			<div
 				className={cn(
-					"flex items-center gap-3 bg-secondary-foreground",
+					"flex items-center gap-3 bg-secondary-foreground relative",
 					`rounded-${rounded}`,
 					(size === "tall" || size === "card") && "flex-1"
 				)}
@@ -118,6 +120,11 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 					>
 						{props.children}
 					</span>
+					{shortcut && (
+						<div className="absolute bottom-0 right-1.5 text-[.6rem] leading-4 rounded-sm font-medium opacity-70 hidden lg:block">
+							{shortcut}
+						</div>
+					)}
 				</motion.button>
 			</div>
 		);

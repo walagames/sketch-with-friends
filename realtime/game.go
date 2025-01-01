@@ -709,9 +709,11 @@ func (phase DrawingPhase) End(g *game) {
 
 	// Update the streaks of all players and award them a streak bonus
 	for _, p := range g.room.Players {
-		// If the player guessed correctly or
-		// if the player is the drawer and at least one person guessed correctly, increment their streak
-		if g.correctGuessers[p.ID] || (p.ID == g.currentDrawer.ID && len(g.correctGuessers) > 0) {
+		if g.correctGuessers[p.ID] {
+			// If the player guessed correctly, increment their streak
+			p.Streak++
+		} else if g.currentDrawer != nil && p.ID == g.currentDrawer.ID && len(g.correctGuessers) > 0 {
+			// If the player is the drawer and at least one person guessed correctly, increment their streak
 			p.Streak++
 		} else {
 			// If the player lost their streak, show a message in chat

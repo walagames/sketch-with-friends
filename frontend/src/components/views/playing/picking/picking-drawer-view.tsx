@@ -6,22 +6,6 @@ import { SkyScene } from "@/components/scenes/sky-scene";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
-import { WordDifficulty } from "@/state/features/room";
-import { cn } from "@/lib/utils";
-
-const wordDifficultyColors: Record<WordDifficulty, string> = {
-	[WordDifficulty.Easy]: "bg-green-500",
-	[WordDifficulty.Medium]: "bg-yellow-500",
-	[WordDifficulty.Hard]: "bg-red-500",
-	[WordDifficulty.Random]: "bg-blue-500",
-} as const;
-
-// const wordDifficultyText: Record<WordDifficulty, string> = {
-// 	[WordDifficulty.Easy]: "1.0x points",
-// 	[WordDifficulty.Medium]: "1.5x points",
-// 	[WordDifficulty.Hard]: "2.0x points",
-// 	[WordDifficulty.Random]: "1.0x points",
-// } as const;
 
 export function PickingDrawerView() {
 	const dispatch = useDispatch();
@@ -45,14 +29,6 @@ export function PickingDrawerView() {
 								onClick={() => dispatch(selectWord(word.value))}
 							>
 								<div className="relative z-10 font-semibold flex overflow-hidden w-full max-w-full h-11 rounded-lg -translate-y-0.5">
-									{word.difficulty && (
-										<div
-											className={cn(
-												"w-1.5 mr-auto h-12",
-												wordDifficultyColors[word.difficulty]
-											)}
-										/>
-									)}
 									<span className="break-words overflow-wrap-anywhere w-full px-8 flex items-center justify-center h-full">
 										{word.value}
 									</span>
@@ -62,7 +38,6 @@ export function PickingDrawerView() {
 								<span className="capitalize text-sm !text-foreground">
 									{word.difficulty}
 								</span>
-								{/* {isRandomDifficulty && wordDifficultyText[word.difficulty]} */}
 							</p>
 						</div>
 					))}

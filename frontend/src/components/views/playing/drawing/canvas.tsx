@@ -7,6 +7,8 @@ import { useWindowSize } from "@/hooks/use-window-size";
 import { getGameRole } from "@/lib/player";
 import { addRecentlyUsedColor } from "@/state/features/client";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { CanvasTool } from "@/state/features/client";
+import { EraserIcon, PaintBucketIcon } from "lucide-react";
 
 const CANVAS_SCALE = 2;
 const MOBILE_OFFSET = 10;
@@ -32,6 +34,9 @@ function Canvas({
 	const strokeColor = useSelector(
 		(state: RootState) => state.client.canvas.color
 	);
+	const currentTool = useSelector(
+		(state: RootState) => state.client.canvas.tool
+	);
 
 	const players = useSelector((state: RootState) => state.room.players);
 	const playerId = useSelector((state: RootState) => state.client.id);
@@ -47,51 +52,211 @@ function Canvas({
 		(state: RootState) => state.client.canvas.strokeWidth
 	);
 
-	const fillCanvasWithStroke = React.useCallback(
-		(ctx: CanvasRenderingContext2D, stroke: Stroke) => {
-			if (stroke.points.length === 0) return;
+	const fillCanvasWithStroke = (
+		ctx: CanvasRenderingContext2D,
+		stroke: Stroke
+	) => {
+		if (stroke.points.length === 0) return;
 
-			ctx.save(); // Save the current context state
-			ctx.beginPath();
-			ctx.rect(0, 0, width * CANVAS_SCALE, height * CANVAS_SCALE);
-			ctx.clip(); // Clip to canvas bounds
+		if (stroke.type === "fill") {
+			const [x, y] = stroke.points[0];
+			const imageData = ctx.getImageData(
+				0,
+				0,
+				width * CANVAS_SCALE,
+				height * CANVAS_SCALE
+			);
+			const pixelData = new Uint8ClampedArray(imageData.data);
 
-			ctx.beginPath();
+			const getPixel = (x: number, y: number) => {
+				if (x < 0 || y < 0 || x >= imageData.width || y >= imageData.height) {
+					return [-1, -1, -1, -1]; // impossible color
+				}
+				const i = (y * imageData.width + x) * 4;
+				return [
+					pixelData[i], // r
+					pixelData[i + 1], // g
+					pixelData[i + 2], // b
+					pixelData[i + 3], // a
+				];
+			};
+
+			const setPixel = (x: number, y: number, [r, g, b, a]: number[]) => {
+				const i = (y * imageData.width + x) * 4;
+				pixelData[i] = r;
+				pixelData[i + 1] = g;
+				pixelData[i + 2] = b;
+				pixelData[i + 3] = a;
+			};
+
+			const fillColorHex = stroke.color.replace("#", "");
+			const fillR = parseInt(fillColorHex.slice(0, 2), 16);
+			const fillG = parseInt(fillColorHex.slice(2, 4), 16);
+			const fillB = parseInt(fillColorHex.slice(4, 6), 16);
+			const fillColor = [fillR, fillG, fillB, 255];
+
+			const targetColor = getPixel(Math.floor(x), Math.floor(y));
+
+			const colorMatch = (c1: number[], c2: number[]) => {
+				if (c1[0] === -1 || c2[0] === -1) return false;
+				const tolerance = 10;
+				const alphaTolerance = 184;
+				return (
+					Math.abs(c1[0] - c2[0]) <= tolerance &&
+					Math.abs(c1[1] - c2[1]) <= tolerance &&
+					Math.abs(c1[2] - c2[2]) <= tolerance &&
+					Math.abs(c1[3] - c2[3]) <= alphaTolerance
+				);
+			};
+
+			if (!colorMatch(targetColor, fillColor)) {
+				const spansToCheck: {
+					left: number;
+					right: number;
+					y: number;
+					direction: number;
+				}[] = [];
+
+				const addSpan = (
+					left: number,
+					right: number,
+					y: number,
+					direction: number
+				) => {
+					spansToCheck.push({
+						left: Math.max(0, left - 1),
+						right: Math.min(imageData.width - 1, right + 1),
+						y,
+						direction,
+					});
+				};
+
+				const checkSpan = (
+					left: number,
+					right: number,
+					y: number,
+					direction: number
+				) => {
+					let inSpan = false;
+					let start = 0;
+					let x;
+
+					for (x = left; x < right; ++x) {
+						const color = getPixel(x, y);
+						if (colorMatch(color, targetColor)) {
+							if (!inSpan) {
+								inSpan = true;
+								start = x;
+							}
+						} else {
+							if (inSpan) {
+								inSpan = false;
+								addSpan(start, x - 1, y, direction);
+							}
+						}
+					}
+					if (inSpan) {
+						inSpan = false;
+						addSpan(start, x - 1, y, direction);
+					}
+				};
+
+				addSpan(Math.floor(x), Math.floor(x), Math.floor(y), 0);
+
+				while (spansToCheck.length > 0) {
+					const { left, right, y, direction } = spansToCheck.pop()!;
+
+					let l = left;
+					for (;;) {
+						--l;
+						const color = getPixel(l, y);
+						if (!colorMatch(color, targetColor)) {
+							break;
+						}
+					}
+					++l;
+
+					let r = right;
+					for (;;) {
+						++r;
+						const color = getPixel(r, y);
+						if (!colorMatch(color, targetColor)) {
+							break;
+						}
+					}
+
+					// Fill the span
+					for (let x = l; x < r; x++) {
+						setPixel(x, y, fillColor);
+					}
+
+					if (direction <= 0) {
+						checkSpan(l, r, y - 1, -1);
+					} else {
+						checkSpan(l, left, y - 1, -1);
+						checkSpan(right, r, y - 1, -1);
+					}
+
+					if (direction >= 0) {
+						checkSpan(l, r, y + 1, +1);
+					} else {
+						checkSpan(l, left, y + 1, +1);
+						checkSpan(right, r, y + 1, +1);
+					}
+				}
+
+				imageData.data.set(pixelData);
+				ctx.putImageData(imageData, 0, 0);
+			}
+			return;
+		}
+
+		// Handle brush strokes
+		ctx.save(); // Save the current context state
+		ctx.beginPath();
+		ctx.rect(0, 0, width * CANVAS_SCALE, height * CANVAS_SCALE);
+		ctx.clip(); // Clip to canvas bounds
+
+		ctx.beginPath();
+		if (stroke.type === "eraser") {
+			ctx.globalCompositeOperation = "destination-out";
+			ctx.strokeStyle = "rgba(0,0,0,1)";
+			ctx.fillStyle = "rgba(0,0,0,1)";
+		} else {
 			ctx.strokeStyle = stroke.color;
 			ctx.fillStyle = stroke.color;
-			ctx.lineWidth = stroke.width;
-			ctx.lineCap = "round";
-			ctx.lineJoin = "round";
+		}
+		ctx.lineWidth = stroke.width;
+		ctx.lineCap = "round";
+		ctx.lineJoin = "round";
 
-			// If we only have one point, draw a circle
-			if (stroke.points.length === 1) {
-				const [x, y] = stroke.points[0];
-				ctx.beginPath();
-				ctx.arc(x, y, stroke.width / 2, 0, Math.PI * 2);
-				ctx.fill();
-				ctx.restore(); // Restore the context state
-				return;
-			}
-
-			// Draw the line allowing points outside bounds
-			ctx.moveTo(stroke.points[0][0], stroke.points[0][1]);
-
-			for (let i = 1; i < stroke.points.length - 1; i++) {
-				const xc = (stroke.points[i][0] + stroke.points[i + 1][0]) / 2;
-				const yc = (stroke.points[i][1] + stroke.points[i + 1][1]) / 2;
-				ctx.quadraticCurveTo(stroke.points[i][0], stroke.points[i][1], xc, yc);
-			}
-
-			if (stroke.points.length > 1) {
-				const lastPoint = stroke.points[stroke.points.length - 1];
-				ctx.lineTo(lastPoint[0], lastPoint[1]);
-			}
-
-			ctx.stroke();
+		// If we only have one point, draw a circle
+		if (stroke.points.length === 1) {
+			const [x, y] = stroke.points[0];
+			ctx.beginPath();
+			ctx.arc(x, y, stroke.width / 2, 0, Math.PI * 2);
+			ctx.fill();
 			ctx.restore(); // Restore the context state
-		},
-		[width, height]
-	);
+			return;
+		}
+
+		// Draw the line allowing points outside bounds
+		ctx.moveTo(stroke.points[0][0], stroke.points[0][1]);
+
+		for (let i = 1; i < stroke.points.length - 1; i++) {
+			const xc = (stroke.points[i][0] + stroke.points[i + 1][0]) / 2;
+			const yc = (stroke.points[i][1] + stroke.points[i + 1][1]) / 2;
+			ctx.quadraticCurveTo(stroke.points[i][0], stroke.points[i][1], xc, yc);
+		}
+
+		if (stroke.points.length > 1) {
+			const lastPoint = stroke.points[stroke.points.length - 1];
+			ctx.lineTo(lastPoint[0], lastPoint[1]);
+		}
+
+		ctx.stroke();
+		ctx.restore(); // Restore the context state
+	};
 
 	const drawingTime = useSelector(
 		(state: RootState) => state.room.settings.drawingTimeAllowed
@@ -209,9 +374,12 @@ function Canvas({
 				color: strokeColor,
 				width: strokeWidth,
 				points: [[x, y]],
+				type: currentTool === CanvasTool.Eraser ? "eraser" : "brush",
 			})
 		);
-		dispatch(addRecentlyUsedColor(strokeColor));
+		if (currentTool !== CanvasTool.Eraser) {
+			dispatch(addRecentlyUsedColor(strokeColor));
+		}
 	};
 
 	const handleStrokePoint = (e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -259,14 +427,38 @@ function Canvas({
 				touch.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
 				rect
 			);
-			dispatch(
-				addStroke({
+
+			if (currentTool === CanvasTool.Bucket) {
+				const ctx = canvasRef.current?.getContext("2d");
+				if (!ctx) return;
+
+				// Create a fill stroke
+				const fillStroke: Stroke = {
 					color: strokeColor,
-					width: strokeWidth,
+					width: 0,
 					points: [[x, y]],
-				})
-			);
-			dispatch(addRecentlyUsedColor(strokeColor));
+					type: "fill",
+				};
+
+				// Apply the fill
+				fillCanvasWithStroke(ctx, fillStroke);
+
+				// Add the flood fill as a stroke
+				dispatch(addStroke(fillStroke));
+				dispatch(addRecentlyUsedColor(strokeColor));
+			} else {
+				dispatch(
+					addStroke({
+						color: strokeColor,
+						width: strokeWidth,
+						points: [[x, y]],
+						type: currentTool === CanvasTool.Eraser ? "eraser" : "brush",
+					})
+				);
+				if (currentTool !== CanvasTool.Eraser) {
+					dispatch(addRecentlyUsedColor(strokeColor));
+				}
+			}
 		}
 	};
 
@@ -279,7 +471,8 @@ function Canvas({
 				cursor.style.top = `${e.clientY + 2.5}px`;
 				cursor.style.width = `${(strokeWidth * scaleFactor) / 2}px`;
 				cursor.style.height = `${(strokeWidth * scaleFactor) / 2}px`;
-				cursor.style.backgroundColor = `${strokeColor}33`;
+				cursor.style.backgroundColor =
+					currentTool === CanvasTool.Eraser ? "#ffffff33" : `${strokeColor}33`;
 				cursor.style.border = "1px solid white";
 				cursor.style.boxShadow = "0 0 0 1px grey";
 				cursor.style.transform = "translate(-50%, -50%)";
@@ -297,6 +490,35 @@ function Canvas({
 		}
 	};
 
+	const handleFloodFill = (e: React.MouseEvent<HTMLCanvasElement>) => {
+		if (!roundIsActive() || e.button !== 0 || role !== GameRole.Drawing) return;
+
+		const ctx = canvasRef.current?.getContext("2d");
+		if (!ctx) return;
+
+		const rect = e.currentTarget.getBoundingClientRect();
+		const [x, y] = getScaledCoordinates(
+			e.clientX,
+			e.clientY - (isLargeScreen ? 0 : MOBILE_OFFSET),
+			rect
+		);
+
+		// Create a fill stroke
+		const fillStroke: Stroke = {
+			color: strokeColor,
+			width: 0,
+			points: [[x, y]],
+			type: "fill",
+		};
+
+		// Apply the fill
+		fillCanvasWithStroke(ctx, fillStroke);
+
+		// Add the flood fill as a stroke
+		dispatch(addStroke(fillStroke));
+		dispatch(addRecentlyUsedColor(strokeColor));
+	};
+
 	return (
 		<div
 			style={{
@@ -311,7 +533,13 @@ function Canvas({
 				}`}
 				width={width * CANVAS_SCALE - (padding ?? 0)}
 				height={height * CANVAS_SCALE - (padding ?? 0)}
-				onMouseDown={handleNewStroke}
+				onMouseDown={(e) => {
+					if (currentTool === CanvasTool.Bucket) {
+						handleFloodFill(e);
+					} else {
+						handleNewStroke(e);
+					}
+				}}
 				onMouseMove={(e) => {
 					if (roundIsActive()) {
 						handleMouseMove(e);
@@ -368,7 +596,18 @@ function Canvas({
 						transform: "translate(-50%, -50%)",
 						position: "absolute",
 					}}
-				/>
+				>
+					{(currentTool === CanvasTool.Bucket ||
+						currentTool === CanvasTool.Eraser) && (
+						<div className="absolute -bottom-5 -right-5">
+							{currentTool === CanvasTool.Bucket ? (
+								<PaintBucketIcon className="size-5" />
+							) : (
+								<EraserIcon className="size-5" />
+							)}
+						</div>
+					)}
+				</div>
 			)}
 		</div>
 	);
