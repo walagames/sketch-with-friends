@@ -16,6 +16,8 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog";
+import { PalleteIcon } from "@/components/ui/icons";
+
 import {
 	changeStrokeWidth,
 	changeTool,
@@ -29,7 +31,7 @@ import { undoStroke, clearStrokes } from "@/state/features/canvas";
 import { RaisedButton } from "../../../ui/raised-button";
 import { getGameRole } from "@/lib/player";
 import { GameRole } from "@/state/features/game";
-import { cn } from "@/lib/utils";
+import { cn, hslToRgb } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { containerSpring } from "@/config/spring";
@@ -38,6 +40,197 @@ import {
 	DropdownMenuContent,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+export function CanvasTools() {
+	const dispatch = useDispatch();
+	const players = useSelector((state: RootState) => state.room.players);
+	const playerId = useSelector((state: RootState) => state.client.id);
+	const role = getGameRole(playerId, players);
+
+	const [colorPaletteOpen, setColorPaletteOpen] = useState(false);
+
+	const isDrawing = role === GameRole.Drawing;
+
+	const currentTool = useSelector(
+		(state: RootState) => state.client.canvas.tool
+	);
+
+	// Add keyboard shortcut handling
+	useEffect(() => {
+		if (!isDrawing) return;
+
+		const handleKeyDown = (e: KeyboardEvent) => {
+			// Ignore if user is typing in an input
+			if (
+				e.target instanceof HTMLInputElement ||
+				e.target instanceof HTMLTextAreaElement
+			) {
+				return;
+			}
+
+			switch (e.key.toLowerCase()) {
+				case "b":
+					dispatch(changeTool(CanvasTool.Brush));
+					break;
+				case "f":
+					dispatch(changeTool(CanvasTool.Bucket));
+					break;
+				case "e":
+					dispatch(changeTool(CanvasTool.Eraser));
+					break;
+				case "p":
+					setColorPaletteOpen(true);
+					break;
+				case "z":
+					if (e.metaKey || e.ctrlKey) {
+						dispatch(undoStroke());
+					}
+					break;
+				case "c":
+					if (e.metaKey || e.ctrlKey) {
+						dispatch(clearStrokes());
+					}
+					break;
+			}
+		};
+
+		window.addEventListener("keydown", handleKeyDown);
+		return () => window.removeEventListener("keydown", handleKeyDown);
+	}, [dispatch, isDrawing]);
+
+	return (
+		<motion.div
+			initial={{ opacity: 0, y: 10 }}
+			animate={{ opacity: 1, y: 0 }}
+			transition={{ ...containerSpring, delay: 1.5 }}
+			className={cn(
+				"lg:gap-8 gap-4 w-full items-center py-1.5 lg:py-4 px-3.5 lg:px-0 ",
+				isDrawing ? "flex" : "hidden"
+			)}
+		>
+			<StrokeWidthSlider />
+			<div className="flex gap-2">
+				<div className="gap-2 hidden lg:flex">
+					<RaisedButton
+						size="icon"
+						variant={currentTool === CanvasTool.Brush ? "action" : "basic"}
+						shift={false}
+						onClick={() => dispatch(changeTool(CanvasTool.Brush))}
+						shortcut="B"
+					>
+						<Brush className="size-5" />
+					</RaisedButton>
+					<RaisedButton
+						size="icon"
+						variant={currentTool === CanvasTool.Bucket ? "action" : "basic"}
+						shift={false}
+						onClick={() => dispatch(changeTool(CanvasTool.Bucket))}
+						shortcut="F"
+					>
+						<PaintBucket className="size-5" />
+					</RaisedButton>
+					<RaisedButton
+						size="icon"
+						variant={currentTool === CanvasTool.Eraser ? "action" : "basic"}
+						shift={false}
+						onClick={() => dispatch(changeTool(CanvasTool.Eraser))}
+						shortcut="E"
+					>
+						<Eraser className="size-5" />
+					</RaisedButton>
+				</div>
+				<div className="lg:hidden">
+					<ToolDropdown />
+				</div>
+				<ColorPaletteDialog
+					isOpen={colorPaletteOpen}
+					setIsOpen={setColorPaletteOpen}
+				/>
+			</div>
+			<div className="flex gap-2">
+				<RaisedButton
+					shift={false}
+					size="icon"
+					onClick={() => dispatch(undoStroke())}
+					shortcut="⌘Z"
+				>
+					<Undo2 className="size-5" />
+				</RaisedButton>
+				<RaisedButton
+					shift={false}
+					size="icon"
+					onClick={() => dispatch(clearStrokes())}
+					shortcut="⌘C"
+				>
+					<Trash className="size-5" />
+				</RaisedButton>
+			</div>
+		</motion.div>
+	);
+}
+
+function ToolDropdown() {
+	const currentTool = useSelector(
+		(state: RootState) => state.client.canvas.tool
+	);
+	const dispatch = useDispatch();
+	const [toolSelectOpen, setToolSelectOpen] = useState(false);
+	return (
+		<DropdownMenu open={toolSelectOpen} onOpenChange={setToolSelectOpen}>
+			<DropdownMenuTrigger asChild>
+				<RaisedButton size="icon" variant="action" shift={false}>
+					{currentTool === CanvasTool.Brush ? (
+						<Brush className="size-5" />
+					) : currentTool === CanvasTool.Bucket ? (
+						<Paintbrush2 className="size-5" />
+					) : (
+						<Eraser className="size-5" />
+					)}
+				</RaisedButton>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent
+				side="top"
+				sideOffset={10}
+				className="flex gap-3 p-3 bg-background-secondary"
+			>
+				<RaisedButton
+					size="icon"
+					variant={currentTool === CanvasTool.Brush ? "action" : "basic"}
+					shift={false}
+					onClick={() => {
+						dispatch(changeTool(CanvasTool.Brush));
+						setToolSelectOpen(false);
+					}}
+				>
+					<Brush className="size-5" />
+				</RaisedButton>
+				<RaisedButton
+					size="icon"
+					variant={currentTool === CanvasTool.Bucket ? "action" : "basic"}
+					shift={false}
+					onClick={() => {
+						dispatch(changeTool(CanvasTool.Bucket));
+						setToolSelectOpen(false);
+					}}
+				>
+					<PaintBucket className="size-5" />
+				</RaisedButton>
+				<RaisedButton
+					size="icon"
+					variant={currentTool === CanvasTool.Eraser ? "action" : "basic"}
+					shift={false}
+					onClick={() => {
+						dispatch(changeTool(CanvasTool.Eraser));
+						setToolSelectOpen(false);
+					}}
+				>
+					<Eraser className="size-5" />
+				</RaisedButton>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+}
+
 const swatches = [
 	// Monochrome
 	"#ffffff", // white
@@ -86,319 +279,92 @@ const swatches = [
 	"#63300d", // dark brown
 ];
 
-function PalleteIcon({
-	className,
-	style,
+function ColorPaletteDialog({
+	isOpen,
+	setIsOpen,
 }: {
-	className?: string;
-	style?: React.CSSProperties;
+	isOpen: boolean;
+	setIsOpen: (isOpen: boolean) => void;
 }) {
-	return (
-		<svg
-			xmlns="http://www.w3.org/2000/svg"
-			width="24"
-			height="24"
-			viewBox="0 0 24 24"
-			fill="none"
-			stroke="currentColor"
-			strokeWidth="2"
-			strokeLinecap="round"
-			strokeLinejoin="round"
-			className={cn("", className)}
-			style={style}
-		>
-			<circle
-				cx="13.5"
-				cy="6.5"
-				r=".5"
-				fill="currentColor"
-				className="text-green-500"
-			/>
-			<circle
-				cx="17.5"
-				cy="10.5"
-				r=".5"
-				fill="currentColor"
-				className="text-blue-500"
-			/>
-			<circle
-				cx="8.5"
-				cy="7.5"
-				r=".5"
-				fill="currentColor"
-				className="text-orange-500"
-			/>
-			<circle
-				cx="6.5"
-				cy="12.5"
-				r=".5"
-				fill="currentColor"
-				className="text-red-500"
-			/>
-			<path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
-		</svg>
-	);
-}
-
-export function CanvasTools() {
-	const dispatch = useDispatch();
-	const players = useSelector((state: RootState) => state.room.players);
-	const playerId = useSelector((state: RootState) => state.client.id);
-	const role = getGameRole(playerId, players);
-
-	const isDrawing = role === GameRole.Drawing;
-
 	const currentColor = useSelector(
 		(state: RootState) => state.client.canvas.color
-	);
-	const currentTool = useSelector(
-		(state: RootState) => state.client.canvas.tool
 	);
 	const recentlyUsedColors = useSelector(
 		(state: RootState) => state.client.canvas.recentlyUsedColors
 	);
-
-	const [isOpen, setIsOpen] = useState(false);
-	const [toolSelectOpen, setToolSelectOpen] = useState(false);
-
-	// Add keyboard shortcut handling
-	useEffect(() => {
-		if (!isDrawing) return;
-
-		const handleKeyDown = (e: KeyboardEvent) => {
-			// Ignore if user is typing in an input
-			if (
-				e.target instanceof HTMLInputElement ||
-				e.target instanceof HTMLTextAreaElement
-			) {
-				return;
-			}
-
-			switch (e.key.toLowerCase()) {
-				case "b":
-					dispatch(changeTool(CanvasTool.Brush));
-					break;
-				case "f":
-					dispatch(changeTool(CanvasTool.Bucket));
-					break;
-				case "e":
-					dispatch(changeTool(CanvasTool.Eraser));
-					break;
-				case "p":
-					setIsOpen(true);
-					break;
-				case "z":
-					if (e.metaKey || e.ctrlKey) {
-						dispatch(undoStroke());
-					}
-					break;
-				case "c":
-					if (e.metaKey || e.ctrlKey) {
-						dispatch(clearStrokes());
-					}
-					break;
-			}
-		};
-
-		window.addEventListener("keydown", handleKeyDown);
-		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [dispatch, isDrawing]);
-
+	const dispatch = useDispatch();
 	return (
-		<motion.div
-			initial={{ opacity: 0, y: 10 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ ...containerSpring, delay: 1.5 }}
-			className={cn(
-				"lg:gap-8 gap-4 w-full items-center py-1.5 lg:py-4 px-3.5 lg:px-0 ",
-				isDrawing ? "flex" : "hidden"
-			)}
-		>
-			<StrokeWidthSlider />
-			<div className="flex gap-2">
-				<div className="gap-2 hidden lg:flex">
-					<RaisedButton
-						size="icon"
-						variant={currentTool === CanvasTool.Brush ? "action" : "basic"}
-						shift={false}
-						onClick={() => {
-							dispatch(changeTool(CanvasTool.Brush));
-							setToolSelectOpen(false);
-						}}
-						shortcut="B"
-					>
-						<Brush className="size-5" />
-					</RaisedButton>
-					<RaisedButton
-						size="icon"
-						variant={currentTool === CanvasTool.Bucket ? "action" : "basic"}
-						shift={false}
-						onClick={() => {
-							dispatch(changeTool(CanvasTool.Bucket));
-							setToolSelectOpen(false);
-						}}
-						shortcut="F"
-					>
-						<PaintBucket className="size-5" />
-					</RaisedButton>
-					<RaisedButton
-						size="icon"
-						variant={currentTool === CanvasTool.Eraser ? "action" : "basic"}
-						shift={false}
-						onClick={() => {
-							dispatch(changeTool(CanvasTool.Eraser));
-							setToolSelectOpen(false);
-						}}
-						shortcut="E"
-					>
-						<Eraser className="size-5" />
-					</RaisedButton>
-				</div>
-				<div className="lg:hidden">
-					<DropdownMenu open={toolSelectOpen} onOpenChange={setToolSelectOpen}>
-						<DropdownMenuTrigger asChild>
-							<RaisedButton size="icon" variant="action" shift={false}>
-								{currentTool === CanvasTool.Brush ? (
-									<Brush className="size-5" />
-								) : currentTool === CanvasTool.Bucket ? (
-									<Paintbrush2 className="size-5" />
-								) : (
-									<Eraser className="size-5" />
-								)}
-							</RaisedButton>
-						</DropdownMenuTrigger>
-						<DropdownMenuContent
-							side="top"
-							sideOffset={10}
-							className="flex gap-3 p-3 bg-background-secondary"
-						>
-							<RaisedButton
-								size="icon"
-								variant={currentTool === CanvasTool.Brush ? "action" : "basic"}
-								shift={false}
-								onClick={() => {
-									dispatch(changeTool(CanvasTool.Brush));
-									setToolSelectOpen(false);
-								}}
-							>
-								<Brush className="size-5" />
-							</RaisedButton>
-							<RaisedButton
-								size="icon"
-								variant={currentTool === CanvasTool.Bucket ? "action" : "basic"}
-								shift={false}
-								onClick={() => {
-									dispatch(changeTool(CanvasTool.Bucket));
-									setToolSelectOpen(false);
-								}}
-							>
-								<PaintBucket className="size-5" />
-							</RaisedButton>
-							<RaisedButton
-								size="icon"
-								variant={currentTool === CanvasTool.Eraser ? "action" : "basic"}
-								shift={false}
-								onClick={() => {
-									dispatch(changeTool(CanvasTool.Eraser));
-									setToolSelectOpen(false);
-								}}
-							>
-								<Eraser className="size-5" />
-							</RaisedButton>
-						</DropdownMenuContent>
-					</DropdownMenu>
-				</div>
-				<Dialog open={isOpen} onOpenChange={setIsOpen}>
-					<DialogTrigger asChild>
-						<RaisedButton
-							size="icon"
-							variant={currentColor === "#ffffff" ? "action" : "basic"}
-							shift={false}
-							shortcut="P"
-						>
-							<div className="h-11 w-11 rounded-lg flex items-center justify-center">
-								<PalleteIcon className="size-5" />
-							</div>
-						</RaisedButton>
-					</DialogTrigger>
-					<DialogContent className="sm:max-w-md border-4 border-foreground bg-zinc-100">
-						<DialogTitle>
-							<p className="text-lg font-semibold">Color palette</p>
-						</DialogTitle>
-						<div className="flex flex-col gap-8">
-							<div className="flex gap-6">
-								<HexColorPicker
-									className="custom-pointers shadow-accent rounded-lg"
-									color={currentColor}
-									onChange={(color) => dispatch(changeColor(color))}
-								/>
-								<div className="flex flex-col gap-2">
-									{recentlyUsedColors.length > 0 && (
-										<p className="text-sm font-semibold">Recently used:</p>
-									)}
-									<div className="grid grid-cols-3 gap-2.5">
-										{recentlyUsedColors.map((color) => (
-											<RaisedButton
-												key={color}
-												size="icon"
-												onClick={() => {
-													dispatch(changeColor(color));
-													setIsOpen(false);
-												}}
-												className="overflow-hidden w-full aspect-square"
-											>
-												<div
-													style={{
-														backgroundColor: color,
-													}}
-													className="h-20 w-20 rounded-lg flex items-center justify-center"
-												/>
-											</RaisedButton>
-										))}
-									</div>
-								</div>
-							</div>
-							<div className="grid grid-cols-8 gap-2 w-full">
-								{swatches.map((swatch) => (
+		<Dialog open={isOpen} onOpenChange={setIsOpen}>
+			<DialogTrigger asChild>
+				<RaisedButton
+					size="icon"
+					variant={currentColor === "#ffffff" ? "action" : "basic"}
+					shift={false}
+					shortcut="P"
+				>
+					<div className="h-11 w-11 rounded-lg flex items-center justify-center">
+						<PalleteIcon className="size-5" />
+					</div>
+				</RaisedButton>
+			</DialogTrigger>
+			<DialogContent className="sm:max-w-md border-4 border-foreground bg-zinc-100">
+				<DialogTitle>
+					<p className="text-lg font-semibold">Color palette</p>
+				</DialogTitle>
+				<div className="flex flex-col gap-8">
+					<div className="flex gap-6">
+						<HexColorPicker
+							className="custom-pointers shadow-accent rounded-lg"
+							color={currentColor}
+							onChange={(color) => dispatch(changeColor(color))}
+						/>
+						<div className="flex flex-col gap-2">
+							{recentlyUsedColors.length > 0 && (
+								<p className="text-sm font-semibold">Recently used:</p>
+							)}
+							<div className="grid grid-cols-3 gap-2.5">
+								{recentlyUsedColors.map((color) => (
 									<RaisedButton
-										key={swatch}
+										key={color}
 										size="icon"
 										onClick={() => {
-											dispatch(changeColor(swatch));
+											dispatch(changeColor(color));
 											setIsOpen(false);
 										}}
 										className="overflow-hidden w-full aspect-square"
 									>
 										<div
-											style={{ backgroundColor: swatch }}
-											className="h-11 w-11 -translate-y-0.5 rounded-lg flex items-center justify-center"
+											style={{
+												backgroundColor: color,
+											}}
+											className="h-20 w-20 rounded-lg flex items-center justify-center"
 										/>
 									</RaisedButton>
 								))}
 							</div>
 						</div>
-					</DialogContent>
-				</Dialog>
-			</div>
-			<div className="flex gap-2">
-				<RaisedButton
-					shift={false}
-					size="icon"
-					onClick={() => dispatch(undoStroke())}
-					shortcut="⌘Z"
-				>
-					<Undo2 className="size-5" />
-				</RaisedButton>
-				<RaisedButton
-					shift={false}
-					size="icon"
-					onClick={() => dispatch(clearStrokes())}
-					shortcut="⌘C"
-				>
-					<Trash className="size-5" />
-				</RaisedButton>
-			</div>
-		</motion.div>
+					</div>
+					<div className="grid grid-cols-8 gap-2 w-full">
+						{swatches.map((swatch) => (
+							<RaisedButton
+								key={swatch}
+								size="icon"
+								onClick={() => {
+									dispatch(changeColor(swatch));
+									setIsOpen(false);
+								}}
+								className="overflow-hidden w-full aspect-square"
+							>
+								<div
+									style={{ backgroundColor: swatch }}
+									className="h-11 w-11 -translate-y-0.5 rounded-lg flex items-center justify-center"
+								/>
+							</RaisedButton>
+						))}
+					</div>
+				</div>
+			</DialogContent>
+		</Dialog>
 	);
 }
 
@@ -406,17 +372,14 @@ function StrokeWidthSlider() {
 	const strokeWidth = useSelector(
 		(state: RootState) => state.client.canvas.strokeWidth
 	);
+	const currentColor = useSelector(
+		(state: RootState) => state.client.canvas.color
+	);
+	const dispatch = useDispatch();
 
 	const handleStrokeWidthChange = (value: number[]) => {
 		dispatch(changeStrokeWidth(value[0]));
 	};
-
-	const dispatch = useDispatch();
-
-	const currentColor = useSelector(
-		(state: RootState) => state.client.canvas.color
-	);
-
 	return (
 		<Dialog>
 			<div className="flex items-center w-full relative max-w-sm">
@@ -447,17 +410,17 @@ function StrokeWidthSlider() {
 }
 
 export function ColorSliders() {
-	const dispatch = useDispatch();
 	const hue = useSelector((state: RootState) => state.client.canvas.hue);
 	const lightness = useSelector(
 		(state: RootState) => state.client.canvas.lightness
 	);
-
 	const players = useSelector((state: RootState) => state.room.players);
 	const playerId = useSelector((state: RootState) => state.client.id);
-	const role = getGameRole(playerId, players);
 
+	const role = getGameRole(playerId, players);
 	const isDrawing = role === GameRole.Drawing;
+
+	const dispatch = useDispatch();
 
 	const handleHueChange = (value: number[]) => {
 		dispatch(changeHue(value[0]));
@@ -465,36 +428,6 @@ export function ColorSliders() {
 
 	const handleLightnessChange = (value: number[]) => {
 		dispatch(changeLightness(value[0]));
-	};
-
-	const hslToRgb = (h: number, s: number, l: number) => {
-		h /= 360;
-		s /= 100;
-		l /= 100;
-		let r, g, b;
-
-		if (s === 0) {
-			r = g = b = l; // achromatic
-		} else {
-			const hue2rgb = (p: number, q: number, t: number) => {
-				if (t < 0) t += 1;
-				if (t > 1) t -= 1;
-				if (t < 1 / 6) return p + (q - p) * 6 * t;
-				if (t < 1 / 2) return q;
-				if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-				return p;
-			};
-
-			const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-			const p = 2 * l - q;
-			r = hue2rgb(p, q, h + 1 / 3);
-			g = hue2rgb(p, q, h);
-			b = hue2rgb(p, q, h - 1 / 3);
-		}
-
-		return `rgb(${Math.round(r * 255)}, ${Math.round(g * 255)}, ${Math.round(
-			b * 255
-		)})`;
 	};
 
 	return (
