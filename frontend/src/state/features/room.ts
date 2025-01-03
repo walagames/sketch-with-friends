@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { GameRole } from "./game";
+import { AvatarConfig } from "./preferences";
 
 export enum RoomStage {
 	PreGame = "preGame",
@@ -17,9 +18,8 @@ export type Player = {
 };
 
 export type PlayerProfile = {
-	name: string;
-	avatarSeed: string;
-	avatarColor: string;
+	username: string;
+	avatarConfig: AvatarConfig;
 };
 
 export enum RoomRole {
@@ -125,9 +125,8 @@ export const roomSlice = createSlice({
 			action: PayloadAction<PlayerProfile & { id: string }>
 		) => {
 			state.players[action.payload.id].profile = {
-				name: action.payload.name,
-				avatarSeed: action.payload.avatarSeed,
-				avatarColor: action.payload.avatarColor,
+				username: action.payload.username,
+				avatarConfig: action.payload.avatarConfig,
 			};
 		},
 	},

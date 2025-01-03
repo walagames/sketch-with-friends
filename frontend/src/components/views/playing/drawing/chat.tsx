@@ -196,8 +196,8 @@ function ChatMessageComponent({
 
 	if (!player) return null;
 
-	const { avatarSeed, name } = player.profile;
-	const avatarSvg = generateAvatar(avatarSeed);
+	const { avatarConfig, username } = player.profile;
+	const avatarSvg = generateAvatar(avatarConfig);
 	const isOwnMessage = playerId === message.playerId;
 
 	return (
@@ -210,7 +210,7 @@ function ChatMessageComponent({
 			)}
 		>
 			<img
-				alt={player.profile.name + " profile picture"}
+				alt={player.profile.username + " profile picture"}
 				className={cn(
 					"h-8 aspect-square relative border-2 shrink-0",
 					isOwnMessage ? "rounded-lg" : "rounded-lg"
@@ -235,7 +235,7 @@ function ChatMessageComponent({
 							isOwnMessage && "order-2 ml-auto"
 						)}
 					>
-						{name}{" "}
+						{username}{" "}
 						{isOwnMessage && (
 							<span className="text-xs text-foreground/50 px-0.5">(You)</span>
 						)}

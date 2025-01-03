@@ -32,10 +32,17 @@ type playerOptions struct {
 	avatarColor string
 }
 
+type AvatarConfig struct {
+	HairStyle       string `json:"hairStyle"`
+	HairColor       string `json:"hairColor"`
+	Mood            string `json:"mood"`
+	SkinColor       string `json:"skinColor"`
+	BackgroundColor string `json:"backgroundColor"`
+}
+
 type playerProfile struct {
-	Name        string `json:"name"`
-	AvatarSeed  string `json:"avatarSeed"`
-	AvatarColor string `json:"avatarColor"`
+	Username     string        `json:"username"`
+	AvatarConfig *AvatarConfig `json:"avatarConfig"`
 }
 
 // player represents an individual participant in the game.
@@ -58,9 +65,8 @@ func NewPlayer(opts *playerOptions) *player {
 	return &player{
 		ID: uuid.New(),
 		Profile: playerProfile{
-			Name:        opts.name,
-			AvatarSeed:  opts.avatarSeed,
-			AvatarColor: opts.avatarColor,
+			Username:     opts.name,
+			AvatarConfig: &AvatarConfig{},
 		},
 		RoomRole:          opts.roomRole,
 		Score:             0,
