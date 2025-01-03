@@ -44,7 +44,7 @@ const socketMiddleware: Middleware = (store) => {
 				socket.onclose = (e) => {
 					const errorMessage =
 						ErrorMessages[e.reason as keyof typeof ErrorMessages];
-						
+
 					if (e.reason) {
 						toast.error(errorMessage || "Unknown error occurred");
 					}
@@ -57,6 +57,16 @@ const socketMiddleware: Middleware = (store) => {
 					// Clear after short delay to avoid visual shift if disconnect is caused by page reload
 					clearStateAfterDelay();
 				};
+
+				socket.onopen = () => {
+					socket?.send(
+						JSON.stringify({
+							type: "room/changePlayerProfile",
+							payload: store.getState().preferences,
+						})
+					);
+				};
+
 				socket.onmessage = (event) => {
 					const actions = JSON.parse(event.data);
 					actions.forEach((action: any) => {

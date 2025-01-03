@@ -422,24 +422,40 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			}
 
 			// Sanitize the profile inputs
-			profile.Name = sanitizeUsername(profile.Name)
-			if profile.Name == "" {
+			profile.Username = sanitizeUsername(profile.Username)
+			if profile.Username == "" {
 				return fmt.Errorf("name cannot be empty")
 			}
-			if profile.AvatarSeed == "" {
-				return fmt.Errorf("avatar seed cannot be empty")
+			if profile.AvatarConfig == nil {
+				return fmt.Errorf("avatar config cannot be empty")
 			}
-			if profile.AvatarColor == "" {
-				return fmt.Errorf("avatar color cannot be empty")
+			if profile.AvatarConfig.HairStyle == "" {
+				return fmt.Errorf("avatar hair style cannot be empty")
 			}
-			if len(profile.Name) > MAX_NAME_LENGTH {
+			if profile.AvatarConfig.HairColor == "" {
+				return fmt.Errorf("avatar hair color cannot be empty")
+			}
+			if profile.AvatarConfig.Mood == "" {
+				return fmt.Errorf("avatar mood cannot be empty")
+			}
+			if profile.AvatarConfig.SkinColor == "" {
+				return fmt.Errorf("avatar skin color cannot be empty")
+			}
+			if profile.AvatarConfig.BackgroundColor == "" {
+				return fmt.Errorf("avatar background color cannot be empty")
+			}
+			if len(profile.Username) > MAX_NAME_LENGTH {
 				return fmt.Errorf("name cannot be longer than %d characters", MAX_NAME_LENGTH)
 			}
 
+			// show a message in chat if the player is joining for the first time
+			if a.Player.Profile.Username == "" && r.game != nil {
+				r.game.SendSystemMessage(fmt.Sprintf("%s joined the room", profile.Username))
+			}
+
 			// Update the player's profile
-			a.Player.Profile.Name = profile.Name
-			a.Player.Profile.AvatarSeed = profile.AvatarSeed
-			a.Player.Profile.AvatarColor = profile.AvatarColor
+			a.Player.Profile.Username = profile.Username
+			a.Player.Profile.AvatarConfig = profile.AvatarConfig
 
 			// Broadcast the change to all players
 			r.broadcast(GameRoleAny,

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"time"
 
@@ -193,15 +192,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 		return ErrRoomFull
 	}
 
-	if len(player.Profile.Name) > MAX_NAME_LENGTH {
-		return ErrNameTooLong
-	}
-
-	// Start the client's goroutines
-	// Note: This launches 2 separate goroutines:
-	// - one for sending messages to the client
-	// - one for receiving messages from the client
-	// client.run() blocks until both routines are confirmed to be started.
+	// Start their client and add the player to the room
 	player.client.run(ctx)
 	r.Players[player.ID] = player
 
@@ -219,7 +210,6 @@ func (r *room) register(ctx context.Context, player *player) error {
 	// If the room is already playing, we need to send them the game state as well
 	// and add them to the drawing queue.
 	if r.Stage == Playing {
-		r.game.SendSystemMessage(fmt.Sprintf("%s joined the room", player.Profile.Name))
 		r.game.enqueueDrawingPlayer(player)
 		player.Send(
 			action(ChangePhase, PhaseChangeMessage{

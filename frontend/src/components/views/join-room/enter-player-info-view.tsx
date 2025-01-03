@@ -6,7 +6,7 @@ import { AnimatePresence } from "framer-motion";
 import { getRealtimeHref } from "@/lib/realtime";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
-import { PlayerProfile, RoomStage } from "@/state/features/room";
+import { RoomStage } from "@/state/features/room";
 import { enterRoomCode, setIsJoining } from "@/state/features/client";
 import { StepBackIcon, StepForwardIcon } from "lucide-react";
 import { RaisedButton } from "@/components/ui/raised-button";
@@ -29,36 +29,18 @@ export function EnterPlayerInfoView() {
 		(state: RootState) => state.client.enteredRoomCode
 	);
 
-	function handleSubmit(profile: PlayerProfile) {
-		const { name, avatarSeed, avatarColor } = profile;
-
+	function handleSubmit() {
 		dispatch(setIsJoining(true));
 
 		if (enteredRoomCode && enteredRoomCode !== "new") {
 			dispatch({
 				type: "socket/connect",
-				payload:
-					getRealtimeHref() +
-					"/join/" +
-					enteredRoomCode +
-					"?username=" +
-					name +
-					"&avatarSeed=" +
-					avatarSeed +
-					"&avatarColor=" +
-					avatarColor,
+				payload: getRealtimeHref() + "/join/" + enteredRoomCode,
 			});
 		} else {
 			dispatch({
 				type: "socket/connect",
-				payload:
-					getRealtimeHref() +
-					"/host?username=" +
-					name +
-					"&avatarSeed=" +
-					avatarSeed +
-					"&avatarColor=" +
-					avatarColor,
+				payload: getRealtimeHref() + "/host",
 			});
 		}
 	}

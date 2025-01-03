@@ -41,7 +41,7 @@ export function DrawingStatus({ delay }: { delay: number }) {
 	return (
 		<span className="flex items-start flex-wrap text-sm lg:text-2xl gap-1">
 			<span className="flex-wrap">
-				{drawingPlayer?.profile.name} is sketching:{" "}
+				{drawingPlayer?.profile.username} is sketching:{" "}
 			</span>
 			{containsLetterBlanks ? (
 				<span className=" lg:text-2xl font-bold">

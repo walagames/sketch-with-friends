@@ -61,7 +61,7 @@ export function PostDrawingView() {
 	const drawingPlayer = getDrawingPlayer(players);
 
 	const message = drawingPlayer
-		? `${drawingPlayer.profile.name} sketched: `
+		? `${drawingPlayer.profile.username} sketched: `
 		: "The word was: ";
 
 	const isLastPhase = useSelector((state: RootState) => state.game.isLastPhase);
@@ -180,9 +180,9 @@ function LeaderboardPlace({
 }) {
 	const {
 		score,
-		profile: { name, avatarSeed },
+		profile: { username, avatarConfig },
 	} = player;
-	const avatarSvg = generateAvatar(avatarSeed);
+	const avatarSvg = generateAvatar(avatarConfig);
 
 	const points =
 		useSelector((state: RootState) => state.game.pointsAwarded[player.id]) ?? 0;
@@ -201,7 +201,7 @@ function LeaderboardPlace({
 				src={avatarSvg}
 			/>
 			<p className="text-xl font-bold text-foreground truncate">
-				{name}{" "}
+				{username}{" "}
 				{isCurrentPlayer && (
 					<span className="text-xs text-foreground/50 px-0.5">(You)</span>
 				)}
@@ -243,11 +243,11 @@ function PodiumPlace({
 
 	const {
 		score,
-		profile: { name, avatarSeed },
+		profile: { username, avatarConfig },
 		id,
 	} = player;
 	const isCurrentPlayer = currentPlayerId === id;
-	const avatarSvg = generateAvatar(avatarSeed);
+	const avatarSvg = generateAvatar(avatarConfig);
 
 	const podiumColor = {
 		1: { color: "bg-primary", height: 180, placeText: "1st", delay: 0.4 },
@@ -294,7 +294,7 @@ function PodiumPlace({
 				layout
 				className=" lg:text-xl font-bold text-foreground lg:max-w-40 max-w-32 flex items-center"
 			>
-				<span className="truncate">{name}</span>
+				<span className="truncate">{username}</span>
 				<span className="text-sm text-foreground/50 px-1">
 					{isCurrentPlayer && "(You)"}
 				</span>

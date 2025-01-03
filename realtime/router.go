@@ -74,28 +74,6 @@ func extractUserParams(r *http.Request) (string, string, string, error) {
 func host(rm RoomManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		requestID := getRequestID(r.Context())
-		username, avatarSeed, avatarColor, err := extractUserParams(r)
-		if err != nil {
-			slog.Warn("error extracting user params",
-				"error", err,
-				"query", r.URL.Query().Encode(),
-				"request_id", requestID,
-			)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		// Sanitize the username to remove any invalid characters
-		username = sanitizeUsername(username)
-		if username == "" {
-			slog.Warn("Invalid username",
-				"username", username,
-				"query", r.URL.Query().Encode(),
-				"request_id", requestID,
-			)
-			http.Error(w, "Invalid username", http.StatusBadRequest)
-			return
-		}
 
 		// Upgrade the HTTP connection to a WebSocket connection
 		conn, err := UpgradeConnection(w, r)
@@ -123,10 +101,7 @@ func host(rm RoomManager) http.HandlerFunc {
 
 		// Connect the player to the newly created room
 		player := NewPlayer(&playerOptions{
-			roomRole:    RoomRoleHost,
-			name:        username,
-			avatarSeed:  avatarSeed,
-			avatarColor: avatarColor,
+			roomRole: RoomRoleHost,
 		})
 		err = room.Connect(conn, player)
 		if err != nil {
@@ -151,28 +126,6 @@ func host(rm RoomManager) http.HandlerFunc {
 func join(rm RoomManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		requestID := getRequestID(r.Context())
-		username, avatarSeed, avatarColor, err := extractUserParams(r)
-		if err != nil {
-			slog.Warn("Invalid query parameters",
-				"error", err,
-				"query", r.URL.Query().Encode(),
-				"request_id", requestID,
-			)
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		// Sanitize the username to remove any invalid characters
-		username = sanitizeUsername(username)
-		if username == "" {
-			slog.Warn("Invalid username",
-				"username", username,
-				"query", r.URL.Query().Encode(),
-				"request_id", requestID,
-			)
-			http.Error(w, "Invalid username", http.StatusBadRequest)
-			return
-		}
 
 		// Get the room code from the URL path
 		code := r.PathValue("code")
@@ -206,10 +159,7 @@ func join(rm RoomManager) http.HandlerFunc {
 
 		// Connect the player to the room
 		player := NewPlayer(&playerOptions{
-			roomRole:    RoomRolePlayer,
-			name:        username,
-			avatarSeed:  avatarSeed,
-			avatarColor: avatarColor,
+			roomRole: RoomRolePlayer,
 		})
 		err = room.Connect(conn, player)
 		if err != nil {
