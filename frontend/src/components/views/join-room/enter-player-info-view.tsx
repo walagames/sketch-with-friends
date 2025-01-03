@@ -94,7 +94,7 @@ export function EnterPlayerInfoView() {
 				startAt={{ left: "-15%", top: "50%", rotate: 25, opacity: 0 }}
 				animateTo={{ left: "25%", top: "60%", rotate: 35, opacity: 1 }}
 				leaveTo={exitPosition()}
-				skipTransition
+				// skipTransition
 			/>
 		</SkyScene>
 	);
