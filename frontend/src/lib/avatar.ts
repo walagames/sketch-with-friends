@@ -1,6 +1,39 @@
 import { createAvatar } from "@dicebear/core";
 import { dylan } from "@dicebear/collection";
-import { AvatarConfig } from "@/state/features/preferences";
+
+export type AvatarConfig = {
+	hairStyle:
+		| "plain"
+		| "wavy"
+		| "shortCurls"
+		| "parting"
+		| "spiky"
+		| "roundBob"
+		| "longCurls"
+		| "buns"
+		| "bangs"
+		| "fluffy"
+		| "flatTop"
+		| "shaggy";
+	hairColor: "000000" | "1d5dff" | "ff543d" | "fff500" | "ffffff";
+	mood:
+		| "happy"
+		| "sad"
+		| "angry"
+		| "neutral"
+		| "superHappy"
+		| "hopeful"
+		| "confused";
+	skinColor: "8d5524" | "c26450" | "e6b087" | "ffd6c0" | "ffe4d3";
+	backgroundColor:
+		| "e02929"
+		| "e08529"
+		| "e0da29"
+		| "5de029"
+		| "29e0d4"
+		| "9129e0"
+		| "e029ce";
+};
 
 export class Avatar {
 	static readonly backgroundColors = [
