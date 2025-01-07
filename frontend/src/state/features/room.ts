@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { GameRole } from "./game";
-import { AvatarConfig } from "./preferences";
+import { AvatarConfig } from "@/lib/avatar";
 
 export enum RoomStage {
 	PreGame = "preGame",
