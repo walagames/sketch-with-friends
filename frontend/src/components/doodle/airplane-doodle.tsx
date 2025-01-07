@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import { motion, MotionProps } from "framer-motion";
+import { motion, MotionProps, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { planeSpring } from "@/lib/motion";
 
@@ -15,6 +15,11 @@ const InstantConfig = {
 	delay: 1.2,
 };
 
+const NoMotionConfig = {
+	duration: 0,
+	delay: 0,
+};
+
 export const AirplaneDoodle = forwardRef<
 	HTMLImageElement,
 	MotionProps &
@@ -25,20 +30,27 @@ export const AirplaneDoodle = forwardRef<
 			leaveTo?: DoodlePosition;
 			skipTransition?: boolean;
 			delay?: number;
-			// layoutId?: string;
 		}
 >(({ skipTransition = false, ...props }, ref) => {
+	const reducedMotion = useReducedMotion();
+
+	const transition = !reducedMotion
+		? skipTransition
+			? InstantConfig
+			: { ...planeSpring, delay: props.delay }
+		: NoMotionConfig;
+
 	return (
 		<motion.img
-			// layoutId={layoutId}
 			className={cn("absolute w-28 hidden lg:block", props.className)}
 			src="/doodles/paper-plane.png"
 			ref={ref}
 			animate={props.animateTo}
-			exit={{ ...props.leaveTo, transition: planeSpring }}
-			transition={
-				skipTransition ? InstantConfig : { ...planeSpring, delay: props.delay }
-			}
+			exit={{
+				...props.leaveTo,
+				transition: reducedMotion ? NoMotionConfig : planeSpring,
+			}}
+			transition={transition}
 			initial={props.startAt}
 			{...props}
 		/>

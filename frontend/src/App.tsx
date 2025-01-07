@@ -172,7 +172,7 @@ function App() {
 	return (
 		<main className="flex min-h-[100dvh] flex-col items-center justify-between relative">
 			<div className="h-[100dvh] w-screen flex flex-col items-center justify-center relative overflow-hidden">
-				<MotionConfig transition={containerSpring}>
+				<MotionConfig reducedMotion="user" transition={containerSpring}>
 					<AnimatePresenceWithDirection
 						key={mountId}
 						initial={false}

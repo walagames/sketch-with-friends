@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useState, useEffect, forwardRef } from "react";
 import { SoundEffect, useSound } from "@/providers/sound-provider";
 
@@ -98,6 +98,9 @@ const textVariants = {
 			},
 		};
 	},
+	reducedExit: {
+		opacity: 0,
+	},
 };
 
 export const AnimatedSketchText = forwardRef<
@@ -112,6 +115,8 @@ export const AnimatedSketchText = forwardRef<
 		return () => clearTimeout(timeout);
 	}, []);
 
+	const reducedMotion = useReducedMotion();
+
 	const strokeWidth = "0.16px";
 	return (
 		<motion.svg
@@ -119,7 +124,7 @@ export const AnimatedSketchText = forwardRef<
 			ref={ref}
 			initial="hidden"
 			animate="visible"
-			exit="exit"
+			exit={reducedMotion ? "reducedExit" : "exit"}
 			fill="currentColor"
 			viewBox="0 0 242 56"
 		>
