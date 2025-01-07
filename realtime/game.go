@@ -738,6 +738,12 @@ func (phase DrawingPhase) End(g *game) {
 		action(SetPlayers, g.room.Players),
 	)
 
+	// Show a message in chat if the lead changes
+	leadChange := CheckLeadChange(g.pointsAwarded, g.room.Players)
+	if leadChange != "" {
+		g.SendSystemMessage(leadChange)
+	}
+
 	g.resetCorrectGuessers()
 }
 
@@ -780,12 +786,6 @@ func (phase PostDrawingPhase) Start(g *game) {
 					IsFirstPhase: false,
 				}),
 		)
-
-		// Show a message in chat if the lead changes
-		leadChange := CheckLeadChange(g.pointsAwarded, g.room.Players)
-		if leadChange != "" {
-			g.SendSystemMessage(leadChange)
-		}
 
 		// Start the timer
 		g.room.timer.Reset(phaseDuration)
