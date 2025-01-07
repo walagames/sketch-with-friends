@@ -114,6 +114,9 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 						y: 0,
 						x: 0,
 					}}
+					transition={{
+						duration: 0.1,
+					}}
 					{...(props as HTMLMotionProps<"button">)}
 				>
 					<span
