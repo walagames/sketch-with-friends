@@ -110,6 +110,14 @@ const (
 	MAX_ROUNDS       = 10
 )
 
+var DefaultAvatarConfig = &AvatarConfig{
+	HairStyle:       "bangs",
+	HairColor:       "ff543d",
+	Mood:            "hopeful",
+	SkinColor:       "ffd6c0",
+	BackgroundColor: "e0da29",
+}
+
 // validateRoomSettings checks if room settings are within allowed bounds
 func validateRoomSettings(settings *RoomSettings) error {
 	if settings.PlayerLimit < MIN_PLAYERS || settings.PlayerLimit > MAX_PLAYERS {
@@ -423,29 +431,30 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 
 			// Sanitize the profile inputs
 			profile.Username = sanitizeUsername(profile.Username)
-			if profile.Username == "" {
-				return fmt.Errorf("name cannot be empty")
+			if profile.Username == "" || len(profile.Username) > MAX_NAME_LENGTH {
+				profile.Username = randomUsername()
 			}
 			if profile.AvatarConfig == nil {
-				return fmt.Errorf("avatar config cannot be empty")
+				profile.AvatarConfig = DefaultAvatarConfig
 			}
 			if profile.AvatarConfig.HairStyle == "" {
-				return fmt.Errorf("avatar hair style cannot be empty")
+				profile.AvatarConfig.HairStyle = DefaultAvatarConfig.HairStyle
 			}
 			if profile.AvatarConfig.HairColor == "" {
-				return fmt.Errorf("avatar hair color cannot be empty")
+				profile.AvatarConfig.HairColor = DefaultAvatarConfig.HairColor
 			}
 			if profile.AvatarConfig.Mood == "" {
-				return fmt.Errorf("avatar mood cannot be empty")
+				profile.AvatarConfig.Mood = DefaultAvatarConfig.Mood
 			}
 			if profile.AvatarConfig.SkinColor == "" {
-				return fmt.Errorf("avatar skin color cannot be empty")
+				profile.AvatarConfig.SkinColor = DefaultAvatarConfig.SkinColor
 			}
 			if profile.AvatarConfig.BackgroundColor == "" {
-				return fmt.Errorf("avatar background color cannot be empty")
+				profile.AvatarConfig.BackgroundColor = DefaultAvatarConfig.BackgroundColor
 			}
-			if len(profile.Username) > MAX_NAME_LENGTH {
-				return fmt.Errorf("name cannot be longer than %d characters", MAX_NAME_LENGTH)
+
+			if len(profile.Username) > MAX_NAME_LENGTH && a.Player.Profile.Username == "" {
+				profile.Username = randomUsername()
 			}
 
 			// show a message in chat if the player is joining for the first time

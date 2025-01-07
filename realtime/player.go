@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
@@ -22,15 +24,6 @@ const (
 	GameRoleDrawing  GameRole = "drawing"
 	GameRoleAny      GameRole = "any"
 )
-
-// We use this to create a new player based on params passed
-// in form route handlers.
-type playerOptions struct {
-	roomRole    RoomRole
-	name        string
-	avatarSeed  string
-	avatarColor string
-}
 
 type AvatarConfig struct {
 	HairStyle       string `json:"hairStyle"`
@@ -61,14 +54,14 @@ type player struct {
 	client            *client
 }
 
-func NewPlayer(opts *playerOptions) *player {
+func NewPlayer(role RoomRole) *player {
 	return &player{
 		ID: uuid.New(),
 		Profile: playerProfile{
-			Username:     opts.name,
+			Username:     "",
 			AvatarConfig: &AvatarConfig{},
 		},
-		RoomRole:          opts.roomRole,
+		RoomRole:          role,
 		Score:             0,
 		GameRole:          GameRoleGuessing,
 		lastInteractionAt: time.Now(),
@@ -97,4 +90,23 @@ func (p *player) UpdateLimiter() {
 		// 2 actions per second, 4 actions in a burst
 		p.client.limiter = rate.NewLimiter(2, 4)
 	}
+}
+
+// Generates a random username for a player.
+func randomUsername() string {
+	adjectives := []string{
+		"Bad", "Lazy", "Odd", "Wild", "Sad",
+		"Mad", "Shy", "Fast", "Slow", "Neat",
+	}
+
+	nouns := []string{
+		"Paint", "Art", "Pen", "Brush", "Ink",
+		"Sketch", "Draw", "Line", "Dot", "Doodle",
+	}
+
+	adj := adjectives[rand.Intn(len(adjectives))]
+	noun := nouns[rand.Intn(len(nouns))]
+	num := rand.Intn(99)
+
+	return fmt.Sprintf("%s%s%d", adj, noun, num)
 }
