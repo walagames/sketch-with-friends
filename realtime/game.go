@@ -190,7 +190,7 @@ func (g *game) handlePlayerLeave(player *player) {
 		g.chatMessages = newChatMessages
 
 		g.room.broadcast(GameRoleAny, action(SetChat, g.chatMessages))
-		g.SendSystemMessage(fmt.Sprintf("%s left the room", player.Profile.Name))
+		g.SendSystemMessage(fmt.Sprintf("%s left the room", player.Profile.Username))
 	}
 
 	g.removePlayerFromDrawingQueue(player.ID)
@@ -370,8 +370,8 @@ func (g *game) randomWordOptions(n int) []DrawingWord {
 		return g.customWords[:min(n, len(g.customWords))]
 	}
 
-	// For non-random difficulty, use the original filtering logic
-	if g.room.Settings.WordDifficulty != WordDifficultyRandom {
+	// For non-all difficulty, use the original filtering logic
+	if g.room.Settings.WordDifficulty != WordDifficultyAll {
 		filteredWords := wordBank
 		if g.room.Settings.WordBank == WordBankMixed && len(g.customWords) > 0 {
 			const customWordWeight = 3
@@ -686,7 +686,7 @@ func (phase DrawingPhase) End(g *game) {
 	drawerName := "A player"
 
 	if g.currentDrawer != nil {
-		drawerName = g.currentDrawer.Profile.Name
+		drawerName = g.currentDrawer.Profile.Username
 	}
 
 	if len(g.correctGuessers) == (len(g.room.Players) - 1) {
@@ -718,7 +718,7 @@ func (phase DrawingPhase) End(g *game) {
 		} else {
 			// If the player lost their streak, show a message in chat
 			if p.Streak >= 5 {
-				g.SendSystemMessage(fmt.Sprintf("%s lost their streak of %d", p.Profile.Name, p.Streak))
+				g.SendSystemMessage(fmt.Sprintf("%s lost their streak of %d", p.Profile.Username, p.Streak))
 			}
 
 			// Otherwise, reset the streak
@@ -737,6 +737,12 @@ func (phase DrawingPhase) End(g *game) {
 	g.room.broadcast(GameRoleAny,
 		action(SetPlayers, g.room.Players),
 	)
+
+	// Show a message in chat if the lead changes
+	leadChange := CheckLeadChange(g.pointsAwarded, g.room.Players)
+	if leadChange != "" {
+		g.SendSystemMessage(leadChange)
+	}
 
 	g.resetCorrectGuessers()
 }
@@ -780,12 +786,6 @@ func (phase PostDrawingPhase) Start(g *game) {
 					IsFirstPhase: false,
 				}),
 		)
-
-		// Show a message in chat if the lead changes
-		leadChange := CheckLeadChange(g.pointsAwarded, g.room.Players)
-		if leadChange != "" {
-			g.SendSystemMessage(leadChange)
-		}
 
 		// Start the timer
 		g.room.timer.Reset(phaseDuration)

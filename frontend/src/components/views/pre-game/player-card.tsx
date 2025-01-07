@@ -25,6 +25,10 @@ import { RaisedButton } from "@/components/ui/raised-button";
 import { PlayerProfile } from "@/state/features/room";
 import { containerSpring } from "@/config/spring";
 import { SoundEffect, useSound } from "@/providers/sound-provider";
+import {
+	changeAvatarConfig,
+	changeUsername,
+} from "@/state/features/preferences";
 
 function CardContent({
 	player,
@@ -38,10 +42,10 @@ function CardContent({
 			<div className="flex items-center h-14 -translate-y-0.5 lg:w-64 min-h-0 flex-1 pr-4">
 				<img
 					className="rounded-l-lg h-full aspect-square relative"
-					src={generateAvatar(player.profile.avatarSeed)}
+					src={generateAvatar(player.profile.avatarConfig)}
 				/>
 				<p className="text-xl leading-0 font-bold truncate pl-2 translate-y-0.5">
-					{player.profile.name}
+					{player.profile.username}
 				</p>
 				{isCurrentPlayer && (
 					<p className="text-sm text-foreground/50 leading-0 font-bold px-1 translate-y-0.5">
@@ -69,9 +73,8 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 			dispatch(
 				changePlayerProfile({
 					id: player.id,
-					name: profile.name,
-					avatarSeed: profile.avatarSeed,
-					avatarColor: profile.avatarColor,
+					username: profile.username,
+					avatarConfig: profile.avatarConfig,
 				})
 			);
 		};
@@ -104,7 +107,7 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 							</DropdownMenuTrigger>
 							<DropdownMenuContent className="w-60 translate-x-1">
 								<DropdownMenuLabel>
-									<p className="font-bold">{player.profile.name}</p>
+									<p className="font-bold">{player.profile.username}</p>
 								</DropdownMenuLabel>
 								<DropdownMenuSeparator />
 								<DropdownMenuGroup>
@@ -147,8 +150,16 @@ function EditPlayerInfoModal({
 	player: Player;
 	handleSubmit: (profile: PlayerProfile) => void;
 }) {
+	const dispatch = useDispatch();
 	return (
-		<Dialog open={isOpen} onOpenChange={setIsOpen}>
+		<Dialog
+			open={isOpen}
+			onOpenChange={(open) => {
+				setIsOpen(open);
+				dispatch(changeAvatarConfig(player.profile.avatarConfig));
+				dispatch(changeUsername(player.profile.username));
+			}}
+		>
 			<DialogContent
 				className="sm:max-w-sm border-4 border-secondary-foreground bg-zinc-100"
 				aria-describedby="edit-player-description"
@@ -160,9 +171,8 @@ function EditPlayerInfoModal({
 					<PlayerInfoForm
 						handleSubmit={handleSubmit}
 						defaultValues={{
-							name: player.profile.name,
-							avatarSeed: player.profile.avatarSeed,
-							avatarColor: player.profile.avatarColor,
+							username: player.profile.username,
+							avatarConfig: player.profile.avatarConfig,
 						}}
 						bottomButton={
 							<RaisedButton shift={false} variant="action" size="lg">

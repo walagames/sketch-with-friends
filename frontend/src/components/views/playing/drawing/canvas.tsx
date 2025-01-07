@@ -10,7 +10,9 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { CanvasTool } from "@/state/features/client";
 import { EraserIcon, PaintBucketIcon } from "lucide-react";
 
+// Makes the canvas less pixelated
 const CANVAS_SCALE = 2;
+// We use this to offset the cursor so it's easier to see where you are drawing on mobile
 const MOBILE_OFFSET = 10;
 
 function Canvas({

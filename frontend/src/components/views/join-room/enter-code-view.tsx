@@ -165,14 +165,14 @@ export function EnterCodeView() {
 					style={{ top: "10%", right: "10%" }}
 					src="/doodles/rain-cloud.png"
 				/>
+				<AirplaneDoodle
+					layoutId="airplane-enter-code"
+					startAt={{ left: "40%", top: "45%", rotate: 35, opacity: 0 }}
+					animateTo={{ left: "66%", top: "45%", rotate: 20, opacity: 1 }}
+					leaveTo={{ left: "125%", top: "60%", rotate: 35, opacity: 1 }}
+					// skipTransition
+				/>
 			</AnimatePresence>
-			<AirplaneDoodle
-				layoutId="airplane-enter-code"
-				startAt={{ left: "125%", top: "60%", rotate: 35, opacity: 1 }}
-				animateTo={{ left: "66%", top: "45%", rotate: 20, opacity: 1 }}
-				leaveTo={{ left: "125%", top: "60%", rotate: 35, opacity: 1 }}
-				// skipTransition
-			/>
 		</SkyScene>
 	);
 }

@@ -3,11 +3,12 @@ import canvasReducer from "./features/canvas";
 import roomReducer from "./features/room";
 import gameReducer from "./features/game";
 import clientReducer from "./features/client";
-import preferencesReducer from "./features/preferences";
+import preferencesReducer, { PreferencesState } from "./features/preferences";
 import { clearQueryParams } from "@/lib/params";
 import { toast } from "sonner";
 import localStorage from "redux-persist/es/storage";
 import { persistReducer, persistStore } from "redux-persist";
+import { Avatar } from "@/lib/avatar";
 
 // Used to display toast notifications from the server
 const ErrorMessages = {
@@ -44,7 +45,7 @@ const socketMiddleware: Middleware = (store) => {
 				socket.onclose = (e) => {
 					const errorMessage =
 						ErrorMessages[e.reason as keyof typeof ErrorMessages];
-						
+
 					if (e.reason) {
 						toast.error(errorMessage || "Unknown error occurred");
 					}
@@ -57,6 +58,16 @@ const socketMiddleware: Middleware = (store) => {
 					// Clear after short delay to avoid visual shift if disconnect is caused by page reload
 					clearStateAfterDelay();
 				};
+
+				socket.onopen = () => {
+					socket?.send(
+						JSON.stringify({
+							type: "room/changePlayerProfile",
+							payload: store.getState().preferences,
+						})
+					);
+				};
+
 				socket.onmessage = (event) => {
 					const actions = JSON.parse(event.data);
 					actions.forEach((action: any) => {
@@ -110,7 +121,34 @@ const socketMiddleware: Middleware = (store) => {
 const persistConfig = {
 	key: "root",
 	storage: localStorage,
-	whitelist: ["preferences"], // only preferences will be persisted
+	whitelist: ["preferences"],
+	transforms: [
+		{
+			in: (state: PreferencesState) => state,
+			out: (state: Partial<PreferencesState>) => {
+				const defaultState = {
+					volume: 0.5,
+					username: "",
+					avatarConfig: Avatar.random(),
+					customWords: [],
+				};
+
+				// If state is null or undefined, return default state
+				if (!state) return defaultState;
+
+				// Merge the stored state with default values for any missing fields
+				return {
+					volume: state.volume ?? defaultState.volume,
+					username: state.username ?? defaultState.username,
+					avatarConfig: {
+						...defaultState.avatarConfig,
+						...state.avatarConfig,
+					},
+					customWords: state.customWords ?? defaultState.customWords,
+				};
+			},
+		},
+	],
 };
 
 const persistedReducer = persistReducer(

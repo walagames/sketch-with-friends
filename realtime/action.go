@@ -110,6 +110,14 @@ const (
 	MAX_ROUNDS       = 10
 )
 
+var DefaultAvatarConfig = &AvatarConfig{
+	HairStyle:       "bangs",
+	HairColor:       "ff543d",
+	Mood:            "hopeful",
+	SkinColor:       "ffd6c0",
+	BackgroundColor: "e0da29",
+}
+
 // validateRoomSettings checks if room settings are within allowed bounds
 func validateRoomSettings(settings *RoomSettings) error {
 	if settings.PlayerLimit < MIN_PLAYERS || settings.PlayerLimit > MAX_PLAYERS {
@@ -126,7 +134,7 @@ func validateRoomSettings(settings *RoomSettings) error {
 
 	// Validate word difficulty
 	switch settings.WordDifficulty {
-	case WordDifficultyEasy, WordDifficultyMedium, WordDifficultyHard, WordDifficultyRandom, WordDifficultyCustom:
+	case WordDifficultyEasy, WordDifficultyMedium, WordDifficultyHard, WordDifficultyAll, WordDifficultyCustom:
 		// Valid values
 	default:
 		return fmt.Errorf("invalid word difficulty: %s", settings.WordDifficulty)
@@ -422,24 +430,41 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 			}
 
 			// Sanitize the profile inputs
-			profile.Name = sanitizeUsername(profile.Name)
-			if profile.Name == "" {
-				return fmt.Errorf("name cannot be empty")
+			profile.Username = sanitizeUsername(profile.Username)
+			if profile.Username == "" || len(profile.Username) > MAX_NAME_LENGTH {
+				profile.Username = randomUsername()
 			}
-			if profile.AvatarSeed == "" {
-				return fmt.Errorf("avatar seed cannot be empty")
+			if profile.AvatarConfig == nil {
+				profile.AvatarConfig = DefaultAvatarConfig
 			}
-			if profile.AvatarColor == "" {
-				return fmt.Errorf("avatar color cannot be empty")
+			if profile.AvatarConfig.HairStyle == "" {
+				profile.AvatarConfig.HairStyle = DefaultAvatarConfig.HairStyle
 			}
-			if len(profile.Name) > MAX_NAME_LENGTH {
-				return fmt.Errorf("name cannot be longer than %d characters", MAX_NAME_LENGTH)
+			if profile.AvatarConfig.HairColor == "" {
+				profile.AvatarConfig.HairColor = DefaultAvatarConfig.HairColor
+			}
+			if profile.AvatarConfig.Mood == "" {
+				profile.AvatarConfig.Mood = DefaultAvatarConfig.Mood
+			}
+			if profile.AvatarConfig.SkinColor == "" {
+				profile.AvatarConfig.SkinColor = DefaultAvatarConfig.SkinColor
+			}
+			if profile.AvatarConfig.BackgroundColor == "" {
+				profile.AvatarConfig.BackgroundColor = DefaultAvatarConfig.BackgroundColor
+			}
+
+			if len(profile.Username) > MAX_NAME_LENGTH && a.Player.Profile.Username == "" {
+				profile.Username = randomUsername()
+			}
+
+			// show a message in chat if the player is joining for the first time
+			if a.Player.Profile.Username == "" && r.game != nil {
+				r.game.SendSystemMessage(fmt.Sprintf("%s joined the room", profile.Username))
 			}
 
 			// Update the player's profile
-			a.Player.Profile.Name = profile.Name
-			a.Player.Profile.AvatarSeed = profile.AvatarSeed
-			a.Player.Profile.AvatarColor = profile.AvatarColor
+			a.Player.Profile.Username = profile.Username
+			a.Player.Profile.AvatarConfig = profile.AvatarConfig
 
 			// Broadcast the change to all players
 			r.broadcast(GameRoleAny,

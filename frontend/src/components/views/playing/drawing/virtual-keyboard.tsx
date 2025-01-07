@@ -253,6 +253,7 @@ export const VirtualKeyboard = forwardRef<
 						onClick={handleSubmit}
 						className=""
 						aria-label="Submit"
+						muted
 					>
 						<SendIcon className="size-5" />
 					</RaisedButton>

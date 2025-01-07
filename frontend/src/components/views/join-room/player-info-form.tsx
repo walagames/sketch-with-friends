@@ -1,4 +1,4 @@
-import { generateAvatar } from "@/lib/avatar";
+import { Avatar, generateAvatar } from "@/lib/avatar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -14,40 +14,38 @@ import { DicesIcon } from "lucide-react";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { PlayerProfile } from "@/state/features/room";
 import { RaisedInput } from "@/components/ui/raised-input";
-
-export const colors = [
-	"e02929",
-	"e08529",
-	"e0da29",
-	"5de029",
-	"29e0d4",
-	"9129e0",
-	"e029ce",
-];
-
-function randomAvatarSeed() {
-	return Array.from(crypto.getRandomValues(new Uint8Array(8)))
-		.map((b) => b.toString(16).padStart(2, "0"))
-		.join("");
-}
+import {
+	changeAvatarConfig,
+	changeUsername,
+} from "@/state/features/preferences";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/state/store";
+import {
+	BackgroundColorIcon,
+	HairColorIcon,
+	HairStyleIcon,
+	MoodIcon,
+	SkinColorIcon,
+} from "@/components/ui/icons";
 
 export const JoinRoomFormSchema = z.object({
 	username: z
 		.string()
-		.min(1, {
-			message: "Username must be at least 1 character.",
-		})
 		.max(14, {
 			message: "Username must be at most 14 characters.",
 		})
-		.refine((value) => /^[a-zA-Z0-9'][a-zA-Z0-9' ]*[a-zA-Z0-9']$/.test(value), {
-			message:
-				"Username can only contain letters, numbers, apostrophes, and single spaces between words.",
-		})
-		.refine((value) => !value.includes("  "), {
+		.refine(
+			(value) =>
+				value === "" || /^[a-zA-Z0-9'][a-zA-Z0-9' ]*[a-zA-Z0-9']$/.test(value),
+			{
+				message:
+					"Username can only contain letters, numbers, apostrophes, and single spaces between words.",
+			}
+		)
+		.refine((value) => value === "" || !value.includes("  "), {
 			message: "Username cannot contain consecutive spaces.",
 		})
-		.refine((value) => !value.includes("''"), {
+		.refine((value) => value === "" || !value.includes("''"), {
 			message: "Username cannot contain consecutive apostrophes.",
 		}),
 });
@@ -66,47 +64,137 @@ export function PlayerInfoForm({
 	rightButton,
 	bottomButton,
 	handleSubmit,
-	defaultValues,
 }: PlayerInfoFormProps) {
-	const [avatarSeed, setAvatarSeed] = useState(
-		defaultValues?.avatarSeed ?? randomAvatarSeed()
-	);
 	const [avatarSvg, setAvatarSvg] = useState("");
+
+	const avatarConfig = useSelector(
+		(state: RootState) => state.preferences.avatarConfig
+	);
+
+	const username = useSelector(
+		(state: RootState) => state.preferences.username
+	);
+
+	const dispatch = useDispatch();
+
+	const cycleHairStyle = () => {
+		dispatch(
+			changeAvatarConfig({
+				...avatarConfig,
+				hairStyle: Avatar.cycleProperty(
+					avatarConfig.hairStyle,
+					Avatar.hairStyles
+				),
+			})
+		);
+	};
+
+	const cycleHairColor = () => {
+		dispatch(
+			changeAvatarConfig({
+				...avatarConfig,
+				hairColor: Avatar.cycleProperty(
+					avatarConfig.hairColor,
+					Avatar.hairColors
+				),
+			})
+		);
+	};
+
+	const cycleMood = () => {
+		dispatch(
+			changeAvatarConfig({
+				...avatarConfig,
+				mood: Avatar.cycleProperty(avatarConfig.mood, Avatar.moods),
+			})
+		);
+	};
+
+	const cycleSkinColor = () => {
+		dispatch(
+			changeAvatarConfig({
+				...avatarConfig,
+				skinColor: Avatar.cycleProperty(
+					avatarConfig.skinColor,
+					Avatar.skinColors
+				),
+			})
+		);
+	};
+
+	const cycleBackgroundColor = () => {
+		dispatch(
+			changeAvatarConfig({
+				...avatarConfig,
+				backgroundColor: Avatar.cycleProperty(
+					avatarConfig.backgroundColor,
+					Avatar.backgroundColors
+				),
+			})
+		);
+	};
 
 	const form = useForm<z.infer<typeof JoinRoomFormSchema>>({
 		resolver: zodResolver(JoinRoomFormSchema),
 		defaultValues: {
-			username: defaultValues?.name ?? "",
+			username: username ?? "",
 		},
 	});
 
 	useEffect(() => {
-		setAvatarSvg(generateAvatar(avatarSeed));
-	}, [avatarSeed]);
+		const subscription = form.watch((value) => {
+			dispatch(changeUsername(value.username ?? ""));
+		});
+
+		return () => subscription.unsubscribe();
+	}, [form, dispatch]);
+
+	useEffect(() => {
+		setAvatarSvg(generateAvatar(avatarConfig));
+	}, [avatarConfig]);
 
 	const onSubmit = (data: z.infer<typeof JoinRoomFormSchema>) => {
 		const { username } = data;
 		handleSubmit({
-			name: username,
-			avatarSeed: avatarSeed,
-			avatarColor: colors[0],
+			username: username,
+			avatarConfig: avatarConfig,
 		});
 	};
 
 	return (
-		<div className="max-w-56 w-full flex flex-col gap-5 items-center relative z-50">
-			<div className="flex justify-center items-center gap-2">
-				<div className="w-40 aspect-square shadow-accent rounded-lg ml-2">
-					<img className="rounded-lg" src={avatarSvg} />
-				</div>
-				<div className="flex flex-col h-full mt-3">
+		<div className="max-w-60 w-full flex flex-col gap-5 items-center relative z-50">
+			<div className="flex justify-center items-start gap-2">
+				<div className="flex flex-col h-full mt-3 gap-2">
+					<RaisedButton shift={false} size="iconMd" onClick={cycleSkinColor}>
+						<SkinColorIcon className="size-8 translate-y-0.5" />
+					</RaisedButton>
 					<RaisedButton
 						shift={false}
-						variant="action"
-						size="tall"
-						onClick={() => setAvatarSeed(randomAvatarSeed())}
+						size="iconMd"
+						onClick={cycleBackgroundColor}
 					>
-						<DicesIcon className="w-5 h-5 -translate-y-0.5" />
+						<BackgroundColorIcon className="size-9 translate-y-0.5" />
+					</RaisedButton>
+					<RaisedButton
+						shift={false}
+						size="iconMd"
+						onClick={() => dispatch(changeAvatarConfig(Avatar.random()))}
+					>
+						<DicesIcon className="size-5" />
+					</RaisedButton>
+				</div>
+				<div className="w-36 mt-2 aspect-square shadow-accent rounded-lg ml-3 mr-0.5">
+					<img alt="avatar" className="rounded-lg" src={avatarSvg} />
+				</div>
+				<div className="flex flex-col h-full mt-3 gap-2">
+					<RaisedButton shift={false} size="iconMd" onClick={cycleHairStyle}>
+						<HairStyleIcon className="size-8 translate-y-0.5" />
+					</RaisedButton>
+					<RaisedButton shift={false} size="iconMd" onClick={cycleHairColor}>
+						<HairColorIcon className="size-8 translate-y-0.5" />
+					</RaisedButton>
+					<RaisedButton shift={false} size="iconMd" onClick={cycleMood}>
+						<MoodIcon className="size-8 translate-y-0.5" />
 					</RaisedButton>
 				</div>
 			</div>

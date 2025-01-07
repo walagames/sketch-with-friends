@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { GameRole } from "./game";
+import { AvatarConfig } from "@/lib/avatar";
 
 export enum RoomStage {
 	PreGame = "preGame",
@@ -17,9 +18,8 @@ export type Player = {
 };
 
 export type PlayerProfile = {
-	name: string;
-	avatarSeed: string;
-	avatarColor: string;
+	username: string;
+	avatarConfig: AvatarConfig;
 };
 
 export enum RoomRole {
@@ -36,7 +36,7 @@ export enum WordDifficulty {
 	Easy = "easy",
 	Medium = "medium",
 	Hard = "hard",
-	Random = "random",
+	All = "all",
 }
 
 export enum WordBank {
@@ -73,7 +73,7 @@ const initialState: RoomState = {
 		playerLimit: 6,
 		drawingTimeAllowed: 90,
 		totalRounds: 4,
-		wordDifficulty: WordDifficulty.Easy,
+		wordDifficulty: WordDifficulty.All,
 		wordBank: WordBank.Mixed,
 		customWords: [],
 		gameMode: GameMode.Classic,
@@ -125,9 +125,8 @@ export const roomSlice = createSlice({
 			action: PayloadAction<PlayerProfile & { id: string }>
 		) => {
 			state.players[action.payload.id].profile = {
-				name: action.payload.name,
-				avatarSeed: action.payload.avatarSeed,
-				avatarColor: action.payload.avatarColor,
+				username: action.payload.username,
+				avatarConfig: action.payload.avatarConfig,
 			};
 		},
 	},
