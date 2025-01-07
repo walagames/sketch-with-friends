@@ -40,7 +40,7 @@ const (
 	WordDifficultyEasy   WordDifficulty = "easy"
 	WordDifficultyMedium WordDifficulty = "medium"
 	WordDifficultyHard   WordDifficulty = "hard"
-	WordDifficultyRandom WordDifficulty = "random"
+	WordDifficultyAll    WordDifficulty = "all"
 	WordDifficultyCustom WordDifficulty = "custom"
 )
 
@@ -125,7 +125,7 @@ func NewRoom(id string) Room {
 			PlayerLimit:        6,
 			DrawingTimeAllowed: 90,
 			TotalRounds:        3,
-			WordDifficulty:     WordDifficultyRandom,
+			WordDifficulty:     WordDifficultyAll,
 			GameMode:           GameModeClassic,
 			WordBank:           WordBankMixed,
 			CustomWords:        make([]string, 0),

@@ -134,7 +134,7 @@ func validateRoomSettings(settings *RoomSettings) error {
 
 	// Validate word difficulty
 	switch settings.WordDifficulty {
-	case WordDifficultyEasy, WordDifficultyMedium, WordDifficultyHard, WordDifficultyRandom, WordDifficultyCustom:
+	case WordDifficultyEasy, WordDifficultyMedium, WordDifficultyHard, WordDifficultyAll, WordDifficultyCustom:
 		// Valid values
 	default:
 		return fmt.Errorf("invalid word difficulty: %s", settings.WordDifficulty)

@@ -36,7 +36,7 @@ export enum WordDifficulty {
 	Easy = "easy",
 	Medium = "medium",
 	Hard = "hard",
-	Random = "random",
+	All = "all",
 }
 
 export enum WordBank {
@@ -73,7 +73,7 @@ const initialState: RoomState = {
 		playerLimit: 6,
 		drawingTimeAllowed: 90,
 		totalRounds: 4,
-		wordDifficulty: WordDifficulty.Easy,
+		wordDifficulty: WordDifficulty.All,
 		wordBank: WordBank.Mixed,
 		customWords: [],
 		gameMode: GameMode.Classic,

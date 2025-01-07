@@ -370,8 +370,8 @@ func (g *game) randomWordOptions(n int) []DrawingWord {
 		return g.customWords[:min(n, len(g.customWords))]
 	}
 
-	// For non-random difficulty, use the original filtering logic
-	if g.room.Settings.WordDifficulty != WordDifficultyRandom {
+	// For non-all difficulty, use the original filtering logic
+	if g.room.Settings.WordDifficulty != WordDifficultyAll {
 		filteredWords := wordBank
 		if g.room.Settings.WordBank == WordBankMixed && len(g.customWords) > 0 {
 			const customWordWeight = 3

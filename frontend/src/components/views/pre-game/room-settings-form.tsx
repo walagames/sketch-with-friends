@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/form";
 import { Slider } from "@/components/ui/slider";
 import { useDebouncedCallback } from "use-debounce";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
 	changeRoomSettings,
 	GameMode,
@@ -20,7 +20,6 @@ import {
 	WordDifficulty,
 } from "@/state/features/room";
 import { RootState } from "@/state/store";
-import { useDispatch } from "react-redux";
 import {
 	Select,
 	SelectContent,
@@ -29,7 +28,14 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { BrainIcon, ClockIcon, Tally5Icon, UsersIcon } from "lucide-react";
+import {
+	ClockIcon,
+	JoystickIcon,
+	SwordsIcon,
+	Tally5Icon,
+	UsersIcon,
+	WholeWordIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { changeCustomWords } from "@/state/features/preferences";
 
@@ -117,7 +123,7 @@ export function RoomSettingsForm() {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel className="flex items-center gap-1">
-											<UsersIcon className="size-4 mr-1" />
+											<UsersIcon className="size-4" />
 											Player Limit
 										</FormLabel>
 										<FormControl>
@@ -142,7 +148,7 @@ export function RoomSettingsForm() {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel className="flex items-center gap-1">
-											<ClockIcon className="size-4 mr-1" />
+											<ClockIcon className="size-4" />
 											Drawing Time
 										</FormLabel>
 										<FormControl>
@@ -167,7 +173,7 @@ export function RoomSettingsForm() {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel className="flex items-center gap-1">
-											<Tally5Icon className="size-4 mr-1" />
+											<Tally5Icon className="size-4" />
 											Number of Rounds
 										</FormLabel>
 										<FormControl>
@@ -195,7 +201,7 @@ export function RoomSettingsForm() {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel className="flex items-center gap-1">
-											<BrainIcon className="size-4 mr-1" />
+											<JoystickIcon className="size-4" />
 											Game Mode
 										</FormLabel>
 										<FormControl>
@@ -227,7 +233,7 @@ export function RoomSettingsForm() {
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel className="flex items-center gap-1">
-											<BrainIcon className="size-4 mr-1" />
+											<SwordsIcon className="size-4" />
 											Word Difficulty
 										</FormLabel>
 										<FormControl>
@@ -241,6 +247,9 @@ export function RoomSettingsForm() {
 													<SelectValue placeholder="Select a difficulty" />
 												</SelectTrigger>
 												<SelectContent>
+													<SelectItem value={WordDifficulty.All}>
+														All
+													</SelectItem>
 													<SelectItem value={WordDifficulty.Easy}>
 														Easy
 													</SelectItem>
@@ -249,9 +258,6 @@ export function RoomSettingsForm() {
 													</SelectItem>
 													<SelectItem value={WordDifficulty.Hard}>
 														Hard
-													</SelectItem>
-													<SelectItem value={WordDifficulty.Random}>
-														Random
 													</SelectItem>
 												</SelectContent>
 											</Select>
@@ -264,7 +270,10 @@ export function RoomSettingsForm() {
 								name="wordBank"
 								render={({ field }) => (
 									<FormItem>
-										<FormLabel>Word Bank</FormLabel>
+										<FormLabel className="flex items-center gap-1">
+											<WholeWordIcon className="size-4" />
+											Word Bank
+										</FormLabel>
 										<FormControl>
 											<Select
 												defaultValue={field.value}
