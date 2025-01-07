@@ -25,6 +25,10 @@ import { RaisedButton } from "@/components/ui/raised-button";
 import { PlayerProfile } from "@/state/features/room";
 import { containerSpring } from "@/config/spring";
 import { SoundEffect, useSound } from "@/providers/sound-provider";
+import {
+	changeAvatarConfig,
+	changeUsername,
+} from "@/state/features/preferences";
 
 function CardContent({
 	player,
@@ -146,8 +150,16 @@ function EditPlayerInfoModal({
 	player: Player;
 	handleSubmit: (profile: PlayerProfile) => void;
 }) {
+	const dispatch = useDispatch();
 	return (
-		<Dialog open={isOpen} onOpenChange={setIsOpen}>
+		<Dialog
+			open={isOpen}
+			onOpenChange={(open) => {
+				setIsOpen(open);
+				dispatch(changeAvatarConfig(player.profile.avatarConfig));
+				dispatch(changeUsername(player.profile.username));
+			}}
+		>
 			<DialogContent
 				className="sm:max-w-sm border-4 border-secondary-foreground bg-zinc-100"
 				aria-describedby="edit-player-description"
