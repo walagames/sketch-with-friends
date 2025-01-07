@@ -1,19 +1,37 @@
-import {
-	HairColor,
-	HairStyle,
-	Mood,
-	SkinColor,
-} from "@/components/views/join-room/player-info-form";
-import { createSlice } from "@reduxjs/toolkit";
-
-import { PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type AvatarConfig = {
-	hairStyle: HairStyle;
-	hairColor: HairColor;
-	mood: Mood;
-	skinColor: SkinColor;
-	backgroundColor: string;
+	hairStyle:
+		| "plain"
+		| "wavy"
+		| "shortCurls"
+		| "parting"
+		| "spiky"
+		| "roundBob"
+		| "longCurls"
+		| "buns"
+		| "bangs"
+		| "fluffy"
+		| "flatTop"
+		| "shaggy";
+	hairColor: "000000" | "1d5dff" | "ff543d" | "fff500" | "ffffff";
+	mood:
+		| "happy"
+		| "sad"
+		| "angry"
+		| "neutral"
+		| "superHappy"
+		| "hopeful"
+		| "confused";
+	skinColor: "8d5524" | "c26450" | "e6b087" | "ffd6c0" | "ffe4d3";
+	backgroundColor:
+		| "e02929"
+		| "e08529"
+		| "e0da29"
+		| "5de029"
+		| "29e0d4"
+		| "9129e0"
+		| "e029ce";
 };
 
 export interface PreferencesState {
@@ -27,9 +45,9 @@ const initialState: PreferencesState = {
 	username: "",
 	avatarConfig: {
 		hairStyle: "bangs",
-		hairColor: "black",
+		hairColor: "000000",
 		mood: "happy",
-		skinColor: "white",
+		skinColor: "8d5524",
 		backgroundColor: "e02929",
 	},
 };

@@ -3,7 +3,7 @@ import canvasReducer from "./features/canvas";
 import roomReducer from "./features/room";
 import gameReducer from "./features/game";
 import clientReducer from "./features/client";
-import preferencesReducer from "./features/preferences";
+import preferencesReducer, { PreferencesState } from "./features/preferences";
 import { clearQueryParams } from "@/lib/params";
 import { toast } from "sonner";
 import localStorage from "redux-persist/es/storage";
@@ -121,6 +121,33 @@ const persistConfig = {
 	key: "root",
 	storage: localStorage,
 	whitelist: ["preferences"], // only preferences will be persisted
+	transforms: [
+		{
+			in: (state: PreferencesState) => state,
+			out: (state: Partial<PreferencesState>) => {
+				// If the stored state is in the old format (just volume)
+				if (
+					typeof state === "object" &&
+					state !== null &&
+					!state.username &&
+					!state.avatarConfig
+				) {
+					return {
+						volume: state.volume ?? 0.5,
+						username: "",
+						avatarConfig: {
+							hairStyle: "bangs",
+							hairColor: "000000",
+							mood: "happy",
+							skinColor: "8d5524",
+							backgroundColor: "e02929",
+						},
+					};
+				}
+				return state;
+			},
+		},
+	],
 };
 
 const persistedReducer = persistReducer(

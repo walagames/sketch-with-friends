@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -56,20 +55,6 @@ func logMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-// Extracts the username, avatarSeed, and avatarColor from the request.
-// We use this info to create a new player.
-func extractUserParams(r *http.Request) (string, string, string, error) {
-	username := r.URL.Query().Get("username")
-	avatarSeed := r.URL.Query().Get("avatarSeed")
-	avatarColor := r.URL.Query().Get("avatarColor")
-
-	if username == "" || avatarSeed == "" || avatarColor == "" {
-		return "", "", "", errors.New("missing required query parameters")
-	}
-
-	return username, avatarSeed, avatarColor, nil
-}
-
 // Clients use this endpoint to create and join a new room.
 func host(rm RoomManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -100,9 +85,7 @@ func host(rm RoomManager) http.HandlerFunc {
 		go room.Run(rm)
 
 		// Connect the player to the newly created room
-		player := NewPlayer(&playerOptions{
-			roomRole: RoomRoleHost,
-		})
+		player := NewPlayer(RoomRoleHost)
 		err = room.Connect(conn, player)
 		if err != nil {
 			slog.Warn("Failed to connect player to room",
@@ -158,9 +141,7 @@ func join(rm RoomManager) http.HandlerFunc {
 		}
 
 		// Connect the player to the room
-		player := NewPlayer(&playerOptions{
-			roomRole: RoomRolePlayer,
-		})
+		player := NewPlayer(RoomRolePlayer)
 		err = room.Connect(conn, player)
 		if err != nil {
 			slog.Warn("Failed to connect player to room",

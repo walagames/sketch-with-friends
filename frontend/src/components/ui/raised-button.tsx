@@ -58,6 +58,7 @@ interface RaisedButtonProps extends ButtonProps {
 	offset?: "default" | "small" | "md";
 	rounded?: "none" | "sm" | "md" | "lg" | "xl" | "full";
 	shortcut?: string;
+	muted?: boolean;
 }
 
 const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
@@ -70,6 +71,7 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 			onClick,
 			offset,
 			shortcut,
+			muted = false,
 			rounded = "lg",
 			...props
 		},
@@ -78,7 +80,9 @@ const RaisedButton = React.forwardRef<HTMLButtonElement, RaisedButtonProps>(
 		const playSound = useSound();
 
 		const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-			playSound(SoundEffect.CLICK);
+			if (!muted) {
+				playSound(SoundEffect.CLICK);
+			}
 			onClick?.(e);
 		};
 

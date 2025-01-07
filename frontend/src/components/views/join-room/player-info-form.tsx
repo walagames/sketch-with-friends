@@ -18,8 +18,7 @@ import {
 	changeAvatarConfig,
 	changeUsername,
 } from "@/state/features/preferences";
-import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import {
 	BackgroundColorIcon,
@@ -29,118 +28,78 @@ import {
 	SkinColorIcon,
 } from "@/components/ui/icons";
 
+const backgroundColors = [
+	"e02929", // RED
+	"e08529", // ORANGE
+	"e0da29", // YELLOW
+	"5de029", // GREEN
+	"29e0d4", // CYAN
+	"9129e0", // PURPLE
+	"e029ce", // PINK
+] as const;
+
+const hairStyles = [
+	"plain",
+	"wavy",
+	"shortCurls",
+	"parting",
+	"spiky",
+	"roundBob",
+	"longCurls",
+	"buns",
+	"bangs",
+	"fluffy",
+	"flatTop",
+	"shaggy",
+] as const;
+
+const hairColors = [
+	"000000", // BLACK
+	"1d5dff", // BLUE
+	"ff543d", // ORANGE
+	"fff500", // YELLOW
+	"ffffff", // WHITE
+] as const;
+
+const moods = [
+	"angry",
+	"confused",
+	"happy",
+	"hopeful",
+	"neutral",
+	"sad",
+	"superHappy",
+] as const;
+
+const skinColors = [
+	"8d5524", // DARK_BROWN
+	"c26450", // BROWN
+	"e6b087", // MEDIUM
+	"ffd6c0", // LIGHT
+	"ffe4d3", // PALE
+] as const;
+
 export const JoinRoomFormSchema = z.object({
 	username: z
 		.string()
-		.min(1, {
-			message: "Username must be at least 1 character.",
-		})
 		.max(14, {
 			message: "Username must be at most 14 characters.",
 		})
-		.refine((value) => /^[a-zA-Z0-9'][a-zA-Z0-9' ]*[a-zA-Z0-9']$/.test(value), {
-			message:
-				"Username can only contain letters, numbers, apostrophes, and single spaces between words.",
-		})
-		.refine((value) => !value.includes("  "), {
+		.refine(
+			(value) =>
+				value === "" || /^[a-zA-Z0-9'][a-zA-Z0-9' ]*[a-zA-Z0-9']$/.test(value),
+			{
+				message:
+					"Username can only contain letters, numbers, apostrophes, and single spaces between words.",
+			}
+		)
+		.refine((value) => value === "" || !value.includes("  "), {
 			message: "Username cannot contain consecutive spaces.",
 		})
-		.refine((value) => !value.includes("''"), {
+		.refine((value) => value === "" || !value.includes("''"), {
 			message: "Username cannot contain consecutive apostrophes.",
 		}),
 });
-
-export const backgroundColors = [
-	"e02929",
-	"e08529",
-	"e0da29",
-	"5de029",
-	"29e0d4",
-	"9129e0",
-	"e029ce",
-];
-
-export enum HairStyle {
-	BANGS = "bangs",
-	BUNS = "buns",
-	FLAT_TOP = "flatTop",
-	FLUFFY = "fluffy",
-	LONG_CURLS = "longCurls",
-	PARTING = "parting",
-	PLAIN = "plain",
-	ROUND_BOB = "roundBob",
-	SHAGGY = "shaggy",
-	SHORT_CURLS = "shortCurls",
-	SPIKEY = "spikey",
-	WAVY = "wavy",
-}
-
-const hairStyles = [
-	HairStyle.BANGS,
-	HairStyle.BUNS,
-	HairStyle.FLAT_TOP,
-	HairStyle.FLUFFY,
-	HairStyle.LONG_CURLS,
-	HairStyle.PARTING,
-	HairStyle.PLAIN,
-	HairStyle.ROUND_BOB,
-	HairStyle.SHAGGY,
-	HairStyle.SHORT_CURLS,
-	HairStyle.SPIKEY,
-	HairStyle.WAVY,
-];
-
-export enum HairColor {
-	BLACK = "000000",
-	BLUE = "1d5dff",
-	ORANGE = "ff543d",
-	YELLOW = "fff500",
-	WHITE = "ffffff",
-}
-
-const hairColors = [
-	HairColor.BLACK,
-	HairColor.BLUE,
-	HairColor.ORANGE,
-	HairColor.YELLOW,
-	HairColor.WHITE,
-];
-
-export enum Mood {
-	ANGRY = "angry",
-	CONFUSED = "confused",
-	HAPPY = "happy",
-	HOPEFUL = "hopeful",
-	NEUTRAL = "neutral",
-	SAD = "sad",
-	SUPER_HAPPY = "superHappy",
-}
-
-const moods = [
-	Mood.ANGRY,
-	Mood.CONFUSED,
-	Mood.HAPPY,
-	Mood.HOPEFUL,
-	Mood.NEUTRAL,
-	Mood.SAD,
-	Mood.SUPER_HAPPY,
-];
-
-export enum SkinColor {
-	DARK_BROWN = "8d5524",
-	BROWN = "c26450",
-	MEDIUM = "e6b087",
-	LIGHT = "ffd6c0",
-	PALE = "ffe4d3",
-}
-
-const skinColors = [
-	SkinColor.DARK_BROWN,
-	SkinColor.BROWN,
-	SkinColor.MEDIUM,
-	SkinColor.LIGHT,
-	SkinColor.PALE,
-];
 
 interface PlayerInfoFormProps {
 	children?: React.ReactNode;
@@ -170,7 +129,7 @@ export function PlayerInfoForm({
 	const dispatch = useDispatch();
 
 	const cycleHairStyle = () => {
-		const index = hairStyles.indexOf(avatarConfig.hairStyle as HairStyle);
+		const index = hairStyles.indexOf(avatarConfig.hairStyle);
 		const nextIndex = (index + 1) % hairStyles.length;
 		dispatch(
 			changeAvatarConfig({
@@ -181,7 +140,7 @@ export function PlayerInfoForm({
 	};
 
 	const cycleHairColor = () => {
-		const index = hairColors.indexOf(avatarConfig.hairColor as HairColor);
+		const index = hairColors.indexOf(avatarConfig.hairColor);
 		const nextIndex = (index + 1) % hairColors.length;
 		dispatch(
 			changeAvatarConfig({
@@ -192,7 +151,7 @@ export function PlayerInfoForm({
 	};
 
 	const cycleMood = () => {
-		const index = moods.indexOf(avatarConfig.mood as Mood);
+		const index = moods.indexOf(avatarConfig.mood);
 		const nextIndex = (index + 1) % moods.length;
 		dispatch(
 			changeAvatarConfig({
@@ -203,7 +162,7 @@ export function PlayerInfoForm({
 	};
 
 	const cycleSkinColor = () => {
-		const index = skinColors.indexOf(avatarConfig.skinColor as SkinColor);
+		const index = skinColors.indexOf(avatarConfig.skinColor);
 		const nextIndex = (index + 1) % skinColors.length;
 		dispatch(
 			changeAvatarConfig({
@@ -244,9 +203,7 @@ export function PlayerInfoForm({
 
 	useEffect(() => {
 		const subscription = form.watch((value) => {
-			if (value.username) {
-				dispatch(changeUsername(value.username));
-			}
+			dispatch(changeUsername(value.username ?? ""));
 		});
 
 		return () => subscription.unsubscribe();
@@ -265,38 +222,38 @@ export function PlayerInfoForm({
 	};
 
 	return (
-		<div className=" max-w-64 w-full flex flex-col gap-5 items-center relative z-50">
+		<div className="max-w-60 w-full flex flex-col gap-5 items-center relative z-50">
 			<div className="flex justify-center items-start gap-2">
 				<div className="flex flex-col h-full mt-3 gap-2">
-					<RaisedButton shift={false} size="icon" onClick={cycleSkinColor}>
+					<RaisedButton shift={false} size="iconMd" onClick={cycleSkinColor}>
 						<SkinColorIcon className="size-8 translate-y-0.5" />
 					</RaisedButton>
 					<RaisedButton
 						shift={false}
-						size="icon"
+						size="iconMd"
 						onClick={cycleBackgroundColor}
 					>
 						<BackgroundColorIcon className="size-9 translate-y-0.5" />
 					</RaisedButton>
 					<RaisedButton
 						shift={false}
-						size="icon"
+						size="iconMd"
 						onClick={() => dispatch(changeAvatarConfig(randomAvatarConfig()))}
 					>
 						<DicesIcon className="size-5" />
 					</RaisedButton>
 				</div>
 				<div className="w-36 mt-2 aspect-square shadow-accent rounded-lg ml-3 mr-0.5">
-					<img className="rounded-lg" src={avatarSvg} />
+					<img alt="avatar" className="rounded-lg" src={avatarSvg} />
 				</div>
 				<div className="flex flex-col h-full mt-3 gap-2">
-					<RaisedButton shift={false} size="icon" onClick={cycleHairStyle}>
+					<RaisedButton shift={false} size="iconMd" onClick={cycleHairStyle}>
 						<HairStyleIcon className="size-8 translate-y-0.5" />
 					</RaisedButton>
-					<RaisedButton shift={false} size="icon" onClick={cycleHairColor}>
+					<RaisedButton shift={false} size="iconMd" onClick={cycleHairColor}>
 						<HairColorIcon className="size-8 translate-y-0.5" />
 					</RaisedButton>
-					<RaisedButton shift={false} size="icon" onClick={cycleMood}>
+					<RaisedButton shift={false} size="iconMd" onClick={cycleMood}>
 						<MoodIcon className="size-8 translate-y-0.5" />
 					</RaisedButton>
 				</div>
