@@ -1,11 +1,4 @@
-import {
-	Brush,
-	Undo2,
-	Trash,
-	Paintbrush2,
-	Eraser,
-	PaintBucket,
-} from "lucide-react";
+import { Brush, Undo2, Trash, Eraser, PaintBucket } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { Slider } from "../../../ui/slider";
@@ -32,7 +25,7 @@ import { RaisedButton } from "../../../ui/raised-button";
 import { getGameRole } from "@/lib/player";
 import { GameRole } from "@/state/features/game";
 import { cn, hslToRgb } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { containerSpring } from "@/config/spring";
 import {
@@ -53,6 +46,15 @@ export function CanvasTools() {
 
 	const currentTool = useSelector(
 		(state: RootState) => state.client.canvas.tool
+	);
+
+	const currentPhaseDeadline = useSelector(
+		(state: RootState) => state.game.currentPhaseDeadline
+	);
+
+	const isRoundActive = useMemo(
+		() => new Date(currentPhaseDeadline) > new Date(),
+		[currentPhaseDeadline]
 	);
 
 	// Add keyboard shortcut handling
@@ -82,12 +84,12 @@ export function CanvasTools() {
 					setColorPaletteOpen(true);
 					break;
 				case "z":
-					if (e.metaKey || e.ctrlKey) {
+					if ((e.metaKey || e.ctrlKey) && isRoundActive) {
 						dispatch(undoStroke());
 					}
 					break;
 				case "c":
-					if (e.metaKey || e.ctrlKey) {
+					if ((e.metaKey || e.ctrlKey) && isRoundActive) {
 						dispatch(clearStrokes());
 					}
 					break;
@@ -96,7 +98,7 @@ export function CanvasTools() {
 
 		window.addEventListener("keydown", handleKeyDown);
 		return () => window.removeEventListener("keydown", handleKeyDown);
-	}, [dispatch, isDrawing]);
+	}, [dispatch, isDrawing, isRoundActive]);
 
 	return (
 		<motion.div
@@ -149,6 +151,7 @@ export function CanvasTools() {
 			</div>
 			<div className="flex gap-2">
 				<RaisedButton
+					disabled={!isRoundActive}
 					shift={false}
 					size="icon"
 					onClick={() => dispatch(undoStroke())}
@@ -157,6 +160,7 @@ export function CanvasTools() {
 					<Undo2 className="size-5" />
 				</RaisedButton>
 				<RaisedButton
+					disabled={!isRoundActive}
 					shift={false}
 					size="icon"
 					onClick={() => dispatch(clearStrokes())}
@@ -169,6 +173,17 @@ export function CanvasTools() {
 	);
 }
 
+function getToolIcon(tool: CanvasTool) {
+	switch (tool) {
+		case CanvasTool.Brush:
+			return <Brush className="size-5" />;
+		case CanvasTool.Bucket:
+			return <PaintBucket className="size-5" />;
+		default:
+			return <Eraser className="size-5" />;
+	}
+}
+
 function ToolDropdown() {
 	const currentTool = useSelector(
 		(state: RootState) => state.client.canvas.tool
@@ -179,13 +194,7 @@ function ToolDropdown() {
 		<DropdownMenu open={toolSelectOpen} onOpenChange={setToolSelectOpen}>
 			<DropdownMenuTrigger asChild>
 				<RaisedButton size="icon" variant="action" shift={false}>
-					{currentTool === CanvasTool.Brush ? (
-						<Brush className="size-5" />
-					) : currentTool === CanvasTool.Bucket ? (
-						<Paintbrush2 className="size-5" />
-					) : (
-						<Eraser className="size-5" />
-					)}
+					{getToolIcon(currentTool as CanvasTool)}
 				</RaisedButton>
 			</DropdownMenuTrigger>
 			<DropdownMenuContent
