@@ -1,3 +1,4 @@
+import { Avatar } from "@/lib/avatar";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 export type AvatarConfig = {
@@ -44,13 +45,7 @@ export interface PreferencesState {
 const initialState: PreferencesState = {
 	volume: 0.5,
 	username: "",
-	avatarConfig: {
-		hairStyle: "bangs",
-		hairColor: "000000",
-		mood: "happy",
-		skinColor: "8d5524",
-		backgroundColor: "e02929",
-	},
+	avatarConfig: Avatar.random(),
 	customWords: [],
 };
 

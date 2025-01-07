@@ -1,4 +1,4 @@
-import { generateAvatar } from "@/lib/avatar";
+import { Avatar, generateAvatar } from "@/lib/avatar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -27,57 +27,6 @@ import {
 	MoodIcon,
 	SkinColorIcon,
 } from "@/components/ui/icons";
-
-const backgroundColors = [
-	"e02929", // RED
-	"e08529", // ORANGE
-	"e0da29", // YELLOW
-	"5de029", // GREEN
-	"29e0d4", // CYAN
-	"9129e0", // PURPLE
-	"e029ce", // PINK
-] as const;
-
-const hairStyles = [
-	"plain",
-	"wavy",
-	"shortCurls",
-	"parting",
-	"spiky",
-	"roundBob",
-	"longCurls",
-	"buns",
-	"bangs",
-	"fluffy",
-	"flatTop",
-	"shaggy",
-] as const;
-
-const hairColors = [
-	"000000", // BLACK
-	"1d5dff", // BLUE
-	"ff543d", // ORANGE
-	"fff500", // YELLOW
-	"ffffff", // WHITE
-] as const;
-
-const moods = [
-	"angry",
-	"confused",
-	"happy",
-	"hopeful",
-	"neutral",
-	"sad",
-	"superHappy",
-] as const;
-
-const skinColors = [
-	"8d5524", // DARK_BROWN
-	"c26450", // BROWN
-	"e6b087", // MEDIUM
-	"ffd6c0", // LIGHT
-	"ffe4d3", // PALE
-] as const;
 
 export const JoinRoomFormSchema = z.object({
 	username: z
@@ -129,69 +78,60 @@ export function PlayerInfoForm({
 	const dispatch = useDispatch();
 
 	const cycleHairStyle = () => {
-		const index = hairStyles.indexOf(avatarConfig.hairStyle);
-		const nextIndex = (index + 1) % hairStyles.length;
 		dispatch(
 			changeAvatarConfig({
 				...avatarConfig,
-				hairStyle: hairStyles[nextIndex],
+				hairStyle: Avatar.cycleProperty(
+					avatarConfig.hairStyle,
+					Avatar.hairStyles
+				),
 			})
 		);
 	};
 
 	const cycleHairColor = () => {
-		const index = hairColors.indexOf(avatarConfig.hairColor);
-		const nextIndex = (index + 1) % hairColors.length;
 		dispatch(
 			changeAvatarConfig({
 				...avatarConfig,
-				hairColor: hairColors[nextIndex],
+				hairColor: Avatar.cycleProperty(
+					avatarConfig.hairColor,
+					Avatar.hairColors
+				),
 			})
 		);
 	};
 
 	const cycleMood = () => {
-		const index = moods.indexOf(avatarConfig.mood);
-		const nextIndex = (index + 1) % moods.length;
 		dispatch(
 			changeAvatarConfig({
 				...avatarConfig,
-				mood: moods[nextIndex],
+				mood: Avatar.cycleProperty(avatarConfig.mood, Avatar.moods),
 			})
 		);
 	};
 
 	const cycleSkinColor = () => {
-		const index = skinColors.indexOf(avatarConfig.skinColor);
-		const nextIndex = (index + 1) % skinColors.length;
 		dispatch(
 			changeAvatarConfig({
 				...avatarConfig,
-				skinColor: skinColors[nextIndex],
+				skinColor: Avatar.cycleProperty(
+					avatarConfig.skinColor,
+					Avatar.skinColors
+				),
 			})
 		);
 	};
 
 	const cycleBackgroundColor = () => {
-		const index = backgroundColors.indexOf(avatarConfig.backgroundColor);
-		const nextIndex = (index + 1) % backgroundColors.length;
 		dispatch(
 			changeAvatarConfig({
 				...avatarConfig,
-				backgroundColor: backgroundColors[nextIndex],
+				backgroundColor: Avatar.cycleProperty(
+					avatarConfig.backgroundColor,
+					Avatar.backgroundColors
+				),
 			})
 		);
-	};
-
-	const randomAvatarConfig = () => {
-		return {
-			hairStyle: hairStyles[Math.floor(Math.random() * hairStyles.length)],
-			hairColor: hairColors[Math.floor(Math.random() * hairColors.length)],
-			mood: moods[Math.floor(Math.random() * moods.length)],
-			skinColor: skinColors[Math.floor(Math.random() * skinColors.length)],
-			backgroundColor:
-				backgroundColors[Math.floor(Math.random() * backgroundColors.length)],
-		};
 	};
 
 	const form = useForm<z.infer<typeof JoinRoomFormSchema>>({
@@ -238,7 +178,7 @@ export function PlayerInfoForm({
 					<RaisedButton
 						shift={false}
 						size="iconMd"
-						onClick={() => dispatch(changeAvatarConfig(randomAvatarConfig()))}
+						onClick={() => dispatch(changeAvatarConfig(Avatar.random()))}
 					>
 						<DicesIcon className="size-5" />
 					</RaisedButton>

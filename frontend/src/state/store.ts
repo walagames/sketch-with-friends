@@ -8,6 +8,7 @@ import { clearQueryParams } from "@/lib/params";
 import { toast } from "sonner";
 import localStorage from "redux-persist/es/storage";
 import { persistReducer, persistStore } from "redux-persist";
+import { Avatar } from "@/lib/avatar";
 
 // Used to display toast notifications from the server
 const ErrorMessages = {
@@ -128,13 +129,7 @@ const persistConfig = {
 				const defaultState = {
 					volume: 0.5,
 					username: "",
-					avatarConfig: {
-						hairStyle: "bangs",
-						hairColor: "000000",
-						mood: "happy",
-						skinColor: "8d5524",
-						backgroundColor: "e02929",
-					},
+					avatarConfig: Avatar.random(),
 					customWords: [],
 				};
 
