@@ -38,6 +38,7 @@ export interface PreferencesState {
 	volume: number;
 	username: string;
 	avatarConfig: AvatarConfig;
+	customWords: string[];
 }
 
 const initialState: PreferencesState = {
@@ -50,6 +51,7 @@ const initialState: PreferencesState = {
 		skinColor: "8d5524",
 		backgroundColor: "e02929",
 	},
+	customWords: [],
 };
 
 export const preferencesSlice = createSlice({
@@ -65,9 +67,16 @@ export const preferencesSlice = createSlice({
 		changeUsername: (state, action: PayloadAction<string>) => {
 			state.username = action.payload;
 		},
+		changeCustomWords: (state, action: PayloadAction<string[]>) => {
+			state.customWords = action.payload;
+		},
 	},
 });
 
-export const { changeVolume, changeAvatarConfig, changeUsername } =
-	preferencesSlice.actions;
+export const {
+	changeVolume,
+	changeAvatarConfig,
+	changeUsername,
+	changeCustomWords,
+} = preferencesSlice.actions;
 export default preferencesSlice.reducer;

@@ -31,6 +31,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { BrainIcon, ClockIcon, Tally5Icon, UsersIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { changeCustomWords } from "@/state/features/preferences";
 
 const RoomFormSchema = z.object({
 	drawingTimeAllowed: z.number().min(15).max(180),
@@ -56,6 +57,10 @@ export function RoomSettingsForm() {
 
 	const [isEditing, setIsEditing] = useState(false);
 
+	const savedCustomWords = useSelector(
+		(state: RootState) => state.preferences.customWords
+	);
+
 	const form = useForm<z.infer<typeof RoomFormSchema>>({
 		resolver: zodResolver(RoomFormSchema),
 		defaultValues: {
@@ -65,20 +70,35 @@ export function RoomSettingsForm() {
 			wordDifficulty,
 			wordBank,
 			gameMode,
-			customWords: customWords.join(","),
+			customWords:
+				customWords.length > 0
+					? customWords.join(",")
+					: savedCustomWords.join(","),
 		},
 	});
 
 	useEffect(() => {
 		if (!isEditing) {
-			form.setValue("customWords", customWords.join(","));
+			if (customWords.length > 0) {
+				form.setValue("customWords", customWords.join(","));
+			} else {
+				// If custom words are empty, load words from history
+				form.setValue("customWords", savedCustomWords.join(","));
+				dispatch(
+					changeRoomSettings({
+						...form.getValues(),
+						customWords: savedCustomWords,
+					})
+				);
+			}
 		}
-	}, [customWords, isEditing]);
+	}, [customWords, isEditing, savedCustomWords]);
 
 	const handleChange = useDebouncedCallback(() => {
 		const values = form.getValues();
 		const customWords = values.customWords.split(",");
 		dispatch(changeRoomSettings({ ...values, customWords }));
+		dispatch(changeCustomWords(customWords));
 	}, 300);
 
 	return (

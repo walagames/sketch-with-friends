@@ -120,31 +120,37 @@ const socketMiddleware: Middleware = (store) => {
 const persistConfig = {
 	key: "root",
 	storage: localStorage,
-	whitelist: ["preferences"], // only preferences will be persisted
+	whitelist: ["preferences"],
 	transforms: [
 		{
 			in: (state: PreferencesState) => state,
 			out: (state: Partial<PreferencesState>) => {
-				// If the stored state is in the old format (just volume)
-				if (
-					typeof state === "object" &&
-					state !== null &&
-					!state.username &&
-					!state.avatarConfig
-				) {
-					return {
-						volume: state.volume ?? 0.5,
-						username: "",
-						avatarConfig: {
-							hairStyle: "bangs",
-							hairColor: "000000",
-							mood: "happy",
-							skinColor: "8d5524",
-							backgroundColor: "e02929",
-						},
-					};
-				}
-				return state;
+				const defaultState = {
+					volume: 0.5,
+					username: "",
+					avatarConfig: {
+						hairStyle: "bangs",
+						hairColor: "000000",
+						mood: "happy",
+						skinColor: "8d5524",
+						backgroundColor: "e02929",
+					},
+					customWords: [],
+				};
+
+				// If state is null or undefined, return default state
+				if (!state) return defaultState;
+
+				// Merge the stored state with default values for any missing fields
+				return {
+					volume: state.volume ?? defaultState.volume,
+					username: state.username ?? defaultState.username,
+					avatarConfig: {
+						...defaultState.avatarConfig,
+						...state.avatarConfig,
+					},
+					customWords: state.customWords ?? defaultState.customWords,
+				};
 			},
 		},
 	],
