@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -126,4 +127,93 @@ func sanitizeGuess(guess string) string {
 	}
 
 	return trimed
+}
+
+// validateRoomSettings checks if room settings are within allowed bounds
+func validateRoomSettings(settings *RoomSettings) error {
+	if settings.PlayerLimit < MIN_PLAYERS || settings.PlayerLimit > MAX_PLAYERS {
+		return fmt.Errorf("player limit must be between %d and %d", MIN_PLAYERS, MAX_PLAYERS)
+	}
+
+	if settings.DrawingTimeAllowed < MIN_DRAWING_TIME || settings.DrawingTimeAllowed > MAX_DRAWING_TIME {
+		return fmt.Errorf("drawing time must be between %d and %d seconds", MIN_DRAWING_TIME, MAX_DRAWING_TIME)
+	}
+
+	if settings.TotalRounds < MIN_ROUNDS || settings.TotalRounds > MAX_ROUNDS {
+		return fmt.Errorf("total rounds must be between %d and %d", MIN_ROUNDS, MAX_ROUNDS)
+	}
+
+	// Validate word difficulty
+	switch settings.WordDifficulty {
+	case WordDifficultyEasy, WordDifficultyMedium, WordDifficultyHard, WordDifficultyAll, WordDifficultyCustom:
+		// Valid values
+	default:
+		return fmt.Errorf("invalid word difficulty: %s", settings.WordDifficulty)
+	}
+
+	// Validate word bank
+	switch settings.WordBank {
+	case WordBankDefault, WordBankCustom, WordBankMixed:
+		// Valid values
+	default:
+		return fmt.Errorf("invalid word bank: %s", settings.WordBank)
+	}
+
+	// Validate game mode
+	switch settings.GameMode {
+	case GameModeClassic, GameModeNoHints:
+		// Valid values
+	default:
+		return fmt.Errorf("invalid game mode: %s", settings.GameMode)
+	}
+
+	return nil
+}
+
+// Helper function to return first non-empty string
+func firstNonEmpty(values ...string) string {
+	for _, v := range values {
+		if v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+// validatePlayerProfile validates and sanitizes player profile data
+func validatePlayerProfile(profile *playerProfile) (*playerProfile, error) {
+	if profile == nil {
+		return &playerProfile{
+			Username:     randomUsername(),
+			AvatarConfig: DefaultAvatarConfig,
+		}, nil
+	}
+
+	// Create a new profile to avoid modifying the input
+	validated := &playerProfile{
+		Username:     sanitizeUsername(profile.Username),
+		AvatarConfig: &AvatarConfig{},
+	}
+
+	// Validate username
+	if validated.Username == "" || len(validated.Username) > MAX_NAME_LENGTH {
+		validated.Username = randomUsername()
+	}
+
+	// Handle nil AvatarConfig
+	if profile.AvatarConfig == nil {
+		validated.AvatarConfig = DefaultAvatarConfig
+		return validated, nil
+	}
+
+	// Validate each avatar field
+	validated.AvatarConfig = &AvatarConfig{
+		HairStyle:       firstNonEmpty(profile.AvatarConfig.HairStyle, DefaultAvatarConfig.HairStyle),
+		HairColor:       firstNonEmpty(profile.AvatarConfig.HairColor, DefaultAvatarConfig.HairColor),
+		Mood:            firstNonEmpty(profile.AvatarConfig.Mood, DefaultAvatarConfig.Mood),
+		SkinColor:       firstNonEmpty(profile.AvatarConfig.SkinColor, DefaultAvatarConfig.SkinColor),
+		BackgroundColor: firstNonEmpty(profile.AvatarConfig.BackgroundColor, DefaultAvatarConfig.BackgroundColor),
+	}
+
+	return validated, nil
 }

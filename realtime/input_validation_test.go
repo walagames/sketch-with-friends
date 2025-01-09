@@ -384,3 +384,254 @@ func TestSanitizeUsername(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateRoomSettings(t *testing.T) {
+	tests := []struct {
+		name     string
+		settings *RoomSettings
+		wantErr  bool
+		errMsg   string
+	}{
+		{
+			name: "valid settings",
+			settings: &RoomSettings{
+				PlayerLimit:        6,
+				DrawingTimeAllowed: 90,
+				TotalRounds:        3,
+				WordDifficulty:     WordDifficultyAll,
+				GameMode:           GameModeClassic,
+				WordBank:           WordBankDefault,
+			},
+			wantErr: false,
+		},
+		{
+			name: "player limit too low",
+			settings: &RoomSettings{
+				PlayerLimit:        1,
+				DrawingTimeAllowed: 90,
+				TotalRounds:        3,
+			},
+			wantErr: true,
+			errMsg:  "player limit must be between 2 and 10",
+		},
+		{
+			name: "player limit too high",
+			settings: &RoomSettings{
+				PlayerLimit:        11,
+				DrawingTimeAllowed: 90,
+				TotalRounds:        3,
+			},
+			wantErr: true,
+			errMsg:  "player limit must be between 2 and 10",
+		},
+		{
+			name: "drawing time too low",
+			settings: &RoomSettings{
+				PlayerLimit:        6,
+				DrawingTimeAllowed: 10,
+				TotalRounds:        3,
+			},
+			wantErr: true,
+			errMsg:  "drawing time must be between 15 and 240 seconds",
+		},
+		{
+			name: "drawing time too high",
+			settings: &RoomSettings{
+				PlayerLimit:        6,
+				DrawingTimeAllowed: 300,
+				TotalRounds:        3,
+			},
+			wantErr: true,
+			errMsg:  "drawing time must be between 15 and 240 seconds",
+		},
+		{
+			name: "rounds too low",
+			settings: &RoomSettings{
+				PlayerLimit:        6,
+				DrawingTimeAllowed: 90,
+				TotalRounds:        0,
+			},
+			wantErr: true,
+			errMsg:  "total rounds must be between 1 and 10",
+		},
+		{
+			name: "rounds too high",
+			settings: &RoomSettings{
+				PlayerLimit:        6,
+				DrawingTimeAllowed: 90,
+				TotalRounds:        11,
+			},
+			wantErr: true,
+			errMsg:  "total rounds must be between 1 and 10",
+		},
+		{
+			name: "invalid word difficulty",
+			settings: &RoomSettings{
+				PlayerLimit:        6,
+				DrawingTimeAllowed: 90,
+				TotalRounds:        3,
+				WordDifficulty:     "invalid",
+			},
+			wantErr: true,
+			errMsg:  "invalid word difficulty: invalid",
+		},
+		{
+			name: "invalid word bank",
+			settings: &RoomSettings{
+				PlayerLimit:        6,
+				DrawingTimeAllowed: 90,
+				TotalRounds:        3,
+				WordDifficulty:     WordDifficultyAll,
+				WordBank:           "invalid",
+			},
+			wantErr: true,
+			errMsg:  "invalid word bank: invalid",
+		},
+		{
+			name: "invalid game mode",
+			settings: &RoomSettings{
+				PlayerLimit:        6,
+				DrawingTimeAllowed: 90,
+				TotalRounds:        3,
+				WordDifficulty:     WordDifficultyAll,
+				WordBank:           WordBankDefault,
+				GameMode:           "invalid",
+			},
+			wantErr: true,
+			errMsg:  "invalid game mode: invalid",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := validateRoomSettings(tt.settings)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("validateRoomSettings() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if tt.wantErr && err.Error() != tt.errMsg {
+				t.Errorf("validateRoomSettings() error message = %v, want %v", err.Error(), tt.errMsg)
+			}
+		})
+	}
+}
+
+func TestValidatePlayerProfile(t *testing.T) {
+	tests := []struct {
+		name    string
+		profile *playerProfile
+		want    *playerProfile
+		wantErr bool
+	}{
+		{
+			name: "valid profile",
+			profile: &playerProfile{
+				Username: "TestUser",
+				AvatarConfig: &AvatarConfig{
+					HairStyle:       "bangs",
+					HairColor:       "ff543d",
+					Mood:            "hopeful",
+					SkinColor:       "ffd6c0",
+					BackgroundColor: "e0da29",
+				},
+			},
+			want: &playerProfile{
+				Username: "TestUser",
+				AvatarConfig: &AvatarConfig{
+					HairStyle:       "bangs",
+					HairColor:       "ff543d",
+					Mood:            "hopeful",
+					SkinColor:       "ffd6c0",
+					BackgroundColor: "e0da29",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name:    "nil profile",
+			profile: nil,
+			want: &playerProfile{
+				Username:     "random", // This will be replaced with a random username
+				AvatarConfig: DefaultAvatarConfig,
+			},
+			wantErr: false,
+		},
+		{
+			name: "empty username",
+			profile: &playerProfile{
+				Username:     "",
+				AvatarConfig: DefaultAvatarConfig,
+			},
+			want: &playerProfile{
+				Username:     "random", // This will be replaced with a random username
+				AvatarConfig: DefaultAvatarConfig,
+			},
+			wantErr: false,
+		},
+		{
+			name: "username too long",
+			profile: &playerProfile{
+				Username:     "ThisUsernameIsTooLong",
+				AvatarConfig: DefaultAvatarConfig,
+			},
+			want: &playerProfile{
+				Username:     "random", // This will be replaced with a random username
+				AvatarConfig: DefaultAvatarConfig,
+			},
+			wantErr: false,
+		},
+		{
+			name: "nil avatar config",
+			profile: &playerProfile{
+				Username:     "TestUser",
+				AvatarConfig: nil,
+			},
+			want: &playerProfile{
+				Username:     "TestUser",
+				AvatarConfig: DefaultAvatarConfig,
+			},
+			wantErr: false,
+		},
+		{
+			name: "partial avatar config",
+			profile: &playerProfile{
+				Username: "TestUser",
+				AvatarConfig: &AvatarConfig{
+					HairStyle: "bangs",
+					// Other fields missing
+				},
+			},
+			want: &playerProfile{
+				Username: "TestUser",
+				AvatarConfig: &AvatarConfig{
+					HairStyle:       "bangs",
+					HairColor:       DefaultAvatarConfig.HairColor,
+					Mood:            DefaultAvatarConfig.Mood,
+					SkinColor:       DefaultAvatarConfig.SkinColor,
+					BackgroundColor: DefaultAvatarConfig.BackgroundColor,
+				},
+			},
+			wantErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := validatePlayerProfile(tt.profile)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("validatePlayerProfile() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			// Skip username comparison for cases where we expect a random username
+			if tt.want.Username != "random" && got.Username != tt.want.Username {
+				t.Errorf("validatePlayerProfile() username = %v, want %v", got.Username, tt.want.Username)
+			}
+
+			// Compare avatar config
+			if !reflect.DeepEqual(got.AvatarConfig, tt.want.AvatarConfig) {
+				t.Errorf("validatePlayerProfile() avatarConfig = %v, want %v", got.AvatarConfig, tt.want.AvatarConfig)
+			}
+		})
+	}
+}

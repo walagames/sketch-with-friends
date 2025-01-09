@@ -118,46 +118,7 @@ var DefaultAvatarConfig = &AvatarConfig{
 	BackgroundColor: "e0da29",
 }
 
-// validateRoomSettings checks if room settings are within allowed bounds
-func validateRoomSettings(settings *RoomSettings) error {
-	if settings.PlayerLimit < MIN_PLAYERS || settings.PlayerLimit > MAX_PLAYERS {
-		return fmt.Errorf("player limit must be between %d and %d", MIN_PLAYERS, MAX_PLAYERS)
-	}
 
-	if settings.DrawingTimeAllowed < MIN_DRAWING_TIME || settings.DrawingTimeAllowed > MAX_DRAWING_TIME {
-		return fmt.Errorf("drawing time must be between %d and %d seconds", MIN_DRAWING_TIME, MAX_DRAWING_TIME)
-	}
-
-	if settings.TotalRounds < MIN_ROUNDS || settings.TotalRounds > MAX_ROUNDS {
-		return fmt.Errorf("total rounds must be between %d and %d", MIN_ROUNDS, MAX_ROUNDS)
-	}
-
-	// Validate word difficulty
-	switch settings.WordDifficulty {
-	case WordDifficultyEasy, WordDifficultyMedium, WordDifficultyHard, WordDifficultyAll, WordDifficultyCustom:
-		// Valid values
-	default:
-		return fmt.Errorf("invalid word difficulty: %s", settings.WordDifficulty)
-	}
-
-	// Validate word bank
-	switch settings.WordBank {
-	case WordBankDefault, WordBankCustom, WordBankMixed:
-		// Valid values
-	default:
-		return fmt.Errorf("invalid word bank: %s", settings.WordBank)
-	}
-
-	// Validate game mode
-	switch settings.GameMode {
-	case GameModeClassic, GameModeNoHints:
-		// Valid values
-	default:
-		return fmt.Errorf("invalid game mode: %s", settings.GameMode)
-	}
-
-	return nil
-}
 
 var ActionDefinitions = map[ActionType]ActionDefinition{
 	StartGame: {
@@ -415,56 +376,32 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 		},
 	},
 	ChangePlayerProfile: {
-		RoomRoleRequired: RoomRoleAny, // Any player can change their own info
+		RoomRoleRequired: RoomRoleAny,
 		GameRoleRequired: GameRoleAny,
 		PayloadType:      map[string]interface{}{},
 		validator: func(r *room) error {
-			// No special validation needed - players can change their info anytime
-			return nil
+			return nil // No special room state validation needed
 		},
 		execute: func(r *room, a *Action) error {
-			// First decode the map into a playerProfile struct
+			// Decode the payload
 			profile, err := decodePayload[playerProfile](a.Payload)
 			if err != nil {
 				return fmt.Errorf("invalid player profile payload: %w", err)
 			}
 
-			// Sanitize the profile inputs
-			profile.Username = sanitizeUsername(profile.Username)
-			if profile.Username == "" || len(profile.Username) > MAX_NAME_LENGTH {
-				profile.Username = randomUsername()
-			}
-			if profile.AvatarConfig == nil {
-				profile.AvatarConfig = DefaultAvatarConfig
-			}
-			if profile.AvatarConfig.HairStyle == "" {
-				profile.AvatarConfig.HairStyle = DefaultAvatarConfig.HairStyle
-			}
-			if profile.AvatarConfig.HairColor == "" {
-				profile.AvatarConfig.HairColor = DefaultAvatarConfig.HairColor
-			}
-			if profile.AvatarConfig.Mood == "" {
-				profile.AvatarConfig.Mood = DefaultAvatarConfig.Mood
-			}
-			if profile.AvatarConfig.SkinColor == "" {
-				profile.AvatarConfig.SkinColor = DefaultAvatarConfig.SkinColor
-			}
-			if profile.AvatarConfig.BackgroundColor == "" {
-				profile.AvatarConfig.BackgroundColor = DefaultAvatarConfig.BackgroundColor
+			// Validate and sanitize the profile
+			validatedProfile, err := validatePlayerProfile(&profile)
+			if err != nil {
+				return fmt.Errorf("profile validation failed: %w", err)
 			}
 
-			if len(profile.Username) > MAX_NAME_LENGTH && a.Player.Profile.Username == "" {
-				profile.Username = randomUsername()
-			}
-
-			// show a message in chat if the player is joining for the first time
+			// Show join message if new player
 			if a.Player.Profile.Username == "" && r.game != nil {
-				r.game.SendSystemMessage(fmt.Sprintf("%s joined the room", profile.Username))
+				r.game.SendSystemMessage(fmt.Sprintf("%s joined the room", validatedProfile.Username))
 			}
 
-			// Update the player's profile
-			a.Player.Profile.Username = profile.Username
-			a.Player.Profile.AvatarConfig = profile.AvatarConfig
+			// Update the player's profile with validated data
+			a.Player.Profile = *validatedProfile
 
 			// Broadcast the change to all players
 			r.broadcast(GameRoleAny,
@@ -475,7 +412,7 @@ var ActionDefinitions = map[ActionType]ActionDefinition{
 	},
 }
 
-// Construct an state action message
+// Construct an action
 func action(actionType ActionType, payload interface{}) *Action {
 	return &Action{
 		Type:    actionType,
@@ -504,7 +441,7 @@ func decodeAction(bytes []byte) (*Action, error) {
 	return action, nil
 }
 
-// Decode event payload into a target type
+// Decode action payload into a target type
 func decodePayload[T any](payload interface{}) (T, error) {
 	var target T
 	err := mapstructure.Decode(payload, &target)
