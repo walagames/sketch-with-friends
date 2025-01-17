@@ -20,7 +20,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { PlayerInfoForm } from "@/components/views/join-room/player-info-form";
+import { PlayerInfoForm } from "@/components/views/components/player-info-form";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { containerSpring } from "@/config/spring";
 import { SoundEffect, useSound } from "@/providers/sound-provider";

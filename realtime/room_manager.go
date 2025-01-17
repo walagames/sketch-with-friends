@@ -63,17 +63,6 @@ func (rm *roomManager) Run(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-ticker.C:
-			count := 0
-			rm.mu.Lock()
-			defer rm.mu.Unlock()
-			for _, room := range rm.rooms {
-				room.Run(rm)
-				count++
-			}
-			if count > 0 {
-				slog.Info("Room manager tick", "active_rooms", count)
-			}
 		}
 	}
 }

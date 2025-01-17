@@ -37,7 +37,7 @@ const (
 	StartGameCmd   CommandType = "game/start"
 
 	ChangeRoomSettingsCmd  CommandType = "room/changeSettings"
-	ChangePlayerProfileCmd CommandType = "room/changePlayerProfile"
+	UpdatePlayerProfileCmd CommandType = "room/updatePlayerProfile"
 
 	PlayerLeftCmd   CommandType = "room/playerLeft"
 	PlayerJoinedCmd CommandType = "room/playerJoined"

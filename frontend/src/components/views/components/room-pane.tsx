@@ -80,7 +80,7 @@ export function RoomPane({ isHost = false }: { isHost?: boolean }) {
 						data-umami-event="Start game"
 						size="xl"
 						variant="action"
-						onClick={() => dispatch({ type: "game/startGame" })}
+						onClick={() => dispatch({ type: "game/start" })}
 					>
 						Start game
 					</RaisedButton>

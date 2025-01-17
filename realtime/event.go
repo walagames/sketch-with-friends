@@ -44,8 +44,8 @@ const (
 )
 
 type Event struct {
-	Type    EventType
-	Payload interface{}
+	Type    EventType   `json:"type"`
+	Payload interface{} `json:"payload"`
 }
 
 // Construct an event

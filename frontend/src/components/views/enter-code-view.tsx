@@ -6,10 +6,12 @@ import { SkyScene } from "@/components/scenes/sky-scene";
 import { Logo } from "@/components/ui/logo";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
-import { CodeForm } from "./code-form";
+import { CodeForm } from "./components/code-form";
 import { AnimatePresence } from "framer-motion";
 import { Doodle } from "@/components/doodle/doodle";
 import { useMemo } from "react";
+import { setCurrentState } from "@/state/features/room";
+import { RoomState } from "@/state/features/room";
 interface DoodleItem {
 	src: string;
 	width: string;
@@ -117,6 +119,7 @@ export function EnterCodeView() {
 							onClick={() => {
 								clearQueryParams();
 								dispatch(enterRoomCode("new"));
+								dispatch(setCurrentState(RoomState.EnterPlayerInfo));
 							}}
 						>
 							Create room

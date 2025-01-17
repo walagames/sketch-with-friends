@@ -5,16 +5,11 @@ import (
 )
 
 const (
-	// Room states (0-99)
-	Waiting = 0
-
-	// Game states (100-199)
-	Picking     = 100
-	Drawing     = 101
-	PostDrawing = 102
-
-	// End game states (200-299)
-	GameOver = 200
+	Waiting     = 100
+	Picking     = 200
+	Drawing     = 201
+	PostDrawing = 202
+	GameOver    = 203
 )
 
 var ErrWrongRoomRole = errors.New("player does not have the correct room role to perform this action")

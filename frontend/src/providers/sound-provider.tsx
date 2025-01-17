@@ -1,5 +1,4 @@
-import { ChatMessage, GamePhase } from "@/state/features/game";
-import { Player, RoomStage } from "@/state/features/room";
+import { ChatMessage, Player, RoomState } from "@/state/features/room";
 import { RootState } from "@/state/store";
 import {
 	createContext,
@@ -66,23 +65,21 @@ const SOUND_PATHS: Record<SoundEffect, SoundConfig> = {
 export function SoundProvider({ children }: { children: React.ReactNode }) {
 	const audioContextRef = useRef<AudioContext>();
 	const soundBuffersRef = useRef<SoundBuffers>({});
-	const volume = useSelector((state: RootState) => state.preferences.volume);
+	const volume = useSelector((state: RootState) => state.client.volume);
 	const chatMessages = useSelector(
-		(state: RootState) => state.game.chatMessages
+		(state: RootState) => state.room.chatMessages
 	);
 	const prevChatMessagesRef = useRef<ChatMessage[]>([]);
-	const phase = useSelector((state: RootState) => state.game.phase);
-	const deadline = useSelector(
-		(state: RootState) => state.game.currentPhaseDeadline
+	const currentState = useSelector(
+		(state: RootState) => state.room.currentState
 	);
+	const timerEndsAt = useSelector((state: RootState) => state.room.timerEndsAt);
 	const timeoutRef = useRef<NodeJS.Timeout>();
 	const intervalRef = useRef<NodeJS.Timeout>();
 	const players = useSelector((state: RootState) => state.room.players);
 	const prevPlayersRef = useRef<{ [key: string]: Player }>({});
 	const isInitializedRef = useRef(false);
-	const gamePhase = useSelector((state: RootState) => state.game.phase);
-	const roomStage = useSelector((state: RootState) => state.room.stage);
-	const prevPhaseRef = useRef(gamePhase);
+	const prevPhaseRef = useRef(currentState);
 
 	const playSound = useCallback(
 		(sound: SoundEffect) => {
@@ -164,13 +161,9 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 			if (intervalRef.current) clearInterval(intervalRef.current);
 		};
 
-		if (
-			phase === GamePhase.Drawing &&
-			deadline &&
-			roomStage === RoomStage.Playing
-		) {
+		if (currentState === RoomState.Drawing && timerEndsAt) {
 			const now = Date.now();
-			const timeUntilDeadline = new Date(deadline).getTime() - now;
+			const timeUntilDeadline = new Date(timerEndsAt).getTime() - now;
 			const timeUntilWarning = timeUntilDeadline - 9000; // 9 seconds before deadline
 
 			// Only set timers if deadline is in the future and we haven't passed the warning point
@@ -187,7 +180,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 		}
 
 		return cleanup;
-	}, [phase, deadline, playSound, roomStage]);
+	}, [currentState, timerEndsAt, playSound]);
 
 	// Play player join/leave sounds when players change
 	useEffect(() => {
@@ -220,12 +213,12 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 
 	// Play scene change sound when phase changes
 	useEffect(() => {
-		if (prevPhaseRef.current !== gamePhase) {
+		if (prevPhaseRef.current !== currentState) {
 			playSound(SoundEffect.SCENE_CHANGE);
 		}
 
-		prevPhaseRef.current = gamePhase;
-	}, [gamePhase, playSound]);
+		prevPhaseRef.current = currentState;
+	}, [currentState, playSound]);
 
 	const contextValue = useMemo(() => ({ playSound }), [playSound]);
 

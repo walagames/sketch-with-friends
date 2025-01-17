@@ -1,11 +1,11 @@
-import Canvas from "./canvas";
-import { CanvasTools, ColorSliders } from "./canvas-tools";
-import { Chat } from "./chat";
+import Canvas from "./components/canvas";
+import { CanvasTools, ColorSliders } from "./components/canvas-tools";
+import { Chat } from "./components/chat";
 import { SkyScene } from "@/components/scenes/sky-scene";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
-import { CanvasHeader } from "./canvas-header";
+import { CanvasHeader } from "./components/canvas-header";
 import { AnimatedSketchText } from "@/components/ui/game-start-countdown";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";

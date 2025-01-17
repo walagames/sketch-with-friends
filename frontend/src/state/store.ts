@@ -131,7 +131,7 @@ const persistedReducer = persistReducer(
 );
 
 export const store = configureStore({
-	devTools: false,
+	devTools: true,
 	reducer: persistedReducer,
 	middleware: (getDefaultMiddleware) =>
 		getDefaultMiddleware({ serializableCheck: false }).concat(socketMiddleware),

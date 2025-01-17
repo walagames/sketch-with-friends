@@ -341,7 +341,7 @@ export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
 			setMessageHistory((prev) => [trimmedMessage, ...prev]);
 			setHistoryIndex(-1);
 			setCurrentMessage("");
-			dispatch({ type: "game/submitChatMessage", payload: trimmedMessage });
+			dispatch({ type: "room/newChatMessage", payload: trimmedMessage });
 			form.reset();
 		}
 	}

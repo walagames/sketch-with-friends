@@ -14,6 +14,8 @@ import {
 	FormMessage,
 } from "@/components/ui/form";
 import { RaisedInput } from "@/components/ui/raised-input";
+import { RoomState } from "@/state/features/room";
+import { setCurrentState } from "@/state/features/room";
 
 const CodeFormSchema = z.object({
 	roomCode: z
@@ -44,6 +46,7 @@ export function CodeForm() {
 
 	function onSubmit(data: z.infer<typeof CodeFormSchema>) {
 		dispatch(enterRoomCode(data.roomCode));
+		dispatch(setCurrentState(RoomState.EnterPlayerInfo));
 	}
 
 	return (

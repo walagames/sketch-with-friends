@@ -39,9 +39,11 @@ func NewDrawingState(word Word) RoomState {
 	}
 
 	return &DrawingState{
-		currentWord: word,
-		strokes:     make([]Stroke, 0),
-		hintedWord:  string(hintRunes),
+		currentWord:     word,
+		strokes:         make([]Stroke, 0),
+		hintedWord:      string(hintRunes),
+		correctGuessers: make(map[uuid.UUID]bool),
+		pointsAwarded:   make(map[uuid.UUID]int),
 	}
 }
 
@@ -74,7 +76,9 @@ func (state DrawingState) applyHint() {
 func (state DrawingState) Enter(room *room) {
 	phaseDuration := time.Duration(room.Settings.DrawingTimeAllowed) * time.Second
 
-	room.broadcast(GameRoleGuessing, event(SetSelectedWordEvt, state.hintedWord))
+	room.broadcast(GameRoleGuessing,
+		event(SetSelectedWordEvt, state.hintedWord),
+	)
 
 	// If the game mode is not no hints, we start the hint routine
 	if room.Settings.GameMode != GameModeNoHints {
@@ -92,7 +96,7 @@ func (state DrawingState) Enter(room *room) {
 	// Inform players of the phase change
 	room.broadcast(GameRoleAny,
 		event(SetCurrentStateEvt, Drawing),
-		event(SetTimerEvt, phaseDuration),
+		event(SetTimerEvt, time.Now().Add(phaseDuration).UTC()),
 	)
 
 	room.scheduler.addEvent(ScheduledStateChange, time.Now().Add(phaseDuration), func() {
@@ -101,7 +105,6 @@ func (state DrawingState) Enter(room *room) {
 }
 
 func (state DrawingState) Exit(room *room) {
-	// Cleanup
 	room.scheduler.cancelEvent(ScheduledStateChange)
 
 	// Reveal the word

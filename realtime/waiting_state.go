@@ -35,8 +35,6 @@ func (state WaitingState) HandleCommand(room *room, cmd *Command) error {
 		return state.handleGameStart(room, cmd)
 	case ChangeRoomSettingsCmd:
 		return state.handleRoomSettingsChange(room, cmd)
-	case ChangePlayerProfileCmd:
-		return state.handlePlayerProfileChange(room, cmd)
 	case PlayerJoinedCmd:
 		return state.handlePlayerJoined(room, cmd)
 	default:
@@ -77,40 +75,6 @@ func (state WaitingState) handleRoomSettingsChange(room *room, cmd *Command) err
 	// Inform clients of the room settings change
 	room.broadcast(GameRoleAny,
 		event(ChangeRoomSettingsEvt, room.Settings),
-	)
-	return nil
-}
-
-type PlayerProfileChange struct {
-	Username     string        `json:"username"`
-	AvatarConfig *AvatarConfig `json:"avatarConfig"`
-}
-
-func (state WaitingState) handlePlayerProfileChange(room *room, cmd *Command) error {
-	// Decode the payload
-	profile, err := decodePayload[PlayerProfileChange](cmd.Payload)
-	if err != nil {
-		return fmt.Errorf("invalid player profile payload: %w", err)
-	}
-
-	// Validate and sanitize the profile
-	validatedProfile, err := validatePlayerProfile(&profile)
-	if err != nil {
-		return fmt.Errorf("profile validation failed: %w", err)
-	}
-
-	// Show join message if new player
-	if profile.Username == "" {
-		room.SendSystemMessage(fmt.Sprintf("%s joined the room", validatedProfile.Username))
-	}
-
-	// Update the player's profile with validated data
-	cmd.Player.Username = validatedProfile.Username
-	cmd.Player.AvatarConfig = validatedProfile.AvatarConfig
-
-	// Broadcast the change to all players
-	room.broadcast(GameRoleAny,
-		event(SetPlayersEvt, room.Players),
 	)
 	return nil
 }

@@ -331,12 +331,61 @@ func (r *room) dispatch(cmd *Command) {
 			return
 		}
 
-		fallthrough
+		chatMsg := ChatMessage{
+			ID:              uuid.New(),
+			PlayerID:        player.ID,
+			Guess:           msg,
+			IsCorrect:       false,
+			PointsAwarded:   0,
+			IsClose:         false,
+			IsSystemMessage: false,
+		}
+
+		r.ChatMessages = append(r.ChatMessages, chatMsg)
+		r.broadcast(GameRoleAny, event(NewChatMessageEvt, chatMsg))
+
+		// fallthrough
+	case UpdatePlayerProfileCmd:
+		r.handlePlayerProfileChange(cmd)
 	default:
 		slog.Debug("passing action to state", "action", cmd.Type)
 		r.currentState.HandleCommand(r, cmd)
 	}
 
+}
+
+type PlayerProfileChange struct {
+	Username     string        `json:"username"`
+	AvatarConfig *AvatarConfig `json:"avatarConfig"`
+}
+
+func (r *room) handlePlayerProfileChange(cmd *Command) error {
+	// Decode the payload
+	profile, err := decodePayload[PlayerProfileChange](cmd.Payload)
+	if err != nil {
+		return fmt.Errorf("invalid player profile payload: %w", err)
+	}
+
+	// Validate and sanitize the profile
+	validatedProfile, err := validatePlayerProfile(&profile)
+	if err != nil {
+		return fmt.Errorf("profile validation failed: %w", err)
+	}
+
+	// Show join message if new player
+	if profile.Username == "" {
+		r.SendSystemMessage(fmt.Sprintf("%s joined the room", validatedProfile.Username))
+	}
+
+	// Update the player's profile with validated data
+	cmd.Player.Username = validatedProfile.Username
+	cmd.Player.AvatarConfig = validatedProfile.AvatarConfig
+
+	// Broadcast the change to all players
+	r.broadcast(GameRoleAny,
+		event(SetPlayersEvt, r.Players),
+	)
+	return nil
 }
 
 // Runs the room's goroutine, handling connections, disconnections,
@@ -367,6 +416,7 @@ func (r *room) Run(rm RoomManager) {
 
 	// This runs when this routine exits, we can do cleanup here
 	defer func() {
+		slog.Debug("Room routine exiting, unregistering room", "id", r.ID)
 		rm.Unregister(r.ID)
 	}()
 

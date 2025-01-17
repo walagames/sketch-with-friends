@@ -67,13 +67,15 @@ type RoomSettings = {
 };
 
 export enum RoomState {
-	Waiting = 0,
-	Picking = 100,
-	Drawing = 101,
-	PostDrawing = 102,
-	GameOver = 200,
+	Unanimous = 0,
+	EnterCode = 1,
+	EnterPlayerInfo = 2,
 
-	Unanimous = 900,
+	Waiting = 100,
+	Picking = 200,
+	Drawing = 201,
+	PostDrawing = 202,
+	GameOver = 203,
 }
 
 export interface Room {
@@ -103,7 +105,7 @@ const initialState: Room = {
 	},
 	players: {},
 	timerEndsAt: "",
-	currentState: RoomState.Waiting,
+	currentState: RoomState.EnterCode,
 	currentRound: 0,
 	chatMessages: [],
 };
@@ -184,6 +186,7 @@ export const {
 	playerLeft,
 	changeRoomSettings,
 	changePlayerProfile,
+	setCurrentState,
 } = roomSlice.actions;
 
 export default roomSlice.reducer;

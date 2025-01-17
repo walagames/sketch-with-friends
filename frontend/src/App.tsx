@@ -1,123 +1,15 @@
 import "./App.css";
-import { RoomRole, RoomStage } from "@/state/features/room";
 import { Toaster } from "@/components/ui/sonner";
-import { useSelector } from "react-redux";
-import { RootState } from "./state/store";
-import { GamePhase, GameRole } from "./state/features/game";
-import {
-	AnimatePresenceWithDirection,
-	Direction,
-} from "@/components/animation/direction-context";
-import { TransitionContainer } from "@/components/animation/transition-container";
 import { MotionConfig } from "framer-motion";
-import { useEffect, useState } from "react";
 import { containerSpring } from "@/config/spring";
-import { roomViews } from "@/hooks/use-view-transition";
-import { joinViews } from "@/hooks/use-view-transition";
-import { View } from "@/hooks/use-view-transition";
-function roomView({
-	roomStage,
-	roomRole,
-	gamePhase,
-	gameRole,
-	isFirstPhase,
-}: {
-	roomStage: RoomStage;
-	roomRole: RoomRole;
-	gamePhase: GamePhase;
-	gameRole: GameRole;
-	isFirstPhase: boolean;
-}): View {
-	if (roomStage === RoomStage.Playing) {
-		const phaseView = roomViews[RoomStage.Playing][gamePhase];
-		if ("Component" in phaseView) {
-			return phaseView;
-		}
-
-		const view = phaseView[gameRole];
-		return isFirstPhase
-			? { ...view, transition: { direction: Direction.DOWN_FADE } }
-			: view;
-	}
-
-	const view = roomViews[roomStage];
-	if ("Component" in view) {
-		return view;
-	}
-	return view[roomRole];
-}
-
-function joinView(enteredRoomCode: string): View {
-	return joinViews[enteredRoomCode ? "ChoosePlayerInfo" : "EnterCode"];
-}
+import { RoomViewContainer } from "@/hooks/use-view-transition";
 
 function App() {
-	const [mountId, setMountId] = useState(Date.now());
-
-	const roomStage = useSelector((state: RootState) => state.room.stage);
-	const gamePhase = useSelector((state: RootState) => state.game.phase);
-	const players = useSelector((state: RootState) => state.room.players);
-	const playerId = useSelector((state: RootState) => state.client.id);
-	const isFirstPhase = useSelector(
-		(state: RootState) => state.game.isFirstPhase
-	);
-	const roomId = useSelector((state: RootState) => state.room.id);
-	const enteredRoomCode = useSelector(
-		(state: RootState) => state.client.enteredRoomCode
-	);
-
-	const roomRole = players[playerId]?.roomRole;
-	const gameRole = players[playerId]?.gameRole;
-
-	const JoinView = joinView(enteredRoomCode);
-	const RoomView = roomView({
-		roomStage,
-		roomRole,
-		gamePhase,
-		gameRole,
-		isFirstPhase,
-	});
-
-	const View = roomId ? RoomView : JoinView;
-
-	// This is a workaround to prevent AnimatePresence from getting out of sync by forcing
-	// it to remount when the browser tab regains focus.
-	// This is necessary because browsers throttle javascript execution on inactive tabs.
-	useEffect(() => {
-		function visibilityChangeHandler() {
-			if (!document.hidden) {
-				setMountId(Date.now());
-			}
-		}
-
-		document.addEventListener("visibilitychange", visibilityChangeHandler);
-		// cleanup the event lister on unmount to prevent memory leak
-		return () => {
-			document.removeEventListener("visibilitychange", visibilityChangeHandler);
-		};
-	}, []);
-
-	// Hack to work around animation bug when leaving a room
-	useEffect(() => {
-		if (!roomId) {
-			setMountId(Date.now());
-		}
-	}, [roomId]);
-
 	return (
 		<main className="flex min-h-[100dvh] flex-col items-center justify-between relative">
 			<div className="h-[100dvh] w-screen flex flex-col items-center justify-center relative overflow-hidden">
 				<MotionConfig reducedMotion="user" transition={containerSpring}>
-					<AnimatePresenceWithDirection
-						key={mountId}
-						initial={false}
-						mode="sync"
-						direction={View.transition.direction}
-					>
-						<TransitionContainer key={View.key}>
-							<View.Component />
-						</TransitionContainer>
-					</AnimatePresenceWithDirection>
+					<RoomViewContainer />
 				</MotionConfig>
 			</div>
 			<Toaster

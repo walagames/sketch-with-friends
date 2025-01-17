@@ -81,11 +81,14 @@ func (state PickingState) handleWordSelection(room *room, cmd *Command) error {
 		return ErrWrongGameRole
 	}
 
-	// Check if selected word is actually an option
-	selectedWord := cmd.Payload.(string)
+	wordMap := cmd.Payload.(map[string]interface{})
+	selectedWord := Word{
+		Value: wordMap["value"].(string),
+	}
+
 	var foundDrawingWord *Word
 	for _, option := range state.wordOptions {
-		if option.Value == selectedWord {
+		if option.Value == selectedWord.Value {
 			foundDrawingWord = &option
 			break
 		}

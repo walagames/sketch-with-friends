@@ -32,13 +32,13 @@ export const gameSlice = createSlice({
 		setWordOptions: (state, action: PayloadAction<Word[]>) => {
 			state.wordOptions = action.payload;
 		},
-		setSelectedWord: (state, action: PayloadAction<Word>) => {
+		selectWord: (state, action: PayloadAction<Word>) => {
 			state.selectedWord = action.payload;
 		},
 	},
 });
 
-export const { setPointsAwarded, setWordOptions, setSelectedWord } =
+export const { setPointsAwarded, setWordOptions, selectWord } =
 	gameSlice.actions;
 
 export default gameSlice.reducer;

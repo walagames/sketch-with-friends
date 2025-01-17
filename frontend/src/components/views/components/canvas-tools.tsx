@@ -1,7 +1,7 @@
 import { Brush, Undo2, Trash, Eraser, PaintBucket } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
-import { Slider } from "../../../ui/slider";
+import { Slider } from "../../ui/slider";
 import { HexColorPicker } from "react-colorful";
 import {
 	Dialog,
@@ -21,7 +21,7 @@ import {
 } from "@/state/features/client";
 
 import { undoStroke, clearStrokes } from "@/state/features/canvas";
-import { RaisedButton } from "../../../ui/raised-button";
+import { RaisedButton } from "../../ui/raised-button";
 import { getGameRole } from "@/lib/player";
 import { GameRole } from "@/state/features/game";
 import { cn, hslToRgb } from "@/lib/utils";

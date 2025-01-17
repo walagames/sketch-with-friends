@@ -9,6 +9,18 @@ import { motion } from "framer-motion";
 import { AnimatePresence } from "framer-motion";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
+function shouldRenderTimer(state: RoomState) {
+	switch (state) {
+		case RoomState.EnterCode:
+		case RoomState.EnterPlayerInfo:
+		case RoomState.Unanimous:
+		case RoomState.Waiting:
+			return false;
+		default:
+			return true;
+	}
+}
+
 export function UIHeader() {
 	const currentState = useSelector(
 		(state: RootState) => state.room.currentState
@@ -16,8 +28,7 @@ export function UIHeader() {
 
 	const deadline = useSelector((state: RootState) => state.room.timerEndsAt);
 
-	const showTimer =
-		currentState !== RoomState.Waiting && currentState !== RoomState.Unanimous;
+	const showTimer = shouldRenderTimer(currentState);
 
 	const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 

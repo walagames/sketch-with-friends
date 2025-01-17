@@ -1,7 +1,7 @@
 import { SkyScene } from "@/components/scenes/sky-scene";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
-import { PlayerInfoForm } from "./player-info-form";
+import { PlayerInfoForm } from "./components/player-info-form";
 import { AnimatePresence } from "framer-motion";
 import { getRealtimeHref } from "@/lib/realtime";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,7 +9,7 @@ import { RootState } from "@/state/store";
 import { enterRoomCode } from "@/state/features/client";
 import { StepBackIcon, StepForwardIcon } from "lucide-react";
 import { RaisedButton } from "@/components/ui/raised-button";
-import { RoomState } from "@/state/features/room";
+import { RoomState, setCurrentState } from "@/state/features/room";
 import { useEffect, useState } from "react";
 
 export function EnterPlayerInfoView() {
@@ -50,13 +50,18 @@ export function EnterPlayerInfoView() {
 		}
 	}
 
+	function handleBack() {
+		dispatch(enterRoomCode(""));
+		dispatch(setCurrentState(RoomState.EnterCode));
+	}
+
 	return (
 		<SkyScene>
 			<PlayerInfoForm
 				handleSubmit={handleSubmit}
 				leftButton={
 					<RaisedButton
-						onClick={() => dispatch(enterRoomCode(""))}
+						onClick={handleBack}
 						type="button"
 						shift={false}
 						variant="action"
