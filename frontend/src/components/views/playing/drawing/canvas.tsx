@@ -41,14 +41,12 @@ function Canvas({
 	);
 
 	const players = useSelector((state: RootState) => state.room.players);
-	const playerId = useSelector((state: RootState) => state.client.id);
+	const playerId = useSelector((state: RootState) => state.room.playerId);
 	const role = getGameRole(playerId, players);
 
 	const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 
-	const currentPhaseDeadline = useSelector(
-		(state: RootState) => state.game.currentPhaseDeadline
-	);
+	const timerEndsAt = useSelector((state: RootState) => state.room.timerEndsAt);
 
 	const strokeWidth = useSelector(
 		(state: RootState) => state.client.canvas.strokeWidth
@@ -268,9 +266,9 @@ function Canvas({
 		const currentTime = Date.now();
 		const startingAnimationActive =
 			drawingTime -
-				(new Date(currentPhaseDeadline).getTime() - Date.now()) / 1000 <
+				(new Date(timerEndsAt).getTime() - Date.now()) / 1000 <
 			1.5;
-		const deadlineTime = new Date(currentPhaseDeadline).getTime();
+		const deadlineTime = new Date(timerEndsAt).getTime();
 		const timeSinceStart = deadlineTime - currentTime;
 		return timeSinceStart > 0 && !startingAnimationActive;
 	};

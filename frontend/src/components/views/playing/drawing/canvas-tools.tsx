@@ -37,7 +37,7 @@ import {
 export function CanvasTools() {
 	const dispatch = useDispatch();
 	const players = useSelector((state: RootState) => state.room.players);
-	const playerId = useSelector((state: RootState) => state.client.id);
+	const playerId = useSelector((state: RootState) => state.room.playerId);
 	const role = getGameRole(playerId, players);
 
 	const [colorPaletteOpen, setColorPaletteOpen] = useState(false);
@@ -48,13 +48,11 @@ export function CanvasTools() {
 		(state: RootState) => state.client.canvas.tool
 	);
 
-	const currentPhaseDeadline = useSelector(
-		(state: RootState) => state.game.currentPhaseDeadline
-	);
+	const timerEndsAt = useSelector((state: RootState) => state.room.timerEndsAt);
 
 	const isRoundActive = useMemo(
-		() => new Date(currentPhaseDeadline) > new Date(),
-		[currentPhaseDeadline]
+		() => new Date(timerEndsAt) > new Date(),
+		[timerEndsAt]
 	);
 
 	// Add keyboard shortcut handling
@@ -424,7 +422,7 @@ export function ColorSliders() {
 		(state: RootState) => state.client.canvas.lightness
 	);
 	const players = useSelector((state: RootState) => state.room.players);
-	const playerId = useSelector((state: RootState) => state.client.id);
+	const playerId = useSelector((state: RootState) => state.room.playerId);
 
 	const role = getGameRole(playerId, players);
 	const isDrawing = role === GameRole.Drawing;

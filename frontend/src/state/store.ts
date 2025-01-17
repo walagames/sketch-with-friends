@@ -3,12 +3,10 @@ import canvasReducer from "./features/canvas";
 import roomReducer from "./features/room";
 import gameReducer from "./features/game";
 import clientReducer from "./features/client";
-import preferencesReducer, { PreferencesState } from "./features/preferences";
 import { clearQueryParams } from "@/lib/params";
 import { toast } from "sonner";
 import localStorage from "redux-persist/es/storage";
 import { persistReducer, persistStore } from "redux-persist";
-import { Avatar } from "@/lib/avatar";
 
 // Used to display toast notifications from the server
 const ErrorMessages = {
@@ -28,7 +26,6 @@ const socketMiddleware: Middleware = (store) => {
 		setTimeout(() => {
 			store.dispatch({ type: "room/reset", fromServer: true });
 			store.dispatch({ type: "game/reset", fromServer: true });
-			store.dispatch({ type: "client/reset", fromServer: true });
 			store.dispatch({ type: "canvas/reset", fromServer: true });
 		}, 100);
 	}
@@ -62,8 +59,11 @@ const socketMiddleware: Middleware = (store) => {
 				socket.onopen = () => {
 					socket?.send(
 						JSON.stringify({
-							type: "room/changePlayerProfile",
-							payload: store.getState().preferences,
+							type: "room/updatePlayerProfile",
+							payload: {
+								username: store.getState().client.username,
+								avatarConfig: store.getState().client.avatarConfig,
+							},
 						})
 					);
 				};
@@ -103,11 +103,7 @@ const socketMiddleware: Middleware = (store) => {
 				//
 				// Actions that are dispatched from the websocket middleware are marked with
 				// fromServer: true, so we don't re-send them to the server.
-				if (
-					!action.type.startsWith("client") &&
-					!action.type.startsWith("preferences") &&
-					!action.fromServer
-				) {
+				if (!action.type.startsWith("client") && !action.fromServer) {
 					if (!action.payload) {
 						action.payload = null;
 					}
@@ -121,34 +117,7 @@ const socketMiddleware: Middleware = (store) => {
 const persistConfig = {
 	key: "root",
 	storage: localStorage,
-	whitelist: ["preferences"],
-	transforms: [
-		{
-			in: (state: PreferencesState) => state,
-			out: (state: Partial<PreferencesState>) => {
-				const defaultState = {
-					volume: 0.5,
-					username: "",
-					avatarConfig: Avatar.random(),
-					customWords: [],
-				};
-
-				// If state is null or undefined, return default state
-				if (!state) return defaultState;
-
-				// Merge the stored state with default values for any missing fields
-				return {
-					volume: state.volume ?? defaultState.volume,
-					username: state.username ?? defaultState.username,
-					avatarConfig: {
-						...defaultState.avatarConfig,
-						...state.avatarConfig,
-					},
-					customWords: state.customWords ?? defaultState.customWords,
-				};
-			},
-		},
-	],
+	whitelist: ["client"],
 };
 
 const persistedReducer = persistReducer(
@@ -158,7 +127,6 @@ const persistedReducer = persistReducer(
 		room: roomReducer,
 		game: gameReducer,
 		client: clientReducer,
-		preferences: preferencesReducer,
 	})
 );
 

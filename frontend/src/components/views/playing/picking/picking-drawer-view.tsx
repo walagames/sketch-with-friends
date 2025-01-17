@@ -1,18 +1,14 @@
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/state/store";
-import { selectWord } from "@/state/features/game";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { SkyScene } from "@/components/scenes/sky-scene";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
-import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
+import { setSelectedWord } from "@/state/features/game";
 
 export function PickingDrawerView() {
 	const dispatch = useDispatch();
 	const wordOptions = useSelector((state: RootState) => state.game.wordOptions);
-	const isFirstPhase = useSelector(
-		(state: RootState) => state.game.isFirstPhase
-	);
 
 	return (
 		<SkyScene>
@@ -26,7 +22,7 @@ export function PickingDrawerView() {
 						>
 							<RaisedButton
 								size="wide"
-								onClick={() => dispatch(selectWord(word.value))}
+								onClick={() => dispatch(setSelectedWord(word))}
 							>
 								<div className="relative z-10 font-semibold flex overflow-hidden w-full max-w-full h-11 rounded-lg -translate-y-0.5">
 									<span className="break-words overflow-wrap-anywhere w-full px-8 flex items-center justify-center h-full">
@@ -66,7 +62,7 @@ export function PickingDrawerView() {
 					key="rain-cloud-3"
 				/>
 			</AnimatePresence>
-
+			{/* 
 			<AirplaneDoodle
 				skipTransition={!isFirstPhase}
 				startAt={
@@ -76,7 +72,7 @@ export function PickingDrawerView() {
 				}
 				animateTo={{ left: "45%", top: "65%", rotate: 30, opacity: 1 }}
 				leaveTo={{ left: "185%", top: "55%", rotate: 30 }}
-			/>
+			/> */}
 		</SkyScene>
 	);
 }

@@ -104,7 +104,7 @@ func getSortedPlayersByScore(players map[uuid.UUID]*player) []uuid.UUID {
 			return int(scoreB - scoreA)
 		}
 		// If scores are equal, sort by name (ascending) to ensure stable ordering
-		return strings.Compare(players[a].Profile.Username, players[b].Profile.Username)
+		return strings.Compare(players[a].Username, players[b].Username)
 	})
 
 	return playerIDs
@@ -159,8 +159,8 @@ func CheckLeadChange(roundPoints map[uuid.UUID]int, players map[uuid.UUID]*playe
 
 	// If the leader changed, return appropriate message
 	if oldLeader != newLeader {
-		oldLeaderName := players[oldLeader].Profile.Username
-		newLeaderName := players[newLeader].Profile.Username
+		oldLeaderName := players[oldLeader].Username
+		newLeaderName := players[newLeader].Username
 		return newLeaderName + " took the lead from " + oldLeaderName
 	}
 

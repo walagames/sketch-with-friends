@@ -6,19 +6,21 @@ import { AnimatePresence } from "framer-motion";
 import { getRealtimeHref } from "@/lib/realtime";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
-import { RoomStage } from "@/state/features/room";
-import { enterRoomCode, setIsJoining } from "@/state/features/client";
+import { enterRoomCode } from "@/state/features/client";
 import { StepBackIcon, StepForwardIcon } from "lucide-react";
 import { RaisedButton } from "@/components/ui/raised-button";
+import { RoomState } from "@/state/features/room";
+import { useEffect, useState } from "react";
 
 export function EnterPlayerInfoView() {
-	const roomStage = useSelector((state: RootState) => state.room.stage);
 	const dispatch = useDispatch();
-	const isJoining = useSelector((state: RootState) => state.client.isJoining);
+	const roomState = useSelector((state: RootState) => state.room.currentState);
+
+	const [isJoining, setIsJoining] = useState(false);
 
 	const exitPosition = () => {
-		switch (roomStage) {
-			case RoomStage.PreGame:
+		switch (roomState) {
+			case RoomState.Waiting:
 				return { left: "80%", top: "-20%", rotate: -5 };
 			default:
 				return { opacity: 0, left: "5%", top: "55%", rotate: 20 };
@@ -26,12 +28,15 @@ export function EnterPlayerInfoView() {
 	};
 
 	const enteredRoomCode = useSelector(
-		(state: RootState) => state.client.enteredRoomCode
+		(state: RootState) => state.client.roomCode
 	);
 
-	function handleSubmit() {
-		dispatch(setIsJoining(true));
+	useEffect(() => {
+		setIsJoining(false);
+	}, [roomState]);
 
+	function handleSubmit() {
+		setIsJoining(true);
 		if (enteredRoomCode && enteredRoomCode !== "new") {
 			dispatch({
 				type: "socket/connect",

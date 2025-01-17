@@ -172,8 +172,14 @@ func TestFilterInvalidWords(t *testing.T) {
 	}
 
 	for _, tt := range tests {
+		words := make([]Word, len(tt.input))
+		for i, word := range tt.input {
+			words[i] = Word{
+				Value: word,
+			}
+		}
 		t.Run(tt.name, func(t *testing.T) {
-			got := filterInvalidWords(tt.input)
+			got := filterInvalidWords(words)
 			if !reflect.DeepEqual(got, tt.expected) {
 				t.Errorf("filterInvalidWords() = %v, want %v", got, tt.expected)
 			}
@@ -274,7 +280,13 @@ func TestFilterDuplicateWords(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := filterDuplicateWords(tt.input)
+			words := make([]Word, len(tt.input))
+			for i, word := range tt.input {
+				words[i] = Word{
+					Value: word,
+				}
+			}
+			got := filterDuplicateWords(words)
 			if !reflect.DeepEqual(got, tt.expected) {
 				t.Errorf("filterDuplicateWords() = %v, want %v", got, tt.expected)
 			}
@@ -519,13 +531,13 @@ func TestValidateRoomSettings(t *testing.T) {
 func TestValidatePlayerProfile(t *testing.T) {
 	tests := []struct {
 		name    string
-		profile *playerProfile
-		want    *playerProfile
+		profile *PlayerProfileChange
+		want    *PlayerProfileChange
 		wantErr bool
 	}{
 		{
 			name: "valid profile",
-			profile: &playerProfile{
+			profile: &PlayerProfileChange{
 				Username: "TestUser",
 				AvatarConfig: &AvatarConfig{
 					HairStyle:       "bangs",
@@ -535,7 +547,7 @@ func TestValidatePlayerProfile(t *testing.T) {
 					BackgroundColor: "e0da29",
 				},
 			},
-			want: &playerProfile{
+			want: &PlayerProfileChange{
 				Username: "TestUser",
 				AvatarConfig: &AvatarConfig{
 					HairStyle:       "bangs",
@@ -550,7 +562,7 @@ func TestValidatePlayerProfile(t *testing.T) {
 		{
 			name:    "nil profile",
 			profile: nil,
-			want: &playerProfile{
+			want: &PlayerProfileChange{
 				Username:     "random", // This will be replaced with a random username
 				AvatarConfig: DefaultAvatarConfig,
 			},
@@ -558,11 +570,11 @@ func TestValidatePlayerProfile(t *testing.T) {
 		},
 		{
 			name: "empty username",
-			profile: &playerProfile{
+			profile: &PlayerProfileChange{
 				Username:     "",
 				AvatarConfig: DefaultAvatarConfig,
 			},
-			want: &playerProfile{
+			want: &PlayerProfileChange{
 				Username:     "random", // This will be replaced with a random username
 				AvatarConfig: DefaultAvatarConfig,
 			},
@@ -570,11 +582,11 @@ func TestValidatePlayerProfile(t *testing.T) {
 		},
 		{
 			name: "username too long",
-			profile: &playerProfile{
+			profile: &PlayerProfileChange{
 				Username:     "ThisUsernameIsTooLong",
 				AvatarConfig: DefaultAvatarConfig,
 			},
-			want: &playerProfile{
+			want: &PlayerProfileChange{
 				Username:     "random", // This will be replaced with a random username
 				AvatarConfig: DefaultAvatarConfig,
 			},
@@ -582,11 +594,11 @@ func TestValidatePlayerProfile(t *testing.T) {
 		},
 		{
 			name: "nil avatar config",
-			profile: &playerProfile{
+			profile: &PlayerProfileChange{
 				Username:     "TestUser",
 				AvatarConfig: nil,
 			},
-			want: &playerProfile{
+			want: &PlayerProfileChange{
 				Username:     "TestUser",
 				AvatarConfig: DefaultAvatarConfig,
 			},
@@ -594,14 +606,14 @@ func TestValidatePlayerProfile(t *testing.T) {
 		},
 		{
 			name: "partial avatar config",
-			profile: &playerProfile{
+			profile: &PlayerProfileChange{
 				Username: "TestUser",
 				AvatarConfig: &AvatarConfig{
 					HairStyle: "bangs",
 					// Other fields missing
 				},
 			},
-			want: &playerProfile{
+			want: &PlayerProfileChange{
 				Username: "TestUser",
 				AvatarConfig: &AvatarConfig{
 					HairStyle:       "bangs",

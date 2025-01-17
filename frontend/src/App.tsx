@@ -10,78 +10,11 @@ import {
 } from "@/components/animation/direction-context";
 import { TransitionContainer } from "@/components/animation/transition-container";
 import { MotionConfig } from "framer-motion";
-import {
-	EnterCodeView,
-	EnterPlayerInfoView,
-	PickingDrawerView,
-	PickingGuesserView,
-	PostDrawingView,
-	DrawingView,
-	PreGameView,
-} from "@/components/views";
 import { useEffect, useState } from "react";
 import { containerSpring } from "@/config/spring";
-type ViewComponent = {
-	Component: React.ComponentType;
-	key: string;
-	transition: Direction;
-};
-
-const joinViews: Record<string, ViewComponent> = {
-	EnterCode: {
-		Component: EnterCodeView,
-		key: "join-enter-code",
-		transition: Direction.RIGHT,
-	},
-	ChoosePlayerInfo: {
-		Component: EnterPlayerInfoView,
-		key: "join-choose-player-info",
-		transition: Direction.LEFT,
-	},
-};
-
-const roomViews = {
-	[RoomStage.PreGame]: {
-		Component: PreGameView,
-		key: "pre-game",
-		transition: Direction.UP,
-	},
-	[RoomStage.Playing]: {
-		[GamePhase.Picking]: {
-			[GameRole.Drawing]: {
-				Component: PickingDrawerView,
-				key: "playing-picking-drawer",
-				transition: Direction.LEFT,
-			},
-			[GameRole.Guessing]: {
-				Component: PickingGuesserView,
-				key: "playing-picking-guesser",
-				transition: Direction.LEFT,
-			},
-		},
-		[GamePhase.Drawing]: {
-			Component: DrawingView,
-			key: "playing-drawing",
-			transition: Direction.LEFT,
-		},
-		[GamePhase.PostDrawing]: {
-			Component: PostDrawingView,
-			key: "playing-post-drawing",
-			transition: Direction.LEFT,
-		},
-		[GamePhase.Unanimous]: {
-			Component: () => <></>,
-			key: "unanimous",
-			transition: Direction.LEFT,
-		},
-	},
-	[RoomStage.Unanimous]: {
-		Component: () => <></>,
-		key: "unanimous",
-		transition: Direction.LEFT,
-	},
-} as const;
-
+import { roomViews } from "@/hooks/use-view-transition";
+import { joinViews } from "@/hooks/use-view-transition";
+import { View } from "@/hooks/use-view-transition";
 function roomView({
 	roomStage,
 	roomRole,
@@ -94,7 +27,7 @@ function roomView({
 	gamePhase: GamePhase;
 	gameRole: GameRole;
 	isFirstPhase: boolean;
-}): ViewComponent {
+}): View {
 	if (roomStage === RoomStage.Playing) {
 		const phaseView = roomViews[RoomStage.Playing][gamePhase];
 		if ("Component" in phaseView) {
@@ -102,7 +35,9 @@ function roomView({
 		}
 
 		const view = phaseView[gameRole];
-		return isFirstPhase ? { ...view, transition: Direction.DOWN_FADE } : view;
+		return isFirstPhase
+			? { ...view, transition: { direction: Direction.DOWN_FADE } }
+			: view;
 	}
 
 	const view = roomViews[roomStage];
@@ -112,7 +47,7 @@ function roomView({
 	return view[roomRole];
 }
 
-function joinView(enteredRoomCode: string): ViewComponent {
+function joinView(enteredRoomCode: string): View {
 	return joinViews[enteredRoomCode ? "ChoosePlayerInfo" : "EnterCode"];
 }
 
@@ -177,7 +112,7 @@ function App() {
 						key={mountId}
 						initial={false}
 						mode="sync"
-						direction={View.transition}
+						direction={View.transition.direction}
 					>
 						<TransitionContainer key={View.key}>
 							<View.Component />

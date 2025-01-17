@@ -7,7 +7,7 @@ import { RoomRole } from "@/state/features/room";
 
 export function PreGameView() {
 	const players = useSelector((state: RootState) => state.room.players);
-	const playerId = useSelector((state: RootState) => state.client.id);
+	const playerId = useSelector((state: RootState) => state.room.playerId);
 	const role = getRoomRole(playerId, players);
 
 	return (

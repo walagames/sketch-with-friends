@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { RootState } from "@/state/store";
-import { ChatMessage, GameRole } from "@/state/features/game";
-import { Player } from "@/state/features/room";
+import { GameRole } from "@/state/features/game";
+import { ChatMessage, Player } from "@/state/features/room";
 import { generateAvatar } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -17,13 +17,13 @@ import { getGameRole } from "@/lib/player";
 import { useMediaQuery } from "@/hooks/use-media-query";
 export function Chat() {
 	const chatMessages = useSelector(
-		(state: RootState) => state.game.chatMessages
+		(state: RootState) => state.room.chatMessages
 	);
 	const players = useSelector((state: RootState) => state.room.players);
-	const playerId = useSelector((state: RootState) => state.client.id);
+	const playerId = useSelector((state: RootState) => state.room.playerId);
 
 	const currentRound = useSelector(
-		(state: RootState) => state.game.currentRound
+		(state: RootState) => state.room.currentRound
 	);
 	const totalRounds = useSelector(
 		(state: RootState) => state.room.settings.totalRounds
@@ -174,7 +174,7 @@ function ChatMessageComponent({
 	message: ChatMessage;
 	player: Player | null;
 }) {
-	const playerId = useSelector((state: RootState) => state.client.id);
+	const playerId = useSelector((state: RootState) => state.room.playerId);
 
 	// If it's a system message, render a simplified version
 	if (message.isSystemMessage) {
@@ -196,7 +196,7 @@ function ChatMessageComponent({
 
 	if (!player) return null;
 
-	const { avatarConfig, username } = player.profile;
+	const { avatarConfig, username } = player;
 	const avatarSvg = generateAvatar(avatarConfig);
 	const isOwnMessage = playerId === message.playerId;
 
@@ -210,7 +210,7 @@ function ChatMessageComponent({
 			)}
 		>
 			<img
-				alt={player.profile.username + " profile picture"}
+				alt={username + " profile picture"}
 				className={cn(
 					"h-8 aspect-square relative border-2 shrink-0",
 					isOwnMessage ? "rounded-lg" : "rounded-lg"
@@ -304,7 +304,7 @@ export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
 		(state: RootState) => state.game.selectedWord
 	);
 
-	const hasNotGuessedAlready = selectedWord.includes("*");
+	const hasNotGuessedAlready = selectedWord?.value.includes("*");
 
 	const form = useForm<z.infer<typeof FormSchema>>({
 		resolver: zodResolver(FormSchema),
@@ -377,9 +377,12 @@ export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
 												<div
 													className={cn(
 														"absolute right-3 top-1/2 -translate-y-3/4 font-bold",
-														length > selectedWord.length && "text-red-500",
-														length === selectedWord.length && "text-green-500",
-														length < selectedWord.length && "text-yellow-500"
+														length > (selectedWord?.value.length ?? 0) &&
+															"text-red-500",
+														length === selectedWord?.value.length &&
+															"text-green-500",
+														length < (selectedWord?.value.length ?? 0) &&
+															"text-yellow-500"
 													)}
 												>
 													{length}

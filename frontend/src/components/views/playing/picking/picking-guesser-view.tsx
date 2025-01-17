@@ -5,22 +5,18 @@ import { getDrawingPlayer } from "@/lib/player";
 import { SkyScene } from "@/components/scenes/sky-scene";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
-import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 
 export function PickingGuesserView() {
 	const players = useSelector((state: RootState) => state.room.players);
 	const drawingPlayer = getDrawingPlayer(players);
-	const isFirstPhase = useSelector(
-		(state: RootState) => state.game.isFirstPhase
-	);
 	if (!drawingPlayer) return null;
-	const avatarSvg = generateAvatar(drawingPlayer.profile.avatarConfig);
+	const avatarSvg = generateAvatar(drawingPlayer.avatarConfig);
 
 	return (
 		<SkyScene>
 			<img src={avatarSvg} className="w-20 h-20 rounded-lg shadow-accent" />
 			<h1 className="text-2xl lg:text-3xl font-bold px-8 lg:px-0 text-center">
-				{drawingPlayer.profile.username} is picking a word to sketch
+				{drawingPlayer.username} is picking a word to sketch
 			</h1>
 			<AnimatePresence>
 				<BobbingDoodle
@@ -44,7 +40,7 @@ export function PickingGuesserView() {
 				/>
 			</AnimatePresence>
 
-			<AirplaneDoodle
+			{/* <AirplaneDoodle
 				skipTransition={!isFirstPhase}
 				startAt={
 					isFirstPhase
@@ -53,7 +49,7 @@ export function PickingGuesserView() {
 				}
 				animateTo={{ left: "45%", top: "65%", rotate: 30, opacity: 1 }}
 				leaveTo={{ left: "185%", top: "55%", rotate: 30 }}
-			/>
+			/> */}
 		</SkyScene>
 	);
 }

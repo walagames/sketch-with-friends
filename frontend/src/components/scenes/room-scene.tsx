@@ -3,14 +3,15 @@ import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { AnimatePresence } from "framer-motion";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
-import { GamePhase } from "@/state/features/game";
+import { RoomState } from "@/state/features/room";
+
 export function RoomScene({ children }: { children: React.ReactNode }) {
-	const phase = useSelector((state: RootState) => state.game.phase);
-	const isLastPhase = useSelector((state: RootState) => state.game.isLastPhase);
+	const currentState = useSelector(
+		(state: RootState) => state.room.currentState
+	);
 
 	const shouldSkipTransition =
-		phase === GamePhase.Unanimous ||
-		(phase === GamePhase.PostDrawing && isLastPhase);
+		currentState === RoomState.Unanimous || currentState === RoomState.GameOver;
 
 	return (
 		<div className="flex h-full flex-col items-center justify-center w-full relative">

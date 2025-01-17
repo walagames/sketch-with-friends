@@ -1,25 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { GameRole } from "./game";
 import { AvatarConfig } from "@/lib/avatar";
 
-export enum RoomStage {
-	PreGame = "preGame",
-	Playing = "playing",
-	Unanimous = "unanimous",
-}
-
-export type Player = {
+export type ChatMessage = {
 	id: string;
-	profile: PlayerProfile;
-	roomRole: RoomRole;
-	gameRole: GameRole;
-	score: number;
-	streak: number;
-};
-
-export type PlayerProfile = {
-	username: string;
-	avatarConfig: AvatarConfig;
+	playerId: string;
+	guess: boolean;
+	isCorrect: boolean;
+	pointsAwarded: number;
+	isClose: boolean;
+	isSystemMessage: boolean;
 };
 
 export enum RoomRole {
@@ -27,17 +16,20 @@ export enum RoomRole {
 	Player = "player",
 }
 
-export enum PlayerConnectionStatus {
-	Joining = "joining",
-	Connected = "connected",
+export enum GameRole {
+	Drawing = "drawing",
+	Guessing = "guessing",
 }
 
-export enum WordDifficulty {
-	Easy = "easy",
-	Medium = "medium",
-	Hard = "hard",
-	All = "all",
-}
+export type Player = {
+	id: string;
+	username: string;
+	avatarConfig: AvatarConfig;
+	roomRole: RoomRole;
+	gameRole: GameRole;
+	score: number;
+	streak: number;
+};
 
 export enum WordBank {
 	Default = "default",
@@ -50,36 +42,70 @@ export enum GameMode {
 	NoHints = "noHints",
 }
 
+export enum WordDifficulty {
+	Easy = "easy",
+	Medium = "medium",
+	Hard = "hard",
+	All = "all",
+	Custom = "custom",
+}
+
+export type Word = {
+	category: string;
+	value: string;
+	difficulty: WordDifficulty;
+};
+
 type RoomSettings = {
 	playerLimit: number;
 	drawingTimeAllowed: number;
 	totalRounds: number;
 	wordDifficulty: WordDifficulty;
 	wordBank: WordBank;
-	customWords: string[];
+	customWords: Word[];
 	gameMode: GameMode;
 };
 
-export interface RoomState {
+export enum RoomState {
+	Waiting = 0,
+	Picking = 100,
+	Drawing = 101,
+	PostDrawing = 102,
+	GameOver = 200,
+
+	Unanimous = 900,
+}
+
+export interface Room {
 	id: string;
 	settings: RoomSettings;
 	players: { [key: string]: Player };
-	stage: RoomStage;
+	currentRound: number;
+	chatMessages: ChatMessage[];
+
+	currentState: RoomState;
+	timerEndsAt: string; // utc date string
+
+	playerId: string;
 }
 
-const initialState: RoomState = {
+const initialState: Room = {
 	id: "",
+	playerId: "",
 	settings: {
 		playerLimit: 6,
 		drawingTimeAllowed: 90,
-		totalRounds: 4,
+		totalRounds: 3,
 		wordDifficulty: WordDifficulty.All,
 		wordBank: WordBank.Mixed,
 		customWords: [],
 		gameMode: GameMode.Classic,
 	},
 	players: {},
-	stage: RoomStage.Unanimous,
+	timerEndsAt: "",
+	currentState: RoomState.Waiting,
+	currentRound: 0,
+	chatMessages: [],
 };
 
 export const roomSlice = createSlice({
@@ -87,16 +113,15 @@ export const roomSlice = createSlice({
 	initialState,
 	reducers: {
 		reset: () => initialState,
-		changeStage: (state, action: PayloadAction<RoomStage>) => {
-			state.stage = action.payload;
-		},
-		initializeRoom: (
+
+		init: (
 			state,
 			action: PayloadAction<{
 				id: string;
 				settings: RoomSettings;
 				players: { [key: string]: Player };
-				stage: RoomStage;
+				currentRound: number;
+				chatMessages: ChatMessage[];
 			}>
 		) => {
 			// Update the URL with the room ID as a query parameter
@@ -106,7 +131,11 @@ export const roomSlice = createSlice({
 			state.id = action.payload.id;
 			state.settings = action.payload.settings;
 			state.players = action.payload.players;
-			state.stage = action.payload.stage;
+			state.currentRound = action.payload.currentRound;
+			state.chatMessages = action.payload.chatMessages;
+		},
+		setPlayerId: (state, action: PayloadAction<string>) => {
+			state.playerId = action.payload;
 		},
 		setPlayers: (state, action: PayloadAction<{ [key: string]: Player }>) => {
 			state.players = action.payload;
@@ -122,18 +151,35 @@ export const roomSlice = createSlice({
 		},
 		changePlayerProfile: (
 			state,
-			action: PayloadAction<PlayerProfile & { id: string }>
+			action: PayloadAction<{
+				id: string;
+				avatarConfig: AvatarConfig;
+				username: string;
+			}>
 		) => {
-			state.players[action.payload.id].profile = {
-				username: action.payload.username,
-				avatarConfig: action.payload.avatarConfig,
-			};
+			state.players[action.payload.id].avatarConfig =
+				action.payload.avatarConfig;
+			state.players[action.payload.id].username = action.payload.username;
+		},
+		setChat: (state, action: PayloadAction<ChatMessage[]>) => {
+			state.chatMessages = action.payload;
+		},
+		newChatMessage: (state, action: PayloadAction<ChatMessage>) => {
+			state.chatMessages.push(action.payload);
+		},
+		setCurrentRound: (state, action: PayloadAction<number>) => {
+			state.currentRound = action.payload;
+		},
+		setCurrentState: (state, action: PayloadAction<RoomState>) => {
+			state.currentState = action.payload;
+		},
+		setTimer: (state, action: PayloadAction<string>) => {
+			state.timerEndsAt = action.payload;
 		},
 	},
 });
 
 export const {
-	changeStage,
 	setPlayers,
 	playerLeft,
 	changeRoomSettings,

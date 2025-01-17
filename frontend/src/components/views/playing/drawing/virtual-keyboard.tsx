@@ -43,7 +43,7 @@ function VirtualInput({
 		(state: RootState) => state.game.selectedWord
 	);
 
-	const hasNotGuessedAlready = selectedWord.includes("*");
+	const hasNotGuessedAlready = selectedWord?.value.includes("*");
 	const length = value.length;
 
 	return (
@@ -96,9 +96,9 @@ function VirtualInput({
 					<div
 						className={cn(
 							"absolute right-3 font-bold top-1/2 -translate-y-1/2",
-							length > selectedWord.length && "text-red-500",
-							length === selectedWord.length && "text-green-500",
-							length < selectedWord.length && "text-yellow-500"
+							length > (selectedWord?.value.length ?? 0) && "text-red-500",
+							length === (selectedWord?.value.length ?? 0) && "text-green-500",
+							length < (selectedWord?.value.length ?? 0) && "text-yellow-500"
 						)}
 					>
 						{length}

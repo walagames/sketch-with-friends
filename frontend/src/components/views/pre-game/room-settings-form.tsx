@@ -37,7 +37,6 @@ import {
 	WholeWordIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { changeCustomWords } from "@/state/features/preferences";
 
 const RoomFormSchema = z.object({
 	drawingTimeAllowed: z.number().min(15).max(180),
@@ -64,7 +63,7 @@ export function RoomSettingsForm() {
 	const [isEditing, setIsEditing] = useState(false);
 
 	const savedCustomWords = useSelector(
-		(state: RootState) => state.preferences.customWords
+		(state: RootState) => state.client.customWords
 	);
 
 	const form = useForm<z.infer<typeof RoomFormSchema>>({
@@ -78,7 +77,7 @@ export function RoomSettingsForm() {
 			gameMode,
 			customWords:
 				customWords.length > 0
-					? customWords.join(",")
+					? customWords.map((word) => ({ value: word })).join(",")
 					: savedCustomWords.join(","),
 		},
 	});
@@ -93,7 +92,11 @@ export function RoomSettingsForm() {
 				dispatch(
 					changeRoomSettings({
 						...form.getValues(),
-						customWords: savedCustomWords,
+						customWords: savedCustomWords.map((word) => ({
+							value: word,
+							category: "custom",
+							difficulty: WordDifficulty.Custom,
+						})),
 					})
 				);
 			}
@@ -103,8 +106,16 @@ export function RoomSettingsForm() {
 	const handleChange = useDebouncedCallback(() => {
 		const values = form.getValues();
 		const customWords = values.customWords.split(",");
-		dispatch(changeRoomSettings({ ...values, customWords }));
-		dispatch(changeCustomWords(customWords));
+		dispatch(
+			changeRoomSettings({
+				...values,
+				customWords: customWords.map((word) => ({
+					value: word,
+					category: "custom",
+					difficulty: WordDifficulty.Custom,
+				})),
+			})
+		);
 	}, 300);
 
 	return (

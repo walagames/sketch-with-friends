@@ -1,7 +1,7 @@
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { SkyScene } from "@/components/scenes/sky-scene";
-import { Player } from "@/state/features/room";
+import { Player, RoomState } from "@/state/features/room";
 import { generateAvatar } from "@/lib/avatar";
 import { ArrowDownIcon, ArrowUpIcon, CrownIcon, FlameIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -60,17 +60,21 @@ export function PostDrawingView() {
 
 	const drawingPlayer = getDrawingPlayer(players);
 
-	const message = drawingPlayer
-		? `${drawingPlayer.profile.username} sketched: `
-		: "The word was: ";
+	const currentState = useSelector(
+		(state: RootState) => state.room.currentState
+	);
 
-	const isLastPhase = useSelector((state: RootState) => state.game.isLastPhase);
+	const isLastPhase = currentState === RoomState.GameOver;
+
+	const message = drawingPlayer
+		? `${drawingPlayer.username} sketched: `
+		: "The word was: ";
 
 	return (
 		<SkyScene className="px-4 lg:px-0">
 			<h1 className="text-xl lg:text-2xl lg:py-2">
 				{message}
-				<span className="lg:text-3xl text-xl font-bold">{word}</span>
+				<span className="lg:text-3xl text-xl font-bold">{word?.value}</span>
 			</h1>
 			<Podium players={sortedPlayers.slice(0, 3)} placeChanges={placeChanges} />
 			{sortedPlayers.length > 3 && (
@@ -178,16 +182,15 @@ function LeaderboardPlace({
 	index: number;
 	placeChanges: number;
 }) {
-	const {
-		score,
-		profile: { username, avatarConfig },
-	} = player;
+	const { score, username, avatarConfig } = player;
 	const avatarSvg = generateAvatar(avatarConfig);
 
 	const points =
 		useSelector((state: RootState) => state.game.pointsAwarded[player.id]) ?? 0;
 
-	const currentPlayerId = useSelector((state: RootState) => state.client.id);
+	const currentPlayerId = useSelector(
+		(state: RootState) => state.room.playerId
+	);
 	const isCurrentPlayer = currentPlayerId === player.id;
 
 	return (
@@ -237,15 +240,13 @@ function PodiumPlace({
 		useSelector(
 			(state: RootState) => state.game.pointsAwarded[player?.id || ""]
 		) ?? 0;
-	const currentPlayerId = useSelector((state: RootState) => state.client.id);
+	const currentPlayerId = useSelector(
+		(state: RootState) => state.room.playerId
+	);
 
 	if (!player) return null;
 
-	const {
-		score,
-		profile: { username, avatarConfig },
-		id,
-	} = player;
+	const { score, username, avatarConfig, id } = player;
 	const isCurrentPlayer = currentPlayerId === id;
 	const avatarSvg = generateAvatar(avatarConfig);
 

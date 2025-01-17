@@ -22,7 +22,7 @@ export function DrawingStatus({ delay }: { delay: number }) {
 		(state: RootState) => state.game.selectedWord
 	);
 	const players = useSelector((state: RootState) => state.room.players);
-	const playerId = useSelector((state: RootState) => state.client.id);
+	const playerId = useSelector((state: RootState) => state.room.playerId);
 	const drawingPlayer = getDrawingPlayer(players);
 
 	const isDrawing = drawingPlayer?.id === playerId;
@@ -31,24 +31,31 @@ export function DrawingStatus({ delay }: { delay: number }) {
 		return (
 			<span className="flex items-center text-sm gap-1 lg:text-2xl">
 				You're sketching:{" "}
-				<span className="lg:text-2xl font-bold">{selectedWord}</span>
+				<span className="lg:text-2xl font-bold">
+					{selectedWord?.value}
+				</span>
 			</span>
 		);
 	}
 
-	const containsLetterBlanks = selectedWord.includes("*");
+	const containsLetterBlanks = selectedWord?.value.includes("*");
 
 	return (
 		<span className="flex items-start flex-wrap text-sm lg:text-2xl gap-1">
 			<span className="flex-wrap">
-				{drawingPlayer?.profile.username} is sketching:{" "}
+				{drawingPlayer?.username} is sketching:{" "}
 			</span>
 			{containsLetterBlanks ? (
 				<span className=" lg:text-2xl font-bold">
-					<WordWithLetterBlanks word={selectedWord} delay={delay - 0.1} />
+					<WordWithLetterBlanks
+						word={selectedWord?.value ?? ""}
+						delay={delay - 0.1}
+					/>
 				</span>
 			) : (
-				<span className=" lg:text-2xl font-bold">{selectedWord}</span>
+				<span className=" lg:text-2xl font-bold">
+					{selectedWord?.value}
+				</span>
 			)}
 		</span>
 	);
@@ -141,7 +148,7 @@ function WordWithLetterBlanks({
 
 export function RoundInfo() {
 	const currentRound = useSelector(
-		(state: RootState) => state.game.currentRound
+		(state: RootState) => state.room.currentRound
 	);
 	const totalRounds = useSelector(
 		(state: RootState) => state.room.settings.totalRounds

@@ -1,4 +1,4 @@
-import { Avatar, generateAvatar } from "@/lib/avatar";
+import { Avatar, AvatarConfig, generateAvatar } from "@/lib/avatar";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -12,12 +12,8 @@ import {
 import { useEffect, useState } from "react";
 import { DicesIcon } from "lucide-react";
 import { RaisedButton } from "@/components/ui/raised-button";
-import { PlayerProfile } from "@/state/features/room";
 import { RaisedInput } from "@/components/ui/raised-input";
-import {
-	changeAvatarConfig,
-	changeUsername,
-} from "@/state/features/preferences";
+import { changeAvatarConfig, changeUsername } from "@/state/features/client";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import {
@@ -55,8 +51,10 @@ interface PlayerInfoFormProps {
 	leftButton?: React.ReactNode;
 	rightButton?: React.ReactNode;
 	bottomButton?: React.ReactNode;
-	handleSubmit: (profile: PlayerProfile) => void;
-	defaultValues?: PlayerProfile;
+	handleSubmit: (data: {
+		username: string;
+		avatarConfig: AvatarConfig;
+	}) => void;
 }
 
 export function PlayerInfoForm({
@@ -68,12 +66,10 @@ export function PlayerInfoForm({
 	const [avatarSvg, setAvatarSvg] = useState("");
 
 	const avatarConfig = useSelector(
-		(state: RootState) => state.preferences.avatarConfig
+		(state: RootState) => state.client.avatarConfig
 	);
 
-	const username = useSelector(
-		(state: RootState) => state.preferences.username
-	);
+	const username = useSelector((state: RootState) => state.client.username);
 
 	const dispatch = useDispatch();
 

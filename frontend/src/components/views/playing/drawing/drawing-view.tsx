@@ -16,16 +16,12 @@ export function DrawingView() {
 		(state: RootState) => state.room.settings.drawingTimeAllowed
 	);
 
-	const currentPhaseDeadline = useSelector(
-		(state: RootState) => state.game.currentPhaseDeadline
-	);
+	const timerEndsAt = useSelector((state: RootState) => state.room.timerEndsAt);
 
 	// Only play the animation within the first second of the drawing phase
 	// Otherwise when the tab refocuses, it will play the animation again
 	const isWithinFirstSecond =
-		drawingTime -
-			(new Date(currentPhaseDeadline).getTime() - Date.now()) / 1000 <
-		1;
+		drawingTime - (new Date(timerEndsAt).getTime() - Date.now()) / 1000 < 1;
 	const [showSketchText, setShowSketchText] = useState(isWithinFirstSecond);
 
 	// Hide the sketch text after the animation is done

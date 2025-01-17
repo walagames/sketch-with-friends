@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 )
 
@@ -90,29 +91,29 @@ func filterInvalidRunes(word string) string {
 	return strings.TrimSpace(result.String())
 }
 
-func filterInvalidWords(words []string) []string {
-	result := make([]string, 0)
+func filterInvalidWords(words []Word) []Word {
+	result := make([]Word, 0)
 
 	for _, word := range words {
-		cleaned := filterInvalidRunes(word)
+		cleaned := filterInvalidRunes(word.Value)
 		if len(cleaned) > MAX_WORD_LENGTH {
 			continue
 		}
 		if cleaned != "" {
-			result = append(result, cleaned)
+			result = append(result, Word{Value: cleaned})
 		}
 	}
 
 	return result
 }
 
-func filterDuplicateWords(words []string) []string {
+func filterDuplicateWords(words []Word) []Word {
 	seen := make(map[string]bool)
-	result := make([]string, 0)
+	result := make([]Word, 0)
 
 	for _, word := range words {
-		if !seen[word] {
-			seen[word] = true
+		if !seen[word.Value] {
+			seen[word.Value] = true
 			result = append(result, word)
 		}
 	}
@@ -167,6 +168,11 @@ func validateRoomSettings(settings *RoomSettings) error {
 		return fmt.Errorf("invalid game mode: %s", settings.GameMode)
 	}
 
+	settings.CustomWords =
+		filterDuplicateWords(
+			filterInvalidWords(settings.CustomWords),
+		)
+
 	return nil
 }
 
@@ -181,18 +187,18 @@ func firstNonEmpty(values ...string) string {
 }
 
 // validatePlayerProfile validates and sanitizes player profile data
-func validatePlayerProfile(profile *playerProfile) (*playerProfile, error) {
+func validatePlayerProfile(profile *PlayerProfileChange) (*PlayerProfileChange, error) {
 	if profile == nil {
-		return &playerProfile{
+		return &PlayerProfileChange{
 			Username:     randomUsername(),
 			AvatarConfig: DefaultAvatarConfig,
 		}, nil
 	}
 
 	// Create a new profile to avoid modifying the input
-	validated := &playerProfile{
+	validated := &PlayerProfileChange{
 		Username:     sanitizeUsername(profile.Username),
-		AvatarConfig: &AvatarConfig{},
+		AvatarConfig: DefaultAvatarConfig,
 	}
 
 	// Validate username
@@ -216,4 +222,23 @@ func validatePlayerProfile(profile *playerProfile) (*playerProfile, error) {
 	}
 
 	return validated, nil
+}
+
+// Generates a random username for a player.
+func randomUsername() string {
+	adjectives := []string{
+		"Bad", "Lazy", "Odd", "Wild", "Sad",
+		"Mad", "Shy", "Fast", "Slow", "Neat",
+	}
+
+	nouns := []string{
+		"Paint", "Art", "Pen", "Brush", "Ink",
+		"Sketch", "Draw", "Line", "Dot", "Doodle",
+	}
+
+	adj := adjectives[rand.Intn(len(adjectives))]
+	noun := nouns[rand.Intn(len(nouns))]
+	num := rand.Intn(99)
+
+	return fmt.Sprintf("%s%s%d", adj, noun, num)
 }

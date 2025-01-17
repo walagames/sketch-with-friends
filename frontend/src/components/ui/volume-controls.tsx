@@ -3,12 +3,12 @@ import { RaisedButton } from "./raised-button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { Slider } from "./slider";
 import { useDispatch, useSelector } from "react-redux";
-import { changeVolume } from "@/state/features/preferences";
 import { RootState } from "@/state/store";
+import { changeVolume } from "@/state/features/client";
 
 export function VolumeControls() {
 	const dispatch = useDispatch();
-	const volume = useSelector((state: RootState) => state.preferences.volume);
+	const volume = useSelector((state: RootState) => state.client.volume);
 
 	return (
 		<div>

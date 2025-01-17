@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { generateAvatar } from "@/lib/avatar";
+import { AvatarConfig, generateAvatar } from "@/lib/avatar";
 import { Player, RoomRole, changePlayerProfile } from "@/state/features/room";
 import { forwardRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
@@ -22,13 +22,9 @@ import {
 } from "@/components/ui/dialog";
 import { PlayerInfoForm } from "@/components/views/join-room/player-info-form";
 import { RaisedButton } from "@/components/ui/raised-button";
-import { PlayerProfile } from "@/state/features/room";
 import { containerSpring } from "@/config/spring";
 import { SoundEffect, useSound } from "@/providers/sound-provider";
-import {
-	changeAvatarConfig,
-	changeUsername,
-} from "@/state/features/preferences";
+import { changeAvatarConfig, changeUsername } from "@/state/features/client";
 
 function CardContent({
 	player,
@@ -42,10 +38,10 @@ function CardContent({
 			<div className="flex items-center h-14 -translate-y-0.5 lg:w-64 min-h-0 flex-1 pr-4">
 				<img
 					className="rounded-l-lg h-full aspect-square relative"
-					src={generateAvatar(player.profile.avatarConfig)}
+					src={generateAvatar(player.avatarConfig)}
 				/>
 				<p className="text-xl leading-0 font-bold truncate pl-2 translate-y-0.5">
-					{player.profile.username}
+					{player.username}
 				</p>
 				{isCurrentPlayer && (
 					<p className="text-sm text-foreground/50 leading-0 font-bold px-1 translate-y-0.5">
@@ -61,14 +57,17 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 	({ player }, ref) => {
 		const dispatch = useDispatch();
 		const { roomRole } = player;
-		const playerId = useSelector((state: RootState) => state.client.id);
+		const playerId = useSelector((state: RootState) => state.room.playerId);
 		const isCurrentPlayer = playerId === player.id;
 		const [isEditPlayerOptionsOpen, setIsEditPlayerOptionsOpen] =
 			useState(false);
 
 		const playSound = useSound();
 
-		const handleSubmit = (profile: PlayerProfile) => {
+		const handleSubmit = (profile: {
+			username: string;
+			avatarConfig: AvatarConfig;
+		}) => {
 			setIsEditPlayerOptionsOpen(false);
 			dispatch(
 				changePlayerProfile({
@@ -107,7 +106,7 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 							</DropdownMenuTrigger>
 							<DropdownMenuContent className="w-60 translate-x-1">
 								<DropdownMenuLabel>
-									<p className="font-bold">{player.profile.username}</p>
+									<p className="font-bold">{player.username}</p>
 								</DropdownMenuLabel>
 								<DropdownMenuSeparator />
 								<DropdownMenuGroup>
@@ -148,7 +147,10 @@ function EditPlayerInfoModal({
 	isOpen: boolean;
 	setIsOpen: (open: boolean) => void;
 	player: Player;
-	handleSubmit: (profile: PlayerProfile) => void;
+	handleSubmit: (profile: {
+		username: string;
+		avatarConfig: AvatarConfig;
+	}) => void;
 }) {
 	const dispatch = useDispatch();
 	return (
@@ -156,8 +158,8 @@ function EditPlayerInfoModal({
 			open={isOpen}
 			onOpenChange={(open) => {
 				setIsOpen(open);
-				dispatch(changeAvatarConfig(player.profile.avatarConfig));
-				dispatch(changeUsername(player.profile.username));
+				dispatch(changeAvatarConfig(player.avatarConfig));
+				dispatch(changeUsername(player.username));
 			}}
 		>
 			<DialogContent
@@ -170,10 +172,6 @@ function EditPlayerInfoModal({
 				<div className="my-6 flex flex-col items-center">
 					<PlayerInfoForm
 						handleSubmit={handleSubmit}
-						defaultValues={{
-							username: player.profile.username,
-							avatarConfig: player.profile.avatarConfig,
-						}}
 						bottomButton={
 							<RaisedButton shift={false} variant="action" size="lg">
 								Save
