@@ -44,17 +44,17 @@ export function useTransitionVariants() {
 	const variants = {
 		initial: {
 			...getDirectionalOffset(direction),
-			transition: { duration: 0.3, ease: "easeInOut" },
+			// transition: { duration: 0.3, ease: "easeInOut" },
 		},
 		target: {
 			x: 0,
 			y: 0,
 			opacity: 1,
-			transition: { duration: 0.3, ease: "easeInOut" },
+			// transition: { duration: 0.3, ease: "easeInOut" },
 		},
 		exit: {
 			...getExitOffset(direction),
-			transition: { duration: 0.3, ease: "easeInOut" },
+			// transition: { duration: 0.3, ease: "easeInOut" },
 		},
 	};
 

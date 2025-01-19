@@ -1,9 +1,6 @@
-import { useContext } from "react";
-
 import { useEffect } from "react";
 import { useState } from "react";
 
-import { createContext } from "react";
 
 import {
 	EnterCodeView,
@@ -13,7 +10,6 @@ import {
 	PostDrawingView,
 	PickingView,
 } from "@/components/views";
-import { GameRole } from "@/state/features/game";
 import { RootState } from "@/state/store";
 import { useSelector } from "react-redux";
 import { RoomState } from "@/state/features/room";
@@ -37,6 +33,7 @@ const views: Record<RoomState, View> = {
 		transition: {
 			direction: Direction.RIGHT,
 		},
+		zIndex: 0,
 	},
 	[RoomState.EnterPlayerInfo]: {
 		Component: EnterPlayerInfoView,
@@ -44,13 +41,15 @@ const views: Record<RoomState, View> = {
 		transition: {
 			direction: Direction.LEFT,
 		},
+		zIndex: 1,
 	},
 	[RoomState.Waiting]: {
 		Component: WaitingView,
 		key: "waiting-view",
 		transition: {
-			direction: Direction.DOWN,
+			direction: Direction.LEFT,
 		},
+		zIndex: 2,
 	},
 	[RoomState.Picking]: {
 		Component: PickingView,
@@ -58,6 +57,7 @@ const views: Record<RoomState, View> = {
 		transition: {
 			direction: Direction.LEFT,
 		},
+		zIndex: 3,
 	},
 	[RoomState.Drawing]: {
 		Component: DrawingView,
@@ -65,6 +65,7 @@ const views: Record<RoomState, View> = {
 		transition: {
 			direction: Direction.LEFT,
 		},
+		zIndex: 4,
 	},
 	[RoomState.PostDrawing]: {
 		Component: PostDrawingView,
@@ -72,6 +73,7 @@ const views: Record<RoomState, View> = {
 		transition: {
 			direction: Direction.LEFT,
 		},
+		zIndex: 5,
 	},
 	[RoomState.GameOver]: {
 		Component: () => <></>,
@@ -79,6 +81,7 @@ const views: Record<RoomState, View> = {
 		transition: {
 			direction: Direction.LEFT,
 		},
+		zIndex: 6,
 	},
 	[RoomState.Unanimous]: {
 		Component: () => <></>,
@@ -86,32 +89,9 @@ const views: Record<RoomState, View> = {
 		transition: {
 			direction: Direction.LEFT,
 		},
+		zIndex: 7,
 	},
 };
-
-// Now determining transitions becomes much simpler
-function getTransitionDirection(from: RoomState, to: RoomState): Direction {
-	// Moving to a higher number means progressing forward
-	if (to > from) {
-		// Special case: Moving from post-drawing back to picking
-		if (from === RoomState.PostDrawing && to === RoomState.Picking) {
-			return Direction.UP; // Circle back to start of game round
-		}
-		return Direction.LEFT; // Normal game progression
-	}
-
-	// Moving to a lower number means going backwards
-	if (to < from) {
-		// Special case: Leaving a room (going back to join flow)
-		// alert("from: " + from + " to: " + to);
-		if (from >= RoomState.Waiting && to <= RoomState.EnterPlayerInfo) {
-			return Direction.RIGHT;
-		}
-		return Direction.RIGHT; // Normal backward movement
-	}
-
-	return Direction.LEFT; // Same view
-}
 
 export type View = {
 	Component: React.ComponentType;
@@ -119,14 +99,45 @@ export type View = {
 	transition: {
 		direction: Direction;
 	};
+	zIndex: number;
 };
 
-// Define possible positions for sprites in each view
-type SpritePosition = {
-	left: string;
-	top: string;
-	rotate: number;
-	opacity: number;
+// // Define possible positions for sprites in each view
+// type SpritePosition = {
+// 	left: string;
+// 	top: string;
+// 	rotate: number;
+// 	opacity: number;
+// };
+
+const getView = (currentState: RoomState, previousState: RoomState) => {
+	const view = { ...views[currentState] };
+
+	if (previousState === RoomState.Waiting && currentState === RoomState.Picking) {
+		// alert("UP");
+		view.transition.direction = Direction.UP;
+		view.key = "picking-view-first";
+	}
+
+	if (
+		currentState === RoomState.Waiting &&
+		previousState === RoomState.EnterPlayerInfo
+	) {
+		// alert("DOWN");
+		view.transition.direction = Direction.DOWN;
+		view.key = "waiting-view-first";
+	}
+
+	if (
+		currentState === RoomState.Picking &&
+		previousState === RoomState.PostDrawing
+	) {
+		// alert("LEFT");
+		view.transition.direction = Direction.LEFT;
+		view.key = "picking-view-second";
+	}
+
+	return view;
 };
 
 // // Map each game view to sprite positions
@@ -146,49 +157,17 @@ type SpritePosition = {
 //   // ... positions for other views
 // };
 
-// Create a context to share view transition information
-type ViewTransitionContext = {
-	from: RoomState | null;
-	to: RoomState | null;
-	direction: Direction;
-};
-
-const ViewTransitionContext = createContext<ViewTransitionContext>({
-	from: RoomState.EnterCode,
-	to: RoomState.EnterPlayerInfo,
-	direction: Direction.RIGHT,
-});
-
-// A hook to manage view transitions and sprite animations
-function useViewTransition(currentState: RoomState) {
-	const [transitionState, setTransitionState] = useState<ViewTransitionContext>(
-		{
-			from: RoomState.Unanimous,
-			to: currentState,
-			direction: Direction.RIGHT,
-		}
-	);
-
-	// Update transition state when view changes
-	useEffect(() => {
-		setTransitionState((prev) => ({
-			from: prev.to,
-			to: currentState,
-			direction: getTransitionDirection(prev.to!, currentState),
-		}));
-	}, [currentState]);
-
-	return transitionState;
-}
-
 // Main view container that provides transition context
 export function RoomViewContainer() {
 	const currentState = useSelector(
 		(state: RootState) => state.room.currentState
 	);
-	const transitionState = useViewTransition(currentState);
 
-	const View = views[currentState];
+	const previousState = useSelector(
+		(state: RootState) => state.room.previousState
+	);
+
+	const View = getView(currentState, previousState);
 
 	const [mountId, setMountId] = useState(Date.now());
 
@@ -209,60 +188,26 @@ export function RoomViewContainer() {
 		};
 	}, []);
 
-	const roomId = useSelector((state: RootState) => state.room.id);
+	// const roomId = useSelector((state: RootState) => state.room.id);
 
-	// Hack to work around animation bug when leaving a room
-	useEffect(() => {
-		if (!roomId) {
-			setMountId(Date.now());
-		}
-	}, [roomId]);
+	// // Hack to work around animation bug when leaving a room
+	// useEffect(() => {
+	// 	if (!roomId) {
+	// 		setMountId(Date.now());
+	// 	}
+	// }, [roomId]);
 
 	return (
-		<ViewTransitionContext.Provider value={transitionState}>
-			<AnimatePresenceWithDirection
-				direction={transitionState.direction}
-				mode="sync"
-				key={mountId}
-				initial={false}
-			>
-				<TransitionContainer key={View.key}>
-					<View.Component />
-					{/* <SceneSprites /> */}
-				</TransitionContainer>
-			</AnimatePresenceWithDirection>
-		</ViewTransitionContext.Provider>
+		<AnimatePresenceWithDirection
+			direction={View.transition.direction}
+			mode="sync"
+			key={mountId}
+			initial={false}
+		>
+			<TransitionContainer zIndex={View.zIndex} key={View.key}>
+				<View.Component />
+				{/* <SceneSprites /> */}
+			</TransitionContainer>
+		</AnimatePresenceWithDirection>
 	);
 }
-
-// // A component to manage sprites that are aware of view transitions
-// function SceneSprites() {
-// 	const { from, to } = useContext(ViewTransitionContext);
-
-// 	// Get sprite positions for current transition
-// 	const fromPosition = from ? spritePositions[from] : null;
-// 	const toPosition = to ? spritePositions[to] : null;
-
-// 	return (
-// 		<AnimatePresence mode="sync">
-// 			<AirplaneDoodle
-// 				layoutId="airplane"
-// 				// If we're transitioning between known states, use those positions
-// 				startAt={fromPosition ?? toPosition}
-// 				animateTo={toPosition}
-// 				// Calculate exit position based on next view's entry point
-// 				leaveTo={toPosition}
-// 				// Add a custom variant for handling late-join scenarios
-// 				variants={{
-// 					lateJoin: {
-// 						// Special animation for when a player late-joins
-// 						opacity: 0,
-// 						transition: { duration: 0 },
-// 					},
-// 				}}
-// 				// Use a custom prop to detect late-join scenarios
-// 				animate={isLateJoin ? "lateJoin" : "animate"}
-// 			/>
-// 		</AnimatePresence>
-// 	);
-// }

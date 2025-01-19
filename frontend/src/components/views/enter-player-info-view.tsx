@@ -18,15 +18,6 @@ export function EnterPlayerInfoView() {
 
 	const [isJoining, setIsJoining] = useState(false);
 
-	const exitPosition = () => {
-		switch (roomState) {
-			case RoomState.Waiting:
-				return { left: "80%", top: "-20%", rotate: -5 };
-			default:
-				return { opacity: 0, left: "5%", top: "55%", rotate: 20 };
-		}
-	};
-
 	const enteredRoomCode = useSelector(
 		(state: RootState) => state.client.roomCode
 	);
@@ -102,8 +93,9 @@ export function EnterPlayerInfoView() {
 			</AnimatePresence>
 			<AirplaneDoodle
 				startAt={{ left: "-15%", top: "50%", rotate: 25, opacity: 0 }}
-				animateTo={{ left: "25%", top: "60%", rotate: 35, opacity: 1 }}
-				leaveTo={exitPosition()}
+				animateTo={{ left: "25%", top: "60%", rotate: 25, opacity: 1 }}
+				// @ts-expect-error - TODO: fix this
+				leaveTo={{ opacity: 0, transition: { duration: 0 } }}
 				// skipTransition
 			/>
 		</SkyScene>

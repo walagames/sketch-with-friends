@@ -48,7 +48,7 @@ export const AirplaneDoodle = forwardRef<
 			animate={props.animateTo}
 			exit={{
 				...props.leaveTo,
-				transition: reducedMotion ? NoMotionConfig : planeSpring,
+				// transition: reducedMotion ? NoMotionConfig : planeSpring,
 			}}
 			transition={transition}
 			initial={props.startAt}

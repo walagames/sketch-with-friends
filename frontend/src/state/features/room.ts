@@ -86,6 +86,7 @@ export interface Room {
 	chatMessages: ChatMessage[];
 
 	currentState: RoomState;
+	previousState: RoomState;
 	timerEndsAt: string; // utc date string
 
 	playerId: string;
@@ -106,6 +107,7 @@ const initialState: Room = {
 	players: {},
 	timerEndsAt: "",
 	currentState: RoomState.EnterCode,
+	previousState: RoomState.EnterCode,
 	currentRound: 0,
 	chatMessages: [],
 };
@@ -173,6 +175,7 @@ export const roomSlice = createSlice({
 			state.currentRound = action.payload;
 		},
 		setCurrentState: (state, action: PayloadAction<RoomState>) => {
+			state.previousState = state.currentState;
 			state.currentState = action.payload;
 		},
 		setTimer: (state, action: PayloadAction<string>) => {

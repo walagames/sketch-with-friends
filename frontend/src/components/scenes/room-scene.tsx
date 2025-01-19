@@ -1,27 +1,31 @@
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { AnimatePresence } from "framer-motion";
-import { useSelector } from "react-redux";
-import { RootState } from "@/state/store";
-import { RoomState } from "@/state/features/room";
+import { cn } from "@/lib/utils";
 
-export function RoomScene({ children }: { children: React.ReactNode }) {
-	const currentState = useSelector(
-		(state: RootState) => state.room.currentState
-	);
-
-	const shouldSkipTransition =
-		currentState === RoomState.Unanimous || currentState === RoomState.GameOver;
-
+export function RoomScene({
+	children,
+	className,
+}: {
+	children: React.ReactNode;
+	className?: string;
+}) {
 	return (
-		<div className="flex h-full flex-col items-center justify-center w-full relative">
+		<div
+			className={cn(
+				"flex h-full flex-col items-center justify-center w-full relative",
+				className
+			)}
+		>
 			{children}
 			<AirplaneDoodle
 				// layoutId="airplane-sky"
-				startAt={{ left: "60%", top: "105%", rotate: -5, opacity: 0 }}
-				animateTo={{ opacity: 1, left: "80%", top: "80%" }}
+				startAt={{ left: "25%", top: "160%", rotate: 25 }}
+				animateTo={{ opacity: 1, left: "80%", top: "80%", rotate: 5 }}
 				leaveTo={{ left: "135%", top: "70%", rotate: 40 }}
-				skipTransition={shouldSkipTransition}
+
+				// animateTo={{ left: "25%", top: "60%", rotate: 25, opacity: 1 }}
+				// skipTransition={shouldSkipTransition}
 			/>
 			<AnimatePresence>
 				<BobbingDoodle
