@@ -28,7 +28,7 @@ const (
 
 	SetPointsAwardedEvt EventType = "game/setPointsAwarded"
 	SetWordOptionsEvt   EventType = "game/setWordOptions"
-	SetSelectedWordEvt  EventType = "game/setSelectedWord"
+	SetSelectedWordEvt  EventType = "game/selectWord"
 
 	RoomInitEvt           EventType = "room/init"
 	SetPlayerIdEvt        EventType = "room/setPlayerId"

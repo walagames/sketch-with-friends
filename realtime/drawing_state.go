@@ -48,7 +48,7 @@ func NewDrawingState(word Word) RoomState {
 }
 
 // Applies a new hint to the hinted word.
-func (state DrawingState) applyHint() {
+func (state *DrawingState) applyHint() {
 	prevRunes := []rune(state.hintedWord)
 	fullRunes := []rune(state.currentWord.Value)
 	hiddenIndices := []int{}
@@ -73,11 +73,11 @@ func (state DrawingState) applyHint() {
 	state.hintedWord = string(prevRunes)
 }
 
-func (state DrawingState) Enter(room *room) {
+func (state *DrawingState) Enter(room *room) {
 	phaseDuration := time.Duration(room.Settings.DrawingTimeAllowed) * time.Second
 
 	room.broadcast(GameRoleGuessing,
-		event(SetSelectedWordEvt, state.hintedWord),
+		event(SetSelectedWordEvt, NewWord(state.hintedWord, state.currentWord.Difficulty)),
 	)
 
 	// If the game mode is not no hints, we start the hint routine
@@ -89,7 +89,7 @@ func (state DrawingState) Enter(room *room) {
 		// This will apply hints to the hinted word at a regular interval
 		room.scheduler.addReccuringEvent(ScheduledHintReveal, hintInterval, totalHints, func() {
 			state.applyHint()
-			room.broadcast(GameRoleGuessing, event(SetSelectedWordEvt, state.hintedWord))
+			room.broadcast(GameRoleGuessing, event(SetSelectedWordEvt, NewWord(state.hintedWord, state.currentWord.Difficulty)))
 		})
 	}
 
@@ -104,14 +104,11 @@ func (state DrawingState) Enter(room *room) {
 	})
 }
 
-func (state DrawingState) Exit(room *room) {
-	room.scheduler.cancelEvent(ScheduledStateChange)
-
-	// Reveal the word
-	state.hintedWord = state.currentWord.Value
+func (state *DrawingState) Exit(room *room) {
+	room.scheduler.cancelEvent(ScheduledHintReveal)
 
 	room.broadcast(GameRoleAny,
-		event(SetSelectedWordEvt, state.hintedWord),
+		event(SetSelectedWordEvt, state.currentWord),
 		event(SetCurrentStateEvt, PostDrawing),
 	)
 
@@ -123,17 +120,17 @@ func (state DrawingState) Exit(room *room) {
 	}
 
 	if len(state.correctGuessers) == (len(room.Players) - 1) {
-		msg = fmt.Sprintf("%s sketched %s and everyone guessed it!", drawerName, state.hintedWord)
+		msg = fmt.Sprintf("%s sketched %s and everyone guessed it!", drawerName, state.currentWord.Value)
 	} else if len(state.correctGuessers) > 0 {
 		playersStr := "player"
 		if len(state.correctGuessers) > 1 {
 			playersStr = "players"
 		}
-		msg = fmt.Sprintf("%s sketched %s and %d %s guessed it.", drawerName, state.hintedWord, len(state.correctGuessers), playersStr)
+		msg = fmt.Sprintf("%s sketched %s and %d %s guessed it.", drawerName, state.currentWord.Value, len(state.correctGuessers), playersStr)
 	} else if len(state.correctGuessers) == 0 {
-		msg = fmt.Sprintf("%s sketched %s but nobody guessed it.", drawerName, state.hintedWord)
+		msg = fmt.Sprintf("%s sketched %s but nobody guessed it.", drawerName, state.currentWord.Value)
 	} else {
-		msg = fmt.Sprintf("%s sketched %s", drawerName, state.hintedWord)
+		msg = fmt.Sprintf("%s sketched %s", drawerName, state.currentWord.Value)
 	}
 
 	room.SendSystemMessage(msg)
@@ -166,6 +163,8 @@ func (state DrawingState) Exit(room *room) {
 		slog.Debug("Streak bonus awarded", "player", p.ID, "streak", p.Streak, "streakBonus", streakBonus, "playerPosition", playerPositions[p.ID])
 	}
 
+	room.currentDrawer.GameRole = GameRoleGuessing
+
 	// Inform players of the state changes
 	room.broadcast(GameRoleAny,
 		event(SetPlayersEvt, room.Players),
@@ -177,6 +176,7 @@ func (state DrawingState) Exit(room *room) {
 		room.SendSystemMessage(leadChange)
 	}
 
+	room.setState(NewPostDrawingState(state.pointsAwarded))
 }
 
 // Decodes the raw payload into a Stroke.
@@ -223,7 +223,7 @@ func removeLastStroke(strokes []Stroke) []Stroke {
 	return strokes
 }
 
-func (state DrawingState) handleStroke(room *room, cmd *Command) error {
+func (state *DrawingState) handleStroke(room *room, cmd *Command) error {
 	// Decode the stroke from the payload
 	stroke, err := decodeStroke(cmd.Payload)
 	if err != nil {
@@ -241,7 +241,7 @@ func (state DrawingState) handleStroke(room *room, cmd *Command) error {
 	return nil
 }
 
-func (state DrawingState) handleStrokePoint(room *room, cmd *Command) error {
+func (state *DrawingState) handleStrokePoint(room *room, cmd *Command) error {
 	// Decode the stroke point from the payload
 	point, err := decodeStrokePoint(cmd.Payload)
 	if err != nil {
@@ -259,7 +259,7 @@ func (state DrawingState) handleStrokePoint(room *room, cmd *Command) error {
 	return nil
 }
 
-func (state DrawingState) handleClearStrokes(room *room, cmd *Command) error {
+func (state *DrawingState) handleClearStrokes(room *room, cmd *Command) error {
 	// Clear the strokes from the game state
 	state.strokes = make([]Stroke, 0)
 
@@ -270,7 +270,7 @@ func (state DrawingState) handleClearStrokes(room *room, cmd *Command) error {
 	return nil
 }
 
-func (state DrawingState) handleUndoStroke(room *room, cmd *Command) error {
+func (state *DrawingState) handleUndoStroke(room *room, cmd *Command) error {
 	// Remove the most recent stroke from the game state
 	state.strokes = removeLastStroke(state.strokes)
 
@@ -282,16 +282,12 @@ func (state DrawingState) handleUndoStroke(room *room, cmd *Command) error {
 
 }
 
-func (state DrawingState) handlePlayerLeft(room *room, cmd *Command) error {
+func (state *DrawingState) handlePlayerLeft(room *room, cmd *Command) error {
 	// Remove the player from the correct guessers map and points awarded map.
 	// This is necessary because the guessers map is used to determine if all
 	// guessing players have guessed correctly.
-	if _, ok := state.correctGuessers[cmd.Player.ID]; ok {
-		delete(state.correctGuessers, cmd.Player.ID)
-	}
-	if _, ok := state.pointsAwarded[cmd.Player.ID]; ok {
-		delete(state.pointsAwarded, cmd.Player.ID)
-	}
+	delete(state.correctGuessers, cmd.Player.ID)
+	delete(state.pointsAwarded, cmd.Player.ID)
 
 	if cmd.Player.GameRole == GameRoleDrawing || len(state.correctGuessers) >= len(room.Players)-2 {
 		// TODO: cancel the event
@@ -301,7 +297,7 @@ func (state DrawingState) handlePlayerLeft(room *room, cmd *Command) error {
 	return nil
 }
 
-func (state DrawingState) handlePlayerJoined(room *room, cmd *Command) error {
+func (state *DrawingState) handlePlayerJoined(room *room, cmd *Command) error {
 	player := cmd.Player
 
 	room.enqueueDrawingPlayer(player)
@@ -348,9 +344,11 @@ func isGuessClose(guess string, currentWord Word) bool {
 	return distance <= maxDistance
 }
 
-func (state DrawingState) handleChatMessage(room *room, cmd *Command) error {
+func (state *DrawingState) handleChatMessage(room *room, cmd *Command) error {
 	player := cmd.Player
 	guessValue := cmd.Payload.(string)
+
+	guessValue = sanitizeGuess(guessValue)
 
 	playerIsNotDrawing := room.currentDrawer.ID != player.ID
 	playerHasNotAlreadyGuessedCorrectly := !state.correctGuessers[player.ID]
@@ -358,8 +356,11 @@ func (state DrawingState) handleChatMessage(room *room, cmd *Command) error {
 	if playerIsNotDrawing && playerHasNotAlreadyGuessedCorrectly {
 		var result ChatMessage
 
+		slog.Debug("judging guess", "guess", guessValue, "currentWord", state.currentWord.Value)
+
 		// Check if the guess is correct if the player is not drawing and hasn't guessed correctly yet
 		if strings.EqualFold(guessValue, state.currentWord.Value) {
+			slog.Debug("guess is correct")
 			guesserPoints, drawerPoints := GuessPoints(len(room.Players)-1, len(state.correctGuessers), state.currentWord.Difficulty)
 
 			// Update the guesser's points
@@ -378,7 +379,7 @@ func (state DrawingState) handleChatMessage(room *room, cmd *Command) error {
 				IsCorrect:     true,
 				PointsAwarded: guesserPoints,
 			}
-			player.Send(event(SetSelectedWordEvt, state.currentWord.Value))
+			player.Send(event(SetSelectedWordEvt, state.currentWord))
 		} else {
 			result = ChatMessage{
 				ID:       uuid.New(),
@@ -387,6 +388,7 @@ func (state DrawingState) handleChatMessage(room *room, cmd *Command) error {
 			}
 
 			if playerIsNotDrawing && !playerHasNotAlreadyGuessedCorrectly {
+				slog.Debug("checking if guess is close")
 				result.IsClose = isGuessClose(strings.ToLower(guessValue), state.currentWord)
 			}
 		}
@@ -397,6 +399,7 @@ func (state DrawingState) handleChatMessage(room *room, cmd *Command) error {
 
 		// Skip to the next phase if everyone has guessed correctly already
 		if len(state.correctGuessers) >= len(room.Players)-1 {
+			room.scheduler.cancelEvent(ScheduledStateChange)
 			room.Transition()
 		}
 	}
@@ -405,7 +408,7 @@ func (state DrawingState) handleChatMessage(room *room, cmd *Command) error {
 }
 
 // ! ordered by most likely to be called
-func (state DrawingState) HandleCommand(room *room, cmd *Command) error {
+func (state *DrawingState) HandleCommand(room *room, cmd *Command) error {
 	switch cmd.Type {
 	case AddStrokePointCmd:
 		return state.handleStrokePoint(room, cmd)

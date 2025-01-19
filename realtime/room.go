@@ -143,12 +143,12 @@ func NewRoom(id string) Room {
 			CustomWords:        make([]Word, 0),
 		},
 
-		currentState: WaitingState{},
+		currentState: &WaitingState{},
 	}
 }
 
 func (r *room) Transition() {
-	r.scheduler.cancelEvent(ScheduledStateChange)
+	// States should manage their own events
 	r.currentState.Exit(r)
 	r.currentState.Enter(r)
 }
@@ -157,7 +157,6 @@ func (r *room) Transition() {
 // early. Ex. In the case that player count falls below
 // the minimum required to start the game.
 func (r *room) TransitionTo(state RoomState) {
-	r.scheduler.cancelEvent(ScheduledStateChange)
 	r.currentState.Exit(r)
 	r.currentState = state
 	r.currentState.Enter(r)
@@ -323,26 +322,7 @@ func (r *room) dispatch(cmd *Command) {
 
 	switch cmd.Type {
 	case ChatMessageCmd:
-		slog.Info("SubmitChatMessage", "message", cmd.Payload)
-		slog.Debug("New chat message", "message", cmd.Payload)
-		msg := sanitizeGuess(cmd.Payload.(string))
-		if msg == "" {
-			slog.Debug("empty chat message", "player", player.ID)
-			return
-		}
-
-		chatMsg := ChatMessage{
-			ID:              uuid.New(),
-			PlayerID:        player.ID,
-			Guess:           msg,
-			IsCorrect:       false,
-			PointsAwarded:   0,
-			IsClose:         false,
-			IsSystemMessage: false,
-		}
-
-		r.ChatMessages = append(r.ChatMessages, chatMsg)
-		r.broadcast(GameRoleAny, event(NewChatMessageEvt, chatMsg))
+		r.currentState.HandleCommand(r, cmd)
 
 		// fallthrough
 	case UpdatePlayerProfileCmd:

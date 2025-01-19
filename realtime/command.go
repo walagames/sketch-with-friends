@@ -36,7 +36,7 @@ const (
 	SelectWordCmd  CommandType = "game/selectWord"
 	StartGameCmd   CommandType = "game/start"
 
-	ChangeRoomSettingsCmd  CommandType = "room/changeSettings"
+	ChangeRoomSettingsCmd  CommandType = "room/changeRoomSettings"
 	UpdatePlayerProfileCmd CommandType = "room/updatePlayerProfile"
 
 	PlayerLeftCmd   CommandType = "room/playerLeft"

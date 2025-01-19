@@ -8,17 +8,17 @@ import (
 type WaitingState struct{}
 
 func NewWaitingState() RoomState {
-	return WaitingState{}
+	return &WaitingState{}
 }
 
-func (state WaitingState) Enter(room *room) {
+func (state *WaitingState) Enter(room *room) {
 	room.broadcast(GameRoleAny,
 		event(SetCurrentStateEvt, Waiting),
 		event(SetPlayersEvt, room.Players), // ! idk if this is needed
 	)
 }
 
-func (state WaitingState) Exit(room *room) {
+func (state *WaitingState) Exit(room *room) {
 	room.setState(
 		NewPickingState(
 			randomWordOptions(3,
@@ -29,7 +29,7 @@ func (state WaitingState) Exit(room *room) {
 	)
 }
 
-func (state WaitingState) HandleCommand(room *room, cmd *Command) error {
+func (state *WaitingState) HandleCommand(room *room, cmd *Command) error {
 	switch cmd.Type {
 	case StartGameCmd:
 		return state.handleGameStart(room, cmd)
@@ -43,7 +43,7 @@ func (state WaitingState) HandleCommand(room *room, cmd *Command) error {
 	}
 }
 
-func (state WaitingState) handleGameStart(room *room, cmd *Command) error {
+func (state *WaitingState) handleGameStart(room *room, cmd *Command) error {
 	if len(room.Players) < 2 {
 		return ErrNotEnoughPlayers
 	}
@@ -59,14 +59,16 @@ func (state WaitingState) handleGameStart(room *room, cmd *Command) error {
 	return nil
 }
 
-func (state WaitingState) handleRoomSettingsChange(room *room, cmd *Command) error {
+func (state *WaitingState) handleRoomSettingsChange(room *room, cmd *Command) error {
 	settings, err := decodePayload[RoomSettings](cmd.Payload)
 	if err != nil {
+		slog.Error("failed to decode room settings", "error", err)
 		return fmt.Errorf("failed to decode room settings: %w", err)
 	}
 
 	// Validate the settings before applying them
 	if err := validateRoomSettings(&settings); err != nil {
+		slog.Error("invalid room settings", "error", err)
 		return fmt.Errorf("invalid room settings: %w", err)
 	}
 
@@ -79,7 +81,7 @@ func (state WaitingState) handleRoomSettingsChange(room *room, cmd *Command) err
 	return nil
 }
 
-func (state WaitingState) handlePlayerJoined(room *room, cmd *Command) error {
+func (state *WaitingState) handlePlayerJoined(room *room, cmd *Command) error {
 	cmd.Player.Send(
 		event(SetCurrentStateEvt, Waiting),
 	)

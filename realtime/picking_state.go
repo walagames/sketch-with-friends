@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"math/rand"
+	"time"
 )
 
 type PickingState struct {
@@ -12,20 +13,23 @@ type PickingState struct {
 }
 
 func NewPickingState(wordOptions []Word) RoomState {
-	return PickingState{
+	return &PickingState{
 		wordOptions:  wordOptions,
 		selectedWord: nil,
 	}
 }
 
-func (state PickingState) Enter(room *room) {
+func (state *PickingState) Enter(room *room) {
+	slog.Debug("ENTERING PICKING STATE")
 	nextDrawer := room.getNextDrawingPlayer()
 
 	// If the queue is empty, we're at the end of a round
 	// OR the beginning of a new game
 	if nextDrawer == nil {
+		slog.Debug("queue is empty, checking if we're at the end of a round")
 		// It's the last round, return to waiting state
 		if room.CurrentRound >= room.Settings.TotalRounds {
+			slog.Debug("it's the last round, returning to waiting state")
 			room.TransitionTo(NewWaitingState())
 			return
 		}
@@ -36,6 +40,7 @@ func (state PickingState) Enter(room *room) {
 		nextDrawer = room.getNextDrawingPlayer()
 
 		if nextDrawer == nil {
+			slog.Error("drawer was nil twice")
 			// TODO: idk if this can happen, maybe a race condition with a player leaving?
 			// what should we do here?
 			return
@@ -49,35 +54,53 @@ func (state PickingState) Enter(room *room) {
 	// room.scheduler.addEvent(evt) ??
 	// broadcast(changeTimer evt.getUTC) ??
 
+	room.currentDrawer = nextDrawer
 	nextDrawer.GameRole = GameRoleDrawing
 	nextDrawer.Send(
 		event(SetWordOptionsEvt, state.wordOptions),
 	)
 
+	// room.scheduler.cancelEvent(ScheduledStateChange)
+	slog.Debug("adding scheduled state change event")
+	newTime := time.Now().Add(time.Second * 15)
+	slog.Debug("new time", "time", newTime)
+	room.scheduler.addEvent(ScheduledStateChange, newTime, func() {
+		slog.Debug("CALLING FUNCTION")
+		room.Transition()
+	})
+
 	room.broadcast(GameRoleAny,
 		event(SetCurrentStateEvt, Picking),
 		event(SetPlayersEvt, room.Players),
 		event(SetCurrentRoundEvt, room.CurrentRound),
-		event(SetSelectedWordEvt, ""),
+		event(SetSelectedWordEvt, nil),
+		event(SetTimerEvt, time.Now().Add(time.Second*15).UTC()),
 	)
+
 }
 
-func (state PickingState) Exit(room *room) {
+func (state *PickingState) Exit(room *room) {
+	room.scheduler.cancelEvent(ScheduledStateChange)
 	// If the player never choose a word, we pick one for them
 	if state.selectedWord == nil {
+		slog.Debug("no word selected, picking a random word")
 		// Select a random word from the options
 		randomIndex := rand.Intn(len(state.wordOptions) - 1)
 		state.selectedWord = &state.wordOptions[randomIndex]
 
 		// Notify all players of the chosen word
-		room.broadcast(GameRoleAny, event(SetSelectedWordEvt, state.selectedWord.Value))
+		room.currentDrawer.Send(
+			event(SetSelectedWordEvt, state.selectedWord),
+		)
 	}
 
+	// room.broadcast(GameRoleGuessing, event(SetSelectedWordEvt, state.selectedWord.Value))
 	room.setState(NewDrawingState(*state.selectedWord))
 }
 
-func (state PickingState) handleWordSelection(room *room, cmd *Command) error {
+func (state *PickingState) handleWordSelection(room *room, cmd *Command) error {
 	if cmd.Player.GameRole != GameRoleDrawing {
+		slog.Debug("player is not the drawer", "player", cmd.Player.ID)
 		return ErrWrongGameRole
 	}
 
@@ -86,24 +109,48 @@ func (state PickingState) handleWordSelection(room *room, cmd *Command) error {
 		Value: wordMap["value"].(string),
 	}
 
+	slog.Debug("player selected word", "word", selectedWord.Value)
+
 	var foundDrawingWord *Word
 	for _, option := range state.wordOptions {
 		if option.Value == selectedWord.Value {
+			slog.Debug("found drawing word", "word", option.Value)
 			foundDrawingWord = &option
 			break
 		}
 	}
 	if foundDrawingWord == nil {
+		slog.Error("selected word is not a valid option", "word", selectedWord.Value)
 		return fmt.Errorf("selected word is not a valid option")
 	}
 
 	state.selectedWord = foundDrawingWord
+
+	room.scheduler.cancelEvent(ScheduledStateChange)
 	room.Transition()
 
 	return nil
 }
 
-func (state PickingState) HandleCommand(room *room, cmd *Command) error {
+func (state *PickingState) handlePlayerLeft(room *room, cmd *Command) error {
+	// Handle phase transitions if the player that left was the drawer
+	if cmd.Player.GameRole == GameRoleDrawing {
+		room.TransitionTo(NewPickingState(state.wordOptions))
+	}
+	return nil
+}
+
+func (state *PickingState) handlePlayerJoined(room *room, cmd *Command) error {
+	player := cmd.Player
+
+	room.enqueueDrawingPlayer(player)
+	player.Send(
+		event(SetCurrentStateEvt, Picking),
+	)
+	return nil
+}
+
+func (state *PickingState) HandleCommand(room *room, cmd *Command) error {
 	switch cmd.Type {
 	case SelectWordCmd:
 		return state.handleWordSelection(room, cmd)
@@ -115,22 +162,4 @@ func (state PickingState) HandleCommand(room *room, cmd *Command) error {
 		slog.Error("Invalid command for current state", "command", cmd.Type)
 		return ErrInvalidCommand
 	}
-}
-
-func (state PickingState) handlePlayerLeft(room *room, cmd *Command) error {
-	// Handle phase transitions if the player that left was the drawer
-	if cmd.Player.GameRole == GameRoleDrawing {
-		room.TransitionTo(NewPickingState(state.wordOptions))
-	}
-	return nil
-}
-
-func (state PickingState) handlePlayerJoined(room *room, cmd *Command) error {
-	player := cmd.Player
-
-	room.enqueueDrawingPlayer(player)
-	player.Send(
-		event(SetCurrentStateEvt, Picking),
-	)
-	return nil
 }

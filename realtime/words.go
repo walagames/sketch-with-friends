@@ -33,6 +33,10 @@ type Word struct {
 	Difficulty WordDifficulty `json:"difficulty"`
 }
 
+func NewWord(value string, difficulty WordDifficulty) Word {
+	return Word{Value: value, Difficulty: difficulty}
+}
+
 var wordBank []Word
 
 // This runs when the package is first imported.

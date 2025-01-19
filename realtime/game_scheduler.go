@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log/slog"
 	"time"
 )
 
@@ -43,17 +44,21 @@ func (s *GameScheduler) tick(delta time.Duration) {
 
 	for id, event := range s.events {
 		if s.now.After(event.nextRunAt) {
+			slog.Debug("calling handler", "id", id)
 			event.handler()
 
 			if event.isRecurring {
 				event.runCount++
 				if event.runLimit > 0 && event.runCount >= event.runLimit {
+					slog.Debug("event reached run limit, deleting", "id", id)
 					delete(s.events, id)
 				} else {
+					slog.Debug("event is recurring, adding interval", "id", id, "interval", event.interval)
 					event.nextRunAt = event.nextRunAt.Add(event.interval)
 				}
 			} else {
-				delete(s.events, id)
+				slog.Debug("event is not recurring, deleting", "id", id)
+				// delete(s.events, id)
 			}
 		}
 	}
@@ -65,11 +70,12 @@ func (s *GameScheduler) addEvent(eventType ScheduledEventType, when time.Time, h
 		handler:   handler,
 	}
 
-	if s.events[eventType] != nil {
-		return nil, ErrEventAlreadyExists
-	}
+	// if s.events[eventType] != nil {
+	// 	return nil, ErrEventAlreadyExists
+	// }
 
 	s.events[eventType] = event
+	slog.Debug("event added", "eventType", eventType, "when", when)
 	return event, nil
 }
 
@@ -84,6 +90,7 @@ func (s *GameScheduler) addReccuringEvent(eventType ScheduledEventType, interval
 	}
 
 	if s.events[eventType] != nil {
+		slog.Debug("event already exists", "eventType", eventType)
 		return nil, ErrEventAlreadyExists
 	}
 
@@ -93,8 +100,11 @@ func (s *GameScheduler) addReccuringEvent(eventType ScheduledEventType, interval
 
 func (s *GameScheduler) cancelEvent(eventType ScheduledEventType) error {
 	if s.events[eventType] == nil {
+		slog.Debug("event not found", "eventType", eventType)
 		return ErrEventNotFound
 	}
+
+	slog.Debug("cancelling event", "eventType", eventType)
 
 	delete(s.events, eventType)
 	return nil
