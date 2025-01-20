@@ -167,7 +167,15 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 			const timeUntilWarning = timeUntilDeadline - 9000; // 9 seconds before deadline
 
 			// Only set timers if deadline is in the future and we haven't passed the warning point
-			if (timeUntilDeadline > 0 && timeUntilWarning > 0) {
+			if (timeUntilDeadline > 0) {
+				// Calculate the delay to the next even second
+				const millisecondsToNextEven = (timeUntilWarning * -1) % 1000;
+
+				let delay = millisecondsToNextEven;
+				if (timeUntilWarning > 0) {
+					delay = timeUntilWarning;
+				}
+
 				// Set timeout for when to start the countdown
 				timeoutRef.current = setTimeout(() => {
 					playSound(SoundEffect.CLOCK_TICK);
@@ -175,7 +183,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 					intervalRef.current = setInterval(() => {
 						playSound(SoundEffect.CLOCK_TICK);
 					}, 1000);
-				}, timeUntilWarning);
+				}, delay);
 			}
 		}
 
