@@ -1,14 +1,13 @@
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { SkyScene } from "@/components/scenes/sky-scene";
-import { Player, RoomState } from "@/state/features/room";
+import { Player } from "@/state/features/room";
 import { generateAvatar } from "@/lib/avatar";
 import { ArrowDownIcon, ArrowUpIcon, CrownIcon, FlameIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { AnimatePresence, motion } from "framer-motion";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
-import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { getDrawingPlayer } from "@/lib/player";
 const springConfig = {
 	type: "spring",
@@ -60,12 +59,6 @@ export function PostDrawingView() {
 
 	const drawingPlayer = getDrawingPlayer(players);
 
-	const currentState = useSelector(
-		(state: RootState) => state.room.currentState
-	);
-
-	const isLastPhase = currentState === RoomState.GameOver;
-
 	const message = drawingPlayer
 		? `${drawingPlayer.username} sketched: `
 		: "The word was: ";
@@ -99,16 +92,6 @@ export function PostDrawingView() {
 					src="/doodles/rain-cloud.png"
 				/>
 			</AnimatePresence>
-			<AirplaneDoodle
-				skipTransition
-				startAt={{ left: "5%", top: "55%", rotate: 20, opacity: 0 }}
-				animateTo={{ left: "5%", top: "55%", rotate: 20, opacity: 1 }}
-				leaveTo={
-					isLastPhase
-						? { left: "80%", top: "-20%", rotate: -5 }
-						: { left: "145%", top: "65%", rotate: 30 }
-				}
-			/>
 		</SkyScene>
 	);
 }

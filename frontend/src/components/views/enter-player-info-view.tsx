@@ -1,5 +1,4 @@
 import { SkyScene } from "@/components/scenes/sky-scene";
-import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { PlayerInfoForm } from "./components/player-info-form";
 import { AnimatePresence } from "framer-motion";
@@ -91,13 +90,6 @@ export function EnterPlayerInfoView() {
 					src="/doodles/rain-cloud.png"
 				/>
 			</AnimatePresence>
-			<AirplaneDoodle
-				startAt={{ left: "-15%", top: "50%", rotate: 25, opacity: 0 }}
-				animateTo={{ left: "25%", top: "60%", rotate: 25, opacity: 1 }}
-				// @ts-expect-error - TODO: fix this
-				leaveTo={{ opacity: 0, transition: { duration: 0 } }}
-				// skipTransition
-			/>
 		</SkyScene>
 	);
 }

@@ -4,7 +4,6 @@ import { enterRoomCode } from "@/state/features/client";
 import { clearQueryParams } from "@/lib/params";
 import { SkyScene } from "@/components/scenes/sky-scene";
 import { Logo } from "@/components/ui/logo";
-import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { CodeForm } from "./components/code-form";
 import { AnimatePresence } from "framer-motion";
@@ -167,13 +166,6 @@ export function EnterCodeView() {
 					duration={4.5}
 					style={{ top: "10%", right: "10%" }}
 					src="/doodles/rain-cloud.png"
-				/>
-				<AirplaneDoodle
-					layoutId="airplane-enter-code"
-					startAt={{ left: "40%", top: "45%", rotate: 35, opacity: 0 }}
-					animateTo={{ left: "66%", top: "45%", rotate: 20, opacity: 1 }}
-					leaveTo={{ left: "125%", top: "60%", rotate: 35, opacity: 1 }}
-					// skipTransition
 				/>
 			</AnimatePresence>
 		</SkyScene>

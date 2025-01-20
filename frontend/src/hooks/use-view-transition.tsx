@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useState } from "react";
 
-
 import {
 	EnterCodeView,
 	EnterPlayerInfoView,
@@ -15,6 +14,8 @@ import { useSelector } from "react-redux";
 import { RoomState } from "@/state/features/room";
 import { AnimatePresenceWithDirection } from "@/components/animation/direction-context";
 import { TransitionContainer } from "@/components/animation/transition-container";
+import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
+import { MotionProps, MotionStyle, Target } from "framer-motion";
 
 export enum Direction {
 	UP,
@@ -26,71 +27,10 @@ export enum Direction {
 	NONE,
 }
 
-const views: Record<RoomState, View> = {
-	[RoomState.EnterCode]: {
-		Component: EnterCodeView,
-		key: "enter-code-view",
-		transition: {
-			direction: Direction.RIGHT,
-		},
-		zIndex: 0,
-	},
-	[RoomState.EnterPlayerInfo]: {
-		Component: EnterPlayerInfoView,
-		key: "enter-player-info-view",
-		transition: {
-			direction: Direction.LEFT,
-		},
-		zIndex: 1,
-	},
-	[RoomState.Waiting]: {
-		Component: WaitingView,
-		key: "waiting-view",
-		transition: {
-			direction: Direction.LEFT,
-		},
-		zIndex: 2,
-	},
-	[RoomState.Picking]: {
-		Component: PickingView,
-		key: "picking-view",
-		transition: {
-			direction: Direction.LEFT,
-		},
-		zIndex: 3,
-	},
-	[RoomState.Drawing]: {
-		Component: DrawingView,
-		key: "drawing-view",
-		transition: {
-			direction: Direction.LEFT,
-		},
-		zIndex: 4,
-	},
-	[RoomState.PostDrawing]: {
-		Component: PostDrawingView,
-		key: "post-drawing-view",
-		transition: {
-			direction: Direction.LEFT,
-		},
-		zIndex: 5,
-	},
-	[RoomState.GameOver]: {
-		Component: () => <></>,
-		key: "game-over-view",
-		transition: {
-			direction: Direction.LEFT,
-		},
-		zIndex: 6,
-	},
-	[RoomState.Unanimous]: {
-		Component: () => <></>,
-		key: "unanimous-view",
-		transition: {
-			direction: Direction.LEFT,
-		},
-		zIndex: 7,
-	},
+type Sprite = {
+	style: MotionStyle;
+	Component: React.ComponentType<MotionProps>;
+	key: string;
 };
 
 export type View = {
@@ -99,22 +39,180 @@ export type View = {
 	transition: {
 		direction: Direction;
 	};
+	sprites?: Sprite[];
 	zIndex: number;
 };
 
-// // Define possible positions for sprites in each view
-// type SpritePosition = {
-// 	left: string;
-// 	top: string;
-// 	rotate: number;
-// 	opacity: number;
-// };
+const views: Record<RoomState, View> = {
+	[RoomState.EnterCode]: {
+		Component: EnterCodeView,
+		key: "enter-code-view",
+		transition: {
+			direction: Direction.RIGHT,
+		},
+		sprites: [
+			{
+				style: {
+					left: 0.66,
+					top: 0.45,
+					rotate: 20,
+					opacity: 1,
+				},
+				Component: AirplaneDoodle,
+				key: "airplane-doodle",
+			},
+		],
+		zIndex: 0,
+	},
+	[RoomState.EnterPlayerInfo]: {
+		Component: EnterPlayerInfoView,
+		key: "enter-player-info-view",
+		transition: {
+			direction: Direction.LEFT,
+		},
+		sprites: [
+			{
+				style: {
+					left: 0.25,
+					top: 0.6,
+					rotate: 25,
+					opacity: 1,
+				},
+				Component: AirplaneDoodle,
+				key: "airplane-doodle",
+			},
+		],
+		zIndex: 1,
+	},
+	[RoomState.Waiting]: {
+		Component: WaitingView,
+		key: "waiting-view",
+		transition: {
+			direction: Direction.LEFT,
+		},
+		sprites: [
+			{
+				style: {
+					left: 0.8,
+					top: 0.8,
+					rotate: 5,
+					opacity: 1,
+				},
+				Component: AirplaneDoodle,
+				key: "airplane-doodle",
+			},
+		],
+		zIndex: 2,
+	},
+	[RoomState.Picking]: {
+		Component: PickingView,
+		key: "picking-view",
+		transition: {
+			direction: Direction.LEFT,
+		},
+		sprites: [
+			{
+				style: {
+					left: 0.45,
+					top: 0.65,
+					rotate: 30,
+					opacity: 1,
+				},
+				Component: AirplaneDoodle,
+				key: "airplane-doodle",
+			},
+		],
+		zIndex: 3,
+	},
+	[RoomState.Drawing]: {
+		Component: DrawingView,
+		key: "drawing-view",
+		transition: {
+			direction: Direction.LEFT,
+		},
+		sprites: [
+			{
+				style: {
+					left: 0.85,
+					top: 0.55,
+					rotate: 30,
+					opacity: 1,
+				},
+				Component: AirplaneDoodle,
+				key: "airplane-doodle",
+			},
+		],
+		zIndex: 4,
+	},
+	[RoomState.PostDrawing]: {
+		Component: PostDrawingView,
+		key: "post-drawing-view",
+		transition: {
+			direction: Direction.LEFT,
+		},
+		sprites: [
+			{
+				style: {
+					left: 0.05,
+					top: 0.55,
+					rotate: 20,
+					opacity: 1,
+				},
+				Component: AirplaneDoodle,
+				key: "airplane-doodle",
+			},
+		],
+		zIndex: 5,
+	},
+	[RoomState.GameOver]: {
+		Component: () => <></>,
+		key: "game-over-view",
+		transition: {
+			direction: Direction.LEFT,
+		},
+		sprites: [
+			{
+				style: {
+					left: 0.9,
+					top: 0.45,
+					rotate: 0,
+					opacity: 0.5,
+				},
+				Component: AirplaneDoodle,
+				key: "airplane-doodle",
+			},
+		],
+		zIndex: 6,
+	},
+	[RoomState.Unanimous]: {
+		Component: () => <></>,
+		key: "unanimous-view",
+		transition: {
+			direction: Direction.LEFT,
+		},
+		sprites: [
+			{
+				style: {
+					left: 0.95,
+					top: 0.45,
+					rotate: -15,
+					opacity: 0.3,
+				},
+				Component: AirplaneDoodle,
+				key: "airplane-doodle",
+			},
+		],
+		zIndex: 7,
+	},
+};
 
 const getView = (currentState: RoomState, previousState: RoomState) => {
 	const view = { ...views[currentState] };
 
-	if (previousState === RoomState.Waiting && currentState === RoomState.Picking) {
-		// alert("UP");
+	if (
+		previousState === RoomState.Waiting &&
+		currentState === RoomState.Picking
+	) {
 		view.transition.direction = Direction.UP;
 		view.key = "picking-view-first";
 	}
@@ -123,7 +221,6 @@ const getView = (currentState: RoomState, previousState: RoomState) => {
 		currentState === RoomState.Waiting &&
 		previousState === RoomState.EnterPlayerInfo
 	) {
-		// alert("DOWN");
 		view.transition.direction = Direction.DOWN;
 		view.key = "waiting-view-first";
 	}
@@ -132,30 +229,12 @@ const getView = (currentState: RoomState, previousState: RoomState) => {
 		currentState === RoomState.Picking &&
 		previousState === RoomState.PostDrawing
 	) {
-		// alert("LEFT");
 		view.transition.direction = Direction.LEFT;
 		view.key = "picking-view-second";
 	}
 
 	return view;
 };
-
-// // Map each game view to sprite positions
-// const spritePositions: Record<GameView, SpritePosition> = {
-//   [GameView.EnterCode]: {
-//     left: "40%",
-//     top: "45%",
-//     rotate: 35,
-//     opacity: 1
-//   },
-//   [GameView.EnterUsername]: {
-//     left: "66%",
-//     top: "45%",
-//     rotate: 20,
-//     opacity: 1
-//   },
-//   // ... positions for other views
-// };
 
 // Main view container that provides transition context
 export function RoomViewContainer() {
@@ -188,15 +267,6 @@ export function RoomViewContainer() {
 		};
 	}, []);
 
-	// const roomId = useSelector((state: RootState) => state.room.id);
-
-	// // Hack to work around animation bug when leaving a room
-	// useEffect(() => {
-	// 	if (!roomId) {
-	// 		setMountId(Date.now());
-	// 	}
-	// }, [roomId]);
-
 	return (
 		<AnimatePresenceWithDirection
 			direction={View.transition.direction}
@@ -206,8 +276,89 @@ export function RoomViewContainer() {
 		>
 			<TransitionContainer zIndex={View.zIndex} key={View.key}>
 				<View.Component />
-				{/* <SceneSprites /> */}
+				<SceneSprites />
 			</TransitionContainer>
 		</AnimatePresenceWithDirection>
+	);
+}
+
+function SceneSprites() {
+	const currentState = useSelector(
+		(state: RootState) => state.room.currentState
+	);
+
+	const previousState = useSelector(
+		(state: RootState) => state.room.previousState
+	);
+
+	const currentView = getView(currentState, previousState);
+	const previousView = views[previousState];
+
+	const previousSprite = previousView.sprites?.find(
+		(s) => s.key === currentView.sprites?.[0]?.key
+	);
+
+	function getSpritePositionOffset() {
+		const offsets = {
+			top: 0,
+			left: 0,
+		};
+
+		if (currentView.transition.direction === Direction.LEFT) {
+			offsets.left = -1;
+		}
+
+		if (currentView.transition.direction === Direction.RIGHT) {
+			offsets.left = 1;
+		}
+
+		if (currentView.transition.direction === Direction.UP) {
+			offsets.top = 0;
+			offsets.left = -1;
+		}
+
+		if (currentView.transition.direction === Direction.DOWN) {
+			offsets.top = 1;
+		}
+
+		return offsets;
+	}
+
+	const offsets = getSpritePositionOffset();
+
+	const spritePosition = {
+		...currentView.sprites?.[0]?.style,
+		top: `${(currentView.sprites?.[0]?.style.top as number) * 100}%`,
+		left: `${(currentView.sprites?.[0]?.style.left as number) * 100}%`,
+	};
+
+	const previousSpritePosition = () => {
+		if (!previousSprite) return spritePosition;
+		return {
+			...previousSprite?.style,
+			top: `${((previousSprite?.style.top as number) + offsets.top) * 100}%`,
+			left: `${((previousSprite?.style.left as number) + offsets.left) * 100}%`,
+		};
+	};
+
+	const exit = () => {
+		if (!previousSprite) return {};
+		return {
+			opacity: 0,
+			transition: { duration: 0 },
+		};
+	};
+
+	return (
+		<>
+			{currentView.sprites?.map((sprite) => (
+				<sprite.Component
+					key={sprite.key}
+					initial={previousSpritePosition() as Target}
+					animate={spritePosition as Target}
+					exit={exit()}
+				/>
+			))}
+		</>
 	);
 }

@@ -4,7 +4,6 @@ import { Chat } from "./components/chat";
 import { SkyScene } from "@/components/scenes/sky-scene";
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { AnimatePresence } from "framer-motion";
-import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { CanvasHeader } from "./components/canvas-header";
 import { AnimatedSketchText } from "@/components/ui/game-start-countdown";
 import { useEffect, useState } from "react";
@@ -71,13 +70,6 @@ export function DrawingView() {
 					</AnimatePresence>
 				</div>
 			</div>
-
-			<AirplaneDoodle
-				skipTransition
-				startAt={{ left: "85%", top: "55%", rotate: 30, opacity: 0 }}
-				animateTo={{ left: "85%", top: "55%", rotate: 30, opacity: 1 }}
-				leaveTo={{ left: "105%", top: "55%", rotate: 20 }}
-			/>
 		</SkyScene>
 	);
 }

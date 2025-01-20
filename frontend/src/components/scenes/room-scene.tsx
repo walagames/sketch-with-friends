@@ -1,5 +1,4 @@
 import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
-import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
 import { AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
@@ -18,15 +17,6 @@ export function RoomScene({
 			)}
 		>
 			{children}
-			<AirplaneDoodle
-				// layoutId="airplane-sky"
-				startAt={{ left: "25%", top: "160%", rotate: 25 }}
-				animateTo={{ opacity: 1, left: "80%", top: "80%", rotate: 5 }}
-				leaveTo={{ left: "135%", top: "70%", rotate: 40 }}
-
-				// animateTo={{ left: "25%", top: "60%", rotate: 25, opacity: 1 }}
-				// skipTransition={shouldSkipTransition}
-			/>
 			<AnimatePresence>
 				<BobbingDoodle
 					hideOnSmallViewports
