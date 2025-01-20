@@ -241,7 +241,28 @@ func (r *room) register(ctx context.Context, player *player) error {
 // Removes the player from the room state, informs the other players,
 // and handles necessary game state changes if they disconnect mid-game.
 func (room *room) unregister(player *player) {
-	room.handlePlayerLeave(player)
+	// Remove player's guesses if they leave during the drawing phase:
+	// 1. Prevents frontend errors when rendering guesses (avoids lookup of non-existent player)
+	// 2. Useful for scenarios like kicking players for offensive language
+	// Note: This is a design choice that may have future benefits.
+	room.dispatch(&Command{
+		Type:    PlayerLeftCmd,
+		Payload: player.ID,
+		Player:  player,
+	})
+
+	// Filter out the player's messages
+	newChatMessages := make([]ChatMessage, 0)
+	for _, g := range room.ChatMessages {
+		if g.PlayerID != player.ID {
+			newChatMessages = append(newChatMessages, g)
+		}
+	}
+	room.ChatMessages = newChatMessages
+
+	room.broadcast(GameRoleAny, event(SetChatEvt, room.ChatMessages))
+	room.SendSystemMessage(fmt.Sprintf("%s left the room", player.Username))
+	room.removePlayerFromDrawingQueue(player.ID)
 
 	// Tell the other players that a player left
 	// Note: This needs to be done before we remove the player from the room state
@@ -282,8 +303,9 @@ func (room *room) unregister(player *player) {
 	// If there are less than 2 players left in the room, we need to cancel the game
 	// and reset the room state since there's no way to continue the game.
 	// ! i dont like this, it should go in the command hanlders i think
-	if len(room.Players) < 2 && isPlaying(room.currentState) {
-		// TODO: remove scheudled event
+	if len(room.Players) < 2 {
+		room.scheduler.clearEvents()
+		room.TransitionTo(NewWaitingState())
 
 		// Tell the remaining player that the game has ended
 		// ! this should prob go to the game over state
@@ -464,35 +486,6 @@ func (r *room) removePlayerFromDrawingQueue(playerID uuid.UUID) {
 
 func (r *room) enqueueDrawingPlayer(player *player) {
 	r.drawingQueue = append(r.drawingQueue, player.ID)
-}
-
-// Gracefully handles a player leaving in the middle of a game.
-func (room *room) handlePlayerLeave(player *player) {
-	// Remove player's guesses if they leave during the drawing phase:
-	// 1. Prevents frontend errors when rendering guesses (avoids lookup of non-existent player)
-	// 2. Useful for scenarios like kicking players for offensive language
-	// Note: This is a design choice that may have future benefits.
-	err := room.currentState.HandleCommand(room, &Command{
-		Type:    PlayerLeftCmd,
-		Payload: player.ID,
-		Player:  player,
-	})
-	if err != nil {
-		slog.Error("error handling player leave", "error", err)
-	}
-
-	// Filter out the player's messages
-	newChatMessages := make([]ChatMessage, 0)
-	for _, g := range room.ChatMessages {
-		if g.PlayerID != player.ID {
-			newChatMessages = append(newChatMessages, g)
-		}
-	}
-	room.ChatMessages = newChatMessages
-
-	room.broadcast(GameRoleAny, event(SetChatEvt, room.ChatMessages))
-	room.SendSystemMessage(fmt.Sprintf("%s left the room", player.Username))
-	room.removePlayerFromDrawingQueue(player.ID)
 }
 
 // ! im gonna dleete this later

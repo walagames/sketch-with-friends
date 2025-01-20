@@ -46,7 +46,6 @@ func NewDrawingState(word Word) RoomState {
 		hintedWord:      string(hintRunes),
 		correctGuessers: make(map[uuid.UUID]bool),
 		pointsAwarded:   make(map[uuid.UUID]int),
-		endsAt:          time.Now().Add(time.Second * 15),
 	}
 }
 
@@ -77,7 +76,7 @@ func (state *DrawingState) applyHint() {
 }
 
 func (state *DrawingState) Enter(room *room) {
-	phaseDuration := time.Duration(room.Settings.DrawingTimeAllowed) * time.Second
+	state.endsAt = time.Now().Add(time.Second * time.Duration(room.Settings.DrawingTimeAllowed))
 
 	room.broadcast(GameRoleGuessing,
 		event(SetSelectedWordEvt, NewWord(state.hintedWord, state.currentWord.Difficulty)),
@@ -88,7 +87,7 @@ func (state *DrawingState) Enter(room *room) {
 		// Will apply up to 60% of the word length as hints
 		totalHints := int(float64(len(state.currentWord.Value)) * 0.6)
 		// Apply hints at a regular interval so the last hint is applied with one interval left
-		hintInterval := phaseDuration / time.Duration(totalHints+1)
+		hintInterval := time.Until(state.endsAt) / time.Duration(totalHints+1)
 		// This will apply hints to the hinted word at a regular interval
 		room.scheduler.addReccuringEvent(ScheduledHintReveal, hintInterval, totalHints, func() {
 			state.applyHint()
@@ -292,11 +291,6 @@ func (state *DrawingState) handlePlayerLeft(room *room, cmd *Command) error {
 	delete(state.correctGuessers, cmd.Player.ID)
 	delete(state.pointsAwarded, cmd.Player.ID)
 
-	if cmd.Player.GameRole == GameRoleDrawing || len(state.correctGuessers) >= len(room.Players)-2 {
-		// TODO: cancel the event
-		room.Transition()
-	}
-
 	return nil
 }
 
@@ -403,7 +397,7 @@ func (state *DrawingState) handleChatMessage(room *room, cmd *Command) error {
 
 		// Skip to the next phase if everyone has guessed correctly already
 		if len(state.correctGuessers) >= len(room.Players)-1 {
-			room.scheduler.cancelEvent(ScheduledStateChange)
+			room.scheduler.clearEvents()
 			room.Transition()
 		}
 	}
