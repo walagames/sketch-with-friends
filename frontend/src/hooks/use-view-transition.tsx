@@ -1,6 +1,4 @@
-import { useEffect } from "react";
-import { useState } from "react";
-
+import { useEffect, useState } from "react";
 import {
 	EnterCodeView,
 	EnterPlayerInfoView,
@@ -217,10 +215,7 @@ const getView = (currentState: RoomState, previousState: RoomState) => {
 		view.key = "picking-view-first";
 	}
 
-	if (
-		currentState === RoomState.Waiting &&
-		previousState === RoomState.EnterPlayerInfo
-	) {
+	if (currentState === RoomState.Waiting) {
 		view.transition.direction = Direction.DOWN;
 		view.key = "waiting-view-first";
 	}
