@@ -228,7 +228,7 @@ func (r *room) register(ctx context.Context, player *player) error {
 		event(RoomInitEvt, r),
 	)
 
-	r.currentState.HandleCommand(r, &Command{
+	r.dispatch(&Command{
 		Type:    PlayerJoinedCmd,
 		Player:  player,
 		Payload: nil,
@@ -321,10 +321,6 @@ func (r *room) dispatch(cmd *Command) {
 	player.lastInteractionAt = time.Now()
 
 	switch cmd.Type {
-	case ChatMessageCmd:
-		r.currentState.HandleCommand(r, cmd)
-
-		// fallthrough
 	case UpdatePlayerProfileCmd:
 		r.handlePlayerProfileChange(cmd)
 	default:
@@ -353,7 +349,7 @@ func (r *room) handlePlayerProfileChange(cmd *Command) error {
 	}
 
 	// Show join message if new player
-	if profile.Username == "" {
+	if cmd.Player.Username == "" {
 		r.SendSystemMessage(fmt.Sprintf("%s joined the room", validatedProfile.Username))
 	}
 
