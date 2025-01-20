@@ -313,6 +313,9 @@ func (room *room) unregister(player *player) {
 			event(SetCurrentStateEvt, Waiting),
 			event(Error, "Not enough players to continue game"),
 		)
+	} else if player.GameRole == GameRoleDrawing {
+		slog.Debug("player left during drawing phase, transitioning to post-drawing phase")
+		room.Transition()
 	}
 
 	slog.Debug("player unregistered", "playerId", player.ID)
