@@ -8,18 +8,20 @@ import (
 
 type PostDrawingState struct {
 	pointsAwarded map[uuid.UUID]int
+	endsAt        time.Time
 }
 
 func NewPostDrawingState(pointsAwarded map[uuid.UUID]int) RoomState {
 	return &PostDrawingState{
 		pointsAwarded: pointsAwarded,
+		endsAt:        time.Now().Add(time.Second * 5),
 	}
 }
 
 func (state *PostDrawingState) Enter(room *room) {
 	// phaseDuration := PostDrawingPhaseDuration
 
-	room.scheduler.addEvent(ScheduledStateChange, time.Now().Add(time.Second*5), func() {
+	room.scheduler.addEvent(ScheduledStateChange, state.endsAt, func() {
 		room.Transition()
 	})
 
@@ -34,7 +36,7 @@ func (state *PostDrawingState) Enter(room *room) {
 	room.broadcast(GameRoleAny,
 		event(SetPointsAwardedEvt, state.pointsAwarded),
 		event(SetCurrentStateEvt, PostDrawing),
-		event(SetTimerEvt, time.Now().Add(time.Second*5).UTC()),
+		event(SetTimerEvt, state.endsAt.UTC()),
 	)
 
 }
@@ -62,6 +64,7 @@ func (state *PostDrawingState) handlePlayerJoined(room *room, cmd *Command) erro
 	room.enqueueDrawingPlayer(player)
 	player.Send(
 		event(SetCurrentStateEvt, PostDrawing),
+		event(SetTimerEvt, state.endsAt.UTC()),
 	)
 	return nil
 }

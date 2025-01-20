@@ -10,12 +10,14 @@ import (
 type PickingState struct {
 	wordOptions  []Word
 	selectedWord *Word
+	endsAt       time.Time
 }
 
 func NewPickingState(wordOptions []Word) RoomState {
 	return &PickingState{
 		wordOptions:  wordOptions,
 		selectedWord: nil,
+		endsAt:       time.Now().Add(time.Second * 15),
 	}
 }
 
@@ -62,9 +64,7 @@ func (state *PickingState) Enter(room *room) {
 
 	// room.scheduler.cancelEvent(ScheduledStateChange)
 	slog.Debug("adding scheduled state change event")
-	newTime := time.Now().Add(time.Second * 15)
-	slog.Debug("new time", "time", newTime)
-	room.scheduler.addEvent(ScheduledStateChange, newTime, func() {
+	room.scheduler.addEvent(ScheduledStateChange, state.endsAt, func() {
 		slog.Debug("CALLING FUNCTION")
 		room.Transition()
 	})
@@ -74,7 +74,7 @@ func (state *PickingState) Enter(room *room) {
 		event(SetPlayersEvt, room.Players),
 		event(SetCurrentRoundEvt, room.CurrentRound),
 		event(SetSelectedWordEvt, nil),
-		event(SetTimerEvt, time.Now().Add(time.Second*15).UTC()),
+		event(SetTimerEvt, state.endsAt.UTC()),
 	)
 
 }
@@ -146,6 +146,7 @@ func (state *PickingState) handlePlayerJoined(room *room, cmd *Command) error {
 	room.enqueueDrawingPlayer(player)
 	player.Send(
 		event(SetCurrentStateEvt, Picking),
+		event(SetTimerEvt, state.endsAt.UTC()),
 	)
 	return nil
 }

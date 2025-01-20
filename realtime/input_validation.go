@@ -100,7 +100,7 @@ func filterInvalidWords(words []Word) []Word {
 			continue
 		}
 		if cleaned != "" {
-			result = append(result, Word{Value: cleaned})
+			result = append(result, Word{Value: cleaned, Difficulty: word.Difficulty, Category: word.Category})
 		}
 	}
 

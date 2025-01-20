@@ -22,6 +22,8 @@ type DrawingState struct {
 	hintedWord  string
 	strokes     []Stroke
 
+	endsAt time.Time
+
 	correctGuessers map[uuid.UUID]bool // ! can we just combine these two things ?
 	pointsAwarded   map[uuid.UUID]int
 }
@@ -44,6 +46,7 @@ func NewDrawingState(word Word) RoomState {
 		hintedWord:      string(hintRunes),
 		correctGuessers: make(map[uuid.UUID]bool),
 		pointsAwarded:   make(map[uuid.UUID]int),
+		endsAt:          time.Now().Add(time.Second * 15),
 	}
 }
 
@@ -96,10 +99,10 @@ func (state *DrawingState) Enter(room *room) {
 	// Inform players of the phase change
 	room.broadcast(GameRoleAny,
 		event(SetCurrentStateEvt, Drawing),
-		event(SetTimerEvt, time.Now().Add(phaseDuration).UTC()),
+		event(SetTimerEvt, state.endsAt.UTC()),
 	)
 
-	room.scheduler.addEvent(ScheduledStateChange, time.Now().Add(phaseDuration), func() {
+	room.scheduler.addEvent(ScheduledStateChange, state.endsAt, func() {
 		room.Transition()
 	})
 }
@@ -303,8 +306,9 @@ func (state *DrawingState) handlePlayerJoined(room *room, cmd *Command) error {
 	room.enqueueDrawingPlayer(player)
 	player.Send(
 		event(SetStrokesEvt, state.strokes),
-		event(SetSelectedWordEvt, state.hintedWord),
+		event(SetSelectedWordEvt, NewWord(state.hintedWord, state.currentWord.Difficulty)),
 		event(SetCurrentStateEvt, Drawing),
+		event(SetTimerEvt, state.endsAt.UTC()),
 	)
 
 	return nil
