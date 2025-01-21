@@ -126,60 +126,54 @@ func TestFilterInvalidRunes(t *testing.T) {
 func TestFilterInvalidWords(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    []string
-		expected []string
+		input    []Word
+		expected []Word
 	}{
 		{
 			name:     "empty slice",
-			input:    []string{},
-			expected: []string{},
+			input:    []Word{},
+			expected: []Word{},
 		},
 		{
 			name:     "basic valid words",
-			input:    []string{"hello", "world"},
-			expected: []string{"hello", "world"},
+			input:    []Word{{Value: "hello"}, {Value: "world"}},
+			expected: []Word{{Value: "hello"}, {Value: "world"}},
 		},
 		{
 			name:     "mixed case words",
-			input:    []string{"Hello", "WORLD", "MiXeD"},
-			expected: []string{"hello", "world", "mixed"},
+			input:    []Word{{Value: "Hello"}, {Value: "WORLD"}, {Value: "MiXeD"}},
+			expected: []Word{{Value: "hello"}, {Value: "world"}, {Value: "mixed"}},
 		},
 		{
 			name:     "words with spaces",
-			input:    []string{"hello world", "  spaces  ", " leading", "trailing "},
-			expected: []string{"hello world", "spaces", "leading", "trailing"},
+			input:    []Word{{Value: "hello world"}, {Value: "  spaces  "}, {Value: " leading"}, {Value: "trailing "}},
+			expected: []Word{{Value: "hello world"}, {Value: "spaces"}, {Value: "leading"}, {Value: "trailing"}},
 		},
 		{
 			name:     "words with invalid characters",
-			input:    []string{"hello!", "world@123", "#special"},
-			expected: []string{"hello", "world", "special"},
+			input:    []Word{{Value: "hello!"}, {Value: "world@123"}, {Value: "#special"}},
+			expected: []Word{{Value: "hello"}, {Value: "world"}, {Value: "special"}},
 		},
 		{
 			name:     "words with apostrophes",
-			input:    []string{"don't", "it's", "mary's"},
-			expected: []string{"don't", "it's", "mary's"},
+			input:    []Word{{Value: "don't"}, {Value: "it's"}, {Value: "mary's"}},
+			expected: []Word{{Value: "don't"}, {Value: "it's"}, {Value: "mary's"}},
 		},
 		{
 			name:     "empty strings and whitespace",
-			input:    []string{"", " ", "  ", "\t", "\n"},
-			expected: []string{},
+			input:    []Word{{Value: ""}, {Value: " "}, {Value: "  "}, {Value: "\t"}, {Value: "\n"}},
+			expected: []Word{},
 		},
 		{
 			name:     "mixed valid and invalid strings",
-			input:    []string{"hello!", "", "  world  ", "test@123", "don't"},
-			expected: []string{"hello", "world", "test", "don't"},
+			input:    []Word{{Value: "hello!"}, {Value: ""}, {Value: "  world  "}, {Value: "test@123"}, {Value: "don't"}},
+			expected: []Word{{Value: "hello"}, {Value: "world"}, {Value: "test"}, {Value: "don't"}},
 		},
 	}
 
 	for _, tt := range tests {
-		words := make([]Word, len(tt.input))
-		for i, word := range tt.input {
-			words[i] = Word{
-				Value: word,
-			}
-		}
 		t.Run(tt.name, func(t *testing.T) {
-			got := filterInvalidWords(words)
+			got := filterInvalidWords(tt.input)
 			if !reflect.DeepEqual(got, tt.expected) {
 				t.Errorf("filterInvalidWords() = %v, want %v", got, tt.expected)
 			}
@@ -238,55 +232,49 @@ func TestSanitizeGuess(t *testing.T) {
 func TestFilterDuplicateWords(t *testing.T) {
 	tests := []struct {
 		name     string
-		input    []string
-		expected []string
+		input    []Word
+		expected []Word
 	}{
 		{
 			name:     "empty slice",
-			input:    []string{},
-			expected: []string{},
+			input:    []Word{},
+			expected: []Word{},
 		},
 		{
 			name:     "no duplicates",
-			input:    []string{"hello", "world", "test"},
-			expected: []string{"hello", "world", "test"},
+			input:    []Word{{Value: "hello"}, {Value: "world"}, {Value: "test"}},
+			expected: []Word{{Value: "hello"}, {Value: "world"}, {Value: "test"}},
 		},
 		{
 			name:     "with duplicates",
-			input:    []string{"hello", "world", "hello", "test", "world"},
-			expected: []string{"hello", "world", "test"},
+			input:    []Word{{Value: "hello"}, {Value: "world"}, {Value: "hello"}, {Value: "test"}, {Value: "world"}},
+			expected: []Word{{Value: "hello"}, {Value: "world"}, {Value: "test"}},
 		},
 		{
 			name:     "all duplicates",
-			input:    []string{"test", "test", "test"},
-			expected: []string{"test"},
+			input:    []Word{{Value: "test"}, {Value: "test"}, {Value: "test"}},
+			expected: []Word{{Value: "test"}},
 		},
 		{
 			name:     "case sensitive duplicates",
-			input:    []string{"hello", "Hello", "HELLO"},
-			expected: []string{"hello", "Hello", "HELLO"},
+			input:    []Word{{Value: "hello"}, {Value: "Hello"}, {Value: "HELLO"}},
+			expected: []Word{{Value: "hello"}, {Value: "Hello"}, {Value: "HELLO"}},
 		},
 		{
 			name:     "with empty strings",
-			input:    []string{"", "test", ""},
-			expected: []string{"", "test"},
+			input:    []Word{{Value: ""}, {Value: "test"}, {Value: ""}},
+			expected: []Word{{Value: ""}, {Value: "test"}},
 		},
 		{
 			name:     "with spaces",
-			input:    []string{"hello world", "hello world", "test"},
-			expected: []string{"hello world", "test"},
+			input:    []Word{{Value: "hello world"}, {Value: "hello world"}, {Value: "test"}},
+			expected: []Word{{Value: "hello world"}, {Value: "test"}},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			words := make([]Word, len(tt.input))
-			for i, word := range tt.input {
-				words[i] = Word{
-					Value: word,
-				}
-			}
-			got := filterDuplicateWords(words)
+			got := filterDuplicateWords(tt.input)
 			if !reflect.DeepEqual(got, tt.expected) {
 				t.Errorf("filterDuplicateWords() = %v, want %v", got, tt.expected)
 			}
