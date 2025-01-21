@@ -151,10 +151,11 @@ const views: Record<RoomState, View> = {
 		sprites: [
 			{
 				style: {
-					left: 0.05,
+					left: 0.15,
 					top: 0.55,
-					rotate: 20,
+					rotate: 25,
 					opacity: 1,
+					zIndex: 50,
 				},
 				Component: AirplaneDoodle,
 				key: "airplane-doodle",
@@ -212,12 +213,31 @@ const getView = (currentState: RoomState, previousState: RoomState) => {
 		currentState === RoomState.Picking
 	) {
 		view.transition.direction = Direction.UP;
-		view.key = "picking-view-first";
+		view.key = "picking-view";
+		view.zIndex = 10;
 	}
 
 	if (currentState === RoomState.Waiting) {
 		view.transition.direction = Direction.DOWN;
 		view.key = "waiting-view-first";
+		if (previousState === RoomState.PostDrawing) {
+			view.zIndex = 10;
+		}
+	}
+
+	if (currentState === RoomState.Drawing) {
+		view.transition.direction = Direction.LEFT;
+		view.key = "drawing-view";
+		view.zIndex = 10;
+	}
+
+	if (
+		currentState === RoomState.PostDrawing &&
+		previousState === RoomState.Drawing
+	) {
+		view.transition.direction = Direction.LEFT;
+		view.key = "post-drawing-view";
+		view.zIndex = 10;
 	}
 
 	if (
