@@ -52,7 +52,7 @@ const SOUND_PATHS: Record<SoundEffect, SoundConfig> = {
 	[SoundEffect.PLAYER_JOIN]: { path: "/sounds/player-join.mp3", volume: 1 },
 	[SoundEffect.PLAYER_LEAVE]: { path: "/sounds/player-leave.mp3", volume: 1 },
 	[SoundEffect.ROUND_END]: { path: "/sounds/round-end.mp3", volume: 1 },
-	[SoundEffect.SCENE_CHANGE]: { path: "/sounds/whoosh.mp3", volume: .3 },
+	[SoundEffect.SCENE_CHANGE]: { path: "/sounds/whoosh.mp3", volume: .2 },
 	[SoundEffect.PLAYER_WIN]: { path: "/sounds/player-win.mp3", volume: 1 },
 	[SoundEffect.PLAYER_LOSE]: { path: "/sounds/player-lose.mp3", volume: 1 },
 	[SoundEffect.SCRIBBLE]: { path: "/sounds/scribble.mp3", volume: 0.4 },
