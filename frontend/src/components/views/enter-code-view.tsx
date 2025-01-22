@@ -4,13 +4,13 @@ import { enterRoomCode } from "@/state/features/client";
 import { clearQueryParams } from "@/lib/params";
 import { SkyScene } from "@/components/scenes/sky-scene";
 import { Logo } from "@/components/ui/logo";
-import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { CodeForm } from "./components/code-form";
 import { AnimatePresence } from "framer-motion";
 import { Doodle } from "@/components/doodle/doodle";
 import { useMemo } from "react";
 import { setCurrentState } from "@/state/features/room";
 import { RoomState } from "@/state/features/room";
+
 interface DoodleItem {
 	src: string;
 	width: string;
@@ -146,7 +146,7 @@ export function EnterCodeView() {
 					))}
 				</div>
 
-				<BobbingDoodle
+				{/* <BobbingDoodle
 					key="rain-cloud-1"
 					hideOnSmallViewports
 					duration={4}
@@ -166,7 +166,7 @@ export function EnterCodeView() {
 					duration={4.5}
 					style={{ top: "10%", right: "10%" }}
 					src="/doodles/rain-cloud.png"
-				/>
+				/> */}
 			</AnimatePresence>
 		</SkyScene>
 	);

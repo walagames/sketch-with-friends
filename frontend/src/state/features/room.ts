@@ -107,7 +107,7 @@ const initialState: Room = {
 	players: {},
 	timerEndsAt: "",
 	currentState: RoomState.EnterCode,
-	previousState: RoomState.EnterCode,
+	previousState: RoomState.Unanimous,
 	currentRound: 0,
 	chatMessages: [],
 };

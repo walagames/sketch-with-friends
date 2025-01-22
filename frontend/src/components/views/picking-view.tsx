@@ -3,8 +3,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { getDrawingPlayer } from "@/lib/player";
 import { SkyScene } from "@/components/scenes/sky-scene";
-import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
-import { AnimatePresence } from "framer-motion";
 import { selectWord } from "@/state/features/game";
 import { RaisedButton } from "@/components/ui/raised-button";
 
@@ -27,27 +25,6 @@ export function PickingView() {
 					username={drawingPlayer.username}
 				/>
 			)}
-			<AnimatePresence>
-				<BobbingDoodle
-					hideOnSmallViewports
-					duration={4}
-					style={{ top: "20%", left: "12%" }}
-					src="/doodles/rain-cloud.png"
-				/>
-				<BobbingDoodle
-					className="lg:w-36 w-28 absolute"
-					duration={5}
-					style={{ top: "8%", left: "20%" }}
-					src="/doodles/rain-cloud.png"
-					key="rain-cloud-2"
-				/>
-				<BobbingDoodle
-					hideOnSmallViewports
-					duration={4.5}
-					style={{ top: "10%", right: "10%" }}
-					src="/doodles/rain-cloud.png"
-				/>
-			</AnimatePresence>
 		</SkyScene>
 	);
 }

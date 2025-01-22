@@ -2,7 +2,7 @@ import Canvas from "./components/canvas";
 import { CanvasTools, ColorSliders } from "./components/canvas-tools";
 import { Chat } from "./components/chat";
 import { SkyScene } from "@/components/scenes/sky-scene";
-import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
+import { RainCloudDoodle } from "@/components/doodle/rain-cloud-doodle";
 import { AnimatePresence } from "framer-motion";
 import { CanvasHeader } from "./components/canvas-header";
 import { AnimatedSketchText } from "@/components/ui/game-start-countdown";
@@ -55,13 +55,13 @@ export function DrawingView() {
 					</div>
 					<Chat />
 					<AnimatePresence>
-						<BobbingDoodle
+						<RainCloudDoodle
 							key="rain-cloud-1"
 							duration={5}
 							className="absolute xl:-top-[10%] xl:-left-[20%] bottom-[14%] right-[14%] w-[8rem] xl:w-[9rem]"
 							src="/doodles/rain-cloud.png"
 						/>
-						<BobbingDoodle
+						<RainCloudDoodle
 							key="rain-cloud-2"
 							duration={4}
 							className="absolute hidden lg:block w-[7rem] xl:top-[12%] xl:-right-[20%]"

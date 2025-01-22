@@ -13,7 +13,14 @@ import { RoomState } from "@/state/features/room";
 import { AnimatePresenceWithDirection } from "@/components/animation/direction-context";
 import { TransitionContainer } from "@/components/animation/transition-container";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
-import { MotionProps, MotionStyle, Target } from "framer-motion";
+import {
+	AnimatePresence,
+	HTMLMotionProps,
+	MotionProps,
+	MotionStyle,
+	Target,
+} from "framer-motion";
+import { RainCloudDoodle } from "@/components/doodle/rain-cloud-doodle";
 
 export enum Direction {
 	UP,
@@ -25,8 +32,14 @@ export enum Direction {
 	NONE,
 }
 
+enum SpriteType {
+	BOBBING,
+	STATIC,
+}
+
 type Sprite = {
-	style: MotionStyle;
+	style?: MotionStyle;
+	type?: SpriteType;
 	Component: React.ComponentType<MotionProps>;
 	key: string;
 };
@@ -58,6 +71,40 @@ const views: Record<RoomState, View> = {
 				},
 				Component: AirplaneDoodle,
 				key: "airplane-doodle",
+				type: SpriteType.STATIC,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={4}
+						{...props}
+						className="lg:top-[20%] top-[6%] lg:left-[12%] left-[6%]"
+					/>
+				),
+				key: "rain-cloud-1",
+				type: SpriteType.BOBBING,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={5}
+						className="top-[8%] left-[20%]"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-2",
+				type: SpriteType.BOBBING,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={4.5}
+						className="top-[10%] right-[10%]"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-3",
+				type: SpriteType.BOBBING,
 			},
 		],
 		zIndex: 0,
@@ -78,6 +125,29 @@ const views: Record<RoomState, View> = {
 				},
 				Component: AirplaneDoodle,
 				key: "airplane-doodle",
+				type: SpriteType.STATIC,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={6}
+						className="top-[5%] left-[12%]"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-1",
+				type: SpriteType.BOBBING,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={4}
+						className="top-[24%] right-[10%]"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-2",
+				type: SpriteType.BOBBING,
 			},
 		],
 		zIndex: 1,
@@ -98,6 +168,40 @@ const views: Record<RoomState, View> = {
 				},
 				Component: AirplaneDoodle,
 				key: "airplane-doodle",
+				type: SpriteType.STATIC,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={5}
+						className="top-[8%] left-[12%]"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-1",
+				type: SpriteType.BOBBING,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={4}
+						className="top-[24%] right-[10%]"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-2",
+				type: SpriteType.BOBBING,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={4}
+						className="bottom-[24%] right-[16%] w-28 lg:hidden"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-3",
+				type: SpriteType.BOBBING,
 			},
 		],
 		zIndex: 2,
@@ -118,6 +222,40 @@ const views: Record<RoomState, View> = {
 				},
 				Component: AirplaneDoodle,
 				key: "airplane-doodle",
+				type: SpriteType.STATIC,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={4}
+						className="top-[20%] left-[12%]"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-1",
+				type: SpriteType.BOBBING,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={5}
+						className="top-[8%] left-[20%]"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-2",
+				type: SpriteType.BOBBING,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={4.5}
+						className="top-[10%] right-[10%]"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-3",
+				type: SpriteType.BOBBING,
 			},
 		],
 		zIndex: 3,
@@ -138,7 +276,30 @@ const views: Record<RoomState, View> = {
 				},
 				Component: AirplaneDoodle,
 				key: "airplane-doodle",
+				type: SpriteType.STATIC,
 			},
+			// {
+			// 	Component: (props: HTMLMotionProps<"img">) => (
+			// 		<RainCloudDoodle
+			// 			duration={5}
+			// 			className="absolute xl:-top-[10%] xl:-left-[20%] bottom-[14%] right-[14%] w-[8rem] xl:w-[9rem]"
+			// 			{...props}
+			// 		/>
+			// 	),
+			// 	key: "rain-cloud-1",
+			// 	type: SpriteType.BOBBING,
+			// },
+			// {
+			// 	Component: (props: HTMLMotionProps<"img">) => (
+			// 		<RainCloudDoodle
+			// 			duration={4}
+			// 			className="absolute hidden lg:block w-[7rem] xl:top-[12%] xl:-right-[20%]"
+			// 			{...props}
+			// 		/>
+			// 	),
+			// 	key: "rain-cloud-2",
+			// 	type: SpriteType.BOBBING,
+			// },
 		],
 		zIndex: 4,
 	},
@@ -159,6 +320,29 @@ const views: Record<RoomState, View> = {
 				},
 				Component: AirplaneDoodle,
 				key: "airplane-doodle",
+				type: SpriteType.STATIC,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={5}
+						className="absolute hidden md:block h-32 top-[8%] left-[20%]"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-1",
+				type: SpriteType.BOBBING,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={4.5}
+						className="absolute hidden md:block h-32 top-[10%] right-[10%]"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-2",
+				type: SpriteType.BOBBING,
 			},
 		],
 		zIndex: 5,
@@ -179,6 +363,7 @@ const views: Record<RoomState, View> = {
 				},
 				Component: AirplaneDoodle,
 				key: "airplane-doodle",
+				type: SpriteType.STATIC,
 			},
 		],
 		zIndex: 6,
@@ -187,18 +372,19 @@ const views: Record<RoomState, View> = {
 		Component: () => <></>,
 		key: "unanimous-view",
 		transition: {
-			direction: Direction.LEFT,
+			direction: Direction.NONE,
 		},
 		sprites: [
 			{
 				style: {
-					left: 0.95,
+					left: 0.66,
 					top: 0.45,
-					rotate: -15,
-					opacity: 0.3,
+					rotate: 20,
+					opacity: 1,
 				},
 				Component: AirplaneDoodle,
 				key: "airplane-doodle",
+				type: SpriteType.STATIC,
 			},
 		],
 		zIndex: 7,
@@ -336,23 +522,33 @@ function SceneSprites() {
 			offsets.top = 1;
 		}
 
+		if (previousView.transition.direction === Direction.NONE) {
+			offsets.left = 0;
+			offsets.top = 0;
+		}
+
 		return offsets;
 	}
 
 	const offsets = getSpritePositionOffset();
 
-	const spritePosition = {
-		...currentView.sprites?.[0]?.style,
-		top: `${(currentView.sprites?.[0]?.style.top as number) * 100}%`,
-		left: `${(currentView.sprites?.[0]?.style.left as number) * 100}%`,
+	const spritePosition = () => {
+		if (!currentView.sprites?.[0]?.style) return {};
+		return {
+			...currentView.sprites?.[0]?.style,
+			top: `${(currentView.sprites?.[0]?.style?.top as number) * 100}%`,
+			left: `${(currentView.sprites?.[0]?.style?.left as number) * 100}%`,
+		};
 	};
 
 	const previousSpritePosition = () => {
 		if (!previousSprite) return spritePosition;
 		return {
 			...previousSprite?.style,
-			top: `${((previousSprite?.style.top as number) + offsets.top) * 100}%`,
-			left: `${((previousSprite?.style.left as number) + offsets.left) * 100}%`,
+			top: `${((previousSprite?.style?.top as number) + offsets.top) * 100}%`,
+			left: `${
+				((previousSprite?.style?.left as number) + offsets.left) * 100
+			}%`,
 		};
 	};
 
@@ -364,9 +560,17 @@ function SceneSprites() {
 		};
 	};
 
+	const staticSprites = currentView.sprites?.filter(
+		(sprite) => sprite.type === SpriteType.STATIC
+	);
+
+	const bobbingSprites = currentView.sprites?.filter(
+		(sprite) => sprite.type === SpriteType.BOBBING
+	);
+
 	return (
 		<>
-			{currentView.sprites?.map((sprite) => (
+			{staticSprites?.map((sprite) => (
 				<sprite.Component
 					key={sprite.key}
 					initial={previousSpritePosition() as Target}
@@ -374,6 +578,11 @@ function SceneSprites() {
 					exit={exit()}
 				/>
 			))}
+			<AnimatePresence>
+				{bobbingSprites?.map((sprite) => (
+					<sprite.Component key={sprite.key} />
+				))}
+			</AnimatePresence>
 		</>
 	);
 }

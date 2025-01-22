@@ -7,7 +7,7 @@ import { ArrowDownIcon, ArrowUpIcon, CrownIcon, FlameIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 import { AnimatePresence, motion } from "framer-motion";
-import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
+import { RainCloudDoodle } from "@/components/doodle/rain-cloud-doodle";
 import { getDrawingPlayer } from "@/lib/player";
 const springConfig = {
 	type: "spring",
@@ -77,14 +77,14 @@ export function PostDrawingView() {
 				/>
 			)}
 			<AnimatePresence>
-				<BobbingDoodle
+				<RainCloudDoodle
 					key="rain-cloud-1"
 					className="absolute hidden md:block h-32"
 					duration={5}
 					style={{ top: "8%", left: "20%" }}
 					src="/doodles/rain-cloud.png"
 				/>
-				<BobbingDoodle
+				<RainCloudDoodle
 					key="rain-cloud-2"
 					className="absolute hidden md:block h-32"
 					duration={4.5}
