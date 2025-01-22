@@ -98,23 +98,40 @@ func (state *PickingState) Exit(room *room) {
 	room.setState(NewDrawingState(*state.selectedWord))
 }
 
+// SafeExtractWord attempts to extract a Word from a command payload
+func SafeExtractWord(payload interface{}) (*Word, error) {
+	wordMap, ok := payload.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("invalid payload format: expected map[string]interface{}")
+	}
+
+	value, ok := wordMap["value"].(string)
+	if !ok {
+		return nil, fmt.Errorf("invalid word format: 'value' field must be a string")
+	}
+
+	if value == "" {
+		return nil, fmt.Errorf("invalid word: value cannot be empty")
+	}
+
+	return &Word{Value: value}, nil
+}
+
 func (state *PickingState) handleWordSelection(room *room, cmd *Command) error {
 	if cmd.Player.GameRole != GameRoleDrawing {
 		slog.Debug("player is not the drawer", "player", cmd.Player.ID)
 		return ErrWrongGameRole
 	}
 
-	wordMap := cmd.Payload.(map[string]interface{})
-	selectedWord := Word{
-		Value: wordMap["value"].(string),
+	selectedWord, err := SafeExtractWord(cmd.Payload)
+	if err != nil {
+		slog.Error("failed to extract word from payload", "error", err)
+		return fmt.Errorf("invalid word selection: %w", err)
 	}
-
-	slog.Debug("player selected word", "word", selectedWord.Value)
 
 	var foundDrawingWord *Word
 	for _, option := range state.wordOptions {
 		if option.Value == selectedWord.Value {
-			slog.Debug("found drawing word", "word", option.Value)
 			foundDrawingWord = &option
 			break
 		}

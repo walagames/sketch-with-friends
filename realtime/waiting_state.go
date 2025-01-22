@@ -60,6 +60,10 @@ func (state *WaitingState) handleGameStart(room *room, cmd *Command) error {
 }
 
 func (state *WaitingState) handleRoomSettingsChange(room *room, cmd *Command) error {
+	if cmd.Player.RoomRole != RoomRoleHost {
+		return ErrWrongRoomRole
+	}
+
 	settings, err := decodePayload[RoomSettings](cmd.Payload)
 	if err != nil {
 		slog.Error("failed to decode room settings", "error", err)
