@@ -7,7 +7,7 @@ import (
 
 type WaitingState struct{}
 
-func NewWaitingState() *WaitingState {
+func NewWaitingState() RoomState {
 	return &WaitingState{}
 }
 

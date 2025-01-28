@@ -13,7 +13,7 @@ type PickingState struct {
 	endsAt       time.Time
 }
 
-func NewPickingState(wordOptions []Word) *PickingState {
+func NewPickingState(wordOptions []Word) RoomState {
 	return &PickingState{
 		wordOptions:  wordOptions,
 		selectedWord: nil,
@@ -32,7 +32,7 @@ func (state *PickingState) Enter(room *room) {
 		// It's the last round, return to waiting state
 		if room.CurrentRound >= room.Settings.TotalRounds {
 			slog.Debug("it's the last round, returning to waiting state")
-			room.TransitionTo(NewWaitingState())
+			room.TransitionTo(NewGameOverState())
 			return
 		}
 
@@ -48,13 +48,6 @@ func (state *PickingState) Enter(room *room) {
 			return
 		}
 	}
-
-	// TODO: scheduling stuff and timer events
-
-	// ! remove this
-	// evt := scheudleEvent(end of state time) ??
-	// room.scheduler.addEvent(evt) ??
-	// broadcast(changeTimer evt.getUTC) ??
 
 	room.currentDrawer = nextDrawer
 	nextDrawer.GameRole = GameRoleDrawing

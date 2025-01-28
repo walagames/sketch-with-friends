@@ -21,15 +21,3 @@ type RoomState interface {
 
 	HandleCommand(room *room, cmd *Command) error
 }
-
-// Helper functions to check if the game is in a playing state
-func isPlaying(state RoomState) bool {
-	_, isWaiting := state.(*WaitingState)
-	return !isWaiting
-}
-
-// Helper functions to check if the game is in a drawing state
-func isDrawingState(state RoomState) bool {
-	_, isDrawing := state.(*DrawingState)
-	return isDrawing
-}

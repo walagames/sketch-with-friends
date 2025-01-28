@@ -21,6 +21,7 @@ import {
 	Target,
 } from "framer-motion";
 import { RainCloudDoodle } from "@/components/doodle/rain-cloud-doodle";
+import { SkyScene } from "@/components/scenes/sky-scene";
 
 export enum Direction {
 	UP,
@@ -348,7 +349,11 @@ const views: Record<RoomState, View> = {
 		zIndex: 5,
 	},
 	[RoomState.GameOver]: {
-		Component: () => <></>,
+		Component: () => (
+			<SkyScene>
+				<div className="text-white text-2xl font-bold">Game over</div>
+			</SkyScene>
+		),
 		key: "game-over-view",
 		transition: {
 			direction: Direction.LEFT,
@@ -359,7 +364,6 @@ const views: Record<RoomState, View> = {
 					left: 0.9,
 					top: 0.45,
 					rotate: 0,
-					opacity: 0.5,
 				},
 				Component: AirplaneDoodle,
 				key: "airplane-doodle",

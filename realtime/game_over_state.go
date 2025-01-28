@@ -5,12 +5,13 @@ import "log/slog"
 type GameOverState struct {
 }
 
-func NewGameOverState() *GameOverState {
+func NewGameOverState() RoomState {
 	return &GameOverState{}
 }
 
 func (state GameOverState) Enter(room *room) {
 	slog.Info("Game over enter")
+	room.broadcast(GameRoleAny, event(SetCurrentStateEvt, GameOver))
 }
 
 func (state GameOverState) Exit(room *room) {
