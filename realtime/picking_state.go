@@ -13,7 +13,7 @@ type PickingState struct {
 	endsAt       time.Time
 }
 
-func NewPickingState(wordOptions []Word) RoomState {
+func NewPickingState(wordOptions []Word) *PickingState {
 	return &PickingState{
 		wordOptions:  wordOptions,
 		selectedWord: nil,

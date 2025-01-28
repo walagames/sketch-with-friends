@@ -1,3 +1,4 @@
+import { SceneSprites } from "@/hooks/use-view-transition";
 import { cn } from "@/lib/utils";
 
 export function RoomScene({
@@ -15,6 +16,7 @@ export function RoomScene({
 			)}
 		>
 			{children}
+			<SceneSprites />
 		</div>
 	);
 }

@@ -35,14 +35,20 @@ var (
 	PostDrawingPhaseDuration = time.Second * 6
 )
 
+type ChatMessageType string
+
+const (
+	ChatMessageTypeDefault    ChatMessageType = "default"
+	ChatMessageTypeCorrect    ChatMessageType = "correct"
+	ChatMessageTypeCloseGuess ChatMessageType = "close_guess"
+	ChatMessageTypeSystem     ChatMessageType = "system"
+)
+
 type ChatMessage struct {
-	ID              uuid.UUID `json:"id"`
-	PlayerID        uuid.UUID `json:"playerId"`
-	Guess           string    `json:"guess"`
-	IsCorrect       bool      `json:"isCorrect"`
-	PointsAwarded   int       `json:"pointsAwarded"`
-	IsClose         bool      `json:"isClose"`
-	IsSystemMessage bool      `json:"isSystemMessage"`
+	ID       uuid.UUID       `json:"id"`
+	PlayerID uuid.UUID       `json:"playerId"`
+	Type     ChatMessageType `json:"type"`
+	Content  string          `json:"content"`
 }
 
 // Room settings validation constants
@@ -494,12 +500,10 @@ func (r *room) enqueueDrawingPlayer(player *player) {
 // ! im gonna dleete this later
 func (room *room) SendSystemMessage(message string) {
 	newMessage := ChatMessage{
-		ID:              uuid.New(),
-		PlayerID:        uuid.Nil,
-		Guess:           message,
-		IsCorrect:       false,
-		PointsAwarded:   0,
-		IsSystemMessage: true,
+		ID:       uuid.New(),
+		PlayerID: uuid.Nil,
+		Content:  message,
+		Type:     ChatMessageTypeSystem,
 	}
 	room.ChatMessages = append(room.ChatMessages, newMessage)
 	room.broadcast(GameRoleAny, event(NewChatMessageEvt, newMessage))

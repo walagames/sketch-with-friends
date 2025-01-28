@@ -278,28 +278,28 @@ const views: Record<RoomState, View> = {
 				key: "airplane-doodle",
 				type: SpriteType.STATIC,
 			},
-			// {
-			// 	Component: (props: HTMLMotionProps<"img">) => (
-			// 		<RainCloudDoodle
-			// 			duration={5}
-			// 			className="absolute xl:-top-[10%] xl:-left-[20%] bottom-[14%] right-[14%] w-[8rem] xl:w-[9rem]"
-			// 			{...props}
-			// 		/>
-			// 	),
-			// 	key: "rain-cloud-1",
-			// 	type: SpriteType.BOBBING,
-			// },
-			// {
-			// 	Component: (props: HTMLMotionProps<"img">) => (
-			// 		<RainCloudDoodle
-			// 			duration={4}
-			// 			className="absolute hidden lg:block w-[7rem] xl:top-[12%] xl:-right-[20%]"
-			// 			{...props}
-			// 		/>
-			// 	),
-			// 	key: "rain-cloud-2",
-			// 	type: SpriteType.BOBBING,
-			// },
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={5}
+						className="top-[20%] right-[4%]"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-1",
+				type: SpriteType.BOBBING,
+			},
+			{
+				Component: (props: HTMLMotionProps<"img">) => (
+					<RainCloudDoodle
+						duration={4}
+						className="top-[8%] left-[5%]"
+						{...props}
+					/>
+				),
+				key: "rain-cloud-2",
+				type: SpriteType.BOBBING,
+			},
 		],
 		zIndex: 4,
 	},
@@ -414,7 +414,7 @@ const getView = (currentState: RoomState, previousState: RoomState) => {
 	if (currentState === RoomState.Drawing) {
 		view.transition.direction = Direction.LEFT;
 		view.key = "drawing-view";
-		view.zIndex = 10;
+		view.zIndex = 20;
 	}
 
 	if (
@@ -432,6 +432,7 @@ const getView = (currentState: RoomState, previousState: RoomState) => {
 	) {
 		view.transition.direction = Direction.LEFT;
 		view.key = "picking-view-second";
+		view.zIndex = 10;
 	}
 
 	return view;
@@ -477,13 +478,13 @@ export function RoomViewContainer() {
 		>
 			<TransitionContainer zIndex={View.zIndex} key={View.key}>
 				<View.Component />
-				<SceneSprites />
+				{/* <SceneSprites /> */}
 			</TransitionContainer>
 		</AnimatePresenceWithDirection>
 	);
 }
 
-function SceneSprites() {
+export function SceneSprites() {
 	const currentState = useSelector(
 		(state: RootState) => state.room.currentState
 	);

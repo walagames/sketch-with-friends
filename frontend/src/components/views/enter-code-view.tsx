@@ -8,8 +8,7 @@ import { CodeForm } from "./components/code-form";
 import { AnimatePresence } from "framer-motion";
 import { Doodle } from "@/components/doodle/doodle";
 import { useMemo } from "react";
-import { setCurrentState } from "@/state/features/room";
-import { RoomState } from "@/state/features/room";
+import { setCurrentState, RoomState } from "@/state/features/room";
 
 interface DoodleItem {
 	src: string;
@@ -145,28 +144,6 @@ export function EnterCodeView() {
 						/>
 					))}
 				</div>
-
-				{/* <BobbingDoodle
-					key="rain-cloud-1"
-					hideOnSmallViewports
-					duration={4}
-					className="lg:top-[20%] top-[6%] lg:left-[12%] left-[6%] absolute w-32"
-					src="/doodles/rain-cloud.png"
-				/>
-				<BobbingDoodle
-					key="rain-cloud-3"
-					hideOnSmallViewports
-					duration={5}
-					style={{ top: "8%", left: "20%" }}
-					src="/doodles/rain-cloud.png"
-				/>
-				<BobbingDoodle
-					key="rain-cloud-4"
-					hideOnSmallViewports
-					duration={4.5}
-					style={{ top: "10%", right: "10%" }}
-					src="/doodles/rain-cloud.png"
-				/> */}
 			</AnimatePresence>
 		</SkyScene>
 	);

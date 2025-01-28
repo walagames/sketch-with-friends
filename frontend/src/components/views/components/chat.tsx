@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { RootState } from "@/state/store";
 import { GameRole } from "@/state/features/game";
-import { ChatMessage, Player } from "@/state/features/room";
+import { ChatMessage, ChatMessageType, Player } from "@/state/features/room";
 import { generateAvatar } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
@@ -12,22 +12,15 @@ import { Form, FormField, FormItem, FormControl } from "@/components/ui/form";
 import { useDispatch, useSelector } from "react-redux";
 import { RaisedInput } from "@/components/ui/raised-input";
 import { VirtualKeyboard } from "./virtual-keyboard";
-import { UsersIcon } from "lucide-react";
 import { getGameRole } from "@/lib/player";
 import { useMediaQuery } from "@/hooks/use-media-query";
-export function Chat() {
+
+export function Chat({ placeholder }: { placeholder?: string }) {
 	const chatMessages = useSelector(
 		(state: RootState) => state.room.chatMessages
 	);
 	const players = useSelector((state: RootState) => state.room.players);
 	const playerId = useSelector((state: RootState) => state.room.playerId);
-
-	const currentRound = useSelector(
-		(state: RootState) => state.room.currentRound
-	);
-	const totalRounds = useSelector(
-		(state: RootState) => state.room.settings.totalRounds
-	);
 	const role = getGameRole(playerId, players);
 	const isGuessing = role === GameRole.Guessing;
 
@@ -91,31 +84,8 @@ export function Chat() {
 	}, []);
 
 	return (
-		<div
-			className={cn(
-				"flex flex-col lg:h-full xl:w-[20rem] w-full xl:max-h-[660px] min-h-[12rem] px-0.5 lg:px-0 relative z-30 gap-1.5",
-				isGuessing
-					? "h-[var(--max-chat-height)]"
-					: "h-[var(--max-chat-height-drawing)]"
-			)}
-		>
-			<div className="overflow-hidden w-full justify-between items-end h-14 py-2 px-0.5 hidden lg:flex">
-				<div className="gap-2 lg:text-xl font-bold items-center relative hidden lg:flex z-20">
-					Round {currentRound} of {totalRounds}
-				</div>
-				<div className="flex gap-1.5 text-lg lg:text-xl font-bold items-center relative ml-auto z-20">
-					<UsersIcon className="size-5 mb-1" /> {Object.values(players).length}
-				</div>
-				<div className="bg-gradient-to-b from-background-secondary to-transparent top-[0.625rem] left-2 right-2  rounded-lg h-14 absolute z-10 lg:hidden" />
-			</div>
-			<div className="relative flex-1 overflow-hidden">
-				<div className="h-14 w-full absolute lg:hidden z-50 top-0 flex overflow-hidden items-start">
-					<div className="flex gap-1.5 text-xl font-bold items-center relative ml-auto z-20 px-4 py-2">
-						<UsersIcon className="size-5 mb-1" />{" "}
-						{Object.values(players).length}
-					</div>
-					<div className="bg-gradient-to-b from-background-secondary to-transparent rounded-lg h-14 absolute top-0.5 left-2 right-2" />
-				</div>
+		<div className="flex flex-col lg:h-full relative z-30 gap-1.5">
+			<div className="flex-1 overflow-hidden">
 				<AnimatePresence>
 					{showNewMessages && (
 						<motion.div
@@ -144,7 +114,7 @@ export function Chat() {
 					ref={listRef}
 					onScroll={handleScroll}
 					className={cn(
-						"h-full mx-1 flex gap-3 break-all lg:border-4 border-[3px] bg-background-secondary/50 backdrop-blur-[4px] border-border border-dashed rounded-lg flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide p-4 pt-8 lg:pt-3.5 lg:pb-6",
+						"h-full mx-1 flex gap-3 break-all flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide",
 						"contain-strict"
 					)}
 				>
@@ -157,8 +127,8 @@ export function Chat() {
 					))}
 				</motion.ul>
 			</div>
-			<div className="mt-2 w-full hidden sm:block h-16">
-				<ChatForm isGuessing={isGuessing} />
+			<div className="mt-1.5 w-full hidden sm:block">
+				<ChatForm isGuessing={isGuessing} placeholder={placeholder} />
 			</div>
 			<div className="w-full sm:hidden">
 				<VirtualKeyboard isGuessing={isGuessing} className="w-full" />
@@ -176,8 +146,7 @@ function ChatMessageComponent({
 }) {
 	const playerId = useSelector((state: RootState) => state.room.playerId);
 
-	// If it's a system message, render a simplified version
-	if (message.isSystemMessage) {
+	if (message.type === ChatMessageType.System) {
 		return (
 			<motion.li
 				initial={{ opacity: 0, y: 3, scale: 0.9 }}
@@ -188,7 +157,7 @@ function ChatMessageComponent({
 					style={{ wordBreak: "break-word" }}
 					className="block text-sm font-semibold max-w-full"
 				>
-					{message.guess}
+					{message.content}
 				</span>
 			</motion.li>
 		);
@@ -196,10 +165,89 @@ function ChatMessageComponent({
 
 	if (!player) return null;
 
+	const isOwnMessage = playerId === message.playerId;
+
+	if (message.type === ChatMessageType.Default) {
+		return (
+			<ChatMessageWrapper message={message} player={player}>
+				<div
+					className={cn(
+						"bg-background border-2 relative z-10 font-semibold flex overflow-hidden w-full max-w-full",
+						isOwnMessage
+							? "rounded-lg rounded-br-none"
+							: "rounded-lg rounded-tl-none"
+					)}
+				>
+					<span className="px-3 py-2 break-words overflow-wrap-anywhere w-full">
+						{message.content}
+					</span>
+				</div>
+			</ChatMessageWrapper>
+		);
+	}
+
+	if (message.type === ChatMessageType.CloseGuess) {
+		return (
+			<ChatMessageWrapper message={message} player={player}>
+				<div
+					className={cn(
+						"bg-background border-2 relative z-10 font-semibold flex overflow-hidden w-full max-w-full",
+						isOwnMessage
+							? "rounded-lg rounded-br-none"
+							: "rounded-lg rounded-tl-none"
+					)}
+				>
+					<div
+						className={cn(
+							"w-1.5 bg-blue-500 ml-auto",
+							isOwnMessage && "order-2"
+						)}
+					/>
+					<span className="px-3 py-2 break-words overflow-wrap-anywhere w-full">
+						{message.content}
+					</span>
+				</div>
+			</ChatMessageWrapper>
+		);
+	}
+
+	if (message.type === ChatMessageType.Correct) {
+		return (
+			<ChatMessageWrapper message={message} player={player}>
+				<div
+					className={cn(
+						"bg-background border-2 relative z-10 font-semibold flex overflow-hidden w-full max-w-full",
+						isOwnMessage
+							? "rounded-lg rounded-br-none"
+							: "rounded-lg rounded-tl-none",
+						isOwnMessage && "bg-[#40FF00]"
+					)}
+				>
+					<span className="px-3 py-2 break-words overflow-wrap-anywhere w-full">
+						{isOwnMessage ? "You guessed it!" : "Guessed it!"}
+					</span>
+					{!isOwnMessage && (
+						<div className={cn("w-1.5 bg-green-500 ml-auto")} />
+					)}
+				</div>
+			</ChatMessageWrapper>
+		);
+	}
+}
+
+function ChatMessageWrapper({
+	message,
+	player,
+	children,
+}: {
+	message: ChatMessage;
+	player: Player;
+	children: React.ReactNode;
+}) {
+	const playerId = useSelector((state: RootState) => state.room.playerId);
 	const { avatarConfig, username } = player;
 	const avatarSvg = generateAvatar(avatarConfig);
 	const isOwnMessage = playerId === message.playerId;
-
 	return (
 		<motion.li
 			initial={{ opacity: 0, y: 3 }}
@@ -240,43 +288,9 @@ function ChatMessageComponent({
 							<span className="text-xs text-foreground/50 px-0.5">(You)</span>
 						)}
 					</p>
-					{!!message.pointsAwarded && (
-						<p className="text-xs shrink-0 py-0.5 px-1">
-							+{message.pointsAwarded} pts
-						</p>
-					)}
 				</div>
 				<div className="w-full relative">
-					<div
-						className={cn(
-							"bg-background border-2 relative z-10 font-semibold flex overflow-hidden w-full max-w-full",
-							isOwnMessage
-								? "rounded-lg rounded-br-none"
-								: "rounded-lg rounded-tl-none",
-							message.isCorrect && isOwnMessage && "bg-[#40FF00]"
-						)}
-					>
-						{isOwnMessage && message.isClose && (
-							<div className="w-1.5 bg-blue-500 ml-auto" />
-						)}
-						{message.isCorrect ? (
-							<span className="px-3 py-2 break-words overflow-wrap-anywhere w-full">
-								{isOwnMessage ? "You guessed it!" : "Guessed it!"}
-							</span>
-						) : (
-							<span className="px-3 py-2 break-words overflow-wrap-anywhere w-full">
-								{message.guess}
-							</span>
-						)}
-						{!isOwnMessage && (message.isClose || message.isCorrect) && (
-							<div
-								className={cn(
-									"w-1.5 bg-blue-500 ml-auto",
-									message.isCorrect && !isOwnMessage && "bg-green-500"
-								)}
-							/>
-						)}
-					</div>
+					{children}
 					<div
 						className={cn(
 							"bg-foreground h-full w-full absolute",
@@ -294,7 +308,13 @@ function ChatMessageComponent({
 const FormSchema = z.object({
 	message: z.string().min(1),
 });
-export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
+export function ChatForm({
+	isGuessing,
+	placeholder,
+}: {
+	isGuessing?: boolean;
+	placeholder?: string;
+}) {
 	const dispatch = useDispatch();
 	const [messageHistory, setMessageHistory] = useState<string[]>([]);
 	const [historyIndex, setHistoryIndex] = useState(-1);
@@ -357,10 +377,10 @@ export function ChatForm({ isGuessing }: { isGuessing?: boolean }) {
 						return (
 							<FormItem className="relative space-y-0">
 								<FormControl>
-									<div className="flex items-center gap-3 relative">
+									<div className="flex items-center gap-3 relative px-0.5">
 										<RaisedInput
 											autoComplete="off"
-											placeholder={isGuessing ? "Guess" : "Chat"}
+											placeholder={placeholder}
 											onKeyDown={handleKeyDown}
 											{...field}
 											onChange={(e) => {

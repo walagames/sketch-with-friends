@@ -161,10 +161,16 @@ export function PlayerInfoForm({
 		<div className="max-w-60 w-full flex flex-col gap-5 items-center relative z-50">
 			<div className="flex justify-center items-start gap-2">
 				<div className="flex flex-col h-full mt-3 gap-2">
-					<RaisedButton shift={false} size="iconMd" onClick={cycleSkinColor}>
+					<RaisedButton
+						variant="action"
+						shift={false}
+						size="iconMd"
+						onClick={cycleSkinColor}
+					>
 						<SkinColorIcon className="size-8 translate-y-0.5" />
 					</RaisedButton>
 					<RaisedButton
+						variant="action"
 						shift={false}
 						size="iconMd"
 						onClick={cycleBackgroundColor}
@@ -172,6 +178,7 @@ export function PlayerInfoForm({
 						<BackgroundColorIcon className="size-9 translate-y-0.5" />
 					</RaisedButton>
 					<RaisedButton
+						variant="action"
 						shift={false}
 						size="iconMd"
 						onClick={() => dispatch(changeAvatarConfig(Avatar.random()))}
@@ -183,13 +190,28 @@ export function PlayerInfoForm({
 					<img alt="avatar" className="rounded-lg" src={avatarSvg} />
 				</div>
 				<div className="flex flex-col h-full mt-3 gap-2">
-					<RaisedButton shift={false} size="iconMd" onClick={cycleHairStyle}>
+					<RaisedButton
+						variant="action"
+						shift={false}
+						size="iconMd"
+						onClick={cycleHairStyle}
+					>
 						<HairStyleIcon className="size-8 translate-y-0.5" />
 					</RaisedButton>
-					<RaisedButton shift={false} size="iconMd" onClick={cycleHairColor}>
+					<RaisedButton
+						variant="action"
+						shift={false}
+						size="iconMd"
+						onClick={cycleHairColor}
+					>
 						<HairColorIcon className="size-8 translate-y-0.5" />
 					</RaisedButton>
-					<RaisedButton shift={false} size="iconMd" onClick={cycleMood}>
+					<RaisedButton
+						variant="action"
+						shift={false}
+						size="iconMd"
+						onClick={cycleMood}
+					>
 						<MoodIcon className="size-8 translate-y-0.5" />
 					</RaisedButton>
 				</div>

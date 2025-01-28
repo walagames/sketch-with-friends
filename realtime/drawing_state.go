@@ -28,7 +28,7 @@ type DrawingState struct {
 	pointsAwarded   map[uuid.UUID]int
 }
 
-func NewDrawingState(word Word) RoomState {
+func NewDrawingState(word Word) *DrawingState {
 	// Initialize the hinted word with blanks but preserve spaces
 	wordRunes := []rune(word.Value)
 	hintRunes := make([]rune, len(wordRunes))
@@ -371,23 +371,24 @@ func (state *DrawingState) handleChatMessage(room *room, cmd *Command) error {
 			room.currentDrawer.Score += drawerPoints
 
 			result = ChatMessage{
-				ID:            uuid.New(),
-				PlayerID:      player.ID,
-				Guess:         "", // Dont leak the correct word to the other players
-				IsCorrect:     true,
-				PointsAwarded: guesserPoints,
+				ID:       uuid.New(),
+				PlayerID: player.ID,
+				Content:  "", // Dont leak the correct word to the other players
+				Type:     ChatMessageTypeCorrect,
 			}
 			player.Send(event(SetSelectedWordEvt, state.currentWord))
 		} else {
 			result = ChatMessage{
 				ID:       uuid.New(),
 				PlayerID: player.ID,
-				Guess:    guessValue,
+				Content:  guessValue,
+				Type:     ChatMessageTypeDefault,
 			}
 
-			if playerIsNotDrawing && !playerHasNotAlreadyGuessedCorrectly {
-				slog.Debug("checking if guess is close")
-				result.IsClose = isGuessClose(strings.ToLower(guessValue), state.currentWord)
+			isClose := isGuessClose(guessValue, state.currentWord)
+
+			if isClose {
+				result.Type = ChatMessageTypeCloseGuess
 			}
 		}
 

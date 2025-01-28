@@ -1,10 +1,9 @@
 import { motion } from "framer-motion";
 import { AvatarConfig, generateAvatar } from "@/lib/avatar";
-import { Player, RoomRole, changePlayerProfile } from "@/state/features/room";
+import { Player, changePlayerProfile } from "@/state/features/room";
 import { forwardRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/state/store";
-import { CrownIcon } from "@/components/ui/icons";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -35,8 +34,9 @@ function CardContent({
 }) {
 	return (
 		<RaisedButton variant="card" size="card" className="w-full justify-start">
-			<div className="flex items-center h-14 -translate-y-0.5 lg:w-64 min-h-0 flex-1 pr-4">
+			<div className="flex items-center h-14 -translate-y-0.5 lg:w-64 min-h-0 flex-1 relative">
 				<img
+					alt="Player avatar"
 					className="rounded-l-lg h-full aspect-square relative"
 					src={generateAvatar(player.avatarConfig)}
 				/>
@@ -56,7 +56,6 @@ function CardContent({
 export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 	({ player }, ref) => {
 		const dispatch = useDispatch();
-		const { roomRole } = player;
 		const playerId = useSelector((state: RootState) => state.room.playerId);
 		const isCurrentPlayer = playerId === player.id;
 		const [isEditPlayerOptionsOpen, setIsEditPlayerOptionsOpen] =
@@ -79,22 +78,14 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 		};
 
 		return (
-			<div
-				className="flex items-start gap-2 w-full ml-auto lg:w-auto px-1"
-				ref={ref}
-			>
-				{roomRole === RoomRole.Host && (
-					<div className="translate-y-2.5">
-						<CrownIcon className="w-8 h-8 text-yellow-400" />
-					</div>
-				)}
+			<div className="flex items-start gap-2 w-full" ref={ref}>
 				<motion.div
 					layout
 					initial={{ opacity: 0, scale: 0.95 }}
 					animate={{ opacity: 1, scale: 1 }}
 					exit={{ opacity: 0, scale: 0.95 }}
 					transition={containerSpring}
-					className="w-[calc(100%-3rem)] ml-auto lg:w-auto"
+					className="w-full"
 				>
 					{isCurrentPlayer ? (
 						<DropdownMenu modal={false}>
@@ -125,7 +116,6 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 						<CardContent player={player} isCurrentPlayer={isCurrentPlayer} />
 					)}
 				</motion.div>
-
 				<EditPlayerInfoModal
 					key={player.id + "edit-modal"}
 					isOpen={isEditPlayerOptionsOpen}

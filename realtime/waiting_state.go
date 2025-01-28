@@ -7,7 +7,7 @@ import (
 
 type WaitingState struct{}
 
-func NewWaitingState() RoomState {
+func NewWaitingState() *WaitingState {
 	return &WaitingState{}
 }
 
@@ -37,6 +37,8 @@ func (state *WaitingState) HandleCommand(room *room, cmd *Command) error {
 		return state.handleRoomSettingsChange(room, cmd)
 	case PlayerJoinedCmd:
 		return state.handlePlayerJoined(room, cmd)
+	case ChatMessageCmd:
+		return state.handleChatMessage(room, cmd)
 	default:
 		slog.Error("Invalid command for current state", "command", cmd.Type)
 		return ErrInvalidCommand
@@ -88,6 +90,20 @@ func (state *WaitingState) handleRoomSettingsChange(room *room, cmd *Command) er
 func (state *WaitingState) handlePlayerJoined(room *room, cmd *Command) error {
 	cmd.Player.Send(
 		event(SetCurrentStateEvt, Waiting),
+	)
+	return nil
+}
+
+func (state *WaitingState) handleChatMessage(room *room, cmd *Command) error {
+	msg := ChatMessage{
+		PlayerID: cmd.Player.ID,
+		Content:  cmd.Payload.(string),
+		Type:     ChatMessageTypeDefault,
+	}
+	room.ChatMessages = append(room.ChatMessages, msg)
+
+	room.broadcast(GameRoleAny,
+		event(NewChatMessageEvt, msg),
 	)
 	return nil
 }

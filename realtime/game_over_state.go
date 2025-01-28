@@ -5,8 +5,8 @@ import "log/slog"
 type GameOverState struct {
 }
 
-func NewGameOverState() RoomState {
-	return GameOverState{}
+func NewGameOverState() *GameOverState {
+	return &GameOverState{}
 }
 
 func (state GameOverState) Enter(room *room) {

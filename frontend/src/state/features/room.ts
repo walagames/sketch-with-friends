@@ -1,16 +1,19 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { AvatarConfig } from "@/lib/avatar";
 
+export enum ChatMessageType {
+	Default = "default",
+	Correct = "correct",
+	CloseGuess = "close_guess",
+	System = "system",
+}
+
 export type ChatMessage = {
 	id: string;
 	playerId: string;
-	guess: boolean;
-	isCorrect: boolean;
-	pointsAwarded: number;
-	isClose: boolean;
-	isSystemMessage: boolean;
+	type: ChatMessageType;
+	content: string;
 };
-
 export enum RoomRole {
 	Host = "host",
 	Player = "player",

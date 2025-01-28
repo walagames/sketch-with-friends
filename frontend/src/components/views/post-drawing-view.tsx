@@ -6,8 +6,7 @@ import { generateAvatar } from "@/lib/avatar";
 import { ArrowDownIcon, ArrowUpIcon, CrownIcon, FlameIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedNumber } from "@/components/ui/animated-number";
-import { AnimatePresence, motion } from "framer-motion";
-import { RainCloudDoodle } from "@/components/doodle/rain-cloud-doodle";
+import { motion } from "framer-motion";
 import { getDrawingPlayer } from "@/lib/player";
 const springConfig = {
 	type: "spring",
@@ -76,22 +75,6 @@ export function PostDrawingView() {
 					placeChanges={placeChanges}
 				/>
 			)}
-			<AnimatePresence>
-				<RainCloudDoodle
-					key="rain-cloud-1"
-					className="absolute hidden md:block h-32"
-					duration={5}
-					style={{ top: "8%", left: "20%" }}
-					src="/doodles/rain-cloud.png"
-				/>
-				<RainCloudDoodle
-					key="rain-cloud-2"
-					className="absolute hidden md:block h-32"
-					duration={4.5}
-					style={{ top: "10%", right: "10%" }}
-					src="/doodles/rain-cloud.png"
-				/>
-			</AnimatePresence>
 		</SkyScene>
 	);
 }

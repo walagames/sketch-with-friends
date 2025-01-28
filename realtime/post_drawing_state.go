@@ -11,7 +11,7 @@ type PostDrawingState struct {
 	endsAt        time.Time
 }
 
-func NewPostDrawingState(pointsAwarded map[uuid.UUID]int) RoomState {
+func NewPostDrawingState(pointsAwarded map[uuid.UUID]int) *PostDrawingState {
 	return &PostDrawingState{
 		pointsAwarded: pointsAwarded,
 		endsAt:        time.Now().Add(time.Second * 5),

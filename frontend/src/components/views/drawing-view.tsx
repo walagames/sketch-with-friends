@@ -2,13 +2,14 @@ import Canvas from "./components/canvas";
 import { CanvasTools, ColorSliders } from "./components/canvas-tools";
 import { Chat } from "./components/chat";
 import { SkyScene } from "@/components/scenes/sky-scene";
-import { RainCloudDoodle } from "@/components/doodle/rain-cloud-doodle";
 import { AnimatePresence } from "framer-motion";
 import { CanvasHeader } from "./components/canvas-header";
 import { AnimatedSketchText } from "@/components/ui/game-start-countdown";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
+import { getGameRole } from "@/lib/player";
+import { GameRole } from "@/state/features/room";
 
 export function DrawingView() {
 	const drawingTime = useSelector(
@@ -16,6 +17,10 @@ export function DrawingView() {
 	);
 
 	const timerEndsAt = useSelector((state: RootState) => state.room.timerEndsAt);
+
+	const players = useSelector((state: RootState) => state.room.players);
+
+	const playerId = useSelector((state: RootState) => state.room.playerId);
 
 	// Only play the animation within the first second of the drawing phase
 	// Otherwise when the tab refocuses, it will play the animation again
@@ -33,6 +38,8 @@ export function DrawingView() {
 			clearTimeout(timeout);
 		};
 	}, []);
+
+	const isDrawing = getGameRole(playerId, players) === GameRole.Drawing;
 
 	return (
 		<SkyScene>
@@ -53,21 +60,11 @@ export function DrawingView() {
 							<CanvasTools />
 						</div>
 					</div>
-					<Chat />
-					<AnimatePresence>
-						<RainCloudDoodle
-							key="rain-cloud-1"
-							duration={5}
-							className="absolute xl:-top-[10%] xl:-left-[20%] bottom-[14%] right-[14%] w-[8rem] xl:w-[9rem]"
-							src="/doodles/rain-cloud.png"
-						/>
-						<RainCloudDoodle
-							key="rain-cloud-2"
-							duration={4}
-							className="absolute hidden lg:block w-[7rem] xl:top-[12%] xl:-right-[20%]"
-							src="/doodles/rain-cloud.png"
-						/>
-					</AnimatePresence>
+					<Chat
+						placeholder={
+							isDrawing ? "Type your message..." : "Type your guess..."
+						}
+					/>
 				</div>
 			</div>
 		</SkyScene>

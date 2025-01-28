@@ -1,4 +1,4 @@
-import { ChatMessage, Player, RoomState } from "@/state/features/room";
+import { ChatMessageType, Player, RoomState } from "@/state/features/room";
 import { RootState } from "@/state/store";
 import {
 	createContext,
@@ -52,7 +52,7 @@ const SOUND_PATHS: Record<SoundEffect, SoundConfig> = {
 	[SoundEffect.PLAYER_JOIN]: { path: "/sounds/player-join.mp3", volume: 1 },
 	[SoundEffect.PLAYER_LEAVE]: { path: "/sounds/player-leave.mp3", volume: 1 },
 	[SoundEffect.ROUND_END]: { path: "/sounds/round-end.mp3", volume: 1 },
-	[SoundEffect.SCENE_CHANGE]: { path: "/sounds/whoosh.mp3", volume: .2 },
+	[SoundEffect.SCENE_CHANGE]: { path: "/sounds/whoosh.mp3", volume: 0.2 },
 	[SoundEffect.PLAYER_WIN]: { path: "/sounds/player-win.mp3", volume: 1 },
 	[SoundEffect.PLAYER_LOSE]: { path: "/sounds/player-lose.mp3", volume: 1 },
 	[SoundEffect.SCRIBBLE]: { path: "/sounds/scribble.mp3", volume: 0.4 },
@@ -65,11 +65,12 @@ const SOUND_PATHS: Record<SoundEffect, SoundConfig> = {
 export function SoundProvider({ children }: { children: React.ReactNode }) {
 	const audioContextRef = useRef<AudioContext>();
 	const soundBuffersRef = useRef<SoundBuffers>({});
+	const lastSoundTimeRef = useRef<{ [key in SoundEffect]?: number }>({});
 	const volume = useSelector((state: RootState) => state.client.volume);
 	const chatMessages = useSelector(
 		(state: RootState) => state.room.chatMessages
 	);
-	const prevChatMessagesRef = useRef<ChatMessage[]>([]);
+	const lastMessageIdRef = useRef<string | null>(null);
 	const currentState = useSelector(
 		(state: RootState) => state.room.currentState
 	);
@@ -85,11 +86,20 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 		(sound: SoundEffect) => {
 			if (!audioContextRef.current || !soundBuffersRef.current[sound]) return;
 
+			// Prevent playing the same sound within 100ms
+			const now = Date.now();
+			const lastPlayTime = lastSoundTimeRef.current[sound] || 0;
+			if (now - lastPlayTime < 100) return;
+			lastSoundTimeRef.current[sound] = now;
+
+			if (audioContextRef.current.state === "suspended") {
+				audioContextRef.current.resume();
+			}
+
 			const source = audioContextRef.current.createBufferSource();
 			source.buffer = soundBuffersRef.current[sound]!;
 
 			const gainNode = audioContextRef.current.createGain();
-			// Multiply the user's volume preference with the sound's default volume
 			gainNode.gain.value = volume * SOUND_PATHS[sound].volume;
 
 			source.connect(gainNode);
@@ -97,7 +107,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 
 			source.start(0);
 		},
-		[audioContextRef, soundBuffersRef, volume]
+		[volume]
 	);
 
 	useEffect(() => {
@@ -126,31 +136,16 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 
 	// Listen for game state changes and play appropriate sounds
 	useEffect(() => {
-		// Initialize the ref on first mount only
-		if (!isInitializedRef.current) {
-			prevChatMessagesRef.current = chatMessages;
-			isInitializedRef.current = true;
-			return;
-		}
-
-		// Only check the most recent message
 		const latestMessage = chatMessages[chatMessages.length - 1];
-		const prevMessages = prevChatMessagesRef.current;
 
-		// Only play sound if there's a new message (comparing lengths)
-		// and the latest message isn't already in the previous messages
-		if (
-			chatMessages.length > prevMessages.length &&
-			!prevMessages.find((prev) => prev.id === latestMessage?.id)
-		) {
-			if (latestMessage?.isCorrect) {
+		if (latestMessage && latestMessage.id !== lastMessageIdRef.current) {
+			if (latestMessage.type === ChatMessageType.Correct) {
 				playSound(SoundEffect.CORRECT);
 			} else {
 				playSound(SoundEffect.CHAT_MESSAGE);
 			}
+			lastMessageIdRef.current = latestMessage.id;
 		}
-
-		prevChatMessagesRef.current = chatMessages;
 	}, [chatMessages, playSound]);
 
 	// Play clock tick sounds when drawing phase is ending
