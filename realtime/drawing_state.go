@@ -125,14 +125,12 @@ func (state *DrawingState) Enter(room *room) {
 func (state *DrawingState) handleDrawingPhaseEnd(room *room) {
 	room.scheduler.clearEvents()
 	state.updateStreaks(room)
-	room.currentDrawer.GameRole = GameRoleGuessing
 
 	// Send drawing phase summary
 	room.SendSystemMessage(state.drawingPhaseSummary(room))
 
 	room.broadcast(GameRoleAny,
 		event(SetSelectedWordEvt, state.currentWord),
-		event(SetPlayersEvt, room.Players),
 	)
 
 	// Transition to the post drawing phase after a short delay
@@ -143,6 +141,9 @@ func (state *DrawingState) handleDrawingPhaseEnd(room *room) {
 
 func (state *DrawingState) Exit(room *room) {
 	room.scheduler.clearEvents()
+
+	room.currentDrawer.GameRole = GameRoleGuessing
+	room.broadcast(GameRoleGuessing, event(SetPlayersEvt, room.Players))
 
 	room.setState(NewPostDrawingState(state.pointsAwarded))
 }
@@ -457,6 +458,9 @@ func (state *DrawingState) handleChatMessage(room *room, cmd *Command) error {
 	if len(state.pointsAwarded) >= len(room.Players) {
 		room.scheduler.clearEvents()
 		state.endsAt = time.Now()
+		room.broadcast(GameRoleAny,
+			event(SetTimerEvt, state.endsAt.UTC()),
+		)
 		state.handleDrawingPhaseEnd(room)
 	}
 
