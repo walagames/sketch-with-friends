@@ -8,9 +8,10 @@ export enum Direction {
 	DOWN_FADE,
 	LEFT,
 	RIGHT,
+	NONE,
 }
 
-export const DirectionContext = createContext<Direction>(Direction.RIGHT);
+export const DirectionContext = createContext<Direction>(Direction.NONE);
 
 type AnimatePresenceWithDirectionProps = {
 	children: React.ReactNode;

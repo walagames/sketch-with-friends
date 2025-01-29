@@ -1,3 +1,4 @@
+import { SceneSprites } from "@/hooks/use-view-transition";
 import { cn } from "@/lib/utils";
 export function SkyScene({
 	children,
@@ -9,15 +10,17 @@ export function SkyScene({
 	return (
 		<div
 			className={cn(
-				"flex h-full flex-col items-center justify-center w-full gap-6 lg:gap-8 relative",
+				"flex h-full flex-col items-center justify-center w-full gap-6 lg:gap-8 relative overflow-visible",
 				className
 			)}
 		>
 			{children}
+
 			<Hills />
 			{/* duplicate hills so that they still appear on sides when spring overshoots */}
 			<Hills className="absolute bottom-0 left-full w-full " />
 			<Hills className="absolute bottom-0 right-full w-full " />
+			<SceneSprites />
 		</div>
 	);
 }

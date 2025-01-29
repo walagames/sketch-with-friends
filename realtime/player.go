@@ -1,12 +1,9 @@
 package main
 
 import (
-	"fmt"
-	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
-	"golang.org/x/time/rate"
 )
 
 type RoomRole string
@@ -33,9 +30,12 @@ type AvatarConfig struct {
 	BackgroundColor string `json:"backgroundColor"`
 }
 
-type playerProfile struct {
-	Username     string        `json:"username"`
-	AvatarConfig *AvatarConfig `json:"avatarConfig"`
+var DefaultAvatarConfig = &AvatarConfig{
+	HairStyle:       "bangs",
+	HairColor:       "ff543d",
+	Mood:            "hopeful",
+	SkinColor:       "ffd6c0",
+	BackgroundColor: "e0da29",
 }
 
 // player represents an individual participant in the game.
@@ -45,7 +45,8 @@ type playerProfile struct {
 // including scoring, role assignment, and message routing.
 type player struct {
 	ID                uuid.UUID     `json:"id"`
-	Profile           playerProfile `json:"profile"`
+	Username          string        `json:"username"`
+	AvatarConfig      *AvatarConfig `json:"avatarConfig"`
 	RoomRole          RoomRole      `json:"roomRole"`
 	GameRole          GameRole      `json:"gameRole"`
 	Score             int           `json:"score"`
@@ -56,11 +57,9 @@ type player struct {
 
 func NewPlayer(role RoomRole) *player {
 	return &player{
-		ID: uuid.New(),
-		Profile: playerProfile{
-			Username:     "",
-			AvatarConfig: &AvatarConfig{},
-		},
+		ID:                uuid.New(),
+		Username:          "",
+		AvatarConfig:      DefaultAvatarConfig,
 		RoomRole:          role,
 		Score:             0,
 		GameRole:          GameRoleGuessing,
@@ -70,43 +69,7 @@ func NewPlayer(role RoomRole) *player {
 }
 
 // Passes messages to the player's client.
-func (p *player) Send(actions ...*Action) {
-	actionList := append([]*Action{}, actions...)
-	p.client.send <- actionList
-}
-
-// Updates the player's rate limiter based on their game role.
-//
-// We use this to prevent spamming and server abuse by applying
-// different limits to drawing and guessing.
-//
-// Drawing players send many more messages to add strokes to drawings,
-// so we need to account for that.
-func (p *player) UpdateLimiter() {
-	if p.GameRole == GameRoleDrawing {
-		// 500 actions per second, 20 actions in a burst
-		p.client.limiter = rate.NewLimiter(500, 20)
-	} else {
-		// 2 actions per second, 4 actions in a burst
-		p.client.limiter = rate.NewLimiter(2, 4)
-	}
-}
-
-// Generates a random username for a player.
-func randomUsername() string {
-	adjectives := []string{
-		"Bad", "Lazy", "Odd", "Wild", "Sad",
-		"Mad", "Shy", "Fast", "Slow", "Neat",
-	}
-
-	nouns := []string{
-		"Paint", "Art", "Pen", "Brush", "Ink",
-		"Sketch", "Draw", "Line", "Dot", "Doodle",
-	}
-
-	adj := adjectives[rand.Intn(len(adjectives))]
-	noun := nouns[rand.Intn(len(nouns))]
-	num := rand.Intn(99)
-
-	return fmt.Sprintf("%s%s%d", adj, noun, num)
+func (p *player) Send(events ...*Event) {
+	eventList := append([]*Event{}, events...)
+	p.client.send <- eventList
 }
