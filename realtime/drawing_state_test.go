@@ -9,7 +9,7 @@ import (
 
 func TestDrawingState_Permissions(t *testing.T) {
 	// Setup test room and state
-	testRoom := NewRoom("test-room").(*room)
+
 	drawer := &player{
 		ID:       uuid.New(),
 		GameRole: GameRoleDrawing,
@@ -22,12 +22,19 @@ func TestDrawingState_Permissions(t *testing.T) {
 		RoomRole: RoomRolePlayer,
 		client:   NewClient(nil, nil, nil),
 	}
-	testRoom.Players = make(map[uuid.UUID]*player)
-	testRoom.Players[drawer.ID] = drawer
-	testRoom.Players[guesser.ID] = guesser
 
-	state := NewDrawingState(Word{Value: "test", Difficulty: WordDifficultyEasy}).(*DrawingState)
-	testRoom.currentState = state
+	testRoom := &room{
+		ID: uuid.New().String(),
+		Players: map[uuid.UUID]*player{
+			drawer.ID:  drawer,
+			guesser.ID: guesser,
+		},
+		Settings: RoomSettings{
+			PlayerLimit: 10,
+		},
+		currentDrawer: drawer,
+		currentState:  NewDrawingState(Word{Value: "test", Difficulty: WordDifficultyEasy}),
+	}
 
 	tests := []struct {
 		name       string
@@ -61,7 +68,7 @@ func TestDrawingState_Permissions(t *testing.T) {
 			},
 			player:     guesser,
 			wantErr:    true,
-			errMessage: "only the drawer can perform this action",
+			errMessage: ErrOnlyDrawerCanAddStrokes.Error(),
 		},
 		{
 			name: "drawer can add stroke point",
@@ -80,7 +87,7 @@ func TestDrawingState_Permissions(t *testing.T) {
 			},
 			player:     guesser,
 			wantErr:    true,
-			errMessage: "only the drawer can perform this action",
+			errMessage: ErrOnlyDrawerCanAddStrokePoints.Error(),
 		},
 		{
 			name: "drawer can clear strokes",
@@ -97,7 +104,7 @@ func TestDrawingState_Permissions(t *testing.T) {
 			},
 			player:     guesser,
 			wantErr:    true,
-			errMessage: "only the drawer can perform this action",
+			errMessage: ErrOnlyDrawerCanClearStrokes.Error(),
 		},
 		{
 			name: "drawer can undo stroke",
@@ -114,14 +121,14 @@ func TestDrawingState_Permissions(t *testing.T) {
 			},
 			player:     guesser,
 			wantErr:    true,
-			errMessage: "only the drawer can perform this action",
+			errMessage: ErrOnlyDrawerCanUndoStroke.Error(),
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.command.Player = tt.player
-			err := state.HandleCommand(testRoom, tt.command)
+			err := testRoom.currentState.HandleCommand(testRoom, tt.command)
 
 			if tt.wantErr {
 				if err == nil {

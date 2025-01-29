@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"math/rand"
@@ -13,6 +14,13 @@ import (
 const (
 	ScheduledHintReveal      ScheduledEventType = "hint_reveal"
 	ScheduledDrawingPhaseEnd ScheduledEventType = "drawing_phase_end"
+)
+
+var (
+	ErrOnlyDrawerCanAddStrokePoints = errors.New("only the drawer can add stroke points")
+	ErrOnlyDrawerCanAddStrokes      = errors.New("only the drawer can add strokes")
+	ErrOnlyDrawerCanClearStrokes    = errors.New("only the drawer can clear strokes")
+	ErrOnlyDrawerCanUndoStroke      = errors.New("only the drawer can undo strokes")
 )
 
 type Stroke struct {
@@ -236,11 +244,6 @@ func appendStrokePoint(strokes []Stroke, point []int) []Stroke {
 	return strokes
 }
 
-// Returns a new empty slice of strokes.
-func emptyStrokeSlice() []Stroke {
-	return make([]Stroke, 0)
-}
-
 // Returns a new slice of strokes with the most recent stroke removed.
 func removeLastStroke(strokes []Stroke) []Stroke {
 	if len(strokes) > 0 {
@@ -254,6 +257,10 @@ func (state *DrawingState) isDrawingPhaseOver() bool {
 }
 
 func (state *DrawingState) handleStroke(room *room, cmd *Command) error {
+	if cmd.Player.ID != room.currentDrawer.ID {
+		return ErrOnlyDrawerCanAddStrokes
+	}
+
 	if state.isDrawingPhaseOver() {
 		return nil // Silently ignore strokes after drawing phase ends
 	}
@@ -276,6 +283,10 @@ func (state *DrawingState) handleStroke(room *room, cmd *Command) error {
 }
 
 func (state *DrawingState) handleStrokePoint(room *room, cmd *Command) error {
+	if cmd.Player.ID != room.currentDrawer.ID {
+		return ErrOnlyDrawerCanAddStrokePoints
+	}
+
 	if state.isDrawingPhaseOver() {
 		return nil // Silently ignore stroke points after drawing phase ends
 	}
@@ -298,6 +309,10 @@ func (state *DrawingState) handleStrokePoint(room *room, cmd *Command) error {
 }
 
 func (state *DrawingState) handleClearStrokes(room *room, cmd *Command) error {
+	if cmd.Player.ID != room.currentDrawer.ID {
+		return ErrOnlyDrawerCanClearStrokes
+	}
+
 	if state.isDrawingPhaseOver() {
 		return nil // Silently ignore clear strokes after drawing phase ends
 	}
@@ -313,6 +328,10 @@ func (state *DrawingState) handleClearStrokes(room *room, cmd *Command) error {
 }
 
 func (state *DrawingState) handleUndoStroke(room *room, cmd *Command) error {
+	if cmd.Player.ID != room.currentDrawer.ID {
+		return ErrOnlyDrawerCanUndoStroke
+	}
+
 	if state.isDrawingPhaseOver() {
 		return nil // Silently ignore undo stroke after drawing phase ends
 	}
