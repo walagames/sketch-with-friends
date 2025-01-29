@@ -15,7 +15,6 @@ type ScheduledEventType string
 
 const (
 	ScheduledStateChange ScheduledEventType = "state_change"
-	ScheduledHintReveal  ScheduledEventType = "hint_reveal"
 )
 
 type ScheduledEvent struct {

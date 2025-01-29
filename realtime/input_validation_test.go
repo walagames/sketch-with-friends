@@ -217,13 +217,18 @@ func TestSanitizeGuess(t *testing.T) {
 			input:    "   ",
 			expected: "",
 		},
+		{
+			name:     "message too long",
+			input:    "This is a message that is too long and should be truncated",
+			expected: "This is a message that is too long and should be truncated",
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := sanitizeGuess(tt.input)
+			got := sanitizeChatMessage(tt.input)
 			if got != tt.expected {
-				t.Errorf("sanitizeGuess(%q) = %q, want %q", tt.input, got, tt.expected)
+				t.Errorf("sanitizeChatMessage(%q) = %q, want %q", tt.input, got, tt.expected)
 			}
 		})
 	}

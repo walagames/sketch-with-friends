@@ -354,6 +354,18 @@ func (r *room) dispatch(cmd *Command) {
 	switch cmd.Type {
 	case UpdatePlayerProfileCmd:
 		r.handlePlayerProfileChange(cmd)
+	case ChatMessageCmd:
+		err := r.currentState.HandleCommand(r, cmd)
+		if err != nil {
+			slog.Debug("handling chat message at room level from player", "playerId", player.ID)
+			msg := sanitizeChatMessage(cmd.Payload.(string))
+			r.handleChatMessage(ChatMessage{
+				ID:       uuid.New(),
+				PlayerID: player.ID,
+				Content:  msg,
+				Type:     ChatMessageTypeDefault,
+			})
+		}
 	default:
 		slog.Debug("passing action to state", "action", cmd.Type)
 		r.currentState.HandleCommand(r, cmd)
@@ -505,8 +517,7 @@ func (room *room) SendSystemMessage(message string) {
 		Content:  message,
 		Type:     ChatMessageTypeSystem,
 	}
-	room.ChatMessages = append(room.ChatMessages, newMessage)
-	room.broadcast(GameRoleAny, event(NewChatMessageEvt, newMessage))
+	room.handleChatMessage(newMessage)
 }
 
 // Returns the next player in the drawing queue
@@ -542,4 +553,10 @@ func (room *room) fillDrawingQueue() {
 	for _, p := range players {
 		room.drawingQueue = append(room.drawingQueue, p.ID)
 	}
+}
+
+func (room *room) handleChatMessage(msg ChatMessage) error {
+	room.ChatMessages = append(room.ChatMessages, msg)
+	room.broadcast(GameRoleAny, event(NewChatMessageEvt, msg))
+	return nil
 }

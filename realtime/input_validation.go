@@ -8,8 +8,8 @@ import (
 
 const (
 	// Maximum length of a word
-	MAX_WORD_LENGTH  = 24
-	MAX_GUESS_LENGTH = 128
+	MAX_WORD_LENGTH = 24
+	MAX_CHAT_LENGTH = 128
 )
 
 func sanitizeUsername(username string) string {
@@ -121,9 +121,9 @@ func filterDuplicateWords(words []Word) []Word {
 	return result
 }
 
-func sanitizeGuess(guess string) string {
-	trimed := strings.TrimSpace(guess)
-	if len(trimed) == 0 || len(trimed) > MAX_GUESS_LENGTH {
+func sanitizeChatMessage(message string) string {
+	trimed := strings.TrimSpace(message)
+	if len(trimed) == 0 || len(trimed) > MAX_CHAT_LENGTH {
 		return ""
 	}
 
