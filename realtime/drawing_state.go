@@ -10,12 +10,21 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	ScheduledHintReveal      ScheduledEventType = "hint_reveal"
+	ScheduledDrawingPhaseEnd ScheduledEventType = "drawing_phase_end"
+)
+
 type Stroke struct {
 	Points [][]int `json:"points"`
 	Color  string  `json:"color"` // hex color
 	Width  int     `json:"width"`
 	Type   string  `json:"type,omitempty"` // "brush" or "fill"
 }
+
+const (
+	EndOfDrawingTimeDelay = 5 * time.Second
+)
 
 type DrawingState struct {
 	currentWord Word
@@ -99,41 +108,37 @@ func (state *DrawingState) Enter(room *room) {
 		event(SetTimerEvt, state.endsAt.UTC()),
 	)
 
-	room.scheduler.addEvent(ScheduledStateChange, state.endsAt, func() {
+	// Schedule the round end event
+	room.scheduler.addEvent(ScheduledDrawingPhaseEnd, state.endsAt, func() {
+		state.handleDrawingPhaseEnd(room)
+	})
+}
+
+func (state *DrawingState) handleDrawingPhaseEnd(room *room) {
+	state.updateStreaks(room)
+	room.currentDrawer.GameRole = GameRoleGuessing
+
+	// Send drawing phase summary
+	room.SendSystemMessage(state.drawingPhaseSummary(room))
+
+	room.broadcast(GameRoleAny,
+		event(SetSelectedWordEvt, state.currentWord),
+		event(SetPlayersEvt, room.Players),
+	)
+
+	// Transition to the post drawing phase after a short delay
+	room.scheduler.addEvent(ScheduledStateChange, time.Now().Add(EndOfDrawingTimeDelay), func() {
 		room.Transition()
 	})
 }
 
 func (state *DrawingState) Exit(room *room) {
-	room.scheduler.cancelEvent(ScheduledHintReveal)
-
-	room.broadcast(GameRoleAny,
-		event(SetSelectedWordEvt, state.currentWord),
-		event(SetCurrentStateEvt, PostDrawing),
-	)
-
-	msg := state.generateRoundSummary(room)
-	room.SendSystemMessage(msg)
-
-	state.updateStreaks(room)
-
-	room.currentDrawer.GameRole = GameRoleGuessing
-
-	// Inform players of the state changes
-	room.broadcast(GameRoleAny,
-		event(SetPlayersEvt, room.Players),
-	)
-
-	// Show a message in chat if the lead changes
-	leadChangeMsg := CheckLeadChange(state.pointsAwarded, room.Players)
-	if leadChangeMsg != "" {
-		room.SendSystemMessage(leadChangeMsg)
-	}
+	room.scheduler.clearEvents()
 
 	room.setState(NewPostDrawingState(state.pointsAwarded))
 }
 
-func (state *DrawingState) generateRoundSummary(room *room) string {
+func (state *DrawingState) drawingPhaseSummary(room *room) string {
 	drawer := "A player"
 	if room.currentDrawer != nil {
 		drawer = room.currentDrawer.Username
@@ -169,27 +174,35 @@ func (state *DrawingState) updateStreaks(room *room) {
 
 	// Update the streaks of all players and award them a streak bonus
 	for _, p := range room.Players {
-		if state.pointsAwarded[p.ID] > 0 {
-			// If the player guessed correctly, increment their streak
-			p.Streak++
-		} else {
-			// If the player lost their streak, show a message in chat
-			if p.Streak >= 5 {
-				room.SendSystemMessage(fmt.Sprintf("%s lost their streak of %d", p.Username, p.Streak))
-			}
+		state.updatePlayerStreak(p, room)
+		state.awardStreakBonus(p, playerPositions[p.ID], len(room.Players))
+	}
+}
 
-			// Otherwise, reset the streak
-			p.Streak = 0
-		}
-
-		// Award them a streak bonus
-		streakBonus := StreakBonus(playerPositions[p.ID], len(room.Players), p.Streak)
-		state.pointsAwarded[p.ID] += streakBonus
-		p.Score += streakBonus
-
-		slog.Debug("Streak bonus awarded", "player", p.ID, "streak", p.Streak, "streakBonus", streakBonus, "playerPosition", playerPositions[p.ID])
+func (state *DrawingState) updatePlayerStreak(p *player, room *room) {
+	if state.pointsAwarded[p.ID] > 0 {
+		p.Streak++
+		return
 	}
 
+	// Notify if a significant streak was lost
+	if p.Streak >= 5 {
+		room.SendSystemMessage(fmt.Sprintf("%s lost their streak of %d", p.Username, p.Streak))
+	}
+	p.Streak = 0
+}
+
+func (state *DrawingState) awardStreakBonus(p *player, position, totalPlayers int) {
+	streakBonus := StreakBonus(position, totalPlayers, p.Streak)
+	state.pointsAwarded[p.ID] += streakBonus
+	p.Score += streakBonus
+
+	slog.Debug("Streak bonus awarded",
+		"player", p.ID,
+		"streak", p.Streak,
+		"streakBonus", streakBonus,
+		"playerPosition", position,
+	)
 }
 
 // Decodes the raw payload into a Stroke.
@@ -236,7 +249,15 @@ func removeLastStroke(strokes []Stroke) []Stroke {
 	return strokes
 }
 
+func (state *DrawingState) isDrawingPhaseOver() bool {
+	return time.Now().After(state.endsAt)
+}
+
 func (state *DrawingState) handleStroke(room *room, cmd *Command) error {
+	if state.isDrawingPhaseOver() {
+		return nil // Silently ignore strokes after drawing phase ends
+	}
+
 	// Decode the stroke from the payload
 	stroke, err := decodeStroke(cmd.Payload)
 	if err != nil {
@@ -255,6 +276,10 @@ func (state *DrawingState) handleStroke(room *room, cmd *Command) error {
 }
 
 func (state *DrawingState) handleStrokePoint(room *room, cmd *Command) error {
+	if state.isDrawingPhaseOver() {
+		return nil // Silently ignore stroke points after drawing phase ends
+	}
+
 	// Decode the stroke point from the payload
 	point, err := decodeStrokePoint(cmd.Payload)
 	if err != nil {
@@ -273,6 +298,10 @@ func (state *DrawingState) handleStrokePoint(room *room, cmd *Command) error {
 }
 
 func (state *DrawingState) handleClearStrokes(room *room, cmd *Command) error {
+	if state.isDrawingPhaseOver() {
+		return nil // Silently ignore clear strokes after drawing phase ends
+	}
+
 	// Clear the strokes from the game state
 	state.strokes = make([]Stroke, 0)
 
@@ -284,6 +313,10 @@ func (state *DrawingState) handleClearStrokes(room *room, cmd *Command) error {
 }
 
 func (state *DrawingState) handleUndoStroke(room *room, cmd *Command) error {
+	if state.isDrawingPhaseOver() {
+		return nil // Silently ignore undo stroke after drawing phase ends
+	}
+
 	// Remove the most recent stroke from the game state
 	state.strokes = removeLastStroke(state.strokes)
 
@@ -292,7 +325,6 @@ func (state *DrawingState) handleUndoStroke(room *room, cmd *Command) error {
 		event(UndoStrokeEvt, nil),
 	)
 	return nil
-
 }
 
 func (state *DrawingState) handlePlayerLeft(room *room, cmd *Command) error {
@@ -350,21 +382,25 @@ func isGuessClose(guess string, currentWord Word) bool {
 }
 
 func (state *DrawingState) handleChatMessage(room *room, cmd *Command) error {
+	if state.isDrawingPhaseOver() {
+		return fmt.Errorf("round is over") // Silently ignore chat messages after drawing phase ends
+	}
+
 	player := cmd.Player
-	guessValue := cmd.Payload.(string)
+	chatValue := cmd.Payload.(string)
 	msg := ChatMessage{
 		ID:       uuid.New(),
 		PlayerID: player.ID,
-		Content:  guessValue,
+		Content:  chatValue,
 		Type:     ChatMessageTypeDefault,
 	}
 
-	guessValue = sanitizeGuess(guessValue)
+	chatValue = sanitizeChatMessage(chatValue)
 
 	// If the player is not drawing and hasn't guessed correctly yet
 	if room.currentDrawer.ID != player.ID && state.pointsAwarded[player.ID] == 0 {
 		// Check if the guess is exactly correct
-		if strings.EqualFold(guessValue, state.currentWord.Value) {
+		if strings.EqualFold(chatValue, state.currentWord.Value) {
 			guesserPoints, drawerPoints := GuessPoints(len(room.Players)-1, len(state.pointsAwarded), state.currentWord.Difficulty)
 
 			// Update the guesser's points
@@ -379,19 +415,19 @@ func (state *DrawingState) handleChatMessage(room *room, cmd *Command) error {
 			msg.Content = "" // Dont leak the correct answer to the other players
 
 			player.Send(event(SetSelectedWordEvt, state.currentWord))
-		} else if isGuessClose(guessValue, state.currentWord) {
+		} else if isGuessClose(chatValue, state.currentWord) {
 			// If the guess is close, show a different message in chat
 			msg.Type = ChatMessageTypeCloseGuess
 		}
 	}
 
-	room.ChatMessages = append(room.ChatMessages, msg)
-	room.broadcast(GameRoleAny, event(NewChatMessageEvt, msg))
+	room.handleChatMessage(msg)
 
-	// Skip to the next phase if everyone has guessed correctly already
+	// if all players have guessed correctly, end the drawing phase
 	if len(state.pointsAwarded) >= len(room.Players) {
 		room.scheduler.clearEvents()
-		room.Transition()
+		state.endsAt = time.Now()
+		state.handleDrawingPhaseEnd(room)
 	}
 
 	return nil
