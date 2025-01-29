@@ -123,6 +123,7 @@ func (state *DrawingState) Enter(room *room) {
 }
 
 func (state *DrawingState) handleDrawingPhaseEnd(room *room) {
+	room.scheduler.clearEvents()
 	state.updateStreaks(room)
 	room.currentDrawer.GameRole = GameRoleGuessing
 
@@ -155,6 +156,13 @@ func (state *DrawingState) drawingPhaseSummary(room *room) string {
 	word := state.currentWord.Value
 	guessers := len(state.pointsAwarded)
 	totalPlayers := len(room.Players)
+
+	slog.Debug("Drawing phase summary",
+		"drawer", drawer,
+		"word", word,
+		"guessers", guessers,
+		"totalPlayers", totalPlayers,
+	)
 
 	switch {
 	case guessers == totalPlayers:
@@ -202,15 +210,18 @@ func (state *DrawingState) updatePlayerStreak(p *player, room *room) {
 
 func (state *DrawingState) awardStreakBonus(p *player, position, totalPlayers int) {
 	streakBonus := StreakBonus(position, totalPlayers, p.Streak)
-	state.pointsAwarded[p.ID] += streakBonus
-	p.Score += streakBonus
 
-	slog.Debug("Streak bonus awarded",
-		"player", p.ID,
-		"streak", p.Streak,
-		"streakBonus", streakBonus,
-		"playerPosition", position,
-	)
+	if streakBonus > 0 {
+		state.pointsAwarded[p.ID] += streakBonus
+		p.Score += streakBonus
+
+		slog.Debug("Streak bonus awarded",
+			"player", p.ID,
+			"streak", p.Streak,
+			"streakBonus", streakBonus,
+			"playerPosition", position,
+		)
+	}
 }
 
 // Decodes the raw payload into a Stroke.
