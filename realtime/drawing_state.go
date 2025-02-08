@@ -31,7 +31,7 @@ type Stroke struct {
 }
 
 const (
-	EndOfDrawingTimeDelay = 5 * time.Second
+	EndOfDrawingTimeDelay = 3 * time.Second
 )
 
 type DrawingState struct {
@@ -106,7 +106,12 @@ func (state *DrawingState) Enter(room *room) {
 		// This will apply hints to the hinted word at a regular interval
 		room.scheduler.addReccuringEvent(ScheduledHintReveal, hintInterval, totalHints, func() {
 			state.applyHint()
-			room.broadcast(GameRoleGuessing, event(SetSelectedWordEvt, NewWord(state.hintedWord, state.currentWord.Difficulty)))
+			for _, p := range room.Players {
+				// Only send the hint to players who haven't guessed correctly yet
+				if state.pointsAwarded[p.ID] == 0 && p.ID != room.currentDrawer.ID {
+					p.Send(event(SetSelectedWordEvt, NewWord(state.hintedWord, state.currentWord.Difficulty)))
+				}
+			}
 		})
 	}
 
