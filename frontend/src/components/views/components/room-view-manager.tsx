@@ -1,4 +1,12 @@
-import { useEffect, useState } from "react";
+import {
+	AnimatePresence,
+	HTMLMotionProps,
+	motion,
+	MotionStyle,
+	Target,
+	usePresenceData,
+} from "motion/react";
+import { forwardRef, useEffect, useMemo, useState } from "react";
 import {
 	EnterCodeView,
 	EnterPlayerInfoView,
@@ -10,27 +18,15 @@ import {
 import { RootState } from "@/state/store";
 import { useSelector } from "react-redux";
 import { RoomState } from "@/state/features/room";
-import { AnimatePresenceWithDirection } from "@/components/animation/direction-context";
-import { TransitionContainer } from "@/components/animation/transition-container";
 import { AirplaneDoodle } from "@/components/doodle/airplane-doodle";
-import {
-	AnimatePresence,
-	HTMLMotionProps,
-	MotionProps,
-	MotionStyle,
-	Target,
-} from "framer-motion";
 import { RainCloudDoodle } from "@/components/doodle/rain-cloud-doodle";
 import { SkyScene } from "@/components/scenes/sky-scene";
 
 export enum Direction {
 	UP,
-	UP_FADE,
 	DOWN,
-	DOWN_FADE,
 	LEFT,
 	RIGHT,
-	NONE,
 }
 
 enum SpriteType {
@@ -41,27 +37,20 @@ enum SpriteType {
 type Sprite = {
 	style?: MotionStyle;
 	type?: SpriteType;
-	Component: React.ComponentType<MotionProps>;
+	Component: React.ComponentType<HTMLMotionProps<"img">>;
 	key: string;
 };
 
 export type View = {
 	Component: React.ComponentType;
 	key: string;
-	transition: {
-		direction: Direction;
-	};
 	sprites?: Sprite[];
-	zIndex: number;
 };
 
 const views: Record<RoomState, View> = {
 	[RoomState.EnterCode]: {
 		Component: EnterCodeView,
 		key: "enter-code-view",
-		transition: {
-			direction: Direction.RIGHT,
-		},
 		sprites: [
 			{
 				style: {
@@ -108,14 +97,10 @@ const views: Record<RoomState, View> = {
 				type: SpriteType.BOBBING,
 			},
 		],
-		zIndex: 0,
 	},
 	[RoomState.EnterPlayerInfo]: {
 		Component: EnterPlayerInfoView,
 		key: "enter-player-info-view",
-		transition: {
-			direction: Direction.LEFT,
-		},
 		sprites: [
 			{
 				style: {
@@ -151,14 +136,10 @@ const views: Record<RoomState, View> = {
 				type: SpriteType.BOBBING,
 			},
 		],
-		zIndex: 1,
 	},
 	[RoomState.Waiting]: {
 		Component: WaitingView,
 		key: "waiting-view",
-		transition: {
-			direction: Direction.LEFT,
-		},
 		sprites: [
 			{
 				style: {
@@ -205,14 +186,10 @@ const views: Record<RoomState, View> = {
 				type: SpriteType.BOBBING,
 			},
 		],
-		zIndex: 2,
 	},
 	[RoomState.Picking]: {
 		Component: PickingView,
 		key: "picking-view",
-		transition: {
-			direction: Direction.LEFT,
-		},
 		sprites: [
 			{
 				style: {
@@ -259,14 +236,10 @@ const views: Record<RoomState, View> = {
 				type: SpriteType.BOBBING,
 			},
 		],
-		zIndex: 3,
 	},
 	[RoomState.Drawing]: {
 		Component: DrawingView,
 		key: "drawing-view",
-		transition: {
-			direction: Direction.LEFT,
-		},
 		sprites: [
 			{
 				style: {
@@ -302,14 +275,10 @@ const views: Record<RoomState, View> = {
 				type: SpriteType.BOBBING,
 			},
 		],
-		zIndex: 4,
 	},
 	[RoomState.PostDrawing]: {
 		Component: PostDrawingView,
 		key: "post-drawing-view",
-		transition: {
-			direction: Direction.LEFT,
-		},
 		sprites: [
 			{
 				style: {
@@ -346,7 +315,6 @@ const views: Record<RoomState, View> = {
 				type: SpriteType.BOBBING,
 			},
 		],
-		zIndex: 5,
 	},
 	[RoomState.GameOver]: {
 		Component: () => (
@@ -355,9 +323,6 @@ const views: Record<RoomState, View> = {
 			</SkyScene>
 		),
 		key: "game-over-view",
-		transition: {
-			direction: Direction.LEFT,
-		},
 		sprites: [
 			{
 				style: {
@@ -370,14 +335,10 @@ const views: Record<RoomState, View> = {
 				type: SpriteType.STATIC,
 			},
 		],
-		zIndex: 6,
 	},
 	[RoomState.Unanimous]: {
 		Component: () => <></>,
 		key: "unanimous-view",
-		transition: {
-			direction: Direction.NONE,
-		},
 		sprites: [
 			{
 				style: {
@@ -391,59 +352,46 @@ const views: Record<RoomState, View> = {
 				type: SpriteType.STATIC,
 			},
 		],
-		zIndex: 7,
 	},
 };
 
-const getView = (currentState: RoomState, previousState: RoomState) => {
-	const view = { ...views[currentState] };
+type TransitionProps = {
+	x?: string;
+	y?: string;
+};
 
-	if (
-		previousState === RoomState.Waiting &&
-		currentState === RoomState.Picking
-	) {
-		view.transition.direction = Direction.UP;
-		view.key = "picking-view";
-		view.zIndex = 10;
-	}
-
+const resolveTransitionDirection = (
+	previousState: RoomState,
+	currentState: RoomState
+) => {
+	// Slide down the waiting view
 	if (currentState === RoomState.Waiting) {
-		view.transition.direction = Direction.DOWN;
-		view.key = "waiting-view-first";
+		return Direction.DOWN;
+	}
+
+	// Slide up from the waiting view
+	if (previousState === RoomState.Waiting) {
+		return Direction.UP;
+	}
+
+	// We are transitioning from a higher state to a lower state
+	// We might want to cycle again in the same direction or go back to a previous screen
+	if (previousState > currentState) {
+		// We are starting the next round, so we want to cycle again in the same direction
 		if (previousState === RoomState.PostDrawing) {
-			view.zIndex = 10;
+			return Direction.LEFT;
 		}
+
+		// We are going back to a previous screen ie. EnterPlayerInfoView -> EnterCodeView
+		return Direction.RIGHT;
 	}
 
-	if (currentState === RoomState.Drawing) {
-		view.transition.direction = Direction.LEFT;
-		view.key = "drawing-view";
-		view.zIndex = 20;
-	}
-
-	if (
-		currentState === RoomState.PostDrawing &&
-		previousState === RoomState.Drawing
-	) {
-		view.transition.direction = Direction.LEFT;
-		view.key = "post-drawing-view";
-		view.zIndex = 10;
-	}
-
-	if (
-		currentState === RoomState.Picking &&
-		previousState === RoomState.PostDrawing
-	) {
-		view.transition.direction = Direction.LEFT;
-		view.key = "picking-view-second";
-		view.zIndex = 10;
-	}
-
-	return view;
+	// Normal transition
+	return Direction.LEFT;
 };
 
 // Main view container that provides transition context
-export function RoomViewContainer() {
+export function RoomViewManager() {
 	const currentState = useSelector(
 		(state: RootState) => state.room.currentState
 	);
@@ -452,7 +400,7 @@ export function RoomViewContainer() {
 		(state: RootState) => state.room.previousState
 	);
 
-	const View = getView(currentState, previousState);
+	const View = views[currentState];
 
 	const [mountId, setMountId] = useState(Date.now());
 
@@ -473,69 +421,118 @@ export function RoomViewContainer() {
 		};
 	}, []);
 
+	const direction = resolveTransitionDirection(previousState, currentState);
+
 	return (
-		<AnimatePresenceWithDirection
-			direction={View.transition.direction}
-			mode="sync"
+		<div
 			key={mountId}
-			initial={false}
+			className="h-[100dvh] w-screen flex flex-col items-center justify-center relative overflow-hidden"
 		>
-			<TransitionContainer zIndex={View.zIndex} key={View.key}>
-				<View.Component />
-				{/* <SceneSprites /> */}
-			</TransitionContainer>
-		</AnimatePresenceWithDirection>
+			<AnimatePresence initial={false} mode="sync" custom={direction}>
+				<ViewTransitionContainer key={View.key}>
+					<View.Component />
+					<SceneSprites
+						currentState={currentState}
+						previousState={previousState}
+					/>
+				</ViewTransitionContainer>
+			</AnimatePresence>
+		</div>
 	);
 }
 
-export function SceneSprites() {
-	const currentState = useSelector(
-		(state: RootState) => state.room.currentState
-	);
+export const ViewTransitionContainer = forwardRef(
+	(
+		{ children }: { children: React.ReactNode },
+		ref: React.Ref<HTMLDivElement>
+	) => {
+		const direction: Direction = usePresenceData();
 
-	const previousState = useSelector(
-		(state: RootState) => state.room.previousState
-	);
+		const transitionCount = useSelector(
+			(state: RootState) => state.room.transitionCount
+		);
 
-	const currentView = getView(currentState, previousState);
+		const zIndex = useMemo(() => {
+			return transitionCount * 10;
+		}, [transitionCount]);
+
+		const exitDirectionMap: Record<Direction, TransitionProps> = {
+			[Direction.LEFT]: { x: "-100%" }, // Exit to left side
+			[Direction.RIGHT]: { x: "100%" }, // Exit to right side
+			[Direction.UP]: { y: "-100%" }, // Exit to top
+			[Direction.DOWN]: { y: "100%" }, // Exit to bottom
+		};
+
+		const enterDirectionMap: Record<Direction, TransitionProps> = {
+			[Direction.LEFT]: { x: "100%" }, // Enter from right side
+			[Direction.RIGHT]: { x: "-100%" }, // Enter from left side
+			[Direction.UP]: { y: "100%" }, // Enter from bottom
+			[Direction.DOWN]: { y: "-100%" }, // Enter from top
+		};
+
+		const initial = enterDirectionMap[direction];
+		const target = {
+			x: 0,
+			y: 0,
+		};
+		const exit = exitDirectionMap[direction];
+
+		return (
+			<motion.div
+				ref={ref}
+				style={{ zIndex }}
+				className="absolute inset-0 bg-background-secondary"
+				initial={initial}
+				animate={target}
+				exit={exit}
+			>
+				{children}
+			</motion.div>
+		);
+	}
+);
+
+function getSpritePositionOffset(direction: Direction) {
+	const offsets = {
+		top: 0,
+		left: 0,
+	};
+
+	switch (direction) {
+		case Direction.LEFT:
+			offsets.left = -1;
+			break;
+		case Direction.RIGHT:
+			offsets.left = 1;
+			break;
+		case Direction.UP:
+			offsets.left = -1;
+			break;
+		case Direction.DOWN:
+			offsets.top = 1;
+			break;
+	}
+
+	return offsets;
+}
+
+export function SceneSprites({
+	currentState,
+	previousState,
+}: {
+	currentState: RoomState;
+	previousState: RoomState;
+}) {
+	const currentView = views[currentState];
 	const previousView = views[previousState];
+
+	const custom: Direction = usePresenceData();
 
 	const previousSprite = previousView.sprites?.find(
 		(s) => s.key === currentView.sprites?.[0]?.key
 	);
 
-	function getSpritePositionOffset() {
-		const offsets = {
-			top: 0,
-			left: 0,
-		};
-
-		if (currentView.transition.direction === Direction.LEFT) {
-			offsets.left = -1;
-		}
-
-		if (currentView.transition.direction === Direction.RIGHT) {
-			offsets.left = 1;
-		}
-
-		if (currentView.transition.direction === Direction.UP) {
-			offsets.top = 0;
-			offsets.left = -1;
-		}
-
-		if (currentView.transition.direction === Direction.DOWN) {
-			offsets.top = 1;
-		}
-
-		if (previousView.transition.direction === Direction.NONE) {
-			offsets.left = 0;
-			offsets.top = 0;
-		}
-
-		return offsets;
-	}
-
-	const offsets = getSpritePositionOffset();
+	const offsets = getSpritePositionOffset(custom);
 
 	const spritePosition = () => {
 		if (!currentView.sprites?.[0]?.style) return {};
@@ -579,7 +576,7 @@ export function SceneSprites() {
 				<sprite.Component
 					key={sprite.key}
 					initial={previousSpritePosition() as Target}
-					animate={spritePosition as Target}
+					animate={spritePosition() as Target}
 					exit={exit()}
 				/>
 			))}
