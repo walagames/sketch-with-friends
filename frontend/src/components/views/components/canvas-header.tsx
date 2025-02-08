@@ -1,7 +1,7 @@
 import { getDrawingPlayer } from "@/lib/player";
 import { RootState } from "@/state/store";
 import { useSelector } from "react-redux";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { containerSpring } from "@/config/spring";
 export function CanvasHeader({ delay }: { delay: number }) {
 	return (
@@ -31,9 +31,7 @@ export function DrawingStatus({ delay }: { delay: number }) {
 		return (
 			<span className="flex items-center text-sm gap-1 lg:text-2xl">
 				You're sketching:{" "}
-				<span className="lg:text-2xl font-bold">
-					{selectedWord?.value}
-				</span>
+				<span className="lg:text-2xl font-bold">{selectedWord?.value}</span>
 			</span>
 		);
 	}
@@ -53,9 +51,7 @@ export function DrawingStatus({ delay }: { delay: number }) {
 					/>
 				</span>
 			) : (
-				<span className=" lg:text-2xl font-bold">
-					{selectedWord?.value}
-				</span>
+				<span className=" lg:text-2xl font-bold">{selectedWord?.value}</span>
 			)}
 		</span>
 	);
