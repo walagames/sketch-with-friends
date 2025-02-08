@@ -367,7 +367,6 @@ func (r *room) dispatch(cmd *Command) {
 			})
 		}
 	default:
-		slog.Debug("passing action to state", "action", cmd.Type)
 		r.currentState.HandleCommand(r, cmd)
 	}
 
