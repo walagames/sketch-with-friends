@@ -5,8 +5,8 @@ import { RoomState } from "@/state/features/room";
 import { cn } from "@/lib/utils";
 import { Timer } from "./timer";
 import { containerSpring } from "@/config/spring";
-import { motion } from "framer-motion";
-import { AnimatePresence } from "framer-motion";
+import { motion } from "motion/react";
+import { AnimatePresence } from "motion/react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 function shouldRenderTimer(state: RoomState) {

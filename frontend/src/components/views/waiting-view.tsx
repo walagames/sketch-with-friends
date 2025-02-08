@@ -8,7 +8,7 @@ import { useState } from "react";
 import { LinkIcon, SettingsIcon, UsersIcon } from "lucide-react";
 import { RootState } from "@/state/store";
 import { ModalMenu } from "@/components/ui/modal-menu";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "motion/react";
 import { RoomRole } from "@/state/features/room";
 import { RoomSettingsForm } from "./components/room-settings-form";
 import { Chat } from "./components/chat";

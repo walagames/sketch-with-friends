@@ -5,7 +5,7 @@ import { clearQueryParams } from "@/lib/params";
 import { SkyScene } from "@/components/scenes/sky-scene";
 import { Logo } from "@/components/ui/logo";
 import { CodeForm } from "./components/code-form";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "motion/react";
 import { Doodle } from "@/components/doodle/doodle";
 import { useMemo } from "react";
 import { setCurrentState, RoomState } from "@/state/features/room";

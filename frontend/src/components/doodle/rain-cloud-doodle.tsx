@@ -1,5 +1,5 @@
 import { ForwardedRef, forwardRef } from "react";
-import { HTMLMotionProps, motion } from "framer-motion";
+import { HTMLMotionProps, motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 export const RainCloudDoodle = forwardRef<

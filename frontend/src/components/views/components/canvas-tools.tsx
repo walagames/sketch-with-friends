@@ -26,7 +26,7 @@ import { getGameRole } from "@/lib/player";
 import { GameRole } from "@/state/features/game";
 import { cn, hslToRgb } from "@/lib/utils";
 import { useState, useEffect, useMemo } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { containerSpring } from "@/config/spring";
 import {
 	DropdownMenu,

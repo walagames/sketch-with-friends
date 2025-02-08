@@ -4,7 +4,7 @@ import { GameRole } from "@/state/features/game";
 import { ChatMessage, ChatMessageType, Player } from "@/state/features/room";
 import { generateAvatar } from "@/lib/avatar";
 import { cn } from "@/lib/utils";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";

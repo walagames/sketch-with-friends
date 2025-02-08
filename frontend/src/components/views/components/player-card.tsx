@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { AvatarConfig, generateAvatar } from "@/lib/avatar";
 import { Player, changePlayerProfile } from "@/state/features/room";
 import { forwardRef, useState } from "react";

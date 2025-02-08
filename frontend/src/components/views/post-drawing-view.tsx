@@ -6,7 +6,7 @@ import { generateAvatar } from "@/lib/avatar";
 import { ArrowDownIcon, ArrowUpIcon, CrownIcon, FlameIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedNumber } from "@/components/ui/animated-number";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { getDrawingPlayer } from "@/lib/player";
 const springConfig = {
 	type: "spring",

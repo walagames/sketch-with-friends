@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { HTMLMotionProps, motion } from "framer-motion";
+import { HTMLMotionProps, motion } from "motion/react";
 import { ForwardedRef, forwardRef } from "react";
 
 const transition = {

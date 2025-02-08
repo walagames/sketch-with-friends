@@ -7,7 +7,7 @@ import {
 	DeleteIcon,
 	SendIcon,
 } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { containerSpring, containerSpringFast } from "@/config/spring";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { RootState } from "@/state/store";
