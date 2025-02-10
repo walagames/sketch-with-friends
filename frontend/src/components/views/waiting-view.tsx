@@ -97,8 +97,10 @@ export function WaitingView() {
 									</AnimatePresence>
 								</ul>
 							</div>
-							<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border rounded-lg flex flex-col p-3 max-h-[calc(100vh-200px)] gap-2">
-								<h1 className="text-2xl font-bold z-10 leading-none">Chat</h1>
+							<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border rounded-lg flex flex-col w-[22rem] h-full relative overflow-hidden">
+								<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary/50 to-background-transparent absolute top-0 left-0 h-12 z-50 flex items-center px-2">
+									<h1 className="text-2xl font-bold z-10 leading-none">Chat</h1>
+								</div>
 								<Chat placeholder="Type your message..." />
 							</div>
 						</div>

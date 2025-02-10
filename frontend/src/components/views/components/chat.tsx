@@ -114,7 +114,7 @@ export function Chat({ placeholder }: { placeholder?: string }) {
 					ref={listRef}
 					onScroll={handleScroll}
 					className={cn(
-						"h-full mx-1 flex gap-3 break-all flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide py-12 pb-16 px-3",
+						"h-full mx-1 flex gap-3 break-all flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide py-12 pb-16 px-2",
 						"contain-strict"
 					)}
 				>
