@@ -57,10 +57,12 @@ export function DrawingView() {
 								</AnimatePresence>
 								<div className="flex flex-col lg:flex-row gap-2 h-[595px]">
 									<Canvas padding={10} width={800} height={600} />
-									<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border rounded-lg flex flex-col p-3 w-[22rem] h-full gap-2">
-										<h1 className="text-2xl font-bold z-10 leading-none">
-											Chat
-										</h1>
+									<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border rounded-lg flex flex-col w-[22rem] h-full relative overflow-hidden">
+										<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary/50 to-background-transparent absolute top-0 left-0 h-12 z-50 flex items-center px-2">
+											<h1 className="text-2xl font-bold z-10 leading-none">
+												Chat
+											</h1>
+										</div>
 										<Chat
 											placeholder={
 												isDrawing

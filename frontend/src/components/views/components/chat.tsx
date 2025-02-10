@@ -85,8 +85,6 @@ export function Chat({ placeholder }: { placeholder?: string }) {
 
 	return (
 		<div className="flex flex-col lg:h-full relative z-30 gap-1.5 overflow-hidden">
-			<div className="absolute -top-5 h-8 w-full bg-background-secondary blur-sm z-50" />
-			<div className="absolute bottom-4 -translate-x-7 h-12 w-[120%] bg-background-secondary blur-sm z-10" />
 			<div className="flex-1 overflow-hidden">
 				<AnimatePresence>
 					{showNewMessages && (
@@ -116,7 +114,7 @@ export function Chat({ placeholder }: { placeholder?: string }) {
 					ref={listRef}
 					onScroll={handleScroll}
 					className={cn(
-						"h-full mx-1 flex gap-3 break-all flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide py-3",
+						"h-full mx-1 flex gap-3 break-all flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide py-12 pb-16 px-3",
 						"contain-strict"
 					)}
 				>
@@ -129,7 +127,7 @@ export function Chat({ placeholder }: { placeholder?: string }) {
 					))}
 				</motion.ul>
 			</div>
-			<div className="w-full hidden sm:block z-50">
+			<div className="w-full hidden sm:block z-50 absolute bg-gradient-to-t from-background-secondary via-background-secondary/50 to-background-transparent bottom-0">
 				<ChatForm isGuessing={isGuessing} placeholder={placeholder} />
 			</div>
 			<div className="w-full sm:hidden">
@@ -370,14 +368,14 @@ export function ChatForm({
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)}>
+			<form className="pb-1 px-0.5" onSubmit={form.handleSubmit(onSubmit)}>
 				<FormField
 					control={form.control}
 					name="message"
 					render={({ field }) => {
 						const length = field.value.length;
 						return (
-							<FormItem className="relative space-y-0">
+							<FormItem className="relative space-y-0 pr-1">
 								<FormControl>
 									<div className="flex items-center gap-3 relative px-0.5">
 										<RaisedInput
@@ -392,7 +390,7 @@ export function ChatForm({
 													setCurrentMessage(e.target.value);
 												}
 											}}
-											className="pr-10"
+											className="pr-12"
 										/>
 										{field.value.length > 0 &&
 											isGuessing &&
