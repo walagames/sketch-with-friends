@@ -26,7 +26,7 @@ export function WaitingView() {
 
 	return (
 		<RoomScene>
-			<div className="relative z-10 max-w-3xl w-full flex flex-col items-end gap-4 p-2.5 lg:px-0 h-full lg:h-auto">
+			<div className="relative z-10 max-w-3xl w-full flex flex-col items-end gap-2 p-2.5 lg:px-0 h-full lg:h-auto">
 				<div className="flex gap-3 items-center w-full">
 					<div>
 						<RaisedButton
@@ -75,14 +75,18 @@ export function WaitingView() {
 				</div>
 				<div className="w-full lg:aspect-[4/3] flex-1 flex items-start justify-center max-h-[calc(100vh-200px)]">
 					{showSettings ? (
-						<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex flex-col lg:p-4 lg:px-5 max-h-[calc(100vh-200px)] overflow-y-auto">
-							<h1 className="text-2xl font-bold z-10">Room settings</h1>
+						<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border rounded-lg flex flex-col lg:p-3 max-h-[calc(100vh-200px)] overflow-y-auto gap-1.5">
+							<h1 className="text-2xl font-bold z-10 leading-none">
+								Room settings
+							</h1>
 							<RoomSettingsForm />
 						</div>
 					) : (
 						<div className="flex h-full gap-2 flex-1">
-							<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex flex-col p-4 max-h-[calc(100vh-200px)] gap-4">
-								<h1 className="text-2xl font-bold z-10">Players</h1>
+							<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border rounded-lg flex flex-col p-3 max-h-[calc(100vh-200px)] gap-4">
+								<h1 className="text-2xl font-bold z-10 leading-none">
+									Players
+								</h1>
 								<ul className="flex flex-col w-full gap-4 ">
 									<AnimatePresence initial={false} mode="popLayout">
 										{Object.values(players)
@@ -93,8 +97,8 @@ export function WaitingView() {
 									</AnimatePresence>
 								</ul>
 							</div>
-							<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex flex-col p-4 max-h-[calc(100vh-200px)] gap-2">
-								<h1 className="text-2xl font-bold z-10">Chat</h1>
+							<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border rounded-lg flex flex-col p-3 max-h-[calc(100vh-200px)] gap-2">
+								<h1 className="text-2xl font-bold z-10 leading-none">Chat</h1>
 								<Chat placeholder="Type your message..." />
 							</div>
 						</div>

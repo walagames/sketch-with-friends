@@ -84,7 +84,9 @@ export function Chat({ placeholder }: { placeholder?: string }) {
 	}, []);
 
 	return (
-		<div className="flex flex-col lg:h-full relative z-30 gap-1.5">
+		<div className="flex flex-col lg:h-full relative z-30 gap-1.5 overflow-hidden">
+			<div className="absolute -top-5 h-8 w-full bg-background-secondary blur-sm z-50" />
+			<div className="absolute bottom-4 -translate-x-7 h-12 w-[120%] bg-background-secondary blur-sm z-10" />
 			<div className="flex-1 overflow-hidden">
 				<AnimatePresence>
 					{showNewMessages && (
@@ -114,7 +116,7 @@ export function Chat({ placeholder }: { placeholder?: string }) {
 					ref={listRef}
 					onScroll={handleScroll}
 					className={cn(
-						"h-full mx-1 flex gap-3 break-all flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide",
+						"h-full mx-1 flex gap-3 break-all flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide py-3",
 						"contain-strict"
 					)}
 				>
@@ -127,7 +129,7 @@ export function Chat({ placeholder }: { placeholder?: string }) {
 					))}
 				</motion.ul>
 			</div>
-			<div className="mt-1.5 w-full hidden sm:block">
+			<div className="w-full hidden sm:block z-50">
 				<ChatForm isGuessing={isGuessing} placeholder={placeholder} />
 			</div>
 			<div className="w-full sm:hidden">
@@ -149,7 +151,7 @@ function ChatMessageComponent({
 	if (message.type === ChatMessageType.System) {
 		return (
 			<motion.li
-				initial={{ opacity: 0, y: 3, scale: 0.9 }}
+				initial={{ opacity: 0, y: 3, scale: 0.98 }}
 				animate={{ opacity: 1, y: 0, scale: 1 }}
 				className="mx-auto text-center py-2 px-3 rounded-lg bg-white"
 			>
@@ -379,6 +381,7 @@ export function ChatForm({
 								<FormControl>
 									<div className="flex items-center gap-3 relative px-0.5">
 										<RaisedInput
+											sizeVariant="md"
 											autoComplete="off"
 											placeholder={placeholder}
 											onKeyDown={handleKeyDown}

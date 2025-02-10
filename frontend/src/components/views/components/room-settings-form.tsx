@@ -132,7 +132,7 @@ export function RoomSettingsForm() {
 		<Form {...form}>
 			<form
 				onChange={handleChange}
-				className="flex flex-col w-full gap-4 justify-between"
+				className="flex flex-col w-full gap-4 justify-between px-1"
 			>
 				<div className="flex lg:flex-row flex-col lg:gap-8 gap-4 w-full">
 					<div className="flex flex-col gap-4 w-full lg:order-2">
@@ -319,7 +319,7 @@ export function RoomSettingsForm() {
 					control={form.control}
 					name="customWords"
 					render={({ field }) => (
-						<FormItem>
+						<FormItem className="">
 							<FormLabel>Custom Words</FormLabel>
 							<FormControl>
 								<Textarea

@@ -104,7 +104,7 @@ export function CanvasTools() {
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ ...containerSpring, delay: 1.5 }}
 			className={cn(
-				"lg:gap-8 gap-4 w-full items-center py-1.5 lg:py-4 px-3.5 lg:px-0 ",
+				"lg:gap-8 gap-4 w-full items-center py-1.5 lg:py-4 px-3.5 lg:px-0 max-w-[800px] ",
 				isDrawing ? "flex" : "hidden"
 			)}
 		>

@@ -27,7 +27,7 @@ const buttonVariants = cva(
 				iconMd: "h-11 w-11",
 				tall: "h-full w-11",
 				wide: "w-full h-11",
-				card: "h-14 px-0 py-0",
+				card: "h-12 px-0 py-0",
 			},
 			rounded: {
 				default: "rounded-lg",

@@ -34,7 +34,7 @@ function CardContent({
 }) {
 	return (
 		<RaisedButton variant="card" size="card" className="w-full justify-start">
-			<div className="flex items-center h-14 -translate-y-0.5 lg:w-64 min-h-0 flex-1 relative">
+			<div className="flex items-center h-12 -translate-y-0.5 lg:w-64 min-h-0 flex-1 relative">
 				<img
 					alt="Player avatar"
 					className="rounded-l-lg h-full aspect-square relative"
