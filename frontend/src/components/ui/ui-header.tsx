@@ -45,7 +45,7 @@ export function UIHeader() {
 					transition={{ ...containerSpring, delay: 0.05 }}
 					exit={{ opacity: 0, y: -10 }}
 					className={cn(
-						"absolute lg:top-5 top-2 w-full lg:px-6 px-2.5 items-start z-[200] flex",
+						"absolute lg:top-5 top-2 w-full lg:px-6 px-2.5 items-start z-50 flex",
 						showTimer ? "justify-between" : "justify-end"
 					)}
 				>

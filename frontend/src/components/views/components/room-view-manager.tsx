@@ -453,7 +453,7 @@ export const ViewTransitionContainer = forwardRef(
 		);
 
 		const zIndex = useMemo(() => {
-			return transitionCount * 10;
+			return (transitionCount % 5) * 10;
 		}, [transitionCount]);
 
 		const exitDirectionMap: Record<Direction, TransitionProps> = {
