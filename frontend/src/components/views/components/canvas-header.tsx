@@ -9,7 +9,7 @@ export function CanvasHeader({ delay }: { delay: number }) {
 			initial={{ opacity: 0, y: -10 }}
 			animate={{ opacity: 1, y: 4 }}
 			transition={{ ...containerSpring, delay }}
-			className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-7rem)] pr-3 lg:w-full h-16 justify-center"
+			className="flex flex-col lg:py-2 lg:px-2 w-[calc(100%-8rem)] ml-[3.125rem] lg:ml-0 pr-3 lg:w-full h-16 pt-2 justify-center"
 		>
 			<RoundInfo />
 			<DrawingStatus delay={delay} />

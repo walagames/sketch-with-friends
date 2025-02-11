@@ -41,27 +41,43 @@ export function DrawingView() {
 
 	const isDrawing = getGameRole(playerId, players) === GameRole.Drawing;
 
+	const currentRound = useSelector(
+		(state: RootState) => state.room.currentRound
+	);
+	const totalRounds = useSelector(
+		(state: RootState) => state.room.settings.totalRounds
+	);
+
 	return (
 		<SkyScene>
 			<div className="mx-auto mb-auto lg:my-auto flex flex-col gap-2 items-center relative z-50">
 				<div className="flex w-full h-full items-center justify-center lg:gap-4 flex-col xl:flex-row relative">
 					<div className="flex items-center justify-center gap-6 pb-1">
 						<ColorSliders />
-						<div className="flex flex-col items-start justify-center">
-							<CanvasHeader delay={showSketchText ? 1.5 : 0.35} />
-							<div className="relative">
-								<AnimatePresence>
-									{showSketchText && (
-										<AnimatedSketchText className="lg:h-[4rem] h-[3rem] text-black absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-3/4 z-50" />
-									)}
-								</AnimatePresence>
-								<div className="flex flex-col lg:flex-row gap-2 h-[595px]">
-									<Canvas padding={10} width={800} height={600} />
-									<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border rounded-lg flex flex-col w-[22rem] h-full relative overflow-hidden">
-										<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary/50 to-background-transparent absolute top-0 left-0 h-12 z-50 flex items-center px-2">
-											<h1 className="text-2xl font-bold z-10 leading-none">
+						<div className="flex flex-col  justify-center">
+							<div className="relative h-dvh sm:h-auto">
+								<CanvasHeader delay={showSketchText ? 1.5 : 0.35} />
+								<div className="flex flex-col lg:flex-row gap-2 lg:h-[595px] h-[calc(100dvh-3.5rem)]">
+									<div className="relative">
+										<AnimatePresence>
+											{showSketchText && (
+												<AnimatedSketchText className="lg:h-[4rem] h-[3rem] text-black absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-3/4 z-50" />
+											)}
+										</AnimatePresence>
+										<Canvas padding={10} width={800} height={600} />
+									</div>
+									{/* Canvas tools for mobile view */}
+									<div className="sm:hidden">
+										<CanvasTools />
+									</div>
+									<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border rounded-xl flex flex-col lg:w-[22rem] w-full lg:h-full h-auto relative overflow-hidden">
+										<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary to-background-transparent absolute top-0 left-0 h-12 z-50 items-start px-2 py-1.5 justify-between flex">
+											<h1 className="text-xl font-bold z-10 leading-none">
 												Chat
 											</h1>
+											<p className="font-bold text-lg text-muted-foreground">
+												Round {currentRound} of {totalRounds}
+											</p>
 										</div>
 										<Chat
 											placeholder={
@@ -73,7 +89,10 @@ export function DrawingView() {
 									</div>
 								</div>
 							</div>
-							<CanvasTools />
+							{/* Canvas tools for desktop */}
+							<div className="hidden sm:flex">
+								<CanvasTools />
+							</div>
 						</div>
 					</div>
 				</div>

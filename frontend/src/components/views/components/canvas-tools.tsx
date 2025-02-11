@@ -100,11 +100,11 @@ export function CanvasTools() {
 
 	return (
 		<motion.div
-			initial={{ opacity: 0, y: 10 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ ...containerSpring, delay: 1.5 }}
+			// initial={{ opacity: 0, y: 10 }}
+			// animate={{ opacity: 1, y: 0 }}
+			// transition={{ ...containerSpring, delay: 1.5 }}
 			className={cn(
-				"lg:gap-8 gap-4 w-full items-center py-1.5 lg:py-4 px-3.5 lg:px-0 max-w-[800px] ",
+				"lg:gap-8 gap-4 w-full items-center pt-1 lg:py-4 px-3.5 lg:px-0 max-w-[800px]",
 				isDrawing ? "flex" : "hidden"
 			)}
 		>

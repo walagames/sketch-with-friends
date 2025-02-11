@@ -68,7 +68,7 @@ const views: Record<RoomState, View> = {
 					<RainCloudDoodle
 						duration={4}
 						{...props}
-						className="lg:top-[20%] top-[6%] lg:left-[12%] left-[6%]"
+						className="lg:top-[20%] top-[2%] lg:left-[12%] left-[6%]"
 					/>
 				),
 				key: "rain-cloud-1",
@@ -78,7 +78,7 @@ const views: Record<RoomState, View> = {
 				Component: (props: HTMLMotionProps<"img">) => (
 					<RainCloudDoodle
 						duration={5}
-						className="top-[8%] left-[20%]"
+						className="top-[8%] left-[20%] hidden lg:block"
 						{...props}
 					/>
 				),
@@ -89,7 +89,7 @@ const views: Record<RoomState, View> = {
 				Component: (props: HTMLMotionProps<"img">) => (
 					<RainCloudDoodle
 						duration={4.5}
-						className="top-[10%] right-[10%]"
+						className="top-[10%] right-[10%] hidden lg:block"
 						{...props}
 					/>
 				),
@@ -117,7 +117,7 @@ const views: Record<RoomState, View> = {
 				Component: (props: HTMLMotionProps<"img">) => (
 					<RainCloudDoodle
 						duration={6}
-						className="top-[5%] left-[12%]"
+						className="top-[5%] lg:left-[12%] right-[12%]"
 						{...props}
 					/>
 				),
@@ -128,7 +128,7 @@ const views: Record<RoomState, View> = {
 				Component: (props: HTMLMotionProps<"img">) => (
 					<RainCloudDoodle
 						duration={4}
-						className="top-[24%] right-[10%]"
+						className="top-[24%] right-[10%] hidden lg:block"
 						{...props}
 					/>
 				),
@@ -206,7 +206,7 @@ const views: Record<RoomState, View> = {
 				Component: (props: HTMLMotionProps<"img">) => (
 					<RainCloudDoodle
 						duration={4}
-						className="top-[20%] left-[12%]"
+						className="top-[20%] left-[12%] hidden lg:block"
 						{...props}
 					/>
 				),
@@ -228,7 +228,7 @@ const views: Record<RoomState, View> = {
 				Component: (props: HTMLMotionProps<"img">) => (
 					<RainCloudDoodle
 						duration={4.5}
-						className="top-[10%] right-[10%]"
+						className="top-[10%] right-[10%] hidden lg:block"
 						{...props}
 					/>
 				),

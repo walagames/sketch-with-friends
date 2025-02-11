@@ -13,8 +13,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RaisedInput } from "@/components/ui/raised-input";
 import { VirtualKeyboard } from "./virtual-keyboard";
 import { getGameRole } from "@/lib/player";
-import { useMediaQuery } from "@/hooks/use-media-query";
-
 export function Chat({ placeholder }: { placeholder?: string }) {
 	const chatMessages = useSelector(
 		(state: RootState) => state.room.chatMessages
@@ -23,8 +21,6 @@ export function Chat({ placeholder }: { placeholder?: string }) {
 	const playerId = useSelector((state: RootState) => state.room.playerId);
 	const role = getGameRole(playerId, players);
 	const isGuessing = role === GameRole.Guessing;
-
-	const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 
 	const [showNewMessages, setShowNewMessages] = useState(false);
 	const [unreadCount, setUnreadCount] = useState(0);
@@ -41,21 +37,10 @@ export function Chat({ placeholder }: { placeholder?: string }) {
 				listRef.current.scrollHeight - listRef.current.offsetHeight - 300;
 
 			if (isOwnMessage || isScrolledToBottom) {
-				// on mobile we need to wait for the keyboard to close before scrolling
-				// otherwise it makes the scroll jump and it looks bad
-				if (isOwnMessage && !isLargeScreen) {
-					setTimeout(() => {
-						listRef.current?.scrollTo({
-							top: listRef.current.scrollHeight,
-							behavior: "smooth",
-						});
-					}, 175);
-				} else {
-					listRef.current?.scrollTo({
-						top: listRef.current.scrollHeight,
-						behavior: "smooth",
-					});
-				}
+				listRef.current?.scrollTo({
+					top: listRef.current.scrollHeight,
+					behavior: "smooth",
+				});
 				setUnreadCount(0);
 			} else {
 				setShowNewMessages(true);
@@ -84,7 +69,7 @@ export function Chat({ placeholder }: { placeholder?: string }) {
 	}, []);
 
 	return (
-		<div className="flex flex-col lg:h-full relative z-30 gap-1.5 overflow-hidden">
+		<div className="flex flex-col h-full relative z-30 gap-1.5 overflow-hidden">
 			<div className="flex-1 overflow-hidden">
 				<AnimatePresence>
 					{showNewMessages && (
@@ -114,7 +99,7 @@ export function Chat({ placeholder }: { placeholder?: string }) {
 					ref={listRef}
 					onScroll={handleScroll}
 					className={cn(
-						"h-full mx-1 flex gap-3 break-all flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide py-12 pb-16 px-2",
+						"h-full mx-1 flex gap-3 break-all flex-col items-start justify-start overflow-y-auto overflow-x-hidden scrollbar-hide py-8 lg:py-14 lg:pb-[4.25rem] pb-16 px-2",
 						"contain-strict"
 					)}
 				>
@@ -130,7 +115,7 @@ export function Chat({ placeholder }: { placeholder?: string }) {
 			<div className="w-full hidden sm:block z-50 absolute bg-gradient-to-t from-background-secondary via-background-secondary/50 to-background-transparent bottom-0">
 				<ChatForm isGuessing={isGuessing} placeholder={placeholder} />
 			</div>
-			<div className="w-full sm:hidden">
+			<div className="w-full sm:hidden z-50 absolute bg-gradient-to-t from-background-secondary via-background-secondary/50 to-background-transparent bottom-0 px-0.5">
 				<VirtualKeyboard isGuessing={isGuessing} className="w-full" />
 			</div>
 		</div>

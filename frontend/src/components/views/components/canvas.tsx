@@ -525,7 +525,7 @@ function Canvas({
 				width: width * scaleFactor - (padding ?? 0),
 				height: height * scaleFactor - (padding ?? 0),
 			}}
-			className="relative mb-2"
+			className="relative lg:mb-2"
 		>
 			<canvas
 				className={`border-[3px] border-border rounded-lg bg-background w-full h-full relative z-10 ${

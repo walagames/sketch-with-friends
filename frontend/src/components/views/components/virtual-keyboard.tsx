@@ -197,7 +197,7 @@ export const VirtualKeyboard = forwardRef<
 	const handleSubmit = useCallback(() => {
 		const trimmedMessage = inputBufferRef.current.trim();
 		if (trimmedMessage) {
-			dispatch({ type: "game/submitChatMessage", payload: trimmedMessage });
+			dispatch({ type: "room/newChatMessage", payload: trimmedMessage });
 			inputBufferRef.current = "";
 			setInput("");
 		}
@@ -232,7 +232,7 @@ export const VirtualKeyboard = forwardRef<
 		<div
 			ref={ref}
 			className={cn(
-				"flex-1 backdrop-blur-sm rounded-lg flex flex-col max-w-full",
+				"flex-1 rounded-lg flex flex-col max-w-full",
 				className
 			)}
 		>
