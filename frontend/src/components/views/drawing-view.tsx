@@ -10,6 +10,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { getGameRole } from "@/lib/player";
 import { GameRole } from "@/state/features/room";
+import { MessageCircleIcon } from "lucide-react";
 
 export function DrawingView() {
 	const drawingTime = useSelector(
@@ -67,30 +68,44 @@ export function DrawingView() {
 										<Canvas padding={10} width={800} height={600} />
 									</div>
 									{/* Canvas tools for mobile view */}
-									<div className="sm:hidden">
+									<div className="lg:hidden">
 										<CanvasTools />
 									</div>
-									<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border rounded-xl flex flex-col lg:w-[22rem] w-full lg:h-full h-auto relative overflow-hidden">
-										<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary to-background-transparent absolute top-0 left-0 h-12 z-50 items-start px-2 py-1.5 justify-between flex">
-											<h1 className="text-xl font-bold z-10 leading-none">
+									<div className="relative flex-1 flex flex-col">
+										<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary/80 to-background-transparent absolute -top-12 left-0 lg:h-12 h-10 z-50 items-center px-2 justify-between hidden lg:flex	">
+											<h1 className="lg:text-xl text-lg font-bold z-10 leading-none flex items-center gap-1.5">
+												<MessageCircleIcon className="size-5 -translate-y-0.5" />
 												Chat
 											</h1>
 											<p className="font-bold text-lg text-muted-foreground">
 												Round {currentRound} of {totalRounds}
 											</p>
 										</div>
-										<Chat
-											placeholder={
-												isDrawing
-													? "Type your message..."
-													: "Type your guess..."
-											}
-										/>
+										<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border border-dashed rounded-xl flex flex-col lg:w-[22rem] w-full lg:h-full h-auto relative overflow-hidden">
+											<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary to-background-transparent absolute top-0 left-0 h-12 z-50 items-start px-2 py-1.5 justify-between flex sm:hidden">
+												<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary/80 to-background-transparent absolute top-0 left-0 lg:h-12 h-10 z-50 flex items-center px-2 justify-between">
+													<h1 className="lg:text-xl text-lg font-bold z-10 leading-none flex items-center gap-1.5">
+														<MessageCircleIcon className="size-5 -translate-y-0.5" />
+														Chat
+													</h1>
+													<p className="font-bold text-lg text-muted-foreground">
+														Round {currentRound} of {totalRounds}
+													</p>
+												</div>
+											</div>
+											<Chat
+												placeholder={
+													isDrawing
+														? "Type your message..."
+														: "Type your guess..."
+												}
+											/>
+										</div>
 									</div>
 								</div>
 							</div>
 							{/* Canvas tools for desktop */}
-							<div className="hidden sm:flex">
+							<div className="hidden lg:flex">
 								<CanvasTools />
 							</div>
 						</div>

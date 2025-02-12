@@ -112,7 +112,7 @@ export function Chat({ placeholder }: { placeholder?: string }) {
 					))}
 				</motion.ul>
 			</div>
-			<div className="w-full hidden sm:block z-50 absolute bg-gradient-to-t from-background-secondary via-background-secondary/50 to-background-transparent bottom-0">
+			<div className="w-full hidden sm:block z-50 absolute bg-gradient-to-t from-background-secondary via-background-secondary/90 to-background-transparent bottom-0 pb-1 px-1">
 				<ChatForm isGuessing={isGuessing} placeholder={placeholder} />
 			</div>
 			<div className="w-full sm:hidden z-50 absolute bg-gradient-to-t from-background-secondary via-background-secondary/50 to-background-transparent bottom-0 px-0.5">
