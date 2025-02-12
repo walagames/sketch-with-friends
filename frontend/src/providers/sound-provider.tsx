@@ -176,6 +176,10 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 					playSound(SoundEffect.CLOCK_TICK);
 					// Start interval for remaining ticks
 					intervalRef.current = setInterval(() => {
+						if (new Date(timerEndsAt).getTime() - Date.now() <= 0) {
+							clearInterval(intervalRef.current);
+							return;
+						}
 						playSound(SoundEffect.CLOCK_TICK);
 					}, 1000);
 				}, delay);
