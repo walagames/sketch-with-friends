@@ -9,11 +9,12 @@ export function SkyScene({
 	return (
 		<div
 			className={cn(
-				"flex h-full flex-col items-center justify-center w-full gap-6 lg:gap-8 relative",
+				"flex h-full flex-col items-center justify-center w-full gap-6 lg:gap-8 relative overflow-visible",
 				className
 			)}
 		>
 			{children}
+
 			<Hills />
 			{/* duplicate hills so that they still appear on sides when spring overshoots */}
 			<Hills className="absolute bottom-0 left-full w-full " />

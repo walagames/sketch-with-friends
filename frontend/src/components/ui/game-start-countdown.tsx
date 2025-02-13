@@ -1,4 +1,4 @@
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "motion/react";
 import { useState, useEffect, forwardRef } from "react";
 import { SoundEffect, useSound } from "@/providers/sound-provider";
 

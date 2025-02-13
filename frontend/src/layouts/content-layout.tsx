@@ -1,9 +1,9 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import { BobbingDoodle } from "@/components/doodle/bobbing-doodle";
 import { ModalMenu } from "@/components/ui/modal-menu";
 import { Logo } from "@/components/ui/logo";
 import { Link } from "react-router";
+import { RainCloudDoodle } from "@/components/doodle/rain-cloud-doodle";
 export function ContentLayout({
 	children,
 	title,
@@ -21,12 +21,14 @@ export function ContentLayout({
 				</Link>
 				<ModalMenu />
 			</div>
-			<BobbingDoodle
+			<RainCloudDoodle
 				key="rain-cloud-1"
+				duration={5}
 				className="lg:top-[20%] top-[10%] lg:left-[12%] left-[6%] absolute w-32 hidden lg:block"
 				src="/doodles/rain-cloud.png"
 			/>
-			<BobbingDoodle
+			<RainCloudDoodle
+				duration={4}
 				className="hidden lg:block bottom-[10%] right-[14%] absolute h-28"
 				key="rain-cloud-2"
 				style={{ top: "10%", right: "10%" }}

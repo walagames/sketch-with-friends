@@ -1,4 +1,6 @@
+import { Avatar, AvatarConfig } from "@/lib/avatar";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { hslToHex } from "@/lib/color";
 
 export enum CanvasTool {
 	Brush = "brush",
@@ -7,15 +9,6 @@ export enum CanvasTool {
 }
 
 export interface ClientState {
-	id: string;
-	preferences: {
-		soundsEnabled: boolean;
-	};
-	game: {
-		wordOptions: string[];
-		selectedWord: string;
-		guessResponse: boolean | null;
-	};
 	canvas: {
 		hue: number;
 		lightness: number;
@@ -24,20 +17,14 @@ export interface ClientState {
 		color: string;
 		recentlyUsedColors: string[];
 	};
-	enteredRoomCode: string;
-	isJoining: boolean;
+	volume: number;
+	username: string;
+	avatarConfig: AvatarConfig;
+	customWords: string[];
+	roomCode: string;
 }
 
 const initialState: ClientState = {
-	id: "",
-	preferences: {
-		soundsEnabled: true,
-	},
-	game: {
-		wordOptions: [],
-		selectedWord: "",
-		guessResponse: null,
-	},
 	canvas: {
 		hue: 0,
 		lightness: 0,
@@ -46,35 +33,12 @@ const initialState: ClientState = {
 		tool: CanvasTool.Brush,
 		recentlyUsedColors: [],
 	},
-	enteredRoomCode: "",
-	isJoining: false,
+	volume: 0.5,
+	username: "",
+	avatarConfig: Avatar.random(),
+	customWords: [],
+	roomCode: "",
 };
-
-function hslToHex(h: number, l: number): string {
-	const s = 100; // Saturation is always 100%
-
-	const c = ((1 - Math.abs((2 * l) / 100 - 1)) * s) / 100;
-	const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-	const m = l / 100 - c / 2;
-
-	let r, g, b;
-	if (h >= 0 && h < 60) {
-		[r, g, b] = [c, x, 0];
-	} else if (h >= 60 && h < 120) {
-		[r, g, b] = [x, c, 0];
-	} else if (h >= 120 && h < 180) {
-		[r, g, b] = [0, c, x];
-	} else if (h >= 180 && h < 240) {
-		[r, g, b] = [0, x, c];
-	} else if (h >= 240 && h < 300) {
-		[r, g, b] = [x, 0, c];
-	} else {
-		[r, g, b] = [c, 0, x];
-	}
-
-	const rgb = [r, g, b].map((v) => Math.round((v + m) * 255));
-	return `#${rgb.map((v) => v.toString(16).padStart(2, "0")).join("")}`;
-}
 
 export const clientSlice = createSlice({
 	name: "client",
@@ -82,13 +46,6 @@ export const clientSlice = createSlice({
 	reducers: {
 		// Only comes from the server
 		reset: () => initialState,
-		initializeClient: (state, action: PayloadAction<string>) => {
-			state.isJoining = false;
-			state.id = action.payload;
-		},
-		setIsJoining: (state, action: PayloadAction<boolean>) => {
-			state.isJoining = action.payload;
-		},
 		changeHue: (state, action: PayloadAction<number>) => {
 			state.canvas.hue = action.payload;
 			state.canvas.color = hslToHex(action.payload, state.canvas.lightness);
@@ -102,9 +59,6 @@ export const clientSlice = createSlice({
 		},
 		changeTool: (state, action: PayloadAction<CanvasTool>) => {
 			state.canvas.tool = action.payload;
-		},
-		enterRoomCode: (state, action: PayloadAction<string>) => {
-			state.enteredRoomCode = action.payload;
 		},
 		changeColor: (state, action: PayloadAction<string>) => {
 			const hex = action.payload;
@@ -152,6 +106,21 @@ export const clientSlice = createSlice({
 				6
 			);
 		},
+		changeVolume: (state, action: PayloadAction<number>) => {
+			state.volume = action.payload;
+		},
+		changeAvatarConfig: (state, action: PayloadAction<AvatarConfig>) => {
+			state.avatarConfig = action.payload;
+		},
+		changeUsername: (state, action: PayloadAction<string>) => {
+			state.username = action.payload;
+		},
+		changeCustomWords: (state, action: PayloadAction<string[]>) => {
+			state.customWords = action.payload;
+		},
+		enterRoomCode: (state, action: PayloadAction<string>) => {
+			state.roomCode = action.payload;
+		},
 	},
 });
 
@@ -160,10 +129,13 @@ export const {
 	changeLightness,
 	changeStrokeWidth,
 	changeTool,
-	enterRoomCode,
-	setIsJoining,
 	changeColor,
 	addRecentlyUsedColor,
+	changeVolume,
+	changeAvatarConfig,
+	changeUsername,
+	changeCustomWords,
+	enterRoomCode,
 } = clientSlice.actions;
 
 export default clientSlice.reducer;

@@ -1,7 +1,7 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
-import { HTMLMotionProps, motion } from "framer-motion";
+import { HTMLMotionProps, motion } from "motion/react";
 import { useSound, SoundEffect } from "@/providers/sound-provider";
 
 const buttonVariants = cva(
@@ -20,14 +20,14 @@ const buttonVariants = cva(
 			size: {
 				default: "h-10 py-4 px-4",
 				sm: "h-9 px-3",
-				lg: "h-11 px-6",
+				lg: "h-11 lg:px-6 px-4",
 				xl: "py-1 px-16",
 				icon: "h-10 lg:h-11 w-10 lg:w-11",
 				iconSm: "h-9 w-9",
 				iconMd: "h-11 w-11",
 				tall: "h-full w-11",
 				wide: "w-full h-11",
-				card: "h-14 px-0 py-0",
+				card: "h-12 px-0 py-0",
 			},
 			rounded: {
 				default: "rounded-lg",

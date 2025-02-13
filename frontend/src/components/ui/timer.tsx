@@ -4,7 +4,7 @@ import {
 	useMotionValue,
 	AnimationPlaybackControls,
 	motion,
-} from "framer-motion";
+} from "motion/react";
 import { useEffect } from "react";
 export function Timer({ endTime }: { endTime: string }) {
 	const count = useMotionValue(0);

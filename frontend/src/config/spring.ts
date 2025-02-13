@@ -1,6 +1,6 @@
 export const containerSpring = {
 	type: "spring",
-	stiffness: 350,
+	stiffness: 320,
 	damping: 45,
 	mass: 1,
 	restDelta: 0.01,
