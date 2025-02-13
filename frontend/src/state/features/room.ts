@@ -158,7 +158,7 @@ export const roomSlice = createSlice({
 		changeRoomSettings: (state, action: PayloadAction<RoomSettings>) => {
 			state.settings = action.payload;
 		},
-		changePlayerProfile: (
+		updatePlayerProfile: (
 			state,
 			action: PayloadAction<{
 				id: string;
@@ -194,7 +194,7 @@ export const {
 	setPlayers,
 	playerLeft,
 	changeRoomSettings,
-	changePlayerProfile,
+	updatePlayerProfile,
 	setCurrentState,
 } = roomSlice.actions;
 

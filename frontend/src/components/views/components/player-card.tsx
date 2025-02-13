@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { AvatarConfig, generateAvatar } from "@/lib/avatar";
-import { Player, changePlayerProfile } from "@/state/features/room";
+import { Player, updatePlayerProfile } from "@/state/features/room";
 import { forwardRef, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/state/store";
@@ -69,7 +69,7 @@ export const PlayerCard = forwardRef<HTMLDivElement, { player: Player }>(
 		}) => {
 			setIsEditPlayerOptionsOpen(false);
 			dispatch(
-				changePlayerProfile({
+				updatePlayerProfile({
 					id: player.id,
 					username: profile.username,
 					avatarConfig: profile.avatarConfig,

@@ -387,6 +387,7 @@ func (r *room) handlePlayerProfileChange(cmd *Command) error {
 	// Validate and sanitize the profile
 	validatedProfile, err := validatePlayerProfile(&profile)
 	if err != nil {
+		slog.Error("profile validation failed", "error", err)
 		return fmt.Errorf("profile validation failed: %w", err)
 	}
 
