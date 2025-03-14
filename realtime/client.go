@@ -122,7 +122,7 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 			}
 
 			// Make sure the client has not exceeded their rate limit
-			// Ignore rate limit for stroke commands if the player is drawing
+			// Ignore rate limit for stroke commands if the player is drawing (drawing has a lot of events)
 			if c.limiter.Allow() || (c.player.GameRole == GameRoleDrawing && cmd.isStrokeCommand()) {
 				// Add the player to the command so the room knows who sent it
 				cmd.Player = c.player

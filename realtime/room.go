@@ -251,11 +251,6 @@ func (room *room) unregister(player *player) {
 	// 1. Prevents frontend errors when rendering guesses (avoids lookup of non-existent player)
 	// 2. Useful for scenarios like kicking players for offensive language
 	// Note: This is a design choice that may have future benefits.
-	room.dispatch(&Command{
-		Type:    PlayerLeftCmd,
-		Payload: player.ID,
-		Player:  player,
-	})
 
 	// Filter out the player's messages
 	newChatMessages := make([]ChatMessage, 0)
@@ -269,6 +264,11 @@ func (room *room) unregister(player *player) {
 	room.broadcast(GameRoleAny, event(SetChatEvt, room.ChatMessages))
 	room.SendSystemMessage(fmt.Sprintf("%s left the room", player.Username))
 	room.removePlayerFromDrawingQueue(player.ID)
+	room.currentState.HandleCommand(room, &Command{
+		Type:    PlayerLeftCmd,
+		Payload: player.ID,
+		Player:  player,
+	})
 
 	// Tell the other players that a player left
 	// Note: This needs to be done before we remove the player from the room state

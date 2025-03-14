@@ -10,12 +10,12 @@ func NewGameOverState() RoomState {
 }
 
 func (state GameOverState) Enter(room *room) {
-	slog.Info("Game over enter")
+	slog.Debug("Game over enter")
 	room.broadcast(GameRoleAny, event(SetCurrentStateEvt, GameOver))
 }
 
 func (state GameOverState) Exit(room *room) {
-	slog.Info("Game over exit")
+	slog.Debug("Game over exit")
 }
 
 func (state GameOverState) handlePlayerJoined(room *room, cmd *Command) error {

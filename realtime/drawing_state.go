@@ -97,6 +97,8 @@ func (state *DrawingState) Enter(room *room) {
 		event(SetSelectedWordEvt, NewWord(state.hintedWord, state.currentWord.Difficulty)),
 	)
 
+	slog.Debug("Entering drawing state", "endsAt", state.endsAt, "len(pointsAwarded)", len(state.pointsAwarded))
+
 	// If the game mode is not no hints, we start the hint routine
 	if room.Settings.GameMode != GameModeNoHints {
 		// Will apply up to 60% of the word length as hints
@@ -160,7 +162,7 @@ func (state *DrawingState) drawingPhaseSummary(room *room) string {
 	}
 
 	word := state.currentWord.Value
-	guessers := len(state.pointsAwarded)
+	guessers := len(state.pointsAwarded) - 1 // -1 for the drawer
 	totalPlayers := len(room.Players)
 
 	slog.Debug("Drawing phase summary",
@@ -366,6 +368,11 @@ func (state *DrawingState) handleUndoStroke(room *room, cmd *Command) error {
 func (state *DrawingState) handlePlayerLeft(room *room, cmd *Command) error {
 	delete(state.pointsAwarded, cmd.Player.ID)
 
+	if len(state.pointsAwarded) >= len(room.Players)-1 {
+		slog.Debug("player left, rest of players have guessed, advancing to next state")
+		state.advanceEarly(room)
+	}
+
 	return nil
 }
 
@@ -461,15 +468,21 @@ func (state *DrawingState) handleChatMessage(room *room, cmd *Command) error {
 
 	// if all players have guessed correctly, end the drawing phase
 	if len(state.pointsAwarded) >= len(room.Players) {
-		room.scheduler.clearEvents()
-		state.endsAt = time.Now()
-		room.broadcast(GameRoleAny,
-			event(SetTimerEvt, state.endsAt.UTC()),
-		)
-		state.handleDrawingPhaseEnd(room)
+		state.advanceEarly(room)
 	}
 
 	return nil
+}
+
+func (state *DrawingState) advanceEarly(room *room) bool {
+	room.scheduler.clearEvents()
+	state.endsAt = time.Now()
+	room.broadcast(GameRoleAny,
+		event(SetTimerEvt, state.endsAt.UTC()),
+	)
+	state.handleDrawingPhaseEnd(room)
+
+	return true
 }
 
 func (state *DrawingState) HandleCommand(room *room, cmd *Command) error {
