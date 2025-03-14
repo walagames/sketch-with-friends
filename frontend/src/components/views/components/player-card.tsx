@@ -33,8 +33,8 @@ function CardContent({
 	isCurrentPlayer: boolean;
 }) {
 	return (
-		<RaisedButton variant="card" size="card" className="w-full justify-start">
-			<div className="flex items-center h-12 -translate-y-0.5 lg:w-64 min-h-0 flex-1 relative">
+		<div className="w-full justify-start bg-background h-12 rounded-lg shadow-accent-md">
+			<div className="flex items-center h-12 lg:w-64 min-h-0 flex-1 relative">
 				<img
 					alt="Player avatar"
 					className="rounded-l-lg h-full aspect-square relative"
@@ -49,7 +49,7 @@ function CardContent({
 					</p>
 				)}
 			</div>
-		</RaisedButton>
+		</div>
 	);
 }
 
