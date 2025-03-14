@@ -85,14 +85,12 @@ export function RoomSettingsForm() {
 	useEffect(() => {
 		if (!isEditing) {
 			if (customWords.length > 0) {
-				console.log("setting with saved custom words", customWords);
 				form.setValue(
 					"customWords",
 					customWords.map((word) => word.value).join(",")
 				);
 			} else if (savedCustomWords.length > 0 && !form.getValues().customWords) {
 				// Only set values if form is empty
-				console.log("setting with history words", savedCustomWords);
 				form.setValue(
 					"customWords",
 					// @ts-expect-error - TODO: fix this
@@ -113,7 +111,6 @@ export function RoomSettingsForm() {
 	}, [customWords, isEditing, savedCustomWords]);
 
 	const handleChange = useDebouncedCallback(() => {
-		console.log("handle change");
 		const values = form.getValues();
 		const customWords = values.customWords.split(",");
 		dispatch(

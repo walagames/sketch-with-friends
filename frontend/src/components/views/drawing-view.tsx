@@ -84,8 +84,8 @@ export function DrawingView() {
 										<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border border-dashed rounded-xl flex flex-col lg:w-[22rem] w-full lg:h-full h-auto relative overflow-hidden">
 											<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary to-background-transparent absolute top-0 left-0 h-12 z-50 items-start px-2 py-1.5 justify-between flex sm:hidden">
 												<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary/80 to-background-transparent absolute top-0 left-0 lg:h-12 h-10 z-50 flex items-center px-2 justify-between">
-													<h1 className="lg:text-xl text-lg font-bold z-10 leading-none flex items-center gap-1.5">
-														<MessageCircleIcon className="size-5 -translate-y-0.5" />
+													<h1 className="text-lg font-bold z-10 leading-none flex items-center gap-1.5">
+														<MessageCircleIcon className="size-6 -translate-y-0.5" />
 														Chat
 													</h1>
 													<p className="font-bold text-lg text-muted-foreground">

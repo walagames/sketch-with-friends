@@ -75,28 +75,37 @@ export function WaitingView() {
 						</div>
 					</div>
 				</div>
-				<div className="w-full lg:aspect-[4/3] flex-1 flex items-start justify-center lg:max-h-[calc(100vh-200px)]">
+				<div className="w-full lg:aspect-[4/3] flex-1 flex items-start justify-center lg:max-h-[calc(100vh-200px)] backdrop-blur-sm border-4 border-border border-dashed rounded-lg">
 					{showSettings ? (
-						<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex flex-col p-3 lg:max-h-[calc(100vh-200px)] max-h-[calc(100vh-70px)] overflow-y-auto gap-1.5">
+						<div className="flex-1 bg-background-secondary/50 flex flex-col p-4 lg:max-h-[calc(100vh-200px)] max-h-[calc(100vh-70px)] overflow-y-auto gap-1.5">
 							<h1 className="lg:text-xl text-lg font-bold z-10 leading-none flex items-center gap-1.5">
-								<SettingsIcon className="size-5 -translate-y-0.5" />
+								<SettingsIcon className="size-6 -translate-y-0.5" />
 								Room settings
 							</h1>
 							<RoomSettingsForm />
 						</div>
 					) : (
-						<div className="flex h-full gap-2 flex-1 lg:flex-row flex-col">
-							<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border border-dashed rounded-lg flex flex-col p-2 lg:p-2.5 lg:max-h-[calc(100vh-200px)] max-h-[50%] gap-4">
-								<div className="flex items-center gap-2">
+						<div className="flex h-full gap-2 flex-1 lg:flex-row flex-col lg:divide-x-4 lg:divide-y-0 divide-y-4 divide-border divide-dashed">
+							<div className="flex-1 bg-background-secondary/50 flex flex-col p-2 lg:p-4 lg:max-h-[calc(100vh-200px)] max-h-[50%] gap-4 overflow-y-auto">
+								{/* <div className="flex items-center gap-2">
 									<h1 className="lg:text-xl text-lg font-bold z-10 leading-none flex items-center gap-2">
-										<UsersIcon className="size-5 -translate-y-0.5" />
+										<UsersIcon className="size-6 -translate-y-0.5" />
 										Players
-										<span className="text-lg">
+										<span className="text-xl">
+											{Object.keys(players).length}/{roomSettings.playerLimit}
+										</span>
+									</h1>
+								</div> */}
+								<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary/80 to-background-transparent absolute top-0 left-0 lg:h-12 h-10 z-50 flex items-center px-2 lg:p-4 lg:py-7">
+									<h1 className="lg:text-xl text-lg font-bold z-10 leading-none flex items-center gap-1.5">
+										<UsersIcon className="size-6 -translate-y-0.5" />
+										Players
+										<span className="text-xl">
 											{Object.keys(players).length}/{roomSettings.playerLimit}
 										</span>
 									</h1>
 								</div>
-								<ul className="flex flex-col w-full lg:gap-4 gap-2 px-1 ">
+								<ul className="flex flex-col w-full lg:gap-4 gap-3 px-1 pt-10">
 									<AnimatePresence initial={false} mode="popLayout">
 										{Object.values(players)
 											.sort((a, b) => b.score - a.score)
@@ -106,10 +115,10 @@ export function WaitingView() {
 									</AnimatePresence>
 								</ul>
 							</div>
-							<div className="flex-1 bg-background-secondary/50 backdrop-blur-sm border-4 border-border border-dashed rounded-xl flex flex-col lg:w-[22rem] w-fill lg:h-full h-auto relative overflow-hidden">
-								<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary/80 to-background-transparent absolute top-0 left-0 lg:h-12 h-10 z-50 flex items-center px-2">
+							<div className="flex-1 bg-background-secondary/50  flex flex-col lg:w-[22rem] w-fill lg:h-full h-auto relative overflow-hidden p-1.5">
+								<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary/80 to-background-transparent absolute top-0 left-0 lg:h-12 h-10 z-50 flex items-center px-2 lg:p-5 lg:py-8">
 									<h1 className="lg:text-xl text-lg font-bold z-10 leading-none flex items-center gap-1.5">
-										<MessageCircleIcon className="size-5 -translate-y-0.5" />
+										<MessageCircleIcon className="size-6 -translate-y-0.5" />
 										Chat
 									</h1>
 								</div>
