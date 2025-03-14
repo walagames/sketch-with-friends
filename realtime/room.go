@@ -13,6 +13,9 @@ import (
 )
 
 const (
+	// Maximum number of chat messages to store
+	MAX_CHAT_MESSAGES = 100
+
 	// How often to check for idle players
 	IDLE_TICK = 1 * time.Minute
 
@@ -557,6 +560,12 @@ func (room *room) fillDrawingQueue() {
 
 func (room *room) handleChatMessage(msg ChatMessage) error {
 	room.ChatMessages = append(room.ChatMessages, msg)
+
+	// Trim old messages if we exceed the limit
+	if len(room.ChatMessages) > MAX_CHAT_MESSAGES {
+		room.ChatMessages = room.ChatMessages[len(room.ChatMessages)-MAX_CHAT_MESSAGES:]
+	}
+
 	room.broadcast(GameRoleAny, event(NewChatMessageEvt, msg))
 	return nil
 }
