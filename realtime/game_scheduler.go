@@ -69,10 +69,6 @@ func (s *GameScheduler) addEvent(eventType ScheduledEventType, when time.Time, h
 		handler:   handler,
 	}
 
-	// if s.events[eventType] != nil {
-	// 	return nil, ErrEventAlreadyExists
-	// }
-
 	s.events[eventType] = event
 	slog.Debug("event added", "eventType", eventType, "when", when)
 	return event, nil

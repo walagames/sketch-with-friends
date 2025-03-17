@@ -6,6 +6,10 @@ import (
 	"log/slog"
 )
 
+// Events are messages sent from the server to the client.
+// They are used to trigger actions on the frontend and update the state of the game.
+// They are also used to send messages to the players.
+
 type EventType string
 
 var (

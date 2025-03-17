@@ -78,68 +78,68 @@ func loadWordBank() {
 }
 
 // Returns unique, random words from the word bank based on the specified difficulty.
-// ! this is garbage and we need to revist it
 func randomWordOptions(numberOfWords int, difficulty WordDifficulty, customWords []Word) []Word {
-	// If the word bank is custom only, we use the custom words if there are any
+	// handle custom words case
 	if len(customWords) > 0 {
 		return customWords[:min(numberOfWords, len(customWords))]
 	}
 
-	// For non-all difficulty, use the original filtering logic
-	if difficulty != WordDifficultyAll {
-		filteredWords := wordBank
-		if len(customWords) > 0 {
-			const customWordWeight = 3
-			weightedCustomWords := make([]Word, 0, len(customWords)*customWordWeight)
-			for i := 0; i < customWordWeight; i++ {
-				weightedCustomWords = append(weightedCustomWords, customWords...)
-			}
-			filteredWords = append(filteredWords, weightedCustomWords...)
-		}
-
-		wordsByDifficulty := make([]Word, 0)
-		for _, word := range filteredWords {
-			if word.Difficulty == difficulty || word.Difficulty == WordDifficultyCustom {
-				wordsByDifficulty = append(wordsByDifficulty, word)
-			}
-		}
-
-		// Create a set to ensure uniqueness
-		wordSet := make(map[Word]struct{})
-		for len(wordSet) < numberOfWords && len(wordSet) < len(wordsByDifficulty) {
-			word := wordsByDifficulty[rand.Intn(len(wordsByDifficulty))]
-			wordSet[word] = struct{}{}
-		}
-
-		words := make([]Word, 0, len(wordSet))
-		for word := range wordSet {
-			words = append(words, word)
-		}
-		return words
+	// handle all difficulties case
+	if difficulty == WordDifficultyAll {
+		return getOneOfEachDifficulty(customWords)
 	}
 
-	// For random difficulty, get one word of each difficulty
-	var easyWords, mediumWords, hardWords []Word
+	// handle specific difficulty case
+	return getRandomWordsOfDifficulty(numberOfWords, difficulty)
+}
+
+// helper to get words of specific difficulty
+func getRandomWordsOfDifficulty(count int, difficulty WordDifficulty) []Word {
+	// filter words by difficulty
+	filtered := make([]Word, 0)
 	for _, word := range wordBank {
-		switch word.Difficulty {
-		case WordDifficultyEasy:
-			easyWords = append(easyWords, word)
-		case WordDifficultyMedium:
-			mediumWords = append(mediumWords, word)
-		case WordDifficultyHard:
-			hardWords = append(hardWords, word)
+		if word.Difficulty == difficulty {
+			filtered = append(filtered, word)
 		}
 	}
 
-	result := make([]Word, 3)
-	result[0] = easyWords[rand.Intn(len(easyWords))]
-	result[1] = mediumWords[rand.Intn(len(mediumWords))]
+	// ensure we don't try to get more words than available
+	count = min(count, len(filtered))
 
-	// 30% chance to use a custom word instead of a hard word if available and using mixed word bank
-	if difficulty == WordDifficultyAll && len(customWords) > 0 && rand.Float32() < 0.3 {
+	// get random unique words
+	result := make([]Word, 0, count)
+	used := make(map[string]bool)
+
+	for len(result) < count {
+		word := filtered[rand.Intn(len(filtered))]
+		if !used[word.Value] {
+			used[word.Value] = true
+			result = append(result, word)
+		}
+	}
+
+	return result
+}
+
+// helper to get one word of each difficulty
+func getOneOfEachDifficulty(customWords []Word) []Word {
+	result := make([]Word, 3)
+
+	// group words by difficulty
+	byDifficulty := make(map[WordDifficulty][]Word)
+	for _, w := range wordBank {
+		byDifficulty[w.Difficulty] = append(byDifficulty[w.Difficulty], w)
+	}
+
+	// get one random word of each difficulty
+	result[0] = byDifficulty[WordDifficultyEasy][rand.Intn(len(byDifficulty[WordDifficultyEasy]))]
+	result[1] = byDifficulty[WordDifficultyMedium][rand.Intn(len(byDifficulty[WordDifficultyMedium]))]
+
+	// 30% chance for custom word instead of hard word
+	if len(customWords) > 0 && rand.Float32() < 0.3 {
 		result[2] = customWords[rand.Intn(len(customWords))]
 	} else {
-		result[2] = hardWords[rand.Intn(len(hardWords))]
+		result[2] = byDifficulty[WordDifficultyHard][rand.Intn(len(byDifficulty[WordDifficultyHard]))]
 	}
 
 	return result

@@ -7,12 +7,14 @@ import (
 	"time"
 )
 
+// PickingState represents the game state where a player is selecting a word to draw
 type PickingState struct {
-	wordOptions  []Word
-	selectedWord *Word
-	endsAt       time.Time
+	wordOptions  []Word    // List of possible words the player can choose from
+	selectedWord *Word     // The word that was selected (nil until selection is made)
+	endsAt       time.Time // When this state should automatically end
 }
 
+// NewPickingState creates a new picking state with the given word options
 func NewPickingState(wordOptions []Word) RoomState {
 	return &PickingState{
 		wordOptions:  wordOptions,
@@ -21,12 +23,11 @@ func NewPickingState(wordOptions []Word) RoomState {
 	}
 }
 
+// Enter is called when the game enters the picking state
 func (state *PickingState) Enter(room *room) {
-	slog.Debug("ENTERING PICKING STATE")
 	nextDrawer := room.getNextDrawingPlayer()
 
-	// If the queue is empty, we're at the end of a round
-	// OR the beginning of a new game
+	// Handle end of round or new game scenarios
 	if nextDrawer == nil {
 		slog.Debug("queue is empty, checking if we're at the end of a round")
 		// It's the last round, return to waiting state
@@ -42,26 +43,23 @@ func (state *PickingState) Enter(room *room) {
 		nextDrawer = room.getNextDrawingPlayer()
 
 		if nextDrawer == nil {
-			slog.Error("drawer was nil twice")
-			// TODO: idk if this can happen, maybe a race condition with a player leaving?
-			// what should we do here?
 			return
 		}
 	}
 
+	// Set up the new drawer and send them the word options
 	room.currentDrawer = nextDrawer
 	nextDrawer.GameRole = GameRoleDrawing
 	nextDrawer.Send(
 		event(SetWordOptionsEvt, state.wordOptions),
 	)
 
-	// room.scheduler.cancelEvent(ScheduledStateChange)
-	slog.Debug("adding scheduled state change event")
+	// Schedule automatic state transition if time runs out
 	room.scheduler.addEvent(ScheduledStateChange, state.endsAt, func() {
-		slog.Debug("CALLING FUNCTION")
 		room.Transition()
 	})
 
+	// Broadcast the new game state to all players
 	room.broadcast(GameRoleAny,
 		event(SetCurrentStateEvt, Picking),
 		event(SetPlayersEvt, room.Players),
@@ -72,7 +70,9 @@ func (state *PickingState) Enter(room *room) {
 
 }
 
+// Exit is called when leaving the picking state
 func (state *PickingState) Exit(room *room) {
+	// Cancel the scheduled auto-transition
 	room.scheduler.cancelEvent(ScheduledStateChange)
 	// If the player never choose a word, we pick one for them
 	if state.selectedWord == nil {
@@ -87,7 +87,6 @@ func (state *PickingState) Exit(room *room) {
 		)
 	}
 
-	// room.broadcast(GameRoleGuessing, event(SetSelectedWordEvt, state.selectedWord.Value))
 	room.setState(NewDrawingState(*state.selectedWord))
 }
 
@@ -110,18 +109,22 @@ func SafeExtractWord(payload interface{}) (*Word, error) {
 	return &Word{Value: value}, nil
 }
 
+// handleWordSelection processes a player's word choice
 func (state *PickingState) handleWordSelection(room *room, cmd *Command) error {
+	// Verify the player is actually the drawer
 	if cmd.Player.GameRole != GameRoleDrawing {
 		slog.Debug("player is not the drawer", "player", cmd.Player.ID)
 		return ErrWrongGameRole
 	}
 
+	// Extract and validate the selected word
 	selectedWord, err := SafeExtractWord(cmd.Payload)
 	if err != nil {
 		slog.Error("failed to extract word from payload", "error", err)
 		return fmt.Errorf("invalid word selection: %w", err)
 	}
 
+	// Verify the selected word is one of the valid options
 	var foundDrawingWord *Word
 	for _, option := range state.wordOptions {
 		if option.Value == selectedWord.Value {
@@ -136,31 +139,33 @@ func (state *PickingState) handleWordSelection(room *room, cmd *Command) error {
 
 	state.selectedWord = foundDrawingWord
 
+	// Cancel the auto-transition and move to next state
 	room.scheduler.cancelEvent(ScheduledStateChange)
 	room.Transition()
 
 	return nil
 }
 
+// handlePlayerLeft handles when a player leaves during the picking state
 func (state *PickingState) handlePlayerLeft(room *room, cmd *Command) error {
-	// Handle phase transitions if the player that left was the drawer
+	// If the drawer leaves, restart the picking state
 	if cmd.Player.GameRole == GameRoleDrawing {
 		room.TransitionTo(NewPickingState(state.wordOptions))
 	}
 	return nil
 }
 
+// handlePlayerJoined handles when a new player joins during the picking state
 func (state *PickingState) handlePlayerJoined(room *room, cmd *Command) error {
-	player := cmd.Player
-
-	room.enqueueDrawingPlayer(player)
-	player.Send(
+	// Send the current game state to the new player
+	cmd.Player.Send(
 		event(SetCurrentStateEvt, Picking),
 		event(SetTimerEvt, state.endsAt.UTC()),
 	)
 	return nil
 }
 
+// HandleCommand routes and processes incoming commands for this state
 func (state *PickingState) HandleCommand(room *room, cmd *Command) error {
 	switch cmd.Type {
 	case SelectWordCmd:

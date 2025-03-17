@@ -8,6 +8,9 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+// Commands are messages sent from the client to the server.
+// They are used to trigger actions on the server and update the state of the game.
+
 var (
 	ErrGameNotInitialized = errors.New("game is not initialized")
 

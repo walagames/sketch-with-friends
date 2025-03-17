@@ -2,6 +2,10 @@ package main
 
 import "log/slog"
 
+// The game over state is the final state of the game.
+// It is entered when the game is over and the players have no more rounds to play.
+// It is used to display the final scoreboard and announce the winner.
+// ! This state is not in use yet.
 type GameOverState struct {
 }
 

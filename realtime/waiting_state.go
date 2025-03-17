@@ -5,19 +5,23 @@ import (
 	"log/slog"
 )
 
+// WaitingState handles the pre-game lobby where players wait to start
 type WaitingState struct{}
 
+// NewWaitingState creates a new WaitingState
 func NewWaitingState() RoomState {
 	return &WaitingState{}
 }
 
+// Enter broadcasts the current state and players to all clients
 func (state *WaitingState) Enter(room *room) {
 	room.broadcast(GameRoleAny,
 		event(SetCurrentStateEvt, Waiting),
-		event(SetPlayersEvt, room.Players), // ! idk if this is needed
+		event(SetPlayersEvt, room.Players),
 	)
 }
 
+// Exit moves the room to picking state with random word options
 func (state *WaitingState) Exit(room *room) {
 	room.setState(
 		NewPickingState(
@@ -29,6 +33,7 @@ func (state *WaitingState) Exit(room *room) {
 	)
 }
 
+// HandleCommand routes commands to their appropriate handlers
 func (state *WaitingState) HandleCommand(room *room, cmd *Command) error {
 	switch cmd.Type {
 	case StartGameCmd:
@@ -45,6 +50,7 @@ func (state *WaitingState) HandleCommand(room *room, cmd *Command) error {
 	}
 }
 
+// handleGameStart checks if game can start and initiates it
 func (state *WaitingState) handleGameStart(room *room, cmd *Command) error {
 	if len(room.Players) < 2 {
 		return ErrNotEnoughPlayers
@@ -61,6 +67,7 @@ func (state *WaitingState) handleGameStart(room *room, cmd *Command) error {
 	return nil
 }
 
+// handleRoomSettingsChange updates room settings if valid
 func (state *WaitingState) handleRoomSettingsChange(room *room, cmd *Command) error {
 	if cmd.Player.RoomRole != RoomRoleHost {
 		return ErrWrongRoomRole
@@ -87,6 +94,7 @@ func (state *WaitingState) handleRoomSettingsChange(room *room, cmd *Command) er
 	return nil
 }
 
+// handlePlayerJoined sends current state to new players
 func (state *WaitingState) handlePlayerJoined(room *room, cmd *Command) error {
 	cmd.Player.Send(
 		event(SetCurrentStateEvt, Waiting),
@@ -94,6 +102,7 @@ func (state *WaitingState) handlePlayerJoined(room *room, cmd *Command) error {
 	return nil
 }
 
+// handleChatMessage broadcasts new chat messages to all players
 func (state *WaitingState) handleChatMessage(room *room, cmd *Command) error {
 	msg := ChatMessage{
 		PlayerID: cmd.Player.ID,

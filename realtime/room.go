@@ -218,6 +218,7 @@ func (r *room) Connect(conn *websocket.Conn, p *player) error {
 // Adds the player to the room state, initializes their client,
 // and informs the other players they joined.
 func (r *room) register(ctx context.Context, player *player) error {
+	// Check if the room is full
 	if len(r.Players) >= r.Settings.PlayerLimit {
 		return ErrRoomFull
 	}
@@ -237,6 +238,10 @@ func (r *room) register(ctx context.Context, player *player) error {
 		event(RoomInitEvt, r),
 	)
 
+	// Add the player to the drawing queue
+	r.enqueueDrawingPlayer(player)
+
+	// Send the player the current drawing state
 	r.dispatch(&Command{
 		Type:    PlayerJoinedCmd,
 		Player:  player,
@@ -311,13 +316,11 @@ func (room *room) unregister(player *player) {
 
 	// If there are less than 2 players left in the room, we need to cancel the game
 	// and reset the room state since there's no way to continue the game.
-	// ! i dont like this, it should go in the command hanlders i think
 	if len(room.Players) < 2 {
 		room.scheduler.clearEvents()
 		room.TransitionTo(NewWaitingState())
 
 		// Tell the remaining player that the game has ended
-		// ! this should prob go to the game over state
 		room.broadcast(GameRoleAny,
 			event(SetCurrentStateEvt, Waiting),
 			event(Error, "Not enough players to continue game"),
@@ -512,7 +515,6 @@ func (r *room) enqueueDrawingPlayer(player *player) {
 	r.drawingQueue = append(r.drawingQueue, player.ID)
 }
 
-// ! im gonna dleete this later
 func (room *room) SendSystemMessage(message string) {
 	newMessage := ChatMessage{
 		ID:       uuid.New(),
@@ -536,7 +538,6 @@ func (room *room) getNextDrawingPlayer() *player {
 // Initializes the drawing queue with all players.
 // The queue is sorted by score, so the first player in the queue
 // is the player with the highest score.
-// ! idk if i like the way this is named
 func (room *room) fillDrawingQueue() {
 	// Clear existing queue
 	room.drawingQueue = make([]uuid.UUID, 0)
