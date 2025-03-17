@@ -22,6 +22,12 @@ func NewPostDrawingState(pointsAwarded map[uuid.UUID]int) RoomState {
 
 // Enter is called when transitioning into the post-drawing state
 func (state *PostDrawingState) Enter(room *room) {
+	// If its the last phase, we increase the duration to allow
+	// players to see the correct word and scoreboard for longer.
+	if room.CurrentRound >= room.Settings.TotalRounds && len(room.drawingQueue) == 0 {
+		state.endsAt = time.Now().Add(time.Second * 15)
+	}
+
 	// Schedule automatic transition after 5 seconds
 	room.scheduler.addEvent(ScheduledStateChange, state.endsAt, func() {
 		room.Transition()
