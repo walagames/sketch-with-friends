@@ -14,7 +14,7 @@ const (
 	MAX_ROOMS = 20
 
 	// How often to check for idle rooms
-	CLEANUP_TICK = 1 * time.Minute
+	ROOM_TICK = 1 * time.Minute
 
 	// How long a room can be idle before it gets cleaned up
 	ROOM_TIMEOUT = 20 * time.Minute
@@ -53,8 +53,8 @@ func (rm *roomManager) Run(ctx context.Context) {
 	slog.Info("Room manager started")
 
 	// This ticker will be used to periodically check for idle rooms and clean them up.
-	cleanupTicker := time.NewTicker(CLEANUP_TICK)
-	defer cleanupTicker.Stop()
+	ticker := time.NewTicker(ROOM_TICK)
+	defer ticker.Stop()
 
 	defer func() {
 		slog.Info("Room manager shutting down")
@@ -63,21 +63,6 @@ func (rm *roomManager) Run(ctx context.Context) {
 		select {
 		case <-ctx.Done():
 			return
-		case <-cleanupTicker.C:
-			rm.cleanup()
-		}
-	}
-}
-
-// Checks for idle rooms and closes them if they have been inactive for too long.
-func (rm *roomManager) cleanup() {
-	rm.mu.Lock()
-	defer rm.mu.Unlock()
-
-	for id, room := range rm.rooms {
-		if time.Since(room.LastInteractionAt()) > ROOM_TIMEOUT {
-			room.Close(ErrRoomIdle)
-			slog.Info("Closed idle room", "room_id", id, "idle_time", time.Since(room.LastInteractionAt()).Round(time.Second).String())
 		}
 	}
 }

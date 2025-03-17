@@ -35,7 +35,7 @@ type client struct {
 	player  *player
 	conn    *websocket.Conn
 	limiter *rate.Limiter
-	send    chan []*Action
+	send    chan []*Event
 	cancel  context.CancelCauseFunc
 }
 
@@ -45,7 +45,7 @@ func NewClient(conn *websocket.Conn, room *room, player *player) *client {
 		player:  player,
 		conn:    conn,
 		limiter: rate.NewLimiter(2, 4),
-		send:    make(chan []*Action, 256),
+		send:    make(chan []*Event, 256),
 	}
 }
 
@@ -113,21 +113,22 @@ func (c *client) read(ctx context.Context, ready chan<- bool) {
 				break
 			}
 
+			// Parse the message into a usable data structure
+			cmd, err := decodeCommand(msgBytes)
+			if err != nil {
+				slog.Warn("Error un-marshalling message", "playerId", c.player.ID, "error", err)
+				c.cancel(err)
+				break
+			}
+
 			// Make sure the client has not exceeded their rate limit
-			if c.limiter.Allow() {
-				// Parse the message into a usable data structure
-				action, err := decodeAction(msgBytes)
-				if err != nil {
-					slog.Warn("Error un-marshalling message", "playerId", c.player.ID, "error", err)
-					c.cancel(err)
-					break
-				}
+			// Ignore rate limit for stroke commands if the player is drawing (drawing has a lot of events)
+			if c.limiter.Allow() || (c.player.GameRole == GameRoleDrawing && cmd.isStrokeCommand()) {
+				// Add the player to the command so the room knows who sent it
+				cmd.Player = c.player
 
-				// Add the player to the action so the room knows who sent it
-				action.Player = c.player
-
-				// Send the action to the room to be processed
-				c.room.action <- action
+				// Send the command to the room to be processed
+				c.room.command <- cmd
 			} else {
 				// The client has exceeded their rate limit, do nothing with the message
 				slog.Debug("dropped event", "playerId", c.player.ID)
@@ -173,7 +174,7 @@ func (c *client) write(ctx context.Context, ready chan<- bool) {
 
 			slog.Debug("write routine cancelled", "player", c.player.ID, "cause", context.Cause(ctx))
 			return
-		case actions, ok := <-c.send:
+		case events, ok := <-c.send:
 			// Set the write deadline
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 
@@ -192,10 +193,10 @@ func (c *client) write(ctx context.Context, ready chan<- bool) {
 				break
 			}
 
-			// Encode the actions and send them to the client
-			jsonBytes, err := encodeActions(actions)
+			// Encode the events and send them to the client
+			jsonBytes, err := encodeEvents(events)
 			if err != nil {
-				slog.Warn("error encoding actions", "playerId", c.player.ID, "error", err)
+				slog.Warn("error encoding events", "playerId", c.player.ID, "error", err)
 				break
 			}
 			w.Write(jsonBytes)

@@ -1,13 +1,15 @@
 package main
 
 import (
+	"fmt"
+	"math/rand"
 	"strings"
 )
 
 const (
 	// Maximum length of a word
-	MAX_WORD_LENGTH  = 24
-	MAX_GUESS_LENGTH = 128
+	MAX_WORD_LENGTH = 24
+	MAX_CHAT_LENGTH = 128
 )
 
 func sanitizeUsername(username string) string {
@@ -89,29 +91,29 @@ func filterInvalidRunes(word string) string {
 	return strings.TrimSpace(result.String())
 }
 
-func filterInvalidWords(words []string) []string {
-	result := make([]string, 0)
+func filterInvalidWords(words []Word) []Word {
+	result := make([]Word, 0)
 
 	for _, word := range words {
-		cleaned := filterInvalidRunes(word)
+		cleaned := filterInvalidRunes(word.Value)
 		if len(cleaned) > MAX_WORD_LENGTH {
 			continue
 		}
 		if cleaned != "" {
-			result = append(result, cleaned)
+			result = append(result, Word{Value: cleaned, Difficulty: word.Difficulty, Category: word.Category})
 		}
 	}
 
 	return result
 }
 
-func filterDuplicateWords(words []string) []string {
+func filterDuplicateWords(words []Word) []Word {
 	seen := make(map[string]bool)
-	result := make([]string, 0)
+	result := make([]Word, 0)
 
 	for _, word := range words {
-		if !seen[word] {
-			seen[word] = true
+		if !seen[word.Value] {
+			seen[word.Value] = true
 			result = append(result, word)
 		}
 	}
@@ -119,11 +121,124 @@ func filterDuplicateWords(words []string) []string {
 	return result
 }
 
-func sanitizeGuess(guess string) string {
-	trimed := strings.TrimSpace(guess)
-	if len(trimed) == 0 || len(trimed) > MAX_GUESS_LENGTH {
+func sanitizeChatMessage(message string) string {
+	trimed := strings.TrimSpace(message)
+	if len(trimed) == 0 || len(trimed) > MAX_CHAT_LENGTH {
 		return ""
 	}
 
 	return trimed
+}
+
+// validateRoomSettings checks if room settings are within allowed bounds
+func validateRoomSettings(settings *RoomSettings) error {
+	if settings.PlayerLimit < MIN_PLAYERS || settings.PlayerLimit > MAX_PLAYERS {
+		return fmt.Errorf("player limit must be between %d and %d", MIN_PLAYERS, MAX_PLAYERS)
+	}
+
+	if settings.DrawingTimeAllowed < MIN_DRAWING_TIME || settings.DrawingTimeAllowed > MAX_DRAWING_TIME {
+		return fmt.Errorf("drawing time must be between %d and %d seconds", MIN_DRAWING_TIME, MAX_DRAWING_TIME)
+	}
+
+	if settings.TotalRounds < MIN_ROUNDS || settings.TotalRounds > MAX_ROUNDS {
+		return fmt.Errorf("total rounds must be between %d and %d", MIN_ROUNDS, MAX_ROUNDS)
+	}
+
+	// Validate word difficulty
+	switch settings.WordDifficulty {
+	case WordDifficultyEasy, WordDifficultyMedium, WordDifficultyHard, WordDifficultyAll, WordDifficultyCustom:
+		// Valid values
+	default:
+		return fmt.Errorf("invalid word difficulty: %s", settings.WordDifficulty)
+	}
+
+	// Validate word bank
+	switch settings.WordBank {
+	case WordBankDefault, WordBankCustom, WordBankMixed:
+		// Valid values
+	default:
+		return fmt.Errorf("invalid word bank: %s", settings.WordBank)
+	}
+
+	// Validate game mode
+	switch settings.GameMode {
+	case GameModeClassic, GameModeNoHints:
+		// Valid values
+	default:
+		return fmt.Errorf("invalid game mode: %s", settings.GameMode)
+	}
+
+	settings.CustomWords =
+		filterDuplicateWords(
+			filterInvalidWords(settings.CustomWords),
+		)
+
+	return nil
+}
+
+// Helper function to return first non-empty string
+func firstNonEmpty(values ...string) string {
+	for _, v := range values {
+		if v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+// validatePlayerProfile validates and sanitizes player profile data
+func validatePlayerProfile(profile *PlayerProfileChange) (*PlayerProfileChange, error) {
+	if profile == nil {
+		return &PlayerProfileChange{
+			Username:     randomUsername(),
+			AvatarConfig: DefaultAvatarConfig,
+		}, nil
+	}
+
+	// Create a new profile to avoid modifying the input
+	validated := &PlayerProfileChange{
+		Username:     sanitizeUsername(profile.Username),
+		AvatarConfig: DefaultAvatarConfig,
+	}
+
+	// Validate username
+	if validated.Username == "" || len(validated.Username) > MAX_NAME_LENGTH {
+		validated.Username = randomUsername()
+	}
+
+	// Handle nil AvatarConfig
+	if profile.AvatarConfig == nil {
+		validated.AvatarConfig = DefaultAvatarConfig
+		return validated, nil
+	}
+
+	// Validate each avatar field
+	validated.AvatarConfig = &AvatarConfig{
+		HairStyle:       firstNonEmpty(profile.AvatarConfig.HairStyle, DefaultAvatarConfig.HairStyle),
+		HairColor:       firstNonEmpty(profile.AvatarConfig.HairColor, DefaultAvatarConfig.HairColor),
+		Mood:            firstNonEmpty(profile.AvatarConfig.Mood, DefaultAvatarConfig.Mood),
+		SkinColor:       firstNonEmpty(profile.AvatarConfig.SkinColor, DefaultAvatarConfig.SkinColor),
+		BackgroundColor: firstNonEmpty(profile.AvatarConfig.BackgroundColor, DefaultAvatarConfig.BackgroundColor),
+	}
+
+	return validated, nil
+}
+
+// Generates a random username for a player.
+func randomUsername() string {
+	adjectives := []string{
+		"Bad", "Lazy", "Odd", "Wild", "Sad",
+		"Mad", "Shy", "Fast", "Slow", "Neat",
+	}
+
+	nouns := []string{
+		"Paint", "Art", "Pen", "Brush", "Ink",
+		"Sketch", "Draw", "Line", "Dot", "Doodle",
+	}
+
+	adj := adjectives[rand.Intn(len(adjectives))]
+	noun := nouns[rand.Intn(len(nouns))]
+	num := rand.Intn(99)
+
+	return fmt.Sprintf("%s%s%d", adj, noun, num)
 }

@@ -1,26 +1,37 @@
 import { useSelector } from "react-redux";
 import { RootState } from "@/state/store";
 import { ModalMenu } from "./modal-menu";
-import { RoomStage } from "@/state/features/room";
+import { RoomState } from "@/state/features/room";
 import { cn } from "@/lib/utils";
 import { Timer } from "./timer";
 import { containerSpring } from "@/config/spring";
-import { motion } from "framer-motion";
-import { AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
-export function UIHeader() {
-	const stage = useSelector((state: RootState) => state.room.stage);
+function shouldRenderTimer(state: RoomState) {
+	switch (state) {
+		case RoomState.EnterCode:
+		case RoomState.EnterPlayerInfo:
+		case RoomState.Unanimous:
+		case RoomState.Waiting:
+			return false;
+		default:
+			return true;
+	}
+}
 
-	const deadline = useSelector(
-		(state: RootState) => state.game.currentPhaseDeadline
+export function UIHeader() {
+	const currentState = useSelector(
+		(state: RootState) => state.room.currentState
 	);
 
-	const showTimer = stage === RoomStage.Playing;
+	const deadline = useSelector((state: RootState) => state.room.timerEndsAt);
+
+	const showTimer = shouldRenderTimer(currentState);
 
 	const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 
-	const renderHeader = stage !== RoomStage.PreGame || isLargeScreen;
+	const renderHeader = showTimer || isLargeScreen;
 
 	return (
 		<AnimatePresence initial={false}>

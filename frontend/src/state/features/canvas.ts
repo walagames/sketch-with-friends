@@ -20,9 +20,6 @@ export const canvasSlice = createSlice({
 	initialState,
 	reducers: {
 		reset: () => initialState,
-		setStrokes: (state, action: PayloadAction<Stroke[]>) => {
-			state.strokes = action.payload;
-		},
 		addStroke: (state, action: PayloadAction<Stroke>) => {
 			state.strokes.push(action.payload);
 		},
@@ -37,6 +34,9 @@ export const canvasSlice = createSlice({
 		},
 		undoStroke: (state) => {
 			state.strokes.pop();
+		},
+		setStrokes: (state, action: PayloadAction<Stroke[]>) => {
+			state.strokes = action.payload;
 		},
 	},
 });
