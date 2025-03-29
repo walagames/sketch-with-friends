@@ -156,7 +156,7 @@ const views: Record<RoomState, View> = {
 				Component: (props: HTMLMotionProps<"img">) => (
 					<RainCloudDoodle
 						duration={5}
-						className="top-[8%] left-[12%]"
+						className="top-[8%] left-[12%] lg:block hidden"
 						{...props}
 					/>
 				),
@@ -167,24 +167,24 @@ const views: Record<RoomState, View> = {
 				Component: (props: HTMLMotionProps<"img">) => (
 					<RainCloudDoodle
 						duration={4}
-						className="top-[24%] right-[10%]"
+						className="top-[24%] right-[10%] lg:block hidden"
 						{...props}
 					/>
 				),
 				key: "rain-cloud-2",
 				type: SpriteType.BOBBING,
 			},
-			{
-				Component: (props: HTMLMotionProps<"img">) => (
-					<RainCloudDoodle
-						duration={4}
-						className="bottom-[24%] right-[16%] w-28 lg:hidden"
-						{...props}
-					/>
-				),
-				key: "rain-cloud-3",
-				type: SpriteType.BOBBING,
-			},
+			// {
+			// 	Component: (props: HTMLMotionProps<"img">) => (
+			// 		<RainCloudDoodle
+			// 			duration={4}
+			// 			className="bottom-[24%] right-[16%] w-28 lg:hidden"
+			// 			{...props}
+			// 		/>
+			// 	),
+			// 	key: "rain-cloud-3",
+			// 	type: SpriteType.BOBBING,
+			// },
 		],
 	},
 	[RoomState.Picking]: {

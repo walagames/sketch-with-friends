@@ -163,8 +163,8 @@ function EditPlayerInfoModal({
 					<PlayerInfoForm
 						handleSubmit={handleSubmit}
 						bottomButton={
-							<RaisedButton shift={false} variant="action" size="lg">
-								Save
+							<RaisedButton shift={false} variant="action" size="wide" className="w-full">
+								Save changes
 							</RaisedButton>
 						}
 					/>

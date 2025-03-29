@@ -8,6 +8,7 @@ import { useState } from "react";
 import {
 	LinkIcon,
 	MessageCircleIcon,
+	PlayIcon,
 	SettingsIcon,
 	UsersIcon,
 } from "lucide-react";
@@ -36,7 +37,7 @@ export function WaitingView() {
 					<div>
 						<RaisedButton
 							size="lg"
-							className="group w-40"
+							className="group lg:w-40 w-32"
 							onClick={() => copyInviteLink(roomId)}
 						>
 							<span className="flex items-center gap-2 text-lg">
@@ -64,10 +65,13 @@ export function WaitingView() {
 								data-umami-event="Start game"
 								size="lg"
 								variant="action"
-								className="text-lg"
+								className="group lg:w-40 w-36"
 								onClick={() => dispatch({ type: "game/start" })}
 							>
-								Start game
+								<span className="flex items-center gap-2 text-lg">
+									<PlayIcon className="size-4 mb-1" />
+									Start
+								</span>
 							</RaisedButton>
 						)}
 						<div className="lg:hidden">
@@ -77,16 +81,16 @@ export function WaitingView() {
 				</div>
 				<div className="w-full lg:aspect-[4/3] flex-1 flex items-start justify-center lg:max-h-[calc(100vh-200px)] backdrop-blur-sm border-4 border-border border-dashed rounded-lg">
 					{showSettings ? (
-						<div className="flex-1 bg-background-secondary/50 flex flex-col p-4 lg:max-h-[calc(100vh-200px)] max-h-[calc(100vh-70px)] overflow-y-auto gap-1.5">
-							<h1 className="lg:text-xl text-lg font-bold z-10 leading-none flex items-center gap-1.5">
-								<SettingsIcon className="size-6 -translate-y-0.5" />
+						<div className="flex-1 lg:bg-background-secondary/50 bg-background-secondary flex flex-col p-4 lg:max-h-[calc(100vh-200px)] max-h-[calc(100vh-100px)] overflow-y-auto gap-1.5">
+							<h1 className="lg:text-2xl text-xl font-bold z-10 leading-none flex items-center gap-1.5">
+								{/* <SettingsIcon className="size-6 -translate-y-0.5" /> */}
 								Room settings
 							</h1>
 							<RoomSettingsForm />
 						</div>
 					) : (
 						<div className="flex h-full gap-2 flex-1 lg:flex-row flex-col lg:divide-x-4 lg:divide-y-0 divide-y-4 divide-border divide-dashed">
-							<div className="flex-1 bg-background-secondary/50 flex flex-col p-2 lg:p-4 lg:max-h-[calc(100vh-200px)] max-h-[50%] gap-4 overflow-y-auto">
+							<div className="flex-1 lg:bg-background-secondary/50 bg-background-secondary flex flex-col p-4 lg:p-4 lg:max-h-[calc(100vh-200px)] max-h-[50%] gap-4 overflow-y-auto">
 								{/* <div className="flex items-center gap-2">
 									<h1 className="lg:text-xl text-lg font-bold z-10 leading-none flex items-center gap-2">
 										<UsersIcon className="size-6 -translate-y-0.5" />
@@ -96,16 +100,16 @@ export function WaitingView() {
 										</span>
 									</h1>
 								</div> */}
-								<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary/80 to-background-transparent absolute top-0 left-0 lg:h-12 h-10 z-50 flex items-center px-2 lg:p-4 lg:py-7">
-									<h1 className="lg:text-xl text-lg font-bold z-10 leading-none flex items-center gap-1.5">
-										<UsersIcon className="size-6 -translate-y-0.5" />
+								<div className="bg-gradient-to-b from-background-secondary via-background-secondary/80 to-background-transparent absolute top-0 left-0 lg:h-12 h-10 z-50 flex items-center px-4 lg:p-4 lg:py-7">
+									<h1 className="lg:text-2xl text-xl font-bold z-10 leading-none flex items-center gap-1.5">
+										{/* <UsersIcon className="size-6 -translate-y-0.5" /> */}
 										Players
-										<span className="text-xl">
+										<span className="">
 											{Object.keys(players).length}/{roomSettings.playerLimit}
 										</span>
 									</h1>
 								</div>
-								<ul className="flex flex-col w-full lg:gap-4 gap-3 px-1 pt-10">
+								<ul className="flex flex-col w-full lg:gap-4 gap-3 px-1 lg:pt-10 pt-6">
 									<AnimatePresence initial={false} mode="popLayout">
 										{Object.values(players)
 											.sort((a, b) => b.score - a.score)
@@ -116,9 +120,9 @@ export function WaitingView() {
 								</ul>
 							</div>
 							<div className="flex-1 bg-background-secondary/50  flex flex-col lg:w-[22rem] w-fill lg:h-full h-auto relative overflow-hidden p-1.5">
-								<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary/80 to-background-transparent absolute top-0 left-0 lg:h-12 h-10 z-50 flex items-center px-2 lg:p-5 lg:py-8">
-									<h1 className="lg:text-xl text-lg font-bold z-10 leading-none flex items-center gap-1.5">
-										<MessageCircleIcon className="size-6 -translate-y-0.5" />
+								<div className="w-full bg-gradient-to-b from-background-secondary via-background-secondary/80 to-background-transparent absolute top-0 left-0 lg:h-12 h-10 z-50 flex items-center px-4 lg:p-4 lg:py-7">
+									<h1 className="lg:text-2xl text-xl font-bold z-10 leading-none flex items-center gap-1.5">
+										{/* <MessageCircleIcon className="size-6 -translate-y-0.5" /> */}
 										Chat
 									</h1>
 								</div>

@@ -162,6 +162,7 @@ export function PlayerInfoForm({
 			<div className="flex justify-center items-start gap-2">
 				<div className="flex flex-col h-full mt-3 gap-2">
 					<RaisedButton
+						variant="action"
 						shift={false}
 						size="iconMd"
 						onClick={cycleSkinColor}
@@ -169,6 +170,7 @@ export function PlayerInfoForm({
 						<SkinColorIcon className="size-8 translate-y-0.5" />
 					</RaisedButton>
 					<RaisedButton
+						variant="action"
 						shift={false}
 						size="iconMd"
 						onClick={cycleBackgroundColor}
@@ -176,6 +178,7 @@ export function PlayerInfoForm({
 						<BackgroundColorIcon className="size-9 translate-y-0.5" />
 					</RaisedButton>
 					<RaisedButton
+						variant="action"
 						shift={false}
 						size="iconMd"
 						onClick={() => dispatch(changeAvatarConfig(Avatar.random()))}
@@ -188,6 +191,7 @@ export function PlayerInfoForm({
 				</div>
 				<div className="flex flex-col h-full mt-3 gap-2">
 					<RaisedButton
+						variant="action"
 						shift={false}
 						size="iconMd"
 						onClick={cycleHairStyle}
@@ -195,6 +199,7 @@ export function PlayerInfoForm({
 						<HairStyleIcon className="size-8 translate-y-0.5" />
 					</RaisedButton>
 					<RaisedButton
+						variant="action"
 						shift={false}
 						size="iconMd"
 						onClick={cycleHairColor}
@@ -202,6 +207,7 @@ export function PlayerInfoForm({
 						<HairColorIcon className="size-8 translate-y-0.5" />
 					</RaisedButton>
 					<RaisedButton
+						variant="action"
 						shift={false}
 						size="iconMd"
 						onClick={cycleMood}
@@ -238,7 +244,7 @@ export function PlayerInfoForm({
 								</FormControl>
 								<FormMessage />
 								{bottomButton && (
-									<div className="flex justify-end pt-2">{bottomButton}</div>
+									<div className="pt-1">{bottomButton}</div>
 								)}
 							</FormItem>
 						)}

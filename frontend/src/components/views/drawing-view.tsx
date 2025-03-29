@@ -77,7 +77,7 @@ export function DrawingView() {
 												<MessageCircleIcon className="size-5 -translate-y-0.5" />
 												Chat
 											</h1>
-											<p className="font-bold text-lg text-muted-foreground">
+											<p className="font-bold text-xl text-muted-foreground">
 												Round {currentRound} of {totalRounds}
 											</p>
 										</div>

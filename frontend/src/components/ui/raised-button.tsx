@@ -10,7 +10,7 @@ const buttonVariants = cva(
 		variants: {
 			variant: {
 				default:
-					"bg-background text-foreground hover:bg-primary hover:text-background",
+					"bg-background text-foreground lg:hover:bg-primary lg:hover:text-background",
 				basic:
 					"bg-background text-foreground hover:bg-zinc-200 hover:text-foreground",
 				icon: "bg-transparent hover:bg-accent hover:text-accent-foreground",
@@ -20,7 +20,7 @@ const buttonVariants = cva(
 			size: {
 				default: "h-10 py-4 px-4",
 				sm: "h-9 px-3",
-				lg: "h-11 lg:px-6 px-4",
+				lg: "lg:h-11 h-10 lg:px-6 px-4",
 				xl: "py-1 px-16",
 				icon: "h-10 lg:h-11 w-10 lg:w-11",
 				iconSm: "h-9 w-9",
