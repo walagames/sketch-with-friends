@@ -5,13 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { copyInviteLink } from "@/lib/realtime";
 import { RaisedButton } from "@/components/ui/raised-button";
 import { useState } from "react";
-import {
-	LinkIcon,
-	MessageCircleIcon,
-	PlayIcon,
-	SettingsIcon,
-	UsersIcon,
-} from "lucide-react";
+import { LinkIcon, PlayIcon, SettingsIcon, UsersIcon } from "lucide-react";
 import { RootState } from "@/state/store";
 import { ModalMenu } from "@/components/ui/modal-menu";
 import { AnimatePresence } from "motion/react";
