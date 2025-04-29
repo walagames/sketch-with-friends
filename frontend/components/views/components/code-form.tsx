@@ -1,3 +1,4 @@
+"use client"
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -16,6 +17,7 @@ import {
 import { RaisedInput } from "@/components/ui/raised-input";
 import { RoomState } from "@/state/features/room";
 import { setCurrentState } from "@/state/features/room";
+import { useSearchParams } from "next/navigation";
 
 const CodeFormSchema = z.object({
 	roomCode: z
@@ -30,7 +32,8 @@ const CodeFormSchema = z.object({
 
 export function CodeForm() {
 	const dispatch = useDispatch();
-	const searchParams = new URLSearchParams(location.search);
+
+	const searchParams = useSearchParams();
 	const roomCodeParam = searchParams.get("room");
 
 	const form = useForm<z.infer<typeof CodeFormSchema>>({

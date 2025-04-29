@@ -1,10 +1,10 @@
 import { toast } from "sonner";
 
 export const getRealtimeHref = () => {
-	const isDev = import.meta.env.DEV;
+	const isDev = process.env.NODE_ENV === "development";
 	const protocol = isDev ? "ws" : "wss";
-	const branchSocketHost = import.meta.env.BRANCH_SOCKET_HOST;
-	const socketHost = import.meta.env.VITE_SOCKET_HOST;
+	const branchSocketHost = process.env.BRANCH_SOCKET_HOST;
+	const socketHost = process.env.NEXT_PUBLIC_SOCKET_HOST;
 
 	let host;
 	if (socketHost) {

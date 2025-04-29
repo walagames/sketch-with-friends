@@ -1,5 +1,5 @@
 import { Menu } from "lucide-react";
-import { Link } from "react-router";
+import Link from "next/link";
 import {
 	Dialog,
 	DialogContent,
@@ -52,24 +52,24 @@ export function ModalMenu() {
 						</RaisedButton>
 					)}
 					<VolumeControls />
-					<Link to="/" onClick={handleClick}>
+					<Link href="/" onClick={handleClick}>
 						<RaisedButton size="wide" className="text-xl">
 							Home
 						</RaisedButton>
 					</Link>
-					<Link to="/how-to-play" onClick={handleClick}>
+					<Link href="/how-to-play" onClick={handleClick}>
 						<RaisedButton size="wide" className="text-xl">
 							How to Play
 						</RaisedButton>
 					</Link>
 
-					<Link to="/terms-of-service" onClick={handleClick}>
+					<Link href="/terms-of-service" onClick={handleClick}>
 						<RaisedButton size="wide" className="text-xl">
 							Terms of Service
 						</RaisedButton>
 					</Link>
 
-					<Link to="/privacy-policy" onClick={handleClick}>
+					<Link href="/privacy-policy" onClick={handleClick}>
 						<RaisedButton size="wide" className="text-xl">
 							Privacy Policy
 						</RaisedButton>

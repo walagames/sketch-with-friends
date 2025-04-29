@@ -40,7 +40,7 @@ function CardContent({
 					className="rounded-l-lg h-full aspect-square relative"
 					src={generateAvatar(player.avatarConfig)}
 				/>
-				<p className="text-xl leading-0 font-bold truncate pl-2 translate-y-0.5">
+				<p className="text-xl font-bold truncate pl-2 translate-y-0.5">
 					{player.username}
 				</p>
 				{isCurrentPlayer && (
@@ -163,7 +163,12 @@ function EditPlayerInfoModal({
 					<PlayerInfoForm
 						handleSubmit={handleSubmit}
 						bottomButton={
-							<RaisedButton shift={false} variant="action" size="wide" className="w-full">
+							<RaisedButton
+								shift={false}
+								variant="action"
+								size="wide"
+								className="w-full"
+							>
 								Save changes
 							</RaisedButton>
 						}

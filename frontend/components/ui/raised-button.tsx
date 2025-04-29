@@ -1,8 +1,10 @@
+"use client"
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { HTMLMotionProps, motion } from "motion/react";
 import { useSound, SoundEffect } from "@/providers/sound-provider";
+
 
 const buttonVariants = cva(
 	"inline-flex items-center duration-150 justify-center font-bold text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:brightness-90 disabled:pointer-events-none ring-offset-background",
