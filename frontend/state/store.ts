@@ -1,3 +1,5 @@
+"use client";
+
 import { combineReducers, configureStore, Middleware } from "@reduxjs/toolkit";
 import canvasReducer from "./features/canvas";
 import roomReducer from "./features/room";

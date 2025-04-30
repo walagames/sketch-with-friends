@@ -1,3 +1,5 @@
+"use client";
+
 import { ChatMessageType, Player, RoomState } from "@/state/features/room";
 import { RootState } from "@/state/store";
 import {
